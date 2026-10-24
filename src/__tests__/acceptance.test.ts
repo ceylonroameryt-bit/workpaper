@@ -30,6 +30,15 @@ describe('Blynt Workpapers - Ground Rules & Acceptance Criteria', () => {
     const closingCost = p1 + p2 - p3;
     expect(closingCost).toBe(720000n);
     expect(formatPence(closingCost)).toBe('£7,200.00');
+
+    // Robust handling of accounting zeros, em-dashes, and formatted strings
+    expect(toPence('—')).toBe(0n);
+    expect(toPence('–')).toBe(0n);
+    expect(toPence('-')).toBe(0n);
+    expect(toPence('nil')).toBe(0n);
+    expect(toPence('n/a')).toBe(0n);
+    expect(toPence('£1,250.50')).toBe(125050n);
+    expect(toPence('(500.00)')).toBe(-50000n);
   });
 
   // 2. Unbalanced CSV is rejected with the difference shown

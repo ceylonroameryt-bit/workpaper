@@ -15,16 +15,42 @@ export function toPence(value: string | number | bigint | null | undefined): big
   if (typeof value === 'number') {
     return BigInt(Math.round(value * 100));
   }
-  const clean = value.replace(/[£$,\s]/g, '').trim();
-  if (!clean) return 0n;
-  
-  const isNegative = clean.startsWith('-') || (clean.startsWith('(') && clean.endsWith(')'));
-  const numStr = clean.replace(/[()-]/g, '');
+  const str = String(value).trim();
+  if (!str) return 0n;
+
+  // Common accounting zero representations (em-dash, en-dash, hyphen, nil, n/a)
+  if (
+    str === '-' ||
+    str === '—' ||
+    str === '–' ||
+    str === '―' ||
+    /^[-—–―\s]+$/.test(str) ||
+    /^(nil|n\/a|none|null)$/i.test(str)
+  ) {
+    return 0n;
+  }
+
+  // Remove currency symbols, commas, quotes, and whitespace
+  const clean = str.replace(/[£$€"'\s,]/g, '').trim();
+  if (!clean || /^[-—–―]+$/.test(clean)) return 0n;
+
+  const isNegative =
+    clean.startsWith('-') ||
+    clean.startsWith('—') ||
+    clean.startsWith('–') ||
+    (clean.startsWith('(') && clean.endsWith(')'));
+
+  const numStr = clean.replace(/[()\-—–―]/g, '').trim();
+  if (!numStr) return 0n;
+
   const parts = numStr.split('.');
-  const pounds = BigInt(parts[0] || '0');
-  const pencePart = (parts[1] || '').padEnd(2, '0').slice(0, 2);
+  const poundsDigits = parts[0].replace(/\D/g, '') || '0';
+  const pounds = BigInt(poundsDigits);
+
+  const rawPence = (parts[1] || '').replace(/\D/g, '');
+  const pencePart = rawPence.padEnd(2, '0').slice(0, 2);
   const pence = BigInt(pencePart || '0');
-  
+
   const total = pounds * 100n + pence;
   return isNegative ? -total : total;
 }

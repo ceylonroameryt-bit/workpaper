@@ -74,6 +74,48 @@ export default function ImportDataPage() {
     }
   });
 
+  // RFC 4180 compliant CSV parser respecting quoted commas and line breaks
+  const parseCsvRows = (text: string): string[][] => {
+    const rows: string[][] = [];
+    let curRow: string[] = [];
+    let curField = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (char === '"') {
+        if (inQuotes && text[i + 1] === '"') {
+          curField += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        curRow.push(curField.trim());
+        curField = '';
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && text[i + 1] === '\n') {
+          i++;
+        }
+        curRow.push(curField.trim());
+        curField = '';
+        if (curRow.some((f) => f.length > 0)) {
+          rows.push(curRow.map((c) => c.replace(/^"|"$/g, '').trim()));
+        }
+        curRow = [];
+      } else {
+        curField += char;
+      }
+    }
+    if (curField.length > 0 || curRow.length > 0) {
+      curRow.push(curField.trim());
+      if (curRow.some((f) => f.length > 0)) {
+        rows.push(curRow.map((c) => c.replace(/^"|"$/g, '').trim()));
+      }
+    }
+    return rows;
+  };
+
   // Parse CSV text into rows
   const parseCsv = (text: string, sourceName: string) => {
     setFileName(sourceName);
@@ -82,61 +124,110 @@ export default function ImportDataPage() {
     setValidationError(null);
     setClearMessage(null);
 
-    const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-    if (lines.length < 2) {
+    const allRows = parseCsvRows(text);
+    if (allRows.length < 2) {
       setValidationError('The uploaded file contains no data rows.');
       setParsedRows([]);
       return;
     }
 
     // Parse header
-    const rawHeaders = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
+    const rawHeaders = allRows[0];
     setHeaders(rawHeaders);
 
     // Identify column indices
     // Whole-word matches, so "Description" is never read as a credit ("cr") column
-    let codeIdx = rawHeaders.findIndex((h) => /\bcode\b|\bnominal\b|account\s*(no|num)/i.test(h));
-    let nameIdx = rawHeaders.findIndex((h) => /\bdesc|\bname\b|\btitle\b/i.test(h));
-    let typeIdx = rawHeaders.findIndex((h) => /\bcat|\btype\b|\bclass\b/i.test(h));
-    let debitIdx = rawHeaders.findIndex((h) => /\bdebit\b|^dr\b/i.test(h));
-    let creditIdx = rawHeaders.findIndex((h) => /\bcredit\b|^cr\b/i.test(h));
+    let codeIdx = rawHeaders.findIndex((h) => /\b(code|nominal|acct|acc|account\s*(no|num|#))\b/i.test(h));
+    let nameIdx = rawHeaders.findIndex((h) => /\b(desc|description|name|title|particulars)\b/i.test(h));
+    let typeIdx = rawHeaders.findIndex((h) => /\b(cat|category|type|class|group|heading)\b/i.test(h));
+    let debitIdx = rawHeaders.findIndex((h) => /\b(debit|dr)\b/i.test(h));
+    let creditIdx = rawHeaders.findIndex((h) => /\b(credit|cr)\b/i.test(h));
+    let netIdx = rawHeaders.findIndex((h) => /\b(balance|net|amount|ytd|total)\b/i.test(h));
 
     // Fallbacks if header names are generic
     if (codeIdx === -1) codeIdx = 0;
-    if (nameIdx === -1) nameIdx = 1;
-    if (typeIdx === -1) typeIdx = 2;
-    if (debitIdx === -1) debitIdx = 3;
-    if (creditIdx === -1) creditIdx = 4;
+    if (nameIdx === -1) {
+      nameIdx = rawHeaders.length > 1 ? (codeIdx === 0 ? 1 : 0) : 0;
+    }
+
+    const isSingleNet = (debitIdx === -1 || creditIdx === -1) && netIdx !== -1;
+    if (debitIdx === -1 && !isSingleNet) {
+      debitIdx = Math.min(rawHeaders.length - 2, 2);
+    }
+    if (creditIdx === -1 && !isSingleNet) {
+      creditIdx = Math.min(rawHeaders.length - 1, 3);
+    }
 
     const rows: ParsedRow[] = [];
     const badRows: number[] = [];
-    for (let i = 1; i < lines.length; i++) {
-      // Split taking basic CSV commas into account
-      const cols = lines[i].split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
+
+    for (let i = 1; i < allRows.length; i++) {
+      const cols = allRows[i];
+      if (!cols.some((c) => c.length > 0)) continue;
+
       const code = cols[codeIdx] || '';
       const name = cols[nameIdx] || 'Unnamed Account';
-      const type = cols[typeIdx] || 'General';
-      const debitRaw = cols[debitIdx] || '0.00';
-      const creditRaw = cols[creditIdx] || '0.00';
+      const type = (typeIdx !== -1 ? cols[typeIdx] : 'General') || 'General';
+
+      // Skip summary / report footer total lines
+      const isTotalRow =
+        /^total(s)?\b/i.test(code) ||
+        /^total(s)?\b/i.test(name) ||
+        /^(grand\s*total|report\s*total|trial\s*balance\s*total)/i.test(name) ||
+        /^(grand\s*total|report\s*total)/i.test(code);
+      if (isTotalRow) {
+        continue;
+      }
 
       if (!code && !name) continue;
 
-      let debitP: bigint;
-      let creditP: bigint;
-      try {
-        debitP = toPence(debitRaw);
-        creditP = toPence(creditRaw);
-      } catch {
-        badRows.push(i + 1);
-        continue;
+      let debitP = 0n;
+      let creditP = 0n;
+      let debitStr = '0.00';
+      let creditStr = '0.00';
+
+      if (isSingleNet) {
+        const netRaw = cols[netIdx] || '0.00';
+        try {
+          const netP = toPence(netRaw);
+          if (netP >= 0n) {
+            debitP = netP;
+            debitStr = (Number(netP) / 100).toFixed(2);
+          } else {
+            creditP = -netP;
+            creditStr = (Number(-netP) / 100).toFixed(2);
+          }
+        } catch {
+          badRows.push(i + 1);
+          continue;
+        }
+      } else {
+        const debitRaw = cols[debitIdx] || '0.00';
+        const creditRaw = cols[creditIdx] || '0.00';
+
+        try {
+          debitP = toPence(debitRaw);
+          debitStr = debitP !== 0n ? (Number(debitP) / 100).toFixed(2) : (debitRaw.trim() || '0.00');
+        } catch {
+          badRows.push(i + 1);
+          continue;
+        }
+
+        try {
+          creditP = toPence(creditRaw);
+          creditStr = creditP !== 0n ? (Number(creditP) / 100).toFixed(2) : (creditRaw.trim() || '0.00');
+        } catch {
+          badRows.push(i + 1);
+          continue;
+        }
       }
 
       rows.push({
         code,
         name,
         type,
-        debit: debitRaw,
-        credit: creditRaw,
+        debit: debitStr,
+        credit: creditStr,
         debitPence: debitP,
         creditPence: creditP,
       });
