@@ -21,6 +21,7 @@ import {
   ChevronRight,
   X,
   FileCheck2,
+  Pencil,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { AccountMapping, BlyntAccount } from '@/lib/types/models';
@@ -39,6 +40,8 @@ export default function AccountMappingPage() {
   const [activeDetailId, setActiveDetailId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState('all');
   const [isRunningAi, setIsRunningAi] = useState(false);
+  const [batchTargetCode, setBatchTargetCode] = useState('');
+  const [correctionToast, setCorrectionToast] = useState<string | null>(null);
 
   // Load from db
   useEffect(() => {
@@ -225,17 +228,21 @@ export default function AccountMappingPage() {
     setSelectedIds([]);
   };
 
-  // Change Blynt Code
-  const handleChangeBlyntCode = (mappingId: string, blyntCode: string) => {
+  // Correct / Change Blynt Code (Single row)
+  const handleChangeBlyntCode = (mappingId: string, blyntCode: string | null) => {
+    const targetAcc = blyntCode ? db.blynt_accounts.find((b) => b.code === blyntCode) : null;
+    const userId = getCurrentUserId();
+    const now = new Date().toISOString();
+
     setMappings((prev) =>
       prev.map((m) =>
         m.id === mappingId
           ? {
               ...m,
               blynt_code: blyntCode,
-              status: 'confirmed' as const,
-              confirmed_by: getCurrentUserId(),
-              confirmed_at: new Date().toISOString(),
+              status: blyntCode ? ('confirmed' as const) : ('needs_you' as const),
+              confirmed_by: blyntCode ? userId : null,
+              confirmed_at: blyntCode ? now : null,
               method: 'manual' as const,
             }
           : m
@@ -246,12 +253,72 @@ export default function AccountMappingPage() {
     if (item) {
       const before = { ...item };
       item.blynt_code = blyntCode;
-      item.status = 'confirmed';
-      item.confirmed_by = getCurrentUserId();
-      item.confirmed_at = new Date().toISOString();
+      item.status = blyntCode ? 'confirmed' : 'needs_you';
+      item.confirmed_by = blyntCode ? userId : null;
+      item.confirmed_at = blyntCode ? now : null;
       item.method = 'manual';
       db.logAudit('firm_blynt_uk', getActor(), 'CONFIRM_MAPPING', 'account_mappings', item.id, before, item);
+
+      if (blyntCode) {
+        setCorrectionToast(
+          `Corrected mapping: ${item.source_code} ${item.source_name} → ${blyntCode} ${targetAcc?.name ?? ''}`
+        );
+        setTimeout(() => setCorrectionToast(null), 3500);
+      }
     }
+
+    // Persist to server store in background
+    fetch(`/api/v1/mappings/${mappingId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ blynt_code: blyntCode }),
+    }).catch(() => {});
+  };
+
+  // Correct / Remap multiple selected accounts at once
+  const handleApplyBatchRemap = () => {
+    if (!batchTargetCode || selectedIds.length === 0) return;
+    const targetAcc = db.blynt_accounts.find((b) => b.code === batchTargetCode);
+    const userId = getCurrentUserId();
+    const now = new Date().toISOString();
+
+    setMappings((prev) =>
+      prev.map((m) =>
+        selectedIds.includes(m.id)
+          ? {
+              ...m,
+              blynt_code: batchTargetCode,
+              status: 'confirmed' as const,
+              confirmed_by: userId,
+              confirmed_at: now,
+              method: 'manual' as const,
+            }
+          : m
+      )
+    );
+
+    selectedIds.forEach((id) => {
+      const item = db.account_mappings.find((m) => m.id === id);
+      if (item) {
+        item.blynt_code = batchTargetCode;
+        item.status = 'confirmed';
+        item.confirmed_by = userId;
+        item.confirmed_at = now;
+        item.method = 'manual';
+      }
+      fetch(`/api/v1/mappings/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blynt_code: batchTargetCode }),
+      }).catch(() => {});
+    });
+
+    setCorrectionToast(
+      `Corrected ${selectedIds.length} accounts to ${batchTargetCode} ${targetAcc?.name ?? ''}`
+    );
+    setTimeout(() => setCorrectionToast(null), 3500);
+    setSelectedIds([]);
+    setBatchTargetCode('');
   };
 
   // Keyboard navigation: Enter confirms, / focuses search, Esc closes panel
@@ -468,6 +535,78 @@ export default function AccountMappingPage() {
               </button>
             )}
 
+            {/* Batch Correction Toolbar */}
+            {selectedIds.length > 0 && (
+              <div className="flex items-center gap-2 bg-[#EAF5FC] border border-[#B3D7F5] px-3 py-1.5 rounded-[8px]">
+                <span className="text-xs font-bold text-[#102654]">
+                  Batch Correct ({selectedIds.length}):
+                </span>
+                <select
+                  aria-label="Batch correct selected accounts"
+                  value={batchTargetCode}
+                  onChange={(e) => setBatchTargetCode(e.target.value)}
+                  className="text-xs font-semibold py-1 px-2 border border-[#D5DBE7] rounded-[6px] bg-white text-[#102654] max-w-[200px]"
+                >
+                  <option value="">Choose Target Blynt COA…</option>
+                  <optgroup label="Overheads & Administration (Leads E, F, T)">
+                    <option value="6000">6000 Office Rent &amp; Rates (Overheads)</option>
+                    <option value="6100">6100 Light, Heat &amp; Power</option>
+                    <option value="6200">6200 Staff Salaries &amp; Welfare</option>
+                    <option value="6900">6900 Depreciation Charge for Year</option>
+                    <option value="6950">6950 Loss / (Profit) on Disposal of Assets</option>
+                  </optgroup>
+                  <optgroup label="Revenue &amp; Turnover (Lead A)">
+                    <option value="4000">4000 Sales Revenue - UK General</option>
+                    <option value="4100">4100 Sales Revenue - Export</option>
+                  </optgroup>
+                  <optgroup label="Cost of Sales &amp; Direct Costs (Lead A)">
+                    <option value="5000">5000 Direct Materials &amp; Components</option>
+                    <option value="5100">5100 Direct Subcontract Wages</option>
+                  </optgroup>
+                  <optgroup label="Bank &amp; Cash (Lead B)">
+                    <option value="1000">1000 Petty Cash</option>
+                    <option value="1010">1010 Barclays Current Account</option>
+                    <option value="1020">1020 Barclays Reserve Account</option>
+                  </optgroup>
+                  <optgroup label="Receivables &amp; Debtors (Leads C, E)">
+                    <option value="1200">1200 Trade Debtors Control</option>
+                    <option value="1210">1210 Bad Debt Provision</option>
+                    <option value="1400">1400 Prepayments</option>
+                  </optgroup>
+                  <optgroup label="Inventories (Lead D)">
+                    <option value="1300">1300 Finished Goods Stock</option>
+                  </optgroup>
+                  <optgroup label="Fixed Assets (Lead F)">
+                    <option value="1500">1500 Plant &amp; Equipment Cost</option>
+                    <option value="1510">1510 Computer Equipment Cost</option>
+                    <option value="1520">1520 Fixtures &amp; Fittings Cost</option>
+                    <option value="1700">1700 Accumulated Depreciation</option>
+                    <option value="1710">1710 Computer Equip Accumulated Deprec</option>
+                    <option value="1720">1720 Fixtures &amp; Fittings Accumulated Deprec</option>
+                  </optgroup>
+                  <optgroup label="Current Liabilities (Leads K, L, T)">
+                    <option value="2000">2000 Trade Creditors Control</option>
+                    <option value="2100">2100 Accruals</option>
+                    <option value="2200">2200 VAT Liability Control</option>
+                    <option value="2300">2300 PAYE &amp; NIC Payable</option>
+                    <option value="2600">2600 Bank Loan (Long Term)</option>
+                  </optgroup>
+                  <optgroup label="Equity &amp; Reserves (Lead Z)">
+                    <option value="3000">3000 Called Up Share Capital</option>
+                    <option value="3100">3100 Profit and Loss Account (Reserves)</option>
+                  </optgroup>
+                </select>
+                <button
+                  type="button"
+                  disabled={!batchTargetCode}
+                  onClick={handleApplyBatchRemap}
+                  className="px-2.5 py-1 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[6px] disabled:opacity-40"
+                >
+                  Apply
+                </button>
+              </div>
+            )}
+
             {/* Confirm Selected (n) Button */}
             <button
               type="button"
@@ -498,7 +637,7 @@ export default function AccountMappingPage() {
                 <th scope="col" className="p-3">Type</th>
                 <th scope="col" className="p-3 text-right">Balance</th>
                 <th scope="col" className="p-3 text-center">→</th>
-                <th scope="col" className="p-3">Blynt Account</th>
+                <th scope="col" className="p-3 min-w-[260px]">Blynt Account (Direct Edit / Correct)</th>
                 <th scope="col" className="p-3">Match Badge</th>
                 <th scope="col" className="p-3 pr-4 text-right">Action</th>
               </tr>
@@ -544,25 +683,83 @@ export default function AccountMappingPage() {
 
                     <td className="p-3 text-center text-[#5B6478]">→</td>
 
-                    <td className="p-3">
-                      {blyntAcc ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-5 h-5 rounded bg-[#102654] text-white flex items-center justify-center font-mono font-bold text-[10px]">
+                    {/* Interactive Inline Blynt Account Dropdown */}
+                    <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1.5">
+                        {blyntAcc && (
+                          <span className="w-5 h-5 rounded bg-[#102654] text-white flex items-center justify-center font-mono font-bold text-[10px] shrink-0" title={`Lead Schedule ${blyntAcc.lead_letter}`}>
                             {blyntAcc.lead_letter}
                           </span>
-                          <span className="font-mono font-bold text-[#102654]">{blyntAcc.code}</span>
-                          <span className="text-[#5B6478] truncate max-w-[160px]">{blyntAcc.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-[#B42318] font-bold">Unassigned</span>
-                      )}
+                        )}
+                        <select
+                          aria-label={`Correct Blynt account for ${row.source_name}`}
+                          value={row.blynt_code || ''}
+                          onChange={(e) => handleChangeBlyntCode(row.id, e.target.value)}
+                          className="text-xs font-semibold py-1.5 px-2 border border-[#D5DBE7] hover:border-[#102654] focus:border-[#102654] rounded-[8px] bg-white text-[#102654] shadow-2xs transition-all cursor-pointer w-full max-w-[280px]"
+                        >
+                          <option value="">Select Blynt COA Account…</option>
+                          <optgroup label="Overheads &amp; Administration (Leads E, F, T)">
+                            <option value="6000">6000 Office Rent &amp; Rates (Overheads)</option>
+                            <option value="6100">6100 Light, Heat &amp; Power</option>
+                            <option value="6200">6200 Staff Salaries &amp; Remuneration</option>
+                            <option value="6900">6900 Depreciation Charge for Year</option>
+                            <option value="6950">6950 Loss / (Profit) on Disposal of Assets</option>
+                          </optgroup>
+                          <optgroup label="Revenue &amp; Turnover (Lead A)">
+                            <option value="4000">4000 Sales Revenue - UK General</option>
+                            <option value="4100">4100 Sales Revenue - Export</option>
+                          </optgroup>
+                          <optgroup label="Cost of Sales &amp; Direct Costs (Lead A)">
+                            <option value="5000">5000 Direct Materials &amp; Components</option>
+                            <option value="5100">5100 Direct Subcontract Wages</option>
+                          </optgroup>
+                          <optgroup label="Bank &amp; Cash Balances (Lead B)">
+                            <option value="1000">1000 Petty Cash</option>
+                            <option value="1010">1010 Barclays Current Account</option>
+                            <option value="1020">1020 Barclays Reserve Account</option>
+                          </optgroup>
+                          <optgroup label="Receivables &amp; Debtors (Leads C, E)">
+                            <option value="1200">1200 Trade Debtors Control</option>
+                            <option value="1210">1210 Bad Debt Provision</option>
+                            <option value="1400">1400 Prepayments</option>
+                          </optgroup>
+                          <optgroup label="Inventories &amp; Stock (Lead D)">
+                            <option value="1300">1300 Finished Goods Stock</option>
+                          </optgroup>
+                          <optgroup label="Tangible Fixed Assets (Lead F)">
+                            <option value="1500">1500 Plant &amp; Equipment Cost</option>
+                            <option value="1510">1510 Computer Equipment Cost</option>
+                            <option value="1520">1520 Fixtures &amp; Fittings Cost</option>
+                            <option value="1700">1700 Accumulated Depreciation</option>
+                            <option value="1710">1710 Computer Equip Accumulated Deprec</option>
+                            <option value="1720">1720 Fixtures &amp; Fittings Accumulated Deprec</option>
+                          </optgroup>
+                          <optgroup label="Current Liabilities &amp; Creditors (Leads K, L, T)">
+                            <option value="2000">2000 Trade Creditors Control</option>
+                            <option value="2100">2100 Accruals</option>
+                            <option value="2200">2200 VAT Liability Control</option>
+                            <option value="2300">2300 PAYE &amp; NIC Payable</option>
+                            <option value="2600">2600 Bank Loan (Long Term)</option>
+                          </optgroup>
+                          <optgroup label="Equity &amp; Reserves (Lead Z)">
+                            <option value="3000">3000 Called Up Share Capital</option>
+                            <option value="3100">3100 Profit and Loss Account - Reserves</option>
+                          </optgroup>
+                        </select>
+                      </div>
                     </td>
 
                     <td className="p-3">
                       {row.status === 'confirmed' ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E6F4EF] text-[#0B6B52]">
-                          ✓ Confirmed by {db.users.find((u) => u.id === row.confirmed_by)?.name.split(" ")[0] ?? "rule"}
-                        </span>
+                        row.method === 'manual' ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAF5FC] text-[#0A58CA] border border-[#0A58CA]/20">
+                            ✓ Corrected (Manual)
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E6F4EF] text-[#0B6B52]">
+                            ✓ Confirmed by {db.users.find((u) => u.id === row.confirmed_by)?.name.split(" ")[0] ?? "rule"}
+                          </span>
+                        )
                       ) : row.confidence >= 90 ? (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFF1EE] text-[#A23A27]">
                           ✦ High {row.confidence}%
@@ -579,26 +776,26 @@ export default function AccountMappingPage() {
                     </td>
 
                     <td className="p-3 pr-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      {row.status !== 'confirmed' ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (row.blynt_code) handleChangeBlyntCode(row.id, row.blynt_code);
-                            else setActiveDetailId(row.id);
-                          }}
-                          className="px-2.5 py-1 bg-[#102654] text-white font-bold text-[11px] rounded-[6px] hover:bg-[#0B1B3D]"
-                        >
-                          {row.blynt_code ? 'Confirm' : 'Choose account'}
-                        </button>
-                      ) : (
+                      <div className="flex items-center justify-end gap-1.5">
+                        {row.status !== 'confirmed' && row.blynt_code && (
+                          <button
+                            type="button"
+                            onClick={() => handleChangeBlyntCode(row.id, row.blynt_code)}
+                            className="px-2.5 py-1 bg-[#102654] text-white font-bold text-[11px] rounded-[6px] hover:bg-[#0B1B3D] shadow-2xs"
+                          >
+                            Confirm
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => setActiveDetailId(row.id)}
-                          className="text-[11px] text-[#5B6478] hover:text-[#102654] underline"
+                          className="px-2 py-1 text-[11px] font-semibold text-[#102654] hover:bg-[#EAF5FC] border border-[#D5DBE7] hover:border-[#102654] rounded-[6px] flex items-center gap-1 transition-colors"
+                          title="Open detail slide-over to see facts, AI reasons, or add rules"
                         >
-                          Change
+                          <Pencil className="w-3 h-3 text-[#5B6478]" />
+                          <span>Correct</span>
                         </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -751,6 +948,14 @@ export default function AccountMappingPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Floating Correction Feedback Toast */}
+      {correctionToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#102654] text-white px-4 py-3 rounded-[10px] shadow-xl flex items-center gap-2.5 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2 border border-white/10">
+          <CheckCircle2 className="w-4 h-4 text-[#12B76A] shrink-0" />
+          <span>{correctionToast}</span>
         </div>
       )}
     </div>

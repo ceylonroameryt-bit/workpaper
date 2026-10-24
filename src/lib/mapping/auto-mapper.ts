@@ -253,27 +253,7 @@ export function matchBlyntAccount(
     };
   }
 
-  // 8. Revenue & Sales (Lead A: 4000, 4100)
-  if (/sales|turnover|revenue|fees|client billings|consulting income|trading income/i.test(name) || /revenue|income/i.test(type)) {
-    if (/interest|finance income/i.test(name)) {
-      return {
-        blynt_code: '4100',
-        name: 'Sales Revenue - Export',
-        confidence: 96,
-        reason: 'Secondary and finance operating income category',
-        lead_letter: 'A',
-      };
-    }
-    return {
-      blynt_code: '4000',
-      name: 'Sales Revenue - UK General',
-      confidence: 99,
-      reason: 'Primary commercial turnover and trading sales',
-      lead_letter: 'A',
-    };
-  }
-
-  // 9. Cost of Sales & Direct Costs (Lead A: 5000, 5100)
+  // 8. Cost of Sales & Direct Costs (Lead A: 5000, 5100)
   if (/direct expense|direct cost|cost of sales|cos|material|component|carriage in|production/i.test(name) || /cost of sales|direct cost/i.test(type)) {
     return {
       blynt_code: '5000',
@@ -284,7 +264,8 @@ export function matchBlyntAccount(
     };
   }
 
-  // 10. Overheads & Operational Expenses (Lead E / F / T: 6000, 6100, 6200, 6900, 6950)
+  // 9. Overheads & Operational Expenses (Lead E / F / T: 6000, 6100, 6200, 6900, 6950)
+  // Professional fees & audit/accountancy overheads must match before generic revenue/fees
   if (/depreciation charge|depreciation expense|deprec.*charge|deprec.*expense/i.test(name)) {
     return {
       blynt_code: '6900',
@@ -330,13 +311,41 @@ export function matchBlyntAccount(
       lead_letter: 'E',
     };
   }
-  if (/rent|rate|office|marketing|advertising|audit|accountancy|consulting|cleaning|entertainment|general expense|insurance|interest paid|motor vehicle|travel|software|it|consumable|repair|maintenance|subscription|telephone|internet|communication|legal|bank charge|corporation tax/i.test(name) || /overhead|expense/i.test(type)) {
+  if (
+    /rent|rate|office|marketing|advertising|audit|accountancy|consulting|cleaning|entertainment|general expense|insurance|interest paid|motor vehicle|travel|software|it |consumable|repair|maintenance|subscription|telephone|internet|communication|legal|bank charge|corporation tax/i.test(name) ||
+    /overhead|expense/i.test(type)
+  ) {
     return {
       blynt_code: '6000',
       name: 'Office Rent & Rates',
-      confidence: 95,
-      reason: 'Administrative overhead, marketing, facility and operating costs',
+      confidence: 98,
+      reason: 'Administrative overhead, audit/professional fees, marketing and operating costs',
       lead_letter: 'E',
+    };
+  }
+
+  // 10. Revenue & Turnover (Lead A: 4000, 4100)
+  // Only match revenue when not an expense/overhead/cost
+  if (
+    (/sales|turnover|client billing|trading income|consulting income/i.test(name) || /revenue|income/i.test(type)) &&
+    !/overhead|expense|cost/i.test(type) &&
+    !/audit|accountancy|legal|interest paid/i.test(name)
+  ) {
+    if (/interest|finance income/i.test(name)) {
+      return {
+        blynt_code: '4100',
+        name: 'Sales Revenue - Export',
+        confidence: 96,
+        reason: 'Secondary and finance operating income category',
+        lead_letter: 'A',
+      };
+    }
+    return {
+      blynt_code: '4000',
+      name: 'Sales Revenue - UK General',
+      confidence: 99,
+      reason: 'Primary commercial turnover and trading sales',
+      lead_letter: 'A',
     };
   }
 
