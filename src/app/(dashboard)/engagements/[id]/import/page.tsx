@@ -19,10 +19,10 @@ import {
   Download,
   FileText,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { toPence, formatPence } from '@/lib/money';
-import crypto from 'crypto';
 
 interface ParsedRow {
   code: string;
@@ -131,14 +131,29 @@ export default function ImportDataPage() {
       return;
     }
 
-    // Parse header
-    const rawHeaders = allRows[0];
+    // Dynamic Header Detection: scans first 12 rows to find actual table header row (skips metadata preambles like "Trial Balance", "MB Therapy", "As at...")
+    let headerRowIdx = -1;
+    for (let r = 0; r < Math.min(allRows.length, 12); r++) {
+      const row = allRows[r];
+      const hasAccountOrCode = row.some((c) => /\b(code|nominal|acct|acc|account)\b/i.test(c));
+      const hasDebitOrCredit = row.some((c) => /\b(debit|credit|dr|cr|balance|net|amount)\b/i.test(c));
+      if (hasAccountOrCode && hasDebitOrCredit) {
+        headerRowIdx = r;
+        break;
+      }
+    }
+    if (headerRowIdx === -1) {
+      headerRowIdx = allRows.findIndex((r) => r.filter((c) => c.length > 0).length >= 3);
+      if (headerRowIdx === -1) headerRowIdx = 0;
+    }
+
+    const rawHeaders = allRows[headerRowIdx];
     setHeaders(rawHeaders);
 
     // Identify column indices
     // Whole-word matches, so "Description" is never read as a credit ("cr") column
     let codeIdx = rawHeaders.findIndex((h) => /\b(code|nominal|acct|acc|account\s*(no|num|#))\b/i.test(h));
-    let nameIdx = rawHeaders.findIndex((h) => /\b(desc|description|name|title|particulars)\b/i.test(h));
+    let nameIdx = rawHeaders.findIndex((h) => /\b(desc|description|name|title|particulars|account)\b/i.test(h));
     let typeIdx = rawHeaders.findIndex((h) => /\b(cat|category|type|class|group|heading)\b/i.test(h));
     let debitIdx = rawHeaders.findIndex((h) => /\b(debit|dr)\b/i.test(h));
     let creditIdx = rawHeaders.findIndex((h) => /\b(credit|cr)\b/i.test(h));
@@ -146,8 +161,9 @@ export default function ImportDataPage() {
 
     // Fallbacks if header names are generic
     if (codeIdx === -1) codeIdx = 0;
-    if (nameIdx === -1) {
-      nameIdx = rawHeaders.length > 1 ? (codeIdx === 0 ? 1 : 0) : 0;
+    if (nameIdx === -1 || nameIdx === codeIdx) {
+      nameIdx = rawHeaders.findIndex((h, idx) => idx !== codeIdx && /\b(name|desc|account|title)\b/i.test(h));
+      if (nameIdx === -1) nameIdx = rawHeaders.length > 1 ? (codeIdx === 0 ? 1 : 0) : 0;
     }
 
     const isSingleNet = (debitIdx === -1 || creditIdx === -1) && netIdx !== -1;
@@ -161,13 +177,13 @@ export default function ImportDataPage() {
     const rows: ParsedRow[] = [];
     const badRows: number[] = [];
 
-    for (let i = 1; i < allRows.length; i++) {
+    for (let i = headerRowIdx + 1; i < allRows.length; i++) {
       const cols = allRows[i];
       if (!cols.some((c) => c.length > 0)) continue;
 
-      const code = cols[codeIdx] || '';
-      const name = cols[nameIdx] || 'Unnamed Account';
-      const type = (typeIdx !== -1 ? cols[typeIdx] : 'General') || 'General';
+      let name = (cols[nameIdx] || '').trim();
+      let code = (cols[codeIdx] || '').trim();
+      const type = (typeIdx !== -1 && cols[typeIdx] ? cols[typeIdx] : 'General') || 'General';
 
       // Skip summary / report footer total lines
       const isTotalRow =
@@ -179,6 +195,14 @@ export default function ImportDataPage() {
         continue;
       }
 
+      // Auto-generate code if missing but name exists (e.g. Starling Business Account)
+      if (!code && name) {
+        const cleanName = name.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+        code = cleanName ? `ACC-${cleanName}` : `ACC-${i + 1}`;
+      }
+      if (!name && code) {
+        name = `Account ${code}`;
+      }
       if (!code && !name) continue;
 
       let debitP = 0n;
@@ -337,6 +361,10 @@ export default function ImportDataPage() {
       if (res.ok) {
         setSnapshotHash(data.snapshot.sha256);
         setIsCommitted(true);
+        // Automatically route to Step 2 (Account Mapping)
+        setTimeout(() => {
+          router.push(`/engagements/${engagementId}/mapping`);
+        }, 1200);
       } else {
         alert('Import error: ' + (data.error || 'Failed to import trial balance'));
       }
@@ -404,7 +432,36 @@ export default function ImportDataPage() {
           <span className="text-[10px] text-[#5B6478] font-mono">Ready to use</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Sample 0: MB Therapy Real Practice File */}
+          <div className="bg-white p-3.5 rounded-[12px] border border-[#102654]/30 shadow-xs flex flex-col justify-between gap-3 ring-1 ring-[#102654]/10">
+            <div>
+              <div className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#FF7D6B]" />
+                MB Therapy Ltd (Client Practice)
+              </div>
+              <p className="text-[11px] text-[#5B6478] mt-1">
+                39 rows • Balanced at £164,755.68 • Preamble headers &amp; blank bank code.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href="/samples/mb_therapy_trial_balance.csv"
+                download="mb_therapy_trial_balance.csv"
+                className="flex-1 py-1.5 px-2 bg-[#F6F7FB] hover:bg-[#EAF5FC] border border-[#D5DBE7] text-[#102654] text-[10px] font-semibold rounded-[6px] text-center flex items-center justify-center gap-1"
+              >
+                <Download className="w-3 h-3 text-[#5B6478]" />
+                Download
+              </a>
+              <button
+                type="button"
+                onClick={() => handleLoadSample('/samples/mb_therapy_trial_balance.csv', 'mb_therapy_trial_balance.csv')}
+                className="py-1.5 px-3 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-[10px] font-bold rounded-[6px] cursor-pointer shadow-xs"
+              >
+                Load &amp; Parse
+              </button>
+            </div>
+          </div>
           {/* Sample 1: Acme Corp Balanced */}
           <div className="bg-white p-3.5 rounded-[12px] border border-[#E3E7EF] flex flex-col justify-between gap-3">
             <div>

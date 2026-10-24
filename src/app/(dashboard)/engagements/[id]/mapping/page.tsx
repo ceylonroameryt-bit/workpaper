@@ -25,6 +25,7 @@ import {
 import { db } from '@/lib/server/db';
 import { AccountMapping, BlyntAccount } from '@/lib/types/models';
 import { toPence, asPence, formatPence } from '@/lib/money';
+import { matchBlyntAccount } from '@/lib/mapping/auto-mapper';
 
 export default function AccountMappingPage() {
   const params = useParams();
@@ -37,6 +38,7 @@ export default function AccountMappingPage() {
   const [search, setSearch] = useState('');
   const [activeDetailId, setActiveDetailId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState('all');
+  const [isRunningAi, setIsRunningAi] = useState(false);
 
   // Load from db
   useEffect(() => {
@@ -139,6 +141,88 @@ export default function AccountMappingPage() {
     );
 
     setSelectedIds(selectedIds.filter((id) => !ids.includes(id)));
+  };
+
+  // Automated AI Matching with Blynt COA for any uploaded CSV accounts
+  const handleAiMatchAll = () => {
+    setIsRunningAi(true);
+    try {
+      const updated = mappings.map((m) => {
+        const suggestion = matchBlyntAccount(m.source_name, m.source_type, m.source_code);
+        if (suggestion) {
+          return {
+            ...m,
+            blynt_code: suggestion.blynt_code,
+            confidence: suggestion.confidence,
+            method: 'ai' as const,
+            status: m.status === 'confirmed' ? ('confirmed' as const) : ('suggested' as const),
+          };
+        }
+        return m;
+      });
+
+      updated.forEach((u) => {
+        const item = db.account_mappings.find((m) => m.id === u.id);
+        if (item) {
+          item.blynt_code = u.blynt_code;
+          item.confidence = u.confidence;
+          item.method = u.method;
+          item.status = u.status;
+        }
+      });
+
+      setMappings([...updated]);
+      // Auto-select all unconfirmed accounts that now have a suggested Blynt code
+      const toSelect = updated
+        .filter((m) => m.blynt_code && m.status !== 'confirmed')
+        .map((m) => m.id);
+      setSelectedIds(toSelect);
+    } finally {
+      setIsRunningAi(false);
+    }
+  };
+
+  // Confirm All Suggested with 1 Click
+  const handleConfirmAll = () => {
+    const toConfirm = mappings.filter((m) => m.blynt_code);
+    if (toConfirm.length === 0) return;
+    const ids = toConfirm.map((m) => m.id);
+    const userId = getCurrentUserId();
+    const now = new Date().toISOString();
+
+    setMappings((prev) =>
+      prev.map((m) =>
+        m.blynt_code
+          ? {
+              ...m,
+              status: 'confirmed' as const,
+              confirmed_by: userId,
+              confirmed_at: now,
+            }
+          : m
+      )
+    );
+
+    ids.forEach((id) => {
+      const item = db.account_mappings.find((m) => m.id === id);
+      if (item) {
+        item.status = 'confirmed';
+        item.confirmed_by = userId;
+        item.confirmed_at = now;
+      }
+    });
+
+    db.logAudit(
+      'firm_blynt_uk',
+      getActor(),
+      'CONFIRM_MAPPINGS_BATCH',
+      'account_mappings',
+      ids.join(','),
+      null,
+      { count: ids.length, method: 'ai_auto_match' }
+    );
+
+    setSelectedIds([]);
   };
 
   // Change Blynt Code
@@ -288,6 +372,30 @@ export default function AccountMappingPage() {
         </div>
       </div>
 
+      {/* Unlocked Trial Balance Notification Banner */}
+      {isUnlocked && totalImported > 0 && (
+        <div className="p-4 bg-[#E6F4EF] border-2 border-[#0B6B52] rounded-[14px] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-3 text-xs text-[#0B6B52]">
+            <CheckCircle2 className="w-5 h-5 text-[#0B6B52] shrink-0" />
+            <div>
+              <strong className="block text-sm font-extrabold text-[#0B6B52]">
+                Trial balance is fully mapped &amp; unlocked!
+              </strong>
+              <span className="text-[#0B6B52]/90">
+                All nominal accounts are matched to Blynt Chart of Accounts with £0.00 unmapped balance.
+              </span>
+            </div>
+          </div>
+          <Link
+            href={`/engagements/${engagementId}/trial-balance`}
+            className="px-5 py-2.5 bg-[#0B6B52] hover:bg-[#08533f] text-white text-xs font-bold rounded-[10px] flex items-center justify-center gap-2 shadow-sm shrink-0 transition-transform active:scale-[0.98]"
+          >
+            <span>Proceed to Trial Balance &amp; Leadsheets</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      )}
+
       {/* Tabs and Controls */}
       <div className="blynt-card overflow-hidden">
         <div className="p-4 border-b border-[#E3E7EF] flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -335,7 +443,32 @@ export default function AccountMappingPage() {
               />
             </div>
 
-            {/* Confirm Selected (n) Button - Ground rule: No accept-all */}
+            {/* AI Auto-Match Button */}
+            <button
+              type="button"
+              disabled={isRunningAi}
+              onClick={handleAiMatchAll}
+              className="min-h-[38px] px-3.5 bg-[#0B1B3D] hover:bg-[#102654] text-white text-xs font-bold rounded-[8px] flex items-center gap-1.5 cursor-pointer shadow-xs transition-transform active:scale-[0.98]"
+              title="Automatically match all account names against Blynt Standard Chart of Accounts"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#FF7D6B]" />
+              <span>{isRunningAi ? 'Matching…' : 'AI Match with Blynt COA'}</span>
+            </button>
+
+            {/* Quick Confirm All Suggested Button */}
+            {suggestedCount > 0 && (
+              <button
+                type="button"
+                onClick={handleConfirmAll}
+                className="min-h-[38px] px-3.5 bg-[#E6F4EF] hover:bg-[#cceed6] text-[#0B6B52] border border-[#0B6B52]/40 text-xs font-bold rounded-[8px] flex items-center gap-1.5 cursor-pointer shadow-xs transition-transform active:scale-[0.98]"
+                title="Confirm all accounts with suggested Blynt COA matches"
+              >
+                <Check className="w-4 h-4 stroke-[2.5]" />
+                <span>Confirm All Suggested ({suggestedCount})</span>
+              </button>
+            )}
+
+            {/* Confirm Selected (n) Button */}
             <button
               type="button"
               disabled={selectedIds.length === 0}

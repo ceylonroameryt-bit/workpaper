@@ -4,6 +4,8 @@ import { db } from '@/lib/server/db';
 import { toPence } from '@/lib/money';
 import crypto from 'crypto';
 
+import { matchBlyntAccount } from '@/lib/mapping/auto-mapper';
+
 export async function POST(
   req: Request,
   props: { params: Promise<{ id: string }> }
@@ -20,18 +22,19 @@ export async function POST(
       return jsonResponse({ error: 'No data lines provided' }, 400);
     }
 
-    // Check duplicate codes and blank codes
+    // Auto-assign codes for lines with missing codes so valid accounting entries are preserved
     const codes = new Set<string>();
-    const blankRows: number[] = [];
     let totalDebit = 0n;
     let totalCredit = 0n;
 
     lines.forEach((l: any, idx: number) => {
-      if (!l.code || !l.code.trim()) {
-        blankRows.push(idx + 1);
-      } else {
-        codes.add(l.code.trim());
+      let code = (l.code || '').trim();
+      if (!code && l.name) {
+        const cleanName = (l.name || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+        code = cleanName ? `ACC-${cleanName}` : `ACC-${idx + 1}`;
+        l.code = code;
       }
+      codes.add(code);
       totalDebit += toPence(l.debit);
       totalCredit += toPence(l.credit);
     });
@@ -45,17 +48,6 @@ export async function POST(
           difference_p: difference.toString(),
           total_debit_p: totalDebit.toString(),
           total_credit_p: totalCredit.toString(),
-        },
-        400
-      );
-    }
-
-    if (blankRows.length > 0) {
-      await syncOut();
-      return jsonResponse(
-        {
-          error: `Blank account codes detected on lines ${blankRows.join(', ')}. Please fix or skip.`,
-          blankRows,
         },
         400
       );
@@ -79,7 +71,7 @@ export async function POST(
     // Clear prior mappings for this engagement for a fresh import
     db.account_mappings = db.account_mappings.filter((m) => m.engagement_id !== params.id);
 
-    // Populate tb_lines and account_mappings
+    // Populate tb_lines and account_mappings with intelligent Blynt COA matching
     lines.forEach((l: any, idx: number) => {
       const lineId = `tbl_${Date.now()}_${idx + 1}`;
       const debitP = toPence(l.debit);
@@ -96,10 +88,11 @@ export async function POST(
         credit_p: creditP.toString(),
       });
 
-      // Auto-suggest matching Blynt account if code matches standard chart
-      const directMatch = db.blynt_accounts.find((ba) => ba.code === l.code.trim());
-      const status = directMatch ? 'confirmed' : 'needs_you';
-      const confidence = directMatch ? 100 : 40;
+      // Semantic & Rule matching with Blynt Standard Chart of Accounts
+      const suggestion = matchBlyntAccount(l.name, l.type, l.code);
+      const blyntCode = suggestion ? suggestion.blynt_code : null;
+      const confidence = suggestion ? suggestion.confidence : 40;
+      const status = suggestion ? 'suggested' : 'needs_you';
 
       db.account_mappings.push({
         id: `map_${Date.now()}_${idx + 1}`,
@@ -108,12 +101,12 @@ export async function POST(
         source_name: l.name.trim(),
         source_type: l.type || 'General',
         balance_p: netBalance.toString(),
-        blynt_code: directMatch ? directMatch.code : null,
+        blynt_code: blyntCode,
         status,
         confidence,
-        method: directMatch ? 'rule' : 'manual',
-        confirmed_by: directMatch ? actor.id : null,
-        confirmed_at: directMatch ? new Date().toISOString() : null,
+        method: confidence >= 95 ? 'rule' : 'ai',
+        confirmed_by: null,
+        confirmed_at: null,
         comment_count: 0,
       });
     });
