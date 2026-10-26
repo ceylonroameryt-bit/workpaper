@@ -21,16 +21,28 @@ export const hasDatabase = () => Boolean(process.env.DATABASE_URL);
 
 import path from 'path';
 
+const isServerless = Boolean(
+  process.env.VERCEL ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.LAMBDA_TASK_ROOT
+);
+
 // Fallback when no database is configured (local dev): keep state in this server process,
-// mirrored to local workspace state file so all worker threads and server restarts retain accounts
-const localFile =
-  process.env.LOCAL_STATE_FILE ||
-  (!process.env.DATABASE_URL ? path.join(process.cwd(), '.workspace_state.json') : undefined);
+// mirrored to local workspace state file so all worker threads and server restarts retain accounts.
+// On serverless / Vercel platforms, route exclusively to writable /tmp scratch directory or remain safely in-memory.
+const localFile: string | undefined = (() => {
+  if (process.env.LOCAL_STATE_FILE) return process.env.LOCAL_STATE_FILE;
+  if (process.env.DATABASE_URL) return undefined;
+  if (isServerless) return path.join('/tmp', '.workspace_state.json');
+  return path.join(process.cwd(), '.workspace_state.json');
+})();
+
 let memoryState: StoredState = loadLocalFile();
 
 function loadLocalFile(): StoredState {
-  if (!localFile || !fs.existsSync(localFile)) return { version: 0, data: null };
+  if (!localFile) return { version: 0, data: null };
   try {
+    if (!fs.existsSync(localFile)) return { version: 0, data: null };
     return JSON.parse(fs.readFileSync(localFile, 'utf8')) as StoredState;
   } catch {
     return { version: 0, data: null };
@@ -106,7 +118,13 @@ export async function writeState(baseVersion: number, data: Record<string, unkno
   if (!hasDatabase()) {
     if (baseVersion !== memoryState.version) return null;
     memoryState = { version: baseVersion + 1, data: JSON.parse(JSON.stringify(data)) };
-    if (localFile) fs.writeFileSync(localFile, JSON.stringify(memoryState));
+    if (localFile) {
+      try {
+        fs.writeFileSync(localFile, JSON.stringify(memoryState));
+      } catch (err) {
+        console.warn('Workspace state local file write skipped:', err);
+      }
+    }
     return memoryState.version;
   }
   const json = JSON.stringify(data);
