@@ -63,7 +63,7 @@ class Database {
   credentials: { user_id: string; password_hash: string }[] = [];
 
   constructor() {
-    this.seed(false);
+    this.seed(true);
   }
 
   // Collections that hold workspace data (persisted to Postgres)
@@ -278,8 +278,17 @@ class Database {
     }
 
     // Client Portfolio
-    const clientId = 'cli_harlow';
     this.clients = [
+      {
+        id: 'cli_mb_therapy',
+        firm_id: firmId,
+        name: 'MB Therapy Ltd',
+        company_no: '14829104',
+        company_type: 'Small company (FRS 102 1A)',
+        year_end: '2026-09-30',
+        data_source: 'csv',
+        reconnect_needed: false,
+      },
       {
         id: 'cli_harlow',
         firm_id: firmId,
@@ -352,7 +361,38 @@ class Database {
       },
     ];
 
+    // MB Therapy Engagements
+    const mbPriorEngId = 'eng_mb_therapy_fy25';
+    this.engagements.push({
+      id: mbPriorEngId,
+      client_id: 'cli_mb_therapy',
+      firm_id: firmId,
+      period_start: '2024-10-01',
+      period_end: '2025-09-30',
+      framework: 'FRS 102 1A',
+      template_pack_id: 'pack_small_co',
+      status: 'locked',
+      locked_at: '2025-11-20T10:00:00Z',
+      locked_by: 'usr_test_partner',
+      prior_engagement_id: null,
+    });
+
+    const mbEngId = 'eng_mb_therapy_fy26';
+    this.engagements.push({
+      id: mbEngId,
+      client_id: 'cli_mb_therapy',
+      firm_id: firmId,
+      period_start: '2025-10-01',
+      period_end: '2026-09-30',
+      framework: 'FRS 102 1A',
+      template_pack_id: 'pack_small_co',
+      status: 'fieldwork',
+      locked_at: null,
+      prior_engagement_id: mbPriorEngId,
+    });
+
     // Prior year engagement (Harlow)
+    const clientId = 'cli_harlow';
     const priorEngId = 'eng_harlow_fy25';
     this.engagements.push({
       id: priorEngId,
@@ -797,6 +837,9 @@ class Database {
       stale_at: null,
     });
 
+    // Populate all remaining workpapers for the small company pack
+    this.createEngagementWorkpapers(engId, 'Small company (FRS 102 1A)');
+
     // Attachments
     const dellSha = crypto.createHash('sha256').update('DELL_SERVER_INVOICE_CONTENT_FY26').digest('hex');
     this.attachments.push({
@@ -1014,6 +1057,205 @@ class Database {
       });
     }
 
+    // Seed MB Therapy Ltd (eng_mb_therapy_fy26) Trial Balance & Mappings
+    const mbSnapId = 'snap_mb_fy26';
+    const mbRawData = JSON.stringify({
+      company: 'MB Therapy Ltd',
+      period: 'Year ended 30 Sep 2026',
+      lines: 39,
+      as_at: '2026-09-30',
+      debits_p: '16475568',
+      credits_p: '16475568',
+    });
+    const mbSnapHash = crypto.createHash('sha256').update(mbRawData).digest('hex');
+
+    this.tb_snapshots.push({
+      id: mbSnapId,
+      engagement_id: mbEngId,
+      source: 'csv',
+      as_at: '2026-09-30',
+      raw_json: mbRawData,
+      sha256: mbSnapHash,
+      created_by: 'usr_test_preparer',
+      created_at: '2026-10-01T08:00:00Z',
+    });
+
+    const mbSeedLines: {
+      code: string;
+      name: string;
+      type: string;
+      debit_p: bigint;
+      credit_p: bigint;
+      blynt_code: string | null;
+      status: 'suggested' | 'confirmed' | 'needs_you';
+      confidence: number;
+    }[] = [
+      { code: '200', name: 'Sales', type: 'Revenue', debit_p: 0n, credit_p: 8711220n, blynt_code: '4000', status: 'confirmed', confidence: 100 },
+      { code: '270', name: 'Interest Income', type: 'Revenue', debit_p: 0n, credit_p: 88735n, blynt_code: '4100', status: 'confirmed', confidence: 96 },
+      { code: '325', name: 'Direct Expenses', type: 'Direct Costs', debit_p: 33212n, credit_p: 0n, blynt_code: '5000', status: 'confirmed', confidence: 98 },
+      { code: '400', name: 'Advertising & Marketing', type: 'Overhead', debit_p: 139038n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '401', name: 'Audit & Accountancy fees', type: 'Overhead', debit_p: 275400n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '402', name: 'Staff wellfair', type: 'Overhead', debit_p: 65848n, credit_p: 0n, blynt_code: '6200', status: 'confirmed', confidence: 92 },
+      { code: '405', name: 'Client entertainment', type: 'Overhead', debit_p: 0n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 90 },
+      { code: '408', name: 'Cleaning', type: 'Overhead', debit_p: 32500n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 95 },
+      { code: '412', name: 'Consulting', type: 'Overhead', debit_p: 69750n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 92 },
+      { code: '416', name: 'Depreciation Expense', type: 'Overhead', debit_p: 4548n, credit_p: 0n, blynt_code: '6900', status: 'confirmed', confidence: 100 },
+      { code: '420', name: 'Entertainment-100% business', type: 'Overhead', debit_p: 23404n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 92 },
+      { code: '429', name: 'General Expenses', type: 'Overhead', debit_p: 102828n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '433', name: 'Insurance', type: 'Overhead', debit_p: 7668n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '437', name: 'Interest Paid', type: 'Overhead', debit_p: 29138n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '449', name: 'Motor Vehicle Expenses', type: 'Overhead', debit_p: 31771n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '463', name: 'IT Software and Consumables', type: 'Overhead', debit_p: 67270n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '469', name: 'Rent', type: 'Overhead', debit_p: 504000n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 100 },
+      { code: '473', name: 'Repairs & Maintenance', type: 'Overhead', debit_p: 15801n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 95 },
+      { code: '478', name: "Directors' Remuneration", type: 'Overhead', debit_p: 1254000n, credit_p: 0n, blynt_code: '6200', status: 'confirmed', confidence: 100 },
+      { code: '479', name: 'Employers National Insurance', type: 'Overhead', debit_p: 0n, credit_p: 113100n, blynt_code: '2300', status: 'confirmed', confidence: 100 },
+      { code: '480', name: 'Staff Training', type: 'Overhead', debit_p: 2700n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 95 },
+      { code: '482', name: 'Pensions Costs', type: 'Overhead', debit_p: 30000n, credit_p: 0n, blynt_code: '6200', status: 'confirmed', confidence: 98 },
+      { code: '485', name: 'Subscriptions', type: 'Overhead', debit_p: 92398n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 96 },
+      { code: '489', name: 'Telephone & Internet', type: 'Overhead', debit_p: 155263n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '493', name: 'Travel - National', type: 'Overhead', debit_p: 30016n, credit_p: 0n, blynt_code: '6000', status: 'confirmed', confidence: 98 },
+      { code: '500', name: 'Corporation Tax', type: 'Overhead', debit_p: 1202042n, credit_p: 0n, blynt_code: '2200', status: 'confirmed', confidence: 100 },
+      { code: 'ACC-STARLING', name: 'Starling Business Account', type: 'Bank', debit_p: 809138n, credit_p: 0n, blynt_code: '1010', status: 'confirmed', confidence: 98 },
+      { code: '610', name: 'Accounts Receivable', type: 'Current Asset', debit_p: 0n, credit_p: 0n, blynt_code: '1200', status: 'confirmed', confidence: 100 },
+      { code: '625', name: 'Other Debtors - Unpaid Share Capital', type: 'Current Asset', debit_p: 100n, credit_p: 0n, blynt_code: '1200', status: 'confirmed', confidence: 95 },
+      { code: '710', name: 'Office Equipment', type: 'Fixed Asset', debit_p: 22739n, credit_p: 0n, blynt_code: '1500', status: 'confirmed', confidence: 100 },
+      { code: '711', name: 'Less Accumulated Depreciation on Office Equipment', type: 'Fixed Asset', debit_p: 0n, credit_p: 4548n, blynt_code: '1700', status: 'confirmed', confidence: 100 },
+      { code: '835b', name: "Director's Loan Account - debtors", type: 'Current Asset', debit_p: 2424996n, credit_p: 0n, blynt_code: '1200', status: 'confirmed', confidence: 100 },
+      { code: '800', name: 'Accounts Payable', type: 'Current Liability', debit_p: 0n, credit_p: 0n, blynt_code: '2000', status: 'confirmed', confidence: 100 },
+      { code: '810', name: 'Income in Advance', type: 'Current Liability', debit_p: 0n, credit_p: 939000n, blynt_code: '2100', status: 'confirmed', confidence: 98 },
+      { code: '825', name: 'PAYE Payable', type: 'Current Liability', debit_p: 0n, credit_p: 0n, blynt_code: '2300', status: 'confirmed', confidence: 100 },
+      { code: '830', name: 'Provision for Corporation Tax', type: 'Current Liability', debit_p: 0n, credit_p: 2250533n, blynt_code: '2200', status: 'confirmed', confidence: 100 },
+      { code: '950', name: 'Capital - x,xxx Ordinary Shares', type: 'Equity', debit_p: 0n, credit_p: 100n, blynt_code: '3000', status: 'confirmed', confidence: 100 },
+      { code: '960', name: 'Retained Earnings', type: 'Equity', debit_p: 0n, credit_p: 4368332n, blynt_code: '3100', status: 'confirmed', confidence: 100 },
+      { code: '961', name: 'Dividends current year', type: 'Equity', debit_p: 4750000n, credit_p: 0n, blynt_code: '3100', status: 'confirmed', confidence: 98 },
+      { code: '962', name: 'Dividends b/f', type: 'Equity', debit_p: 4300000n, credit_p: 0n, blynt_code: '3100', status: 'confirmed', confidence: 100 },
+    ];
+
+    mbSeedLines.forEach((line, idx) => {
+      const lineId = `tbl_mb_${idx + 1}`;
+      this.tb_lines.push({
+        id: lineId,
+        snapshot_id: mbSnapId,
+        source_code: line.code,
+        source_name: line.name,
+        source_type: line.type,
+        debit_p: line.debit_p.toString(),
+        credit_p: line.credit_p.toString(),
+      });
+
+      const netBalance = line.debit_p - line.credit_p;
+      this.account_mappings.push({
+        id: `map_mb_${idx + 1}`,
+        engagement_id: mbEngId,
+        source_code: line.code,
+        source_name: line.name,
+        source_type: line.type,
+        balance_p: netBalance.toString(),
+        blynt_code: line.blynt_code,
+        status: line.status,
+        confidence: line.confidence,
+        method: line.status === 'confirmed' ? 'rule' : line.status === 'suggested' ? 'ai' : 'manual',
+        ai_alternatives:
+          line.status === 'suggested'
+            ? [
+                { blynt_code: '6000', name: 'Office Rent & Rates', reason: 'Common administrative overhead classification', confidence: 45 },
+                { blynt_code: '2100', name: 'Accruals', reason: 'Potential balance sheet contra provision', confidence: 35 },
+              ]
+            : undefined,
+        confirmed_by: line.status === 'confirmed' ? 'usr_test_reviewer' : null,
+        confirmed_at: line.status === 'confirmed' ? '2026-10-02T10:00:00Z' : null,
+        comment_count: 0,
+      });
+    });
+
+    // Create MB Therapy workpapers
+    this.createEngagementWorkpapers(mbEngId, 'Small company (FRS 102 1A)');
+
+    // Customize B-10 Bank Rec for MB Therapy (Starling Bank £8,091.38)
+    const mbB10 = this.workpapers.find((w) => w.id === `wp_${mbEngId}_b10`);
+    if (mbB10) {
+      mbB10.status = 'prepared';
+      mbB10.data_json = {
+        title: 'Bank reconciliation - Starling Business Account',
+        bank_name: 'Starling Business Account',
+        ledger_balance_p: '809138', // £8,091.38
+        statement_p: '809138', // £8,091.38
+        bank_balance_p: '809138',
+        outstanding_cheques_total_p: '0',
+        deposits_in_transit_total_p: '0',
+        adjusted_bank_balance_p: '809138',
+        difference_p: '0',
+        sections: [
+          { id: 'sec_less', label: 'Less: unpresented cheques', sign: '-1', rows: [] },
+          { id: 'sec_add', label: 'Add: uncredited lodgements', sign: '1', rows: [] },
+        ],
+        ties: true,
+      };
+
+      // Attachment for Starling statement to pass 'statement_evidence' check
+      const starlingSha = crypto.createHash('sha256').update('STARLING_STATEMENT_SEPT_2026').digest('hex');
+      const starlingAttId = 'att_stmt_starling';
+      this.attachments.push({
+        id: starlingAttId,
+        engagement_id: mbEngId,
+        workpaper_id: mbB10.id,
+        file_key: 'uploads/mb_therapy_fy26/Starling_Statement_Sept_2026.pdf',
+        filename: 'Starling_Statement_Sept_2026.pdf',
+        mime: 'application/pdf',
+        size: 89450,
+        sha256: starlingSha,
+        category: 'Statement',
+        is_permanent: false,
+        uploaded_by: 'usr_test_preparer',
+        uploaded_by_name: 'Test Preparer',
+        uploaded_at: '2026-10-02T09:15:00Z',
+        links: [{ attachment_id: starlingAttId, anchor_json: { kind: 'row', table: 'schedule', row: 'statement' } }],
+      });
+    }
+
+    // Customize F-10 Fixed Assets for MB Therapy (Office Equipment £227.39 cost, £45.48 deprec)
+    const mbF10 = this.workpapers.find((w) => w.id === `wp_${mbEngId}_f10`);
+    if (mbF10) {
+      mbF10.status = 'prepared';
+      mbF10.data_json = {
+        objective: 'Substantive testing of office equipment under FRS 102 section 17.',
+        classes: [
+          {
+            id: 'c1',
+            name: 'Office Equipment',
+            cost_opening_p: '22739',
+            cost_opening_is_py: true,
+            cost_additions_p: '0',
+            cost_disposals_p: '0',
+            cost_closing_p: '22739',
+            deprec_opening_p: '0',
+            deprec_opening_is_py: true,
+            charge_p: '4548',
+            deprec_charge_p: '4548',
+            deprec_disposals_p: '0',
+            deprec_closing_p: '4548',
+            nbv_this_year_p: '18191',
+            nbv_prior_year_p: '22739',
+            deprec_method: 'Straight line',
+            rate: 20,
+            deprec_rate: '20%',
+          },
+        ],
+        movements: [],
+        proof_in_total: {
+          total_expected_charge_p: '4548',
+          actual_charge_p: '4548',
+          variance_p: '0',
+        },
+        conclusion: {
+          text: 'Office equipment cost agrees to opening balance (£227.39). Depreciation of £45.48 calculated at 20% agrees to trial balance nominal 416 with zero variance.',
+          ai_draft: '✦ verified: Office equipment depreciation agrees to TB 416 (£45.48). NBV is £181.91.',
+          ai_status: 'draft',
+        },
+      };
+    }
+
     // View Preferences
     this.view_prefs.push({
       user_id: 'usr_test_reviewer',
@@ -1039,6 +1281,15 @@ class Database {
       snapId,
       null,
       { source: 'csv', filename: 'Harlow_Trial_Balance_FY26.csv', sha256: snapHash }
+    );
+    this.logAudit(
+      firmId,
+      { id: 'usr_test_preparer', name: 'Test Preparer', role: 'preparer' },
+      'CREATE_SNAPSHOT',
+      'tb_snapshots',
+      mbSnapId,
+      null,
+      { source: 'csv', filename: 'mb_therapy_trial_balance.csv', sha256: mbSnapHash }
     );
 
     if (!withDemo) this.clearWorkspaceData();

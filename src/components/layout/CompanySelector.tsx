@@ -15,7 +15,7 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
   variant = 'header',
   onAddNewCompany,
 }) => {
-  const { clients, activeCompany, activeEngagement, setActiveCompanyId } = useCompany();
+  const { clients, engagements, activeCompany, activeEngagement, setActiveCompanyId } = useCompany();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -50,7 +50,10 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
       if (match) {
         const subpath = match[2] || '';
         // Find engagement for selected company
-        const nextEng = activeEngagement?.client_id === clientId ? activeEngagement : null;
+        const nextEng =
+          engagements.find((e) => e.client_id === clientId && e.status !== 'locked') ||
+          engagements.find((e) => e.client_id === clientId) ||
+          null;
         if (nextEng) {
           router.push(`/engagements/${nextEng.id}${subpath}`);
         } else {

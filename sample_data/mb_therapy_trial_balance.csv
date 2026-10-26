@@ -1,0 +1,46 @@
+Trial Balance,,,,,
+MB Therapy,,,,,
+As at 30 September 2026,,,,,
+,,,,,
+Account Code,Account,Account Type,Debit - Year to date,Credit - Year to date,30 Sept 2025
+200,Sales,Revenue,,"87,112.20","(78,667.51)"
+270,Interest Income,Revenue,,887.35,0.00
+325,Direct Expenses,Direct Costs,332.12,,20.19
+400,Advertising & Marketing,Overhead,"1,390.38",,"1,111.06"
+401,Audit & Accountancy fees,Overhead,"2,754.00",,321.98
+402,Staff wellfair,Overhead,658.48,,371.50
+405,Client entertainment,Overhead,0.00,,204.00
+408,Cleaning,Overhead,325.00,,25.00
+412,Consulting,Overhead,697.50,,"1,118.00"
+416,Depreciation Expense,Overhead,45.48,,0.00
+420,Entertainment-100% business,Overhead,234.04,,38.03
+429,General Expenses,Overhead,"1,028.28",,"1,122.63"
+433,Insurance,Overhead,76.68,,74.68
+437,Interest Paid,Overhead,291.38,,0.00
+449,Motor Vehicle Expenses,Overhead,317.71,,0.00
+463,IT Software and Consumables,Overhead,672.70,,432.52
+469,Rent,Overhead,"5,040.00",,"4,620.00"
+473,Repairs & Maintenance,Overhead,158.01,,0.00
+478,Directors' Remuneration,Overhead,"12,540.00",,"12,540.00"
+479,Employers National Insurance,Overhead,,"1,131.00","1,131.00"
+480,Staff Training,Overhead,27.00,,165.19
+482,Pensions Costs,Overhead,300.00,,0.00
+485,Subscriptions,Overhead,923.98,,409.52
+489,Telephone & Internet,Overhead,"1,552.63",,822.49
+493,Travel - National,Overhead,300.16,,262.87
+500,Corporation Tax,Overhead,"12,020.42",,"10,193.53"
+,Starling Business Account,Bank,"8,091.38",,"4,400.49"
+610,Accounts Receivable,Current Asset,0.00,,670.00
+625,Other Debtors - Unpaid Share Capital,Current Asset,1.00,,0.00
+710,Office Equipment,Fixed Asset,227.39,,227.39
+711,Less Accumulated Depreciation on Office Equipment,Fixed Asset,,45.48,0.00
+835b,Director's Loan Account - debtors,Current Asset,"24,249.96",,"6,729.72"
+800,Accounts Payable,Current Liability,,0.00,(19.75)
+810,Income in Advance,Current Liability,,"9,390.00",0.00
+825,PAYE Payable,Current Liability,,0.00,"(1,131.00)"
+830,Provision for Corporation Tax,Current Liability,,"22,505.33","(10,193.53)"
+950,"Capital - x,xxx Ordinary Shares",Equity,,1.00,0.00
+960,Retained Earnings,Equity,,"43,683.32",0.00
+961,Dividends current year,Equity,"47,500.00",,"43,000.00"
+962,Dividends b/f,Equity,"43,000.00",,0.00
+Total,,,"164,755.68","164,755.68",0.00

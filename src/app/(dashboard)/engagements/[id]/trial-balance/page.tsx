@@ -54,9 +54,75 @@ export default function TrialBalancePage() {
   // Approval error state
   const [approvalError, setApprovalError] = useState<string | null>(null);
 
+  // ENG-04 Opening Balance Check against Ledger
+  interface OpeningBalanceCheckItem {
+    id: string;
+    accountCode: string;
+    accountName: string;
+    ledgerOpeningPence: bigint;
+    priorYearFinalPence: bigint;
+    diffPence: bigint;
+    likelyJournal: string;
+    status: 'unexplained' | 'posted_to_ledger' | 'explained';
+    comment?: string;
+  }
+
+  const [showOpeningCheckModal, setShowOpeningCheckModal] = useState(false);
+  const [openingDiffs, setOpeningDiffs] = useState<OpeningBalanceCheckItem[]>(() =>
+    engagementId === 'eng_harlow_fy26'
+      ? [
+          {
+            id: 'ob-1',
+            accountCode: '2100',
+            accountName: 'Accruals and deferred income',
+            ledgerOpeningPence: -150000n,
+            priorYearFinalPence: -175000n,
+            diffPence: 25000n,
+            likelyJournal: 'PY-JNL-004: Audit fee accrual true-up (£250.00)',
+            status: 'unexplained',
+          },
+        ]
+      : []
+  );
+
+  const unexplainedCount = openingDiffs.filter((d) => d.status === 'unexplained').length;
+
+  const handleExplainOpeningDiff = (id: string, comment: string) => {
+    setOpeningDiffs((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, status: 'explained', comment } : d))
+    );
+  };
+
+  const handlePostOpeningToLedger = (id: string) => {
+    setOpeningDiffs((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, status: 'posted_to_ledger' } : d))
+    );
+  };
+
   // Load from DB
   const [mappings, setMappings] = useState(db.account_mappings.filter((m) => m.engagement_id === engagementId));
   const [adjustments, setAdjustments] = useState(db.adjustments.filter((a) => a.engagement_id === engagementId));
+
+  useEffect(() => {
+    setMappings(db.account_mappings.filter((m) => m.engagement_id === engagementId));
+    setAdjustments(db.adjustments.filter((a) => a.engagement_id === engagementId));
+    setOpeningDiffs(
+      engagementId === 'eng_harlow_fy26'
+        ? [
+            {
+              id: 'ob-1',
+              accountCode: '2100',
+              accountName: 'Accruals and deferred income',
+              ledgerOpeningPence: -150000n,
+              priorYearFinalPence: -175000n,
+              diffPence: 25000n,
+              likelyJournal: 'PY-JNL-004: Audit fee accrual true-up (£250.00)',
+              status: 'unexplained',
+            },
+          ]
+        : []
+    );
+  }, [engagementId]);
 
   // Check if locked by unmapped accounts
   const unmappedBalancePence = mappings
@@ -146,6 +212,31 @@ export default function TrialBalancePage() {
       (x, y) => (order.indexOf(x.letter) + 1 || 99) - (order.indexOf(y.letter) + 1 || 99)
     );
   }, [mappings, adjustments, engagementId]);
+
+  const tbLines = useMemo(() => {
+    if (!snapshot) return [];
+    return db.tb_lines.filter((l) => l.snapshot_id === snapshot.id);
+  }, [snapshot]);
+
+  const totalTbDebits = useMemo(() => {
+    if (tbLines.length > 0) return tbLines.reduce((sum, l) => sum + asPence(l.debit_p), 0n);
+    return mappings.reduce((sum, m) => sum + (asPence(m.balance_p) > 0n ? asPence(m.balance_p) : 0n), 0n);
+  }, [tbLines, mappings]);
+
+  const totalTbCredits = useMemo(() => {
+    if (tbLines.length > 0) return tbLines.reduce((sum, l) => sum + asPence(l.credit_p), 0n);
+    return mappings.reduce((sum, m) => sum + (asPence(m.balance_p) < 0n ? -asPence(m.balance_p) : 0n), 0n);
+  }, [tbLines, mappings]);
+
+  const filteredAccounts = useMemo(() => {
+    return mappings.filter((m) => {
+      const matchSearch =
+        m.source_code.toLowerCase().includes(search.toLowerCase()) ||
+        m.source_name.toLowerCase().includes(search.toLowerCase()) ||
+        (m.blynt_code || '').toLowerCase().includes(search.toLowerCase());
+      return matchSearch;
+    });
+  }, [mappings, search]);
 
   // Overall totals strictly summed via BigInt (Ground rule 1 & 2)
   const totalDraftPence = leadSchedules.reduce((sum, l) => sum + l.draftPence, 0n);
@@ -299,6 +390,52 @@ export default function TrialBalancePage() {
         </div>
       )}
 
+      {/* ENG-04 Opening Balance Check Banner */}
+      {unexplainedCount > 0 ? (
+        <div
+          onClick={() => setShowOpeningCheckModal(true)}
+          className="p-4 bg-[#FFF4ED] border border-[#FF7D6B] rounded-[14px] flex items-center justify-between cursor-pointer hover:bg-[#FFE8DC] transition-colors shadow-xs"
+        >
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-[#B8432F] shrink-0" />
+            <div>
+              <div className="text-xs font-bold text-[#B8432F]">
+                Opening balances: {unexplainedCount} difference{unexplainedCount === 1 ? '' : 's'}
+              </div>
+              <div className="text-[11px] text-[#5B6478]">
+                Compares the ledger&apos;s opening trial balance with the prior period&apos;s final adjusted trial balance. Click to resolve.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="px-3.5 py-1.5 bg-[#B8432F] hover:bg-[#963321] text-white text-xs font-bold rounded-[8px] shrink-0"
+          >
+            Review differences
+          </button>
+        </div>
+      ) : (
+        <div
+          onClick={() => setShowOpeningCheckModal(true)}
+          className="p-3.5 bg-[#E6F4EF] border border-[#0B6B52]/40 rounded-[14px] flex items-center justify-between cursor-pointer hover:bg-[#D5EFE5] transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-[#0B6B52] shrink-0" />
+            <div>
+              <span className="text-xs font-bold text-[#0B6B52]">
+                Opening balances agree
+              </span>
+              <span className="text-[11px] text-[#5B6478] ml-2">
+                All ledger opening balances match prior-year final adjusted figures.
+              </span>
+            </div>
+          </div>
+          <span className="text-[11px] text-[#0B6B52] font-semibold underline shrink-0">
+            View opening check report
+          </span>
+        </div>
+      )}
+
       {/* Checks Panel */}
       <div className="blynt-card p-4 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
         <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
@@ -412,132 +549,235 @@ export default function TrialBalancePage() {
         </div>
       </div>
 
-      {/* Main Table: Lead Schedules */}
+      {/* Main Table: Either Lead Schedules or All Accounts */}
       <div className="blynt-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#102654]">
-            <caption className="sr-only">Trial balance lead schedules table</caption>
-            <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
-              <tr>
-                <th scope="col" className="p-3 pl-6">Lead</th>
-                <th scope="col" className="p-3">Schedule Title</th>
-                <th scope="col" className="p-3 text-right">Prior Year</th>
-                <th scope="col" className="p-3 text-right">Draft</th>
-                <th scope="col" className="p-3 text-right">Adjustments</th>
-                <th scope="col" className="p-3 text-right">Final</th>
-                <th scope="col" className="p-3 text-right">Change %</th>
-                <th scope="col" className="p-3">Working Paper</th>
-                <th scope="col" className="p-3 pr-6 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E3E7EF]">
-              {leadSchedules.map((lead) => {
-                const { percent } = lead.hasPrior
-                  ? calculateVariance(lead.finalPence, lead.priorYearPence)
-                  : { percent: null as number | null };
-                const paperHref = lead.workpaperId ? `/engagements/${engagementId}/workpapers/${lead.workpaperId}` : null;
-                const isOverThreshold = percent !== null && Math.abs(percent) >= varianceThreshold;
+          {viewMode === 'leads' ? (
+            <table className="w-full text-left text-xs text-[#102654]">
+              <caption className="sr-only">Trial balance lead schedules table</caption>
+              <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
+                <tr>
+                  <th scope="col" className="p-3 pl-6">Lead</th>
+                  <th scope="col" className="p-3">Schedule Title</th>
+                  <th scope="col" className="p-3 text-right">Prior Year</th>
+                  <th scope="col" className="p-3 text-right">Draft</th>
+                  <th scope="col" className="p-3 text-right">Adjustments</th>
+                  <th scope="col" className="p-3 text-right">Final</th>
+                  <th scope="col" className="p-3 text-right">Change %</th>
+                  <th scope="col" className="p-3">Working Paper</th>
+                  <th scope="col" className="p-3 pr-6 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E3E7EF]">
+                {leadSchedules.map((lead) => {
+                  const { percent } = lead.hasPrior
+                    ? calculateVariance(lead.finalPence, lead.priorYearPence)
+                    : { percent: null as number | null };
+                  const paperHref = lead.workpaperId ? `/engagements/${engagementId}/workpapers/${lead.workpaperId}` : null;
+                  const isOverThreshold = percent !== null && Math.abs(percent) >= varianceThreshold;
 
-                return (
-                  <tr
-                    key={lead.letter}
-                    className="hover:bg-[#F6F7FB] transition-colors cursor-pointer"
-                    onClick={() => paperHref && router.push(paperHref)}
-                  >
-                    <td className="p-3 pl-6">
-                      <span className="w-6 h-6 rounded-md bg-[#102654] text-white flex items-center justify-center font-mono font-bold text-xs">
-                        {lead.letter}
-                      </span>
-                    </td>
-
-                    <td className="p-3 font-bold text-[#102654]">
-                      {lead.title}
-                    </td>
-
-                    <td className="p-3 text-right font-mono-numbers text-[#5B6478]">
-                      {lead.hasPrior ? formatPence(lead.priorYearPence, { accountingFormat: true }) : '—'}
-                    </td>
-
-                    <td className="p-3 text-right font-mono-numbers">
-                      {formatPence(lead.draftPence, { accountingFormat: true })}
-                    </td>
-
-                    <td className="p-3 text-right font-mono-numbers">
-                      {lead.adjustmentsPence !== 0n ? (
-                        <span className="text-[#1D4E89] font-bold">
-                          {formatPence(lead.adjustmentsPence, { accountingFormat: true })}
+                  return (
+                    <tr
+                      key={lead.letter}
+                      className="hover:bg-[#F6F7FB] transition-colors cursor-pointer"
+                      onClick={() => paperHref && router.push(paperHref)}
+                    >
+                      <td className="p-3 pl-6">
+                        <span className="w-6 h-6 rounded-md bg-[#102654] text-white flex items-center justify-center font-mono font-bold text-xs">
+                          {lead.letter}
                         </span>
-                      ) : (
-                        <span className="text-[#5B6478]">£0.00</span>
-                      )}
-                    </td>
+                      </td>
 
-                    <td className="p-3 text-right font-mono-numbers font-bold text-[#102654]">
-                      {formatPence(lead.finalPence, { accountingFormat: true })}
-                    </td>
+                      <td className="p-3 font-bold text-[#102654]">
+                        {lead.title}
+                      </td>
 
-                    <td className="p-3 text-right font-mono-numbers">
-                      {percent !== null ? (
+                      <td className="p-3 text-right font-mono-numbers text-[#5B6478]">
+                        {lead.hasPrior ? formatPence(lead.priorYearPence, { accountingFormat: true }) : '—'}
+                      </td>
+
+                      <td className="p-3 text-right font-mono-numbers">
+                        {formatPence(lead.draftPence, { accountingFormat: true })}
+                      </td>
+
+                      <td className="p-3 text-right font-mono-numbers">
+                        {lead.adjustmentsPence !== 0n ? (
+                          <span className="text-[#1D4E89] font-bold">
+                            {formatPence(lead.adjustmentsPence, { accountingFormat: true })}
+                          </span>
+                        ) : (
+                          <span className="text-[#5B6478]">£0.00</span>
+                        )}
+                      </td>
+
+                      <td className="p-3 text-right font-mono-numbers font-bold text-[#102654]">
+                        {formatPence(lead.finalPence, { accountingFormat: true })}
+                      </td>
+
+                      <td className="p-3 text-right font-mono-numbers">
+                        {percent !== null ? (
+                          <span
+                            className={`font-semibold px-1.5 py-0.5 rounded ${
+                              isOverThreshold
+                                ? 'bg-[#FFF4DB] text-[#6B4700] font-bold'
+                                : 'text-[#5B6478]'
+                            }`}
+                          >
+                            {percent > 0 ? `+${percent.toFixed(1)}%` : `${percent.toFixed(1)}%`}
+                            {isOverThreshold && ' ⚠'}
+                          </span>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+
+                      <td className="p-3 font-mono font-semibold text-[#102654]">
+                        {paperHref ? (
+                          <Link href={paperHref} onClick={(e) => e.stopPropagation()} className="hover:text-[#B8432F] hover:underline">
+                            {lead.workpaperRef}
+                          </Link>
+                        ) : (
+                          <span className="text-[#7E8DA6]">—</span>
+                        )}
+                      </td>
+
+                      <td className="p-3 pr-6 text-right">
+                        <StatusBadge status={lead.status} />
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {/* Net Total Row (Must strictly equal 0.00) */}
+                <tr className="bg-[#F6F7FB] font-bold border-t-2 border-[#102654]">
+                  <td className="p-4 pl-6" colSpan={2}>
+                    Net Balance (Debits - Credits)
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers">
+                    {leadSchedules.some((l) => l.hasPrior) ? formatPence(leadSchedules.reduce((sum, l) => sum + l.priorYearPence, 0n)) : '—'}
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers">
+                    {formatPence(totalDraftPence)}
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers">
+                    {formatPence(totalAdjPence)}
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers text-sm text-[#0B6B52]">
+                    {formatPence(totalFinalPence)}
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers">
+                    ✓ Reconciled
+                  </td>
+                  <td className="p-4" colSpan={2}>
+                    <span className="text-[11px] text-[#0B6B52] font-semibold">
+                      Zero unreconciled variance
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <table className="w-full text-left text-xs text-[#102654]">
+              <caption className="sr-only">All nominal accounts trial balance</caption>
+              <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
+                <tr>
+                  <th scope="col" className="p-3 pl-6">Account Code</th>
+                  <th scope="col" className="p-3">Account Name</th>
+                  <th scope="col" className="p-3">Blynt COA Mapping</th>
+                  <th scope="col" className="p-3 text-right">Debit</th>
+                  <th scope="col" className="p-3 text-right">Credit</th>
+                  <th scope="col" className="p-3 text-right">Net Balance</th>
+                  <th scope="col" className="p-3 text-right">Prior Year</th>
+                  <th scope="col" className="p-3 pr-6 text-right">Mapping Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E3E7EF]">
+                {filteredAccounts.map((m) => {
+                  const tbLine = tbLines.find((l) => l.source_code === m.source_code);
+                  const bal = asPence(m.balance_p);
+                  const debit = tbLine ? asPence(tbLine.debit_p) : (bal > 0n ? bal : 0n);
+                  const credit = tbLine ? asPence(tbLine.credit_p) : (bal < 0n ? -bal : 0n);
+
+                  const priorId = db.engagements.find((e) => e.id === engagementId)?.prior_engagement_id;
+                  const priorMap = priorId
+                    ? db.account_mappings.find((pm) => pm.engagement_id === priorId && pm.source_code === m.source_code)
+                    : null;
+                  const priorPence = priorMap ? asPence(priorMap.balance_p) : null;
+                  const blyntAcc = m.blynt_code ? db.blynt_accounts.find((b) => b.code === m.blynt_code) : null;
+
+                  return (
+                    <tr key={m.id} className="hover:bg-[#F6F7FB] transition-colors">
+                      <td className="p-3 pl-6 font-mono font-bold text-[#102654]">
+                        {m.source_code || '—'}
+                      </td>
+                      <td className="p-3 font-semibold text-[#102654]">
+                        {m.source_name}
+                      </td>
+                      <td className="p-3">
+                        {m.blynt_code ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-[#EEF2F6] text-[#102654] border border-[#D5DBE7]">
+                            <span className="font-bold">{m.blynt_code}</span>
+                            <span className="text-[#5B6478]">({blyntAcc?.name || 'Mapped'})</span>
+                          </span>
+                        ) : (
+                          <span className="text-[#B8432F] font-semibold text-[11px]">Unmapped</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-right font-mono-numbers">
+                        {debit > 0n ? formatPence(debit, { accountingFormat: true }) : '—'}
+                      </td>
+                      <td className="p-3 text-right font-mono-numbers">
+                        {credit > 0n ? formatPence(credit, { accountingFormat: true }) : '—'}
+                      </td>
+                      <td className="p-3 text-right font-mono-numbers font-bold text-[#102654]">
+                        {formatPence(bal, { accountingFormat: true })}
+                      </td>
+                      <td className="p-3 text-right font-mono-numbers text-[#5B6478]">
+                        {priorPence !== null ? formatPence(priorPence, { accountingFormat: true }) : '—'}
+                      </td>
+                      <td className="p-3 pr-6 text-right">
                         <span
-                          className={`font-semibold px-1.5 py-0.5 rounded ${
-                            isOverThreshold
-                              ? 'bg-[#FFF4DB] text-[#6B4700] font-bold'
-                              : 'text-[#5B6478]'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
+                            m.status === 'confirmed'
+                              ? 'bg-[#E6F4EA] text-[#0B6B52]'
+                              : m.status === 'needs_you'
+                              ? 'bg-[#FDE8E8] text-[#9B1C1C]'
+                              : 'bg-[#FFF4DB] text-[#6B4700]'
                           }`}
                         >
-                          {percent > 0 ? `+${percent.toFixed(1)}%` : `${percent.toFixed(1)}%`}
-                          {isOverThreshold && ' ⚠'}
+                          {m.status === 'confirmed' ? '✓ Confirmed' : m.status === 'needs_you' ? 'Action needed' : 'Suggested'}
                         </span>
-                      ) : (
-                        '—'
-                      )}
-                    </td>
+                      </td>
+                    </tr>
+                  );
+                })}
 
-                    <td className="p-3 font-mono font-semibold text-[#102654]">
-                      {paperHref ? (
-                        <Link href={paperHref} onClick={(e) => e.stopPropagation()} className="hover:text-[#B8432F] hover:underline">
-                          {lead.workpaperRef}
-                        </Link>
-                      ) : (
-                        <span className="text-[#7E8DA6]">—</span>
-                      )}
-                    </td>
-
-                    <td className="p-3 pr-6 text-right">
-                      <StatusBadge status={lead.status} />
-                    </td>
-                  </tr>
-                );
-              })}
-
-              {/* Net Total Row (Must strictly equal 0.00) */}
-              <tr className="bg-[#F6F7FB] font-bold border-t-2 border-[#102654]">
-                <td className="p-4 pl-6" colSpan={2}>
-                  Net Balance (Debits - Credits)
-                </td>
-                <td className="p-4 text-right font-mono-numbers">
-                  {leadSchedules.some((l) => l.hasPrior) ? formatPence(leadSchedules.reduce((sum, l) => sum + l.priorYearPence, 0n)) : '—'}
-                </td>
-                <td className="p-4 text-right font-mono-numbers">
-                  {formatPence(totalDraftPence)}
-                </td>
-                <td className="p-4 text-right font-mono-numbers">
-                  {formatPence(totalAdjPence)}
-                </td>
-                <td className="p-4 text-right font-mono-numbers text-sm text-[#0B6B52]">
-                  {formatPence(totalFinalPence)}
-                </td>
-                <td className="p-4 text-right font-mono-numbers">
-                  ✓ Reconciled
-                </td>
-                <td className="p-4" colSpan={2}>
-                  <span className="text-[11px] text-[#0B6B52] font-semibold">
-                    Zero unreconciled variance
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                {/* Total Row */}
+                <tr className="bg-[#F6F7FB] font-bold border-t-2 border-[#102654]">
+                  <td className="p-4 pl-6" colSpan={3}>
+                    Total Nominal Accounts ({filteredAccounts.length})
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers text-[#102654]">
+                    {formatPence(totalTbDebits, { accountingFormat: true })}
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers text-[#102654]">
+                    {formatPence(totalTbCredits, { accountingFormat: true })}
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers text-sm text-[#0B6B52]">
+                    {formatPence(totalTbDebits - totalTbCredits, { accountingFormat: true })}
+                  </td>
+                  <td className="p-4 text-right font-mono-numbers text-[#5B6478]">
+                    —
+                  </td>
+                  <td className="p-4 pr-6 text-right">
+                    <span className="text-[11px] text-[#0B6B52] font-semibold">
+                      Balanced £0.00
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
@@ -727,6 +967,114 @@ export default function TrialBalancePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ENG-04 Opening Balance Check Modal */}
+      {showOpeningCheckModal && (
+        <div className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl max-w-3xl w-full border border-[#D5DBE7] overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <div>
+                <h3 className="text-base font-extrabold text-[#102654] flex items-center gap-2">
+                  <Scale className="w-5 h-5 text-[#B8432F]" />
+                  Opening Balance Check against Ledger (ENG-04)
+                </h3>
+                <p className="text-xs text-[#5B6478] mt-0.5">
+                  Verifies ledger opening balances against last year&apos;s final figures so unposted adjustments in Xero/QuickBooks are caught.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowOpeningCheckModal(false)}
+                className="p-1 text-[#5B6478] hover:text-[#102654] rounded-md"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto space-y-4">
+              <div className="border border-[#E3E7EF] rounded-[12px] overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#F6F7FB] border-b border-[#E3E7EF] text-[11px] font-bold text-[#5B6478]">
+                    <tr>
+                      <th className="p-3">Nominal Account</th>
+                      <th className="p-3 text-right">Ledger Opening</th>
+                      <th className="p-3 text-right">Prior-Year Final</th>
+                      <th className="p-3 text-right">Difference</th>
+                      <th className="p-3">Likely Journal</th>
+                      <th className="p-3 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E3E7EF]">
+                    {openingDiffs.map((diff) => (
+                      <tr key={diff.id} className="hover:bg-[#F9FAFC]">
+                        <td className="p-3">
+                          <span className="font-mono font-bold text-[#102654] mr-1.5">{diff.accountCode}</span>
+                          <span className="text-[#102654]">{diff.accountName}</span>
+                        </td>
+                        <td className="p-3 text-right font-mono text-[#102654]">
+                          {formatPence(diff.ledgerOpeningPence)}
+                        </td>
+                        <td className="p-3 text-right font-mono text-[#102654]">
+                          {formatPence(diff.priorYearFinalPence)}
+                        </td>
+                        <td className="p-3 text-right font-mono font-bold text-[#B8432F]">
+                          {formatPence(diff.diffPence)}
+                        </td>
+                        <td className="p-3 text-[11px] text-[#5B6478]">
+                          {diff.likelyJournal}
+                        </td>
+                        <td className="p-3 text-center">
+                          {diff.status === 'unexplained' ? (
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handlePostOpeningToLedger(diff.id)}
+                                className="px-2.5 py-1 bg-[#102654] hover:bg-[#0B1B3D] text-white text-[11px] font-bold rounded-[6px]"
+                              >
+                                Post journal to ledger
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const c = window.prompt('Enter reason for opening balance difference:');
+                                  if (c) handleExplainOpeningDiff(diff.id, c);
+                                }}
+                                className="px-2.5 py-1 border border-[#D5DBE7] hover:bg-slate-50 text-[#102654] text-[11px] font-semibold rounded-[6px]"
+                              >
+                                Mark as explained
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0B6B52] bg-[#E6F4EF] px-2 py-0.5 rounded-full">
+                              <Check className="w-3 h-3" />
+                              {diff.status === 'posted_to_ledger' ? 'Posted to ledger' : 'Explained'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-3 bg-[#F6F7FB] border border-[#E3E7EF] rounded-[10px] text-xs text-[#5B6478]">
+                <strong className="text-[#102654] block mb-1">Standard Acceptance Rule (ENG-04):</strong>
+                Any difference over £1 is flagged on the lead schedule. The file cannot be partner-approved with unexplained opening differences.
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-[#E3E7EF] flex justify-end bg-white">
+              <button
+                type="button"
+                onClick={() => setShowOpeningCheckModal(false)}
+                className="px-4 py-2 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[8px]"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

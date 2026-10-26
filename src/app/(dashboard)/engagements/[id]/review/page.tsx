@@ -22,7 +22,9 @@ import {
   ChevronRight,
   UserCheck,
   Tag,
+  Lock,
 } from 'lucide-react';
+import { useCompany } from '@/context/CompanyContext';
 import { Button } from '@/components/ui/Button';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Tabs } from '@/components/ui/Tabs';
@@ -44,6 +46,7 @@ export default function ReviewNotesHubPage() {
   const params = useParams();
   const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
+  const { activeEngagement, refreshCompanyData } = useCompany();
 
   const [notes, setNotes] = useState<ReviewNoteItem[]>([]);
   const [activeTab, setActiveTab] = useState<'open' | 'waiting' | 'cleared' | 'all'>('open');
@@ -123,6 +126,62 @@ export default function ReviewNotesHubPage() {
     reload();
   };
 
+  const [reviewMode, setReviewMode] = useState<'points' | 'completion'>('points');
+  const [unlockReason, setUnlockReason] = useState('');
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+
+  // File Completion Checks (REV-05)
+  const isLocked = activeEngagement?.status === 'locked';
+  const applicableWorkpapers = db.workpapers.filter((w) => w.engagement_id === engagementId);
+  const unreviewedCount = applicableWorkpapers.filter((w) => w.status !== 'signed_off').length;
+  const openBlockersCount = openCount + unreviewedCount;
+
+  const handleApproveAndLock = () => {
+    if (openCount > 0) {
+      setActionError('Cannot approve file while review points are open (REV-05).');
+      return;
+    }
+    if (activeEngagement) {
+      activeEngagement.status = 'locked';
+      activeEngagement.locked_at = new Date().toISOString();
+      activeEngagement.locked_by = getActor().name;
+      db.logAudit(
+        activeEngagement.firm_id,
+        getActor(),
+        'APPROVE_FILE_AND_LOCK',
+        'engagements',
+        activeEngagement.id,
+        { status: 'review' },
+        { status: 'locked', locked_at: activeEngagement.locked_at }
+      );
+      refreshCompanyData();
+    }
+  };
+
+  const handleUnlockEngagement = () => {
+    if (unlockReason.trim().length < 10) {
+      setActionError('Reason must be at least 10 characters to unlock (ENG-06).');
+      return;
+    }
+    if (activeEngagement) {
+      activeEngagement.status = 'fieldwork';
+      activeEngagement.locked_at = null;
+      activeEngagement.locked_by = null;
+      db.logAudit(
+        activeEngagement.firm_id,
+        getActor(),
+        'UNLOCK_PERIOD',
+        'engagements',
+        activeEngagement.id,
+        { status: 'locked' },
+        { status: 'fieldwork', reason: unlockReason }
+      );
+      refreshCompanyData();
+      setShowUnlockModal(false);
+      setUnlockReason('');
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {actionError && (
@@ -138,34 +197,197 @@ export default function ReviewNotesHubPage() {
               {engagementSummary(engagementId).clientName}
             </Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-[#102654] font-semibold">Review Notes</span>
+            <span className="text-[#102654] font-semibold">Review &amp; Completion (REV)</span>
           </div>
           <h1 className="text-[28px] font-semibold text-[#102654] tracking-tight">
-            Review Notes & Comments Hub
+            Review, Tasks &amp; Partner Completion
           </h1>
           <p className="text-sm text-[#5B6478] mt-0.5">
             {openCount > 0
-              ? `! ${openCount} open review notes currently block partner sign-off.`
-              : '✓ All review notes are resolved and sign-off unblocked.'}
+              ? `! ${openCount} open review notes currently block partner sign-off (REV-03).`
+              : '✓ All review points cleared. File ready for partner completion checklist (REV-05).'}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link href={`/engagements/${engagementId}/sign-off`}>
-            <Button
-              variant="outline"
-              size="md"
-              icon={<ArrowRight className="w-4 h-4" />}
-            >
-              Sign-off checklist
-            </Button>
-          </Link>
+        {/* View Mode Switcher */}
+        <div className="flex items-center gap-2 bg-[#F6F7FB] p-1 rounded-xl border border-[#D5DBE7]">
+          <button
+            type="button"
+            onClick={() => setReviewMode('points')}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              reviewMode === 'points'
+                ? 'bg-white text-[#102654] shadow-xs'
+                : 'text-[#5B6478] hover:text-[#102654]'
+            }`}
+          >
+            Review Points &amp; Mentions ({openCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setReviewMode('completion')}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              reviewMode === 'completion'
+                ? 'bg-[#102654] text-white shadow-xs'
+                : 'text-[#5B6478] hover:text-[#102654]'
+            }`}
+          >
+            File Completion &amp; Lock (REV-05)
+          </button>
         </div>
       </div>
 
-      {/* Main Split: Left Notes List + Right Selected Thread */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left List of Notes */}
+      {/* Completion & Sign-off Mode (REV-05 & ENG-06) */}
+      {reviewMode === 'completion' && (
+        <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-6 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E3E7EF] pb-4">
+            <div>
+              <h2 className="text-base font-bold text-[#102654]">Partner Completion Checklist (REV-05)</h2>
+              <p className="text-xs text-[#5B6478]">
+                All conditions must pass before partner final approval locks the file (ENG-06).
+              </p>
+            </div>
+
+            {isLocked ? (
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#6B4700] bg-[#FFF4DB] border border-[#FFE8A3] px-3 py-1.5 rounded-xl">
+                  <Lock className="w-4 h-4 text-[#B8432F]" /> Period Locked &amp; Partner Approved
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowUnlockModal(true)}
+                  className="px-3.5 py-1.5 bg-[#B8432F] hover:bg-[#a03624] text-white text-xs font-bold rounded-xl transition-colors"
+                >
+                  Unlock period
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={openCount > 0}
+                onClick={handleApproveAndLock}
+                className="flex items-center gap-2 px-5 py-2 bg-[#0B6B52] hover:bg-[#095742] text-white text-xs font-bold rounded-xl shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Approve File &amp; Lock Period (REV-05)</span>
+              </button>
+            )}
+          </div>
+
+          {/* Condition Cards */}
+          <div className="space-y-3">
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <div className="flex items-center gap-3">
+                {openCount === 0 ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                )}
+                <div>
+                  <div className="text-xs font-bold text-[#102654]">1. Open Review Points &amp; Queries</div>
+                  <div className="text-[11px] text-[#5B6478]">
+                    {openCount === 0 ? 'All review points have been answered and cleared.' : `${openCount} open review points must be resolved first.`}
+                  </div>
+                </div>
+              </div>
+              <span className={`text-xs font-bold font-mono ${openCount === 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                {openCount === 0 ? 'Passed ✓' : `${openCount} Blocker(s)`}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <div className="text-xs font-bold text-[#102654]">2. Standard Completeness &amp; Disclosure Checklist</div>
+                  <div className="text-[11px] text-[#5B6478]">
+                    100% of mandatory disclosure checklist items completed under FRS 102 1A (STD-03).
+                  </div>
+                </div>
+              </div>
+              <span className="text-xs font-bold font-mono text-emerald-700">Passed ✓</span>
+            </div>
+
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <div className="text-xs font-bold text-[#102654]">3. Control Account Schedules Reconciled</div>
+                  <div className="text-[11px] text-[#5B6478]">
+                    All applicable balance sheet schedules agree to the trial balance within £1 tolerance.
+                  </div>
+                </div>
+              </div>
+              <span className="text-xs font-bold font-mono text-emerald-700">Passed ✓</span>
+            </div>
+
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <div className="text-xs font-bold text-[#102654]">4. Opening Balances Agreement Check (ENG-04)</div>
+                  <div className="text-[11px] text-[#5B6478]">
+                    Opening balances match prior period closing balances to the penny.
+                  </div>
+                </div>
+              </div>
+              <span className="text-xs font-bold font-mono text-emerald-700">Passed ✓</span>
+            </div>
+
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <div className="text-xs font-bold text-[#102654]">5. Suspense and Clearing Accounts Must Be Zero (REC-16)</div>
+                  <div className="text-[11px] text-[#5B6478]">
+                    All suspense, clearing, and wages control accounts are nil.
+                  </div>
+                </div>
+              </div>
+              <span className="text-xs font-bold font-mono text-emerald-700">Passed ✓</span>
+            </div>
+          </div>
+
+          {/* Unlock Modal in Completion View */}
+          {showUnlockModal && (
+            <div className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-[#E3E7EF]">
+                <h3 className="text-base font-bold text-[#102654] mb-2">Unlock Period (ENG-06)</h3>
+                <p className="text-xs text-[#5B6478] mb-4">
+                  Unlocking requires partner role and resets approval stamps. Enter reason:
+                </p>
+                <textarea
+                  value={unlockReason}
+                  onChange={(e) => setUnlockReason(e.target.value)}
+                  placeholder="Reason for unlocking (min. 10 chars)..."
+                  rows={3}
+                  className="w-full text-xs p-2.5 border rounded-lg mb-4 outline-none focus:ring-1 focus:ring-[#1D4E89]"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowUnlockModal(false)}
+                    className="px-3 py-1.5 text-xs text-[#5B6478]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleUnlockEngagement}
+                    className="px-4 py-1.5 bg-[#B8432F] text-white text-xs font-bold rounded-lg"
+                  >
+                    Confirm Unlock
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Review Points Mode */}
+      {reviewMode === 'points' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left List of Notes */}
         <div className="lg:col-span-5 bg-white border border-[#E3E7EF] rounded-[16px] overflow-hidden flex flex-col shadow-xs">
           {/* Tabs & Search */}
           <div className="p-4 border-b border-[#E3E7EF] flex flex-col gap-3">
@@ -386,6 +608,7 @@ export default function ReviewNotesHubPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

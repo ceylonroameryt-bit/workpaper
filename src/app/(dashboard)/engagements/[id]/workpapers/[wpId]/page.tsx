@@ -123,10 +123,18 @@ export default function WorkpaperPage() {
 
   const engagement = db.engagements.find((e) => e.id === engagementId);
   const client = engagement ? db.clients.find((c) => c.id === engagement.client_id) : undefined;
-  const key = rawWpId.toLowerCase().replace(/^wp_/, '').replace('-', '');
-  const workpaper = db.workpapers.find(
-    (w) => w.engagement_id === engagementId && (w.id === rawWpId || w.ref.toLowerCase().replace('-', '') === key)
+  const norm = (s: string) => s.toLowerCase().replace(/^wp_/, '').replace(engagementId.toLowerCase() + '_', '').replace(/[-_]/g, '');
+  const key = norm(rawWpId);
+  let workpaper = db.workpapers.find(
+    (w) => w.engagement_id === engagementId && (w.id === rawWpId || norm(w.id) === key || norm(w.ref) === key)
   );
+  if (!workpaper && engagement) {
+    const rawRef = rawWpId.toUpperCase().replace(/^WP_/, '').replace(/^([A-Z])(\d)/, '$1-$2');
+    const tpl = templateFor(rawRef) || TEMPLATES.find((t) => norm(t.ref) === key);
+    if (tpl) {
+      workpaper = db.addWorkpaper(engagement.id, tpl.ref) || undefined;
+    }
+  }
   const papers = db.workpapers
     .filter((w) => w.engagement_id === engagementId)
     .sort((a, b) => a.ref.localeCompare(b.ref));

@@ -453,13 +453,21 @@ export default function AccountMappingPage() {
               </span>
             </div>
           </div>
-          <Link
-            href={`/engagements/${engagementId}/trial-balance`}
-            className="px-5 py-2.5 bg-[#0B6B52] hover:bg-[#08533f] text-white text-xs font-bold rounded-[10px] flex items-center justify-center gap-2 shadow-sm shrink-0 transition-transform active:scale-[0.98]"
-          >
-            <span>Proceed to Trial Balance &amp; Leadsheets</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={`/engagements/${engagementId}/workpapers`}
+              className="px-4 py-2.5 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[10px] flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
+            >
+              <span>Go to working paper</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href={`/engagements/${engagementId}/trial-balance`}
+              className="px-4 py-2.5 bg-[#0B6B52] hover:bg-[#08533f] text-white text-xs font-bold rounded-[10px] flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
+            >
+              <span>Trial balance &amp; leads</span>
+            </Link>
+          </div>
         </div>
       )}
 

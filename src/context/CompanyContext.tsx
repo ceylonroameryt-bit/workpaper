@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 import { Client, Engagement } from '@/lib/types/models';
 import { db } from '@/lib/server/db';
 import { getCurrentUserId } from '@/lib/session';
@@ -28,6 +29,7 @@ const ONBOARDING_STORAGE_KEY = 'blynt_onboarding_completed';
 const INACTIVITY_STORAGE_KEY = 'blynt_inactivity_timeout_mins';
 
 export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
   const [clients, setClients] = useState<Client[]>(() => [...db.clients]);
   const [engagements, setEngagements] = useState<Engagement[]>(() => [...db.engagements]);
   const [activeCompanyId, setActiveCompanyIdState] = useState<string>('');
@@ -66,18 +68,29 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (!isNaN(parsed) && parsed > 0) setInactivityTimeoutMinutesState(parsed);
     }
 
-    // Set initial active company if user previously selected one or from current route
+    // Set initial active company from current route engagement or storage
     let initialClientId = '';
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(ACTIVE_CLIENT_STORAGE_KEY);
-      if (saved && db.clients.some((c) => c.id === saved)) {
-        initialClientId = saved;
-      } else {
-        const match = window.location.pathname.match(/\/engagements\/([^/]+)/);
-        if (match && match[1] !== 'new') {
-          const eng = db.engagements.find((e) => e.id === match[1]);
-          if (eng) initialClientId = eng.client_id;
+      const match = window.location.pathname.match(/\/engagements\/([^/]+)/);
+      if (match && match[1] !== 'new') {
+        const eng = db.engagements.find((e) => e.id === match[1]);
+        if (eng) {
+          initialClientId = eng.client_id;
+          localStorage.setItem(ACTIVE_CLIENT_STORAGE_KEY, initialClientId);
         }
+      }
+
+      if (!initialClientId) {
+        const saved = localStorage.getItem(ACTIVE_CLIENT_STORAGE_KEY);
+        if (saved && db.clients.some((c) => c.id === saved)) {
+          initialClientId = saved;
+        }
+      }
+
+      // Auto-select first client if none chosen yet but clients exist
+      if (!initialClientId && db.clients.length > 0) {
+        initialClientId = db.clients[0].id;
+        localStorage.setItem(ACTIVE_CLIENT_STORAGE_KEY, initialClientId);
       }
     }
     setActiveCompanyIdState(initialClientId);
@@ -97,6 +110,19 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     }
   }, []);
+
+  // Synchronize active client whenever pathname changes to an engagement route
+  useEffect(() => {
+    if (pathname && pathname.includes('/engagements/')) {
+      const match = pathname.match(/\/engagements\/([^/]+)/);
+      if (match && match[1] !== 'new') {
+        const eng = db.engagements.find((e) => e.id === match[1]);
+        if (eng && eng.client_id !== activeCompanyId) {
+          setActiveCompanyId(eng.client_id);
+        }
+      }
+    }
+  }, [pathname, activeCompanyId, setActiveCompanyId]);
 
   const setOnboardingCompleted = useCallback((val: boolean) => {
     setOnboardingCompletedState(val);

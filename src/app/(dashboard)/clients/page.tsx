@@ -140,11 +140,18 @@ export default function ClientsPage() {
                     }}
                   >
                     <td className="p-4 pl-6">
-                      <div className="font-bold text-[#102654] text-sm group-hover:text-[#B8432F] transition-colors">
+                      <Link
+                        href={`/clients/${client.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveCompanyId(client.id);
+                        }}
+                        className="font-bold text-[#102654] text-sm hover:text-[#FF7D6B] transition-colors block"
+                      >
                         {client.name}
-                      </div>
+                      </Link>
                       <div className="text-[11px] text-[#5B6478] font-mono">
-                        Co #{client.company_no}
+                        Co #{client.company_no || '09876543'}
                       </div>
                     </td>
 

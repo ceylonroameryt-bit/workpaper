@@ -405,9 +405,9 @@ export default function PracticeHomePage() {
                 </div>
               </Link>
 
-              {/* 4 Working Papers */}
+              {/* 4 Working Papers Index (WPS) */}
               <Link
-                href={`/engagements/${companyEng.id}/workpapers/wp_f10`}
+                href={`/engagements/${companyEng.id}/workpapers`}
                 className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#0B6B52] hover:shadow-sm transition-all group flex flex-col justify-between"
               >
                 <div>

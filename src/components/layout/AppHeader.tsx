@@ -24,6 +24,7 @@ import { UserRole } from '@/lib/types/models';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 import { CompanySelector } from './CompanySelector';
+import { PeriodSelector } from './PeriodSelector';
 import { OnboardingModal } from '../onboarding/OnboardingModal';
 
 interface AppHeaderProps {
@@ -169,9 +170,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
             })}
           </nav>
 
-          {/* Active Company Switcher */}
-          <div className="hidden lg:block ml-4">
+          {/* Active Company Switcher & Period Selector */}
+          <div className="hidden lg:flex items-center gap-2.5 ml-4">
             <CompanySelector variant="header" onAddNewCompany={() => setShowCustomizeModal(true)} />
+            <PeriodSelector />
           </div>
         </div>
 
@@ -259,6 +261,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
                 </div>
 
                 <div className="py-1">
+                  <Link
+                    href="/settings"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-xs text-[#102654] hover:bg-[#F6F7FB] text-left cursor-pointer font-medium"
+                  >
+                    <Sliders className="w-3.5 h-3.5 text-[#FF7D6B]" />
+                    <span>Practice settings (ADM)</span>
+                  </Link>
+
                   <button
                     type="button"
                     onClick={() => {
@@ -267,7 +278,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
                     }}
                     className="w-full flex items-center gap-2 px-4 py-2 text-xs text-[#102654] hover:bg-[#F6F7FB] text-left cursor-pointer font-medium"
                   >
-                    <Sliders className="w-3.5 h-3.5 text-[#FF7D6B]" />
+                    <Shield className="w-3.5 h-3.5 text-[#1D4E89]" />
                     <span>Customize system &amp; company</span>
                   </button>
 

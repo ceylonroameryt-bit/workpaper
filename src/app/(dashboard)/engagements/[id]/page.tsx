@@ -94,7 +94,16 @@ export default function EngagementOverviewPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link href={`/engagements/${engagementId}/workpapers`}>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<FileSpreadsheet className="w-4 h-4" />}
+            >
+              Working paper index (WPS)
+            </Button>
+          </Link>
           <Link href={`/engagements/${engagementId}/trial-balance`}>
             <Button
               variant="outline"
@@ -104,13 +113,13 @@ export default function EngagementOverviewPage() {
               Trial balance
             </Button>
           </Link>
-          <Link href={`/engagements/${engagementId}/sign-off`}>
+          <Link href={`/engagements/${engagementId}/review`}>
             <Button
-              variant="primary"
+              variant="outline"
               size="md"
-              icon={<FileSpreadsheet className="w-4 h-4" />}
+              icon={<CheckCircle2 className="w-4 h-4 text-[#0B6B4D]" />}
             >
-              Sign-off and lock
+              Review &amp; Approval
             </Button>
           </Link>
         </div>
