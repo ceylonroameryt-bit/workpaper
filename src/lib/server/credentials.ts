@@ -1,9 +1,8 @@
 import { db } from './db';
 import { hashPassword } from './auth';
 
-// Password for the seeded test users. Override with TEST_USER_PASSWORD; set real
-// passwords per user before any live client data goes in.
-export const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'Blynt-Test-2026!';
+// Password for the seeded test users. Default is admin123 matching the login form hint.
+export const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'admin123';
 
 /** Gives every user without a password the test password (server side only). */
 export function ensureCredentials(): boolean {
