@@ -80,6 +80,7 @@ export function firmSlice(state: State, firmId: string): State {
     schedule_versions: rows(state, 'schedule_versions').filter((v) => wpIds.has(v.workpaper_id)),
     checklist_items: rows(state, 'checklist_items').filter((c) => engIds.has(c.engagement_id)),
     statutory_notes: rows(state, 'statutory_notes').filter((n) => engIds.has(n.engagement_id)),
+    transactions: rows(state, 'transactions').filter((t) => engIds.has(t.engagement_id)),
   };
 }
 
@@ -127,7 +128,7 @@ export function checkRules(before: State, after: State, actor: Actor) {
     rows(after, 'engagements').filter((e) => e.status === 'locked' && rows(before, 'engagements').some((b) => b.id === e.id && b.status === 'locked')).map((e) => e.id)
   );
   const wpEng = new Map([...rows(before, 'workpapers'), ...rows(after, 'workpapers')].map((w) => [w.id, w.engagement_id]));
-  for (const k of ['workpapers', 'adjustments', 'account_mappings', 'tb_snapshots', 'signoffs', 'procedures', 'comments']) {
+  for (const k of ['workpapers', 'adjustments', 'account_mappings', 'tb_snapshots', 'signoffs', 'procedures', 'comments', 'transactions']) {
     const c = changed(rows(before, k), rows(after, k), k);
     for (const r of [...c.added, ...c.updated.map((u) => u.after), ...c.removed]) {
       const engId = r.engagement_id ?? wpEng.get(r.workpaper_id);

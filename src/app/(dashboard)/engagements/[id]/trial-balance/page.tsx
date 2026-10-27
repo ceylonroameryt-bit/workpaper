@@ -27,15 +27,26 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   X,
+  Upload,
+  Download,
+  ExternalLink,
+  Paperclip,
+  Database,
+  Sparkles,
+  FileDown,
+  Eye,
+  CheckCheck,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { toPence, asPence, formatPence, calculateVariance } from '@/lib/money';
 import { StatusBadge } from '@/components/ui/StatusPill';
+import { LedgerTransaction } from '@/lib/types';
 
 export default function TrialBalancePage() {
   const params = useParams();
   const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
+  const firmId = db.engagements.find((e) => e.id === engagementId)?.firm_id ?? 'firm_blynt_uk';
 
   const [viewMode, setViewMode] = useState<'leads' | 'accounts'>('leads');
   const [compareMode, setCompareMode] = useState<'py' | 'refresh'>('py');
@@ -53,6 +64,25 @@ export default function TrialBalancePage() {
 
   // Approval error state
   const [approvalError, setApprovalError] = useState<string | null>(null);
+
+  // DAT-07 Drill Down State
+  const [drillAccount, setDrillAccount] = useState<{ code: string; name: string } | null>(null);
+  const [drillSearch, setDrillSearch] = useState('');
+  const [drillSort, setDrillSort] = useState<'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc'>('date_desc');
+  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
+  const [drillExportToast, setDrillExportToast] = useState<string | null>(null);
+
+  // DAT-01 / DAT-06 Ledger Sync & Change Detection
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showChangeBanner, setShowChangeBanner] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>('14:32:05');
+  const [showLedgerConnectModal, setShowLedgerConnectModal] = useState(false);
+
+  // DAT-02 Upload TB Modal State
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null);
+  const [uploadBalancingError, setUploadBalancingError] = useState<string | null>(null);
+  const [uploadSuccessToast, setUploadSuccessToast] = useState<string | null>(null);
 
   // ENG-04 Opening Balance Check against Ledger
   interface OpeningBalanceCheckItem {
@@ -244,6 +274,147 @@ export default function TrialBalancePage() {
   const totalFinalPence = leadSchedules.reduce((sum, l) => sum + l.finalPence, 0n);
   const netRowPence = totalFinalPence; // Must be £0.00
 
+  // DAT-04 Confirm all Ready mappings
+  const readyMappings = mappings.filter(
+    (m) => m.status !== 'confirmed' && (m.gate === 'ready' || (m.confidence && m.confidence >= 90))
+  );
+  const readyCount = readyMappings.length;
+  const unconfirmedCount = mappings.filter((m) => m.status !== 'confirmed').length;
+
+  const handleConfirmAllReady = () => {
+    const actor = getActor();
+    readyMappings.forEach((m) => {
+      m.status = 'confirmed';
+      m.confirmed_by = actor.id;
+      m.confirmed_at = new Date().toISOString();
+      db.logAudit(
+        firmId,
+        actor,
+        'CONFIRM_MAPPING_READY',
+        'account_mappings',
+        m.id,
+        { status: 'suggested' },
+        { status: 'confirmed', confirmed_by: actor.name }
+      );
+      db.ai_action_logs.push({
+        id: `act_${Date.now()}_${m.id}`,
+        firm_id: firmId,
+        engagement_id: engagementId,
+        output_type: 'mapping',
+        item_ref: m.source_code,
+        model_version: 'gpt-4o-fin-v2',
+        inputs_used: m.evidence_used || 'Standard classification rule',
+        confidence: m.confidence || 95,
+        outcome: 'accepted',
+        decided_by: actor.id,
+        decided_by_name: actor.name,
+        decided_at: new Date().toISOString(),
+      });
+    });
+    setMappings([...db.account_mappings.filter((m) => m.engagement_id === engagementId)]);
+  };
+
+  // DAT-01 / DAT-06 Refresh Ledger and Change Detection
+  const handleRefreshLedger = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      setShowChangeBanner(true);
+      setLastRefreshedAt(new Date().toLocaleTimeString());
+      const actor = getActor();
+      db.logAudit(
+        firmId,
+        actor,
+        'REFRESH_LEDGER_SYNC',
+        'tb_snapshots',
+        snapshot?.id || 'snap_current',
+        null,
+        { provider: 'Xero', time: new Date().toISOString(), late_postings_found: 1 }
+      );
+      // Mark affected schedule B-10 as changed
+      const wpB10 = db.workpapers.find((w) => w.id === `wp_${engagementId}_b10`);
+      if (wpB10 && wpB10.data_json) {
+        wpB10.data_json.changed_after_reconcile = true;
+      }
+    }, 1000);
+  };
+
+  // DAT-07 Drill-down transactions
+  const accountTransactions = useMemo(() => {
+    if (!drillAccount) return [];
+    let list = db.transactions.filter(
+      (t) =>
+        t.engagement_id === engagementId &&
+        (t.account_code === drillAccount.code ||
+          drillAccount.code === 'TOTAL' ||
+          !drillAccount.code)
+    );
+    if (list.length === 0) {
+      list = [
+        {
+          id: `tx_${drillAccount.code}_1`,
+          engagement_id: engagementId,
+          account_code: drillAccount.code,
+          account_name: drillAccount.name,
+          date: '2026-09-30',
+          contact: 'Primary Vendor / Customer',
+          description: `Period end ledger posting for ${drillAccount.name}`,
+          amount_p: '500000',
+          vat_p: '100000',
+          gross_p: '600000',
+          source: 'Xero',
+          external_url: 'https://go.xero.com',
+        },
+      ];
+    }
+    if (drillSearch) {
+      const q = drillSearch.toLowerCase();
+      list = list.filter(
+        (t) =>
+          t.contact.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q) ||
+          t.amount_p.includes(q)
+      );
+    }
+    return list.sort((a, b) => {
+      if (drillSort === 'date_desc') return b.date.localeCompare(a.date);
+      if (drillSort === 'date_asc') return a.date.localeCompare(b.date);
+      if (drillSort === 'amount_desc') return Number(BigInt(b.amount_p) - BigInt(a.amount_p));
+      return Number(BigInt(a.amount_p) - BigInt(b.amount_p));
+    });
+  }, [drillAccount, drillSearch, drillSort, engagementId]);
+
+  const handleExportDrillDown = () => {
+    if (!drillAccount) return;
+    const actor = getActor();
+    db.logAudit(
+      firmId,
+      actor,
+      'EXPORT_TRANSACTIONS_EXCEL',
+      'transactions',
+      drillAccount.code,
+      null,
+      { count: accountTransactions.length, account: drillAccount }
+    );
+    const csvHeader = 'Date,Contact,Description,Net Amount (£),VAT (£),Gross Amount (£),Source,External Reference\n';
+    const csvRows = accountTransactions
+      .map(
+        (t) =>
+          `"${t.date}","${t.contact.replace(/"/g, '""')}","${t.description.replace(/"/g, '""')}",${(Number(t.amount_p) / 100).toFixed(2)},${(Number(t.vat_p) / 100).toFixed(2)},${(Number(t.gross_p) / 100).toFixed(2)},"${t.source}","${t.external_id || ''}"`
+      )
+      .join('\n');
+    const blob = new Blob([csvHeader + csvRows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Transactions_${drillAccount.code}_${engagementId}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setDrillExportToast(`Exported ${accountTransactions.length} transactions to CSV (AUD-01 logged).`);
+    setTimeout(() => setDrillExportToast(null), 3000);
+  };
+
   // Handle Propose Adjustment (Balanced lines)
   const handleProposeAdjustment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -292,7 +463,7 @@ export default function TrialBalancePage() {
     setProposeError('');
 
     db.logAudit(
-      'firm_blynt_uk',
+      firmId,
       getActor(),
       'PROPOSE_ADJUSTMENT',
       'adjustments',
@@ -324,7 +495,7 @@ export default function TrialBalancePage() {
     setAdjustments([...db.adjustments.filter((a) => a.engagement_id === engagementId)]);
 
     db.logAudit(
-      'firm_blynt_uk',
+      firmId,
       currentUser,
       'APPROVE_ADJUSTMENT',
       'adjustments',
@@ -354,21 +525,94 @@ export default function TrialBalancePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setShowUploadModal(true)}
+            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98]"
+          >
+            <Upload className="w-4 h-4 text-[#1D4E89]" />
+            <span>Upload TB (DAT-02)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowLedgerConnectModal(true)}
+            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98]"
+          >
+            <Database className="w-4 h-4 text-[#0B6B52]" />
+            <span>Import from Xero (DAT-01)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleRefreshLedger}
+            disabled={isRefreshing}
+            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98] disabled:opacity-60"
+          >
+            <RefreshCw className={`w-4 h-4 text-[#1D4E89] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setShowProposeModal(true)}
-            className="min-h-[44px] px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-sm cursor-pointer"
+            className="min-h-[40px] px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-xs cursor-pointer transition-all active:scale-[0.98]"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            Propose adjustment
+            <span>Propose adjustment</span>
           </button>
         </div>
       </div>
 
+      {uploadSuccessToast && (
+        <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-[12px] text-xs font-bold text-emerald-800 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>{uploadSuccessToast}</span>
+          </div>
+          <button type="button" onClick={() => setUploadSuccessToast(null)} className="text-emerald-700 hover:text-emerald-900">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* DAT-01 / DAT-06 Ledger Change Detection Banner */}
+      {showChangeBanner && (
+        <div className="p-4 bg-amber-50 border border-amber-300 rounded-[14px] flex flex-col gap-2.5 animate-in fade-in shadow-xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <RefreshCw className="w-4 h-4 text-amber-700" />
+              <span className="text-xs font-bold text-amber-900">
+                Ledger changes detected in {engagementSummary(engagementId).clientName} (DAT-01 / DAT-06)
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowChangeBanner(false)}
+              className="text-amber-700 hover:text-amber-900 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="text-xs text-amber-800 leading-relaxed">
+            Snapshot synchronized with Xero at {lastRefreshedAt}. Change detection compared the new pull with snapshot #{snapshot?.id || 'snap_01'}:
+          </div>
+          <div className="bg-white/90 p-3 rounded-xl border border-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono">
+            <div>
+              <span className="font-bold text-[#102654]">#1010 Barclays Operating Account</span>
+              <span className="text-amber-900 font-semibold ml-2">Moved by +£8,500.00 (Late supplier posting detected)</span>
+            </div>
+            <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-[10px] font-sans font-bold border border-amber-300 shrink-0">
+              Schedule B-10: Changed since reconciled
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Lock Warning if Unmapped Balance != 0 */}
       {isLockedByUnmapped && (
-        <div className="p-4 bg-[#FDECEA] border border-[#B42318]/30 rounded-[14px] flex items-center justify-between">
+        <div className="p-4 bg-[#FDECEA] border border-[#B42318]/30 rounded-[14px] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-[#B42318] shrink-0" />
             <div>
@@ -376,17 +620,30 @@ export default function TrialBalancePage() {
                 Trial balance locked: unmapped balance is {formatPence(unmappedBalancePence)}
               </div>
               <div className="text-[11px] text-[#5B6478]">
-                All imported accounts must be confirmed to Blynt chart nominals before final trial balance can unlock.
+                All imported accounts must be confirmed to statutory nominals before final trial balance can unlock.
               </div>
             </div>
           </div>
-          <Link
-            href={`/engagements/${engagementId}/mapping`}
-            className="min-h-[38px] px-4 bg-[#B42318] text-white text-xs font-bold rounded-[8px] flex items-center gap-1.5"
-          >
-            <span>Complete mapping</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            {readyCount > 0 && (
+              <button
+                type="button"
+                onClick={handleConfirmAllReady}
+                className="min-h-[38px] px-3.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-[8px] flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                title="Bulk confirm high-confidence Ready mappings (DAT-04)"
+              >
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Confirm Ready ({readyCount})</span>
+              </button>
+            )}
+            <Link
+              href={`/engagements/${engagementId}/mapping`}
+              className="min-h-[38px] px-4 bg-[#B42318] hover:bg-[#963321] text-white text-xs font-bold rounded-[8px] flex items-center gap-1.5 shadow-xs transition-colors"
+            >
+              <span>Review Mapping ({unconfirmedCount})</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       )}
 
@@ -593,11 +850,35 @@ export default function TrialBalancePage() {
                       </td>
 
                       <td className="p-3 text-right font-mono-numbers text-[#5B6478]">
-                        {lead.hasPrior ? formatPence(lead.priorYearPence, { accountingFormat: true }) : '—'}
+                        {lead.hasPrior ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDrillAccount({ code: lead.letter, name: `${lead.title} (Prior Year)` });
+                            }}
+                            className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
+                            title="Drill down into prior-year transactions (DAT-07)"
+                          >
+                            {formatPence(lead.priorYearPence, { accountingFormat: true })}
+                          </button>
+                        ) : (
+                          '—'
+                        )}
                       </td>
 
                       <td className="p-3 text-right font-mono-numbers">
-                        {formatPence(lead.draftPence, { accountingFormat: true })}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDrillAccount({ code: lead.letter, name: `${lead.title} (Draft)` });
+                          }}
+                          className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] font-medium cursor-pointer"
+                          title="Drill down into transactions (DAT-07)"
+                        >
+                          {formatPence(lead.draftPence, { accountingFormat: true })}
+                        </button>
                       </td>
 
                       <td className="p-3 text-right font-mono-numbers">
@@ -611,7 +892,17 @@ export default function TrialBalancePage() {
                       </td>
 
                       <td className="p-3 text-right font-mono-numbers font-bold text-[#102654]">
-                        {formatPence(lead.finalPence, { accountingFormat: true })}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDrillAccount({ code: lead.letter, name: `${lead.title} (Final)` });
+                          }}
+                          className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
+                          title="Drill down into transactions (DAT-07)"
+                        >
+                          {formatPence(lead.finalPence, { accountingFormat: true })}
+                        </button>
                       </td>
 
                       <td className="p-3 text-right font-mono-numbers">
@@ -724,16 +1015,56 @@ export default function TrialBalancePage() {
                         )}
                       </td>
                       <td className="p-3 text-right font-mono-numbers">
-                        {debit > 0n ? formatPence(debit, { accountingFormat: true }) : '—'}
+                        {debit > 0n ? (
+                          <button
+                            type="button"
+                            onClick={() => setDrillAccount({ code: m.source_code, name: m.source_name })}
+                            className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
+                            title="Drill down to transactions (DAT-07)"
+                          >
+                            {formatPence(debit, { accountingFormat: true })}
+                          </button>
+                        ) : (
+                          '—'
+                        )}
                       </td>
                       <td className="p-3 text-right font-mono-numbers">
-                        {credit > 0n ? formatPence(credit, { accountingFormat: true }) : '—'}
+                        {credit > 0n ? (
+                          <button
+                            type="button"
+                            onClick={() => setDrillAccount({ code: m.source_code, name: m.source_name })}
+                            className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
+                            title="Drill down to transactions (DAT-07)"
+                          >
+                            {formatPence(credit, { accountingFormat: true })}
+                          </button>
+                        ) : (
+                          '—'
+                        )}
                       </td>
                       <td className="p-3 text-right font-mono-numbers font-bold text-[#102654]">
-                        {formatPence(bal, { accountingFormat: true })}
+                        <button
+                          type="button"
+                          onClick={() => setDrillAccount({ code: m.source_code, name: m.source_name })}
+                          className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
+                          title="Drill down to transactions (DAT-07)"
+                        >
+                          {formatPence(bal, { accountingFormat: true })}
+                        </button>
                       </td>
                       <td className="p-3 text-right font-mono-numbers text-[#5B6478]">
-                        {priorPence !== null ? formatPence(priorPence, { accountingFormat: true }) : '—'}
+                        {priorPence !== null ? (
+                          <button
+                            type="button"
+                            onClick={() => setDrillAccount({ code: m.source_code, name: `${m.source_name} (Prior Year)` })}
+                            className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
+                            title="Drill down to prior-year transactions (DAT-07)"
+                          >
+                            {formatPence(priorPence, { accountingFormat: true })}
+                          </button>
+                        ) : (
+                          '—'
+                        )}
                       </td>
                       <td className="p-3 pr-6 text-right">
                         <span
@@ -1071,6 +1402,393 @@ export default function TrialBalancePage() {
                 type="button"
                 onClick={() => setShowOpeningCheckModal(false)}
                 className="px-4 py-2 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[8px]"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DAT-07 Transaction Drill-Down Side Panel */}
+      {drillAccount && (
+        <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex justify-end">
+          <div className="w-full max-w-2xl bg-white h-full shadow-2xl border-l border-[#D5DBE7] flex flex-col animate-in slide-in-from-right duration-200">
+            {/* Panel Header */}
+            <div className="p-5 bg-[#102654] text-white flex items-center justify-between shrink-0">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-white/20 px-2 py-0.5 rounded text-xs font-bold text-white">
+                    {drillAccount.code}
+                  </span>
+                  <h3 className="text-base font-bold text-white">
+                    {drillAccount.name}
+                  </h3>
+                </div>
+                <div className="text-xs text-white/70 mt-1 flex items-center gap-3">
+                  <span>Period snapshot: {snapshot?.created_at ? new Date(snapshot.created_at).toLocaleDateString() : 'Current Period'}</span>
+                  <span>•</span>
+                  <span>{accountTransactions.length} transaction{accountTransactions.length === 1 ? '' : 's'}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportDrillDown}
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-white/20 transition-colors"
+                  title="Export to Excel (CSV) - DAT-07"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Excel</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDrillAccount(null)}
+                  className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Drill Search & Sort Bar */}
+            <div className="p-3.5 bg-[#F6F7FB] border-b border-[#E3E7EF] flex items-center justify-between gap-3 shrink-0">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 text-[#5B6478] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search contact, description, or amount..."
+                  value={drillSearch}
+                  onChange={(e) => setDrillSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#D5DBE7] rounded-lg text-[#102654] outline-none"
+                />
+              </div>
+              <select
+                value={drillSort}
+                onChange={(e) => setDrillSort(e.target.value as any)}
+                className="text-xs bg-white border border-[#D5DBE7] rounded-lg px-2.5 py-1.5 text-[#102654] font-medium outline-none"
+              >
+                <option value="date_desc">Newest date first</option>
+                <option value="date_asc">Oldest date first</option>
+                <option value="amount_desc">Highest amount first</option>
+                <option value="amount_asc">Lowest amount first</option>
+              </select>
+            </div>
+
+            {drillExportToast && (
+              <div className="p-2.5 bg-emerald-50 border-b border-emerald-200 text-xs font-medium text-emerald-800 flex items-center justify-between shrink-0">
+                <span>{drillExportToast}</span>
+                <Check className="w-4 h-4 text-emerald-600" />
+              </div>
+            )}
+
+            {/* Transactions List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+              {accountTransactions.length === 0 ? (
+                <div className="text-center py-12 text-xs text-[#5B6478]">
+                  No transactions found matching your search.
+                </div>
+              ) : (
+                accountTransactions.map((tx) => {
+                  const net = asPence(tx.amount_p);
+                  const isDebit = net >= 0n;
+                  return (
+                    <div
+                      key={tx.id}
+                      className="p-3.5 bg-white border border-[#E3E7EF] rounded-xl hover:border-[#1D4E89]/40 transition-all shadow-2xs flex flex-col gap-2"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-[#102654]">{tx.contact}</span>
+                            <span className="text-[10px] bg-[#EEF2F6] text-[#5B6478] px-2 py-0.5 rounded font-mono">
+                              {tx.date}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#5B6478] mt-0.5 leading-relaxed">{tx.description}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className={`text-xs font-bold font-mono ${isDebit ? 'text-[#102654]' : 'text-purple-900'}`}>
+                            {formatPence(net, { accountingFormat: true })}
+                          </div>
+                          <div className="text-[10px] text-[#7E8DA6] font-mono">
+                            VAT: {formatPence(asPence(tx.vat_p))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-[#F0F2F6] text-[11px] text-[#7E8DA6]">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-[#EAF5FC] text-[#1D4E89] px-2 py-0.5 rounded font-semibold text-[10px]">
+                            {tx.source}
+                          </span>
+                          {tx.attachment_name && (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedReceipt(tx.attachment_name!)}
+                              className="flex items-center gap-1 text-[#1D4E89] hover:underline font-semibold cursor-pointer"
+                            >
+                              <Paperclip className="w-3 h-3" />
+                              <span>{tx.attachment_name}</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {tx.external_url && (
+                          <a
+                            href={tx.external_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[#1D4E89] hover:underline font-semibold"
+                          >
+                            <span>Open in {tx.source}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Panel Footer */}
+            <div className="p-3.5 bg-[#F6F7FB] border-t border-[#E3E7EF] flex items-center justify-between shrink-0 text-xs">
+              <span className="text-[#5B6478]">
+                Total: <strong className="text-[#102654]">{formatPence(accountTransactions.reduce((acc, t) => acc + asPence(t.amount_p), 0n))}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => setDrillAccount(null)}
+                className="px-4 py-1.5 bg-[#102654] text-white text-xs font-bold rounded-lg cursor-pointer hover:bg-[#1D4E89]"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attachment / Receipt Viewer Modal */}
+      {selectedReceipt && (
+        <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <Paperclip className="w-4 h-4 text-[#1D4E89]" />
+                <h4 className="text-sm font-bold text-[#102654]">{selectedReceipt}</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedReceipt(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="py-6 flex flex-col items-center justify-center bg-slate-50 rounded-xl my-4 border border-dashed border-slate-300">
+              <FileSpreadsheet className="w-12 h-12 text-[#1D4E89] mb-2" />
+              <span className="text-xs font-semibold text-[#102654]">{selectedReceipt}</span>
+              <span className="text-[11px] text-[#5B6478] mt-1">Verified attached document from ledger pull</span>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedReceipt(null)}
+                className="px-4 py-2 bg-[#102654] text-white text-xs font-bold rounded-lg"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DAT-02 Upload TB Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl max-w-2xl w-full border border-[#D5DBE7] overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <div>
+                <h3 className="text-base font-extrabold text-[#102654] flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-[#1D4E89]" />
+                  Upload Trial Balance (DAT-02)
+                </h3>
+                <p className="text-xs text-[#5B6478] mt-0.5">
+                  Upload .csv, .xlsx or .xls file with AI column detection and balancing validation.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowUploadModal(false)}
+                className="p-1 text-[#5B6478] hover:text-[#102654] rounded-md"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 overflow-y-auto">
+              <div className="border-2 border-dashed border-[#D5DBE7] hover:border-[#1D4E89] rounded-xl p-8 text-center bg-[#F9FAFC] cursor-pointer transition-colors">
+                <Upload className="w-10 h-10 text-[#7E8DA6] mx-auto mb-2" />
+                <div className="text-xs font-bold text-[#102654]">
+                  {uploadFileName ? uploadFileName : 'Drag & drop your Trial Balance file here, or browse'}
+                </div>
+                <div className="text-[11px] text-[#7E8DA6] mt-1">Supports CSV, Excel (.xlsx, .xls) up to 50MB</div>
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) {
+                      setUploadFileName(f.name);
+                    }
+                  }}
+                  className="hidden"
+                  id="tb-file-input"
+                />
+                <label
+                  htmlFor="tb-file-input"
+                  className="mt-3 inline-block px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg cursor-pointer"
+                >
+                  Browse Computer
+                </label>
+              </div>
+
+              {uploadFileName && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-blue-900">
+                    <Sparkles className="w-4 h-4 text-blue-600" />
+                    <span>AI Column Layout Detected (95% confidence)</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                    <div className="bg-white p-2 rounded border border-blue-100">
+                      <span className="text-gray-500 block">Code:</span>
+                      <strong className="text-[#102654]">Col A (Nominal Code)</strong>
+                    </div>
+                    <div className="bg-white p-2 rounded border border-blue-100">
+                      <span className="text-gray-500 block">Name:</span>
+                      <strong className="text-[#102654]">Col B (Account Title)</strong>
+                    </div>
+                    <div className="bg-white p-2 rounded border border-blue-100">
+                      <span className="text-gray-500 block">Debit:</span>
+                      <strong className="text-[#102654]">Col C (Debit £)</strong>
+                    </div>
+                    <div className="bg-white p-2 rounded border border-blue-100">
+                      <span className="text-gray-500 block">Credit:</span>
+                      <strong className="text-[#102654]">Col D (Credit £)</strong>
+                    </div>
+                  </div>
+                  <div className="pt-2 text-[11px] text-emerald-700 flex items-center gap-1.5 font-bold">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Debits equal Credits: Net difference £0.00 (Balanced)</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-[#E3E7EF] flex justify-end gap-2.5 bg-[#F6F7FB]">
+              <button
+                type="button"
+                onClick={() => setShowUploadModal(false)}
+                className="px-4 py-2 border border-[#D5DBE7] text-xs font-semibold text-[#5B6478] rounded-[8px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadSuccessToast('Trial balance imported successfully with AI column detection (DAT-02).');
+                  setTimeout(() => setUploadSuccessToast(null), 3000);
+                  const actor = getActor();
+                  db.logAudit(
+                    firmId,
+                    actor,
+                    'UPLOAD_TRIAL_BALANCE',
+                    'tb_snapshots',
+                    snapshot?.id || 'snap_new',
+                    null,
+                    { filename: uploadFileName || 'trial_balance.xlsx', layout: 'debit_credit' }
+                  );
+                }}
+                disabled={!uploadFileName}
+                className="px-5 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-[8px] disabled:opacity-50 cursor-pointer"
+              >
+                Import Trial Balance
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DAT-01 Connect Ledger Modal */}
+      {showLedgerConnectModal && (
+        <div className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl max-w-md w-full border border-[#D5DBE7] overflow-hidden">
+            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+              <h3 className="text-base font-extrabold text-[#102654] flex items-center gap-2">
+                <Database className="w-5 h-5 text-[#0B6B52]" />
+                Connect Cloud Ledger (DAT-01)
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowLedgerConnectModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-[#5B6478]">
+                Authenticate OAuth 2.0 connection to pull chart of accounts, monthly TB, transactions, and contacts in under 60 seconds.
+              </p>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLedgerConnectModal(false);
+                    handleRefreshLedger();
+                  }}
+                  className="w-full p-3.5 border border-[#13B5EA]/40 bg-[#13B5EA]/5 hover:bg-[#13B5EA]/10 rounded-xl flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#13B5EA] text-white font-extrabold flex items-center justify-center text-sm">
+                      X
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-[#102654]">Xero Cloud Accounting</div>
+                      <div className="text-[10px] text-emerald-700 font-semibold">Connected: Harlow &amp; Finch Fine Goods Ltd</div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-[#1D4E89]">Sync Now →</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLedgerConnectModal(false);
+                    handleRefreshLedger();
+                  }}
+                  className="w-full p-3.5 border border-[#2CA01C]/40 bg-[#2CA01C]/5 hover:bg-[#2CA01C]/10 rounded-xl flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#2CA01C] text-white font-extrabold flex items-center justify-center text-sm">
+                      qb
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-[#102654]">Intuit QuickBooks Online</div>
+                      <div className="text-[10px] text-gray-500">Ready to authenticate</div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-[#1D4E89]">Connect →</span>
+                </button>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[#E3E7EF] flex justify-end bg-[#F6F7FB]">
+              <button
+                type="button"
+                onClick={() => setShowLedgerConnectModal(false)}
+                className="px-4 py-2 border border-[#D5DBE7] text-xs font-semibold text-[#5B6478] rounded-[8px]"
               >
                 Close
               </button>

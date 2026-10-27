@@ -32,6 +32,7 @@ import {
   ScheduleVersion,
   DisclosureChecklistItem,
   StatutoryNoteItem,
+  LedgerTransaction,
 } from '../types/models';
 import { toPence, sumPence } from '../money';
 import { packFor, templateFor, blankPaperData } from '../workpapers/templates';
@@ -73,6 +74,7 @@ class Database {
   schedule_versions: ScheduleVersion[] = [];
   checklist_items: DisclosureChecklistItem[] = [];
   statutory_notes: StatutoryNoteItem[] = [];
+  transactions: LedgerTransaction[] = [];
   // Server-only: password hashes. Never sent to the browser (see state-guard.ts)
   credentials: { user_id: string; password_hash: string }[] = [];
 
@@ -87,6 +89,7 @@ class Database {
     'adjustments', 'templates', 'workpapers', 'procedures', 'comments', 'attachments',
     'attachment_links', 'signoffs', 'view_prefs', 'audit_logs', 'ai_lineage', 'credentials',
     'learned_rules', 'ai_action_logs', 'ai_review_findings', 'schedule_versions', 'checklist_items', 'statutory_notes',
+    'transactions',
   ] as const;
 
   exportState(): Record<string, unknown[]> {
@@ -165,6 +168,7 @@ class Database {
     this.schedule_versions = [];
     this.checklist_items = [];
     this.statutory_notes = [];
+    this.transactions = [];
   }
 
   // Delete a specific client and cascade remove associated engagements and workpapers
@@ -173,6 +177,7 @@ class Database {
     const engIds = this.engagements.filter((e) => e.client_id === clientId).map((e) => e.id);
     this.engagements = this.engagements.filter((e) => e.client_id !== clientId);
     this.account_mappings = this.account_mappings.filter((m) => !engIds.includes(m.engagement_id));
+    this.transactions = this.transactions.filter((t) => !engIds.includes(t.engagement_id));
     this.tb_snapshots = this.tb_snapshots.filter((s) => !engIds.includes(s.engagement_id));
     this.tb_lines = this.tb_lines.filter((l) => !engIds.some((eid) => l.snapshot_id?.includes(eid)));
     this.adjustments = this.adjustments.filter((a) => !engIds.includes(a.engagement_id));
@@ -967,7 +972,7 @@ class Database {
       status: 'suggested' | 'confirmed' | 'needs_you';
       confidence: number;
     }[] = [
-      { code: '1010', name: 'Barclays Operating Account', type: 'Bank', debit_p: 11840217n, credit_p: 0n, blynt_code: '1010', status: 'confirmed', confidence: 100 },
+      { code: '1010', name: 'Barclays Operating Account', type: 'Bank', debit_p: 95535000n, credit_p: 0n, blynt_code: '1010', status: 'confirmed', confidence: 100 },
       { code: '1020', name: 'Barclays High Yield Reserve', type: 'Bank', debit_p: 35000000n, credit_p: 0n, blynt_code: '1020', status: 'confirmed', confidence: 100 },
       { code: '1200', name: 'Sales Ledger Control Account', type: 'Current Asset', debit_p: 248950000n, credit_p: 0n, blynt_code: '1200', status: 'confirmed', confidence: 100 },
       { code: '1210', name: 'Allowance for Doubtful Debts', type: 'Current Asset', debit_p: 0n, credit_p: 12500000n, blynt_code: '1210', status: 'confirmed', confidence: 100 },
@@ -1489,6 +1494,283 @@ class Database {
         status: 'open',
         feedback: 'useful',
         created_at: now,
+      }
+    );
+
+    // Seed DAT-07 Ledger Transactions for Harlow Food Group (Stage A Step 3)
+    const harlowEngId = 'eng_harlow_fy26';
+    this.transactions.push(
+      // 1010 Barclays Operating Account
+      {
+        id: 'tx_1010_1',
+        engagement_id: harlowEngId,
+        account_code: '1010',
+        account_name: 'Barclays Operating Account',
+        date: '2026-09-30',
+        contact: 'Harlow Wholesale Cust #402',
+        description: 'Customer direct transfer bulk settlement',
+        amount_p: '850000000', // £850,000.00 Dr
+        vat_p: '0',
+        gross_p: '850000000',
+        source: 'Xero',
+        external_id: 'xero_tx_9011',
+        external_url: 'https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=9011',
+      },
+      {
+        id: 'tx_1010_2',
+        engagement_id: harlowEngId,
+        account_code: '1010',
+        account_name: 'Barclays Operating Account',
+        date: '2026-09-28',
+        contact: 'Crown Commercial Landlords Ltd',
+        description: 'Quarterly London office rent & facilities',
+        amount_p: '-10000000', // -£100,000.00 Cr
+        vat_p: '2000000',
+        gross_p: '-12000000',
+        source: 'Xero',
+        external_id: 'xero_tx_9012',
+        external_url: 'https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=9012',
+        attachment_name: 'Office_Rent_Invoice_Q3.pdf',
+        attachment_url: '/demo/Office_Rent_Invoice_Q3.pdf',
+      },
+      {
+        id: 'tx_1010_3',
+        engagement_id: harlowEngId,
+        account_code: '1010',
+        account_name: 'Barclays Operating Account',
+        date: '2026-09-25',
+        contact: 'British Gas Business',
+        description: 'Monthly warehouse electricity & gas utilities',
+        amount_p: '-4120000', // -£41,200.00 Cr
+        vat_p: '824000',
+        gross_p: '-4944000',
+        source: 'Xero',
+        external_id: 'xero_tx_9013',
+        external_url: 'https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=9013',
+        attachment_name: 'British_Gas_Sept2026.pdf',
+      },
+      {
+        id: 'tx_1010_4',
+        engagement_id: harlowEngId,
+        account_code: '1010',
+        account_name: 'Barclays Operating Account',
+        date: '2026-09-20',
+        contact: 'HMRC Shipley',
+        description: 'PAYE / NIC Settlement Month 5',
+        amount_p: '-14200000', // -£142,000.00 Cr
+        vat_p: '0',
+        gross_p: '-14200000',
+        source: 'Xero',
+        external_id: 'xero_tx_9014',
+        external_url: 'https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=9014',
+      },
+      {
+        id: 'tx_1010_5',
+        engagement_id: harlowEngId,
+        account_code: '1010',
+        account_name: 'Barclays Operating Account',
+        date: '2026-09-18',
+        contact: 'Caterpillar Equipment UK',
+        description: 'Warehouse plant machinery addition - forklift lift arm',
+        amount_p: '-8500000', // -£85,000.00 Cr
+        vat_p: '1700000',
+        gross_p: '-10200000',
+        source: 'Xero',
+        external_id: 'xero_tx_9015',
+        external_url: 'https://go.xero.com/Bank/ViewTransaction.aspx?bankTransactionID=9015',
+        attachment_name: 'Forklift_Invoice_CAT.pdf',
+      },
+      // 1200 Sales Ledger Control Account
+      {
+        id: 'tx_1200_1',
+        engagement_id: harlowEngId,
+        account_code: '1200',
+        account_name: 'Sales Ledger Control Account',
+        date: '2026-09-29',
+        contact: "Sainsbury's Supermarkets Ltd",
+        description: 'Inv #INV-2026-881 Wholesale gourmet preserves',
+        amount_p: '120000000', // £1,200,000.00 Dr
+        vat_p: '24000000',
+        gross_p: '144000000',
+        source: 'Xero',
+        external_id: 'xero_tx_881',
+        external_url: 'https://go.xero.com/AccountsReceivable/View.aspx?invoiceID=881',
+        attachment_name: 'Sainsburys_Preserves_Inv881.pdf',
+      },
+      {
+        id: 'tx_1200_2',
+        engagement_id: harlowEngId,
+        account_code: '1200',
+        account_name: 'Sales Ledger Control Account',
+        date: '2026-09-25',
+        contact: 'Waitrose & Partners',
+        description: 'Inv #INV-2026-882 Organic condiment supply contract',
+        amount_p: '85000000', // £850,000.00 Dr
+        vat_p: '17000000',
+        gross_p: '102000000',
+        source: 'Xero',
+        external_id: 'xero_tx_882',
+        external_url: 'https://go.xero.com/AccountsReceivable/View.aspx?invoiceID=882',
+        attachment_name: 'Waitrose_Supply_Inv882.pdf',
+      },
+      {
+        id: 'tx_1200_3',
+        engagement_id: harlowEngId,
+        account_code: '1200',
+        account_name: 'Sales Ledger Control Account',
+        date: '2026-09-15',
+        contact: 'Marks & Spencer PLC',
+        description: 'Inv #INV-2026-879 Artisan confectionery quarterly order',
+        amount_p: '43950000', // £439,500.00 Dr
+        vat_p: '8790000',
+        gross_p: '52740000',
+        source: 'Xero',
+        external_id: 'xero_tx_879',
+        external_url: 'https://go.xero.com/AccountsReceivable/View.aspx?invoiceID=879',
+      },
+      // 1500 Plant and Warehouse Machinery Cost
+      {
+        id: 'tx_1500_1',
+        engagement_id: harlowEngId,
+        account_code: '1500',
+        account_name: 'Plant and Warehouse Machinery Cost',
+        date: '2026-08-15',
+        contact: 'Tetra Pak Processing Systems Ltd',
+        description: 'Automated bottling & aseptic pasteurisation line (CapEx)',
+        amount_p: '450000000', // £4,500,000.00 Dr
+        vat_p: '90000000',
+        gross_p: '540000000',
+        source: 'Xero',
+        external_id: 'xero_tx_7701',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=7701',
+        attachment_name: 'TetraPak_Contract_Signed.pdf',
+      },
+      {
+        id: 'tx_1500_2',
+        engagement_id: harlowEngId,
+        account_code: '1500',
+        account_name: 'Plant and Warehouse Machinery Cost',
+        date: '2026-09-02',
+        contact: 'Apple Store Regent Street',
+        description: 'MacBook Pro M3 Max for Quality Assurance head',
+        amount_p: '720000', // £7,200.00 Dr
+        vat_p: '144000',
+        gross_p: '864000',
+        source: 'Xero',
+        external_id: 'xero_tx_7702',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=7702',
+        attachment_name: 'Apple_Store_Inv_7702.pdf',
+      },
+      // 2000 Purchase Ledger Control Account
+      {
+        id: 'tx_2000_1',
+        engagement_id: harlowEngId,
+        account_code: '2000',
+        account_name: 'Purchase Ledger Control Account',
+        date: '2026-09-28',
+        contact: 'Bramley Glass Packaging Ltd',
+        description: 'Glass containers batch #GB-401 for food packaging',
+        amount_p: '-64200000', // -£642,000.00 Cr
+        vat_p: '12840000',
+        gross_p: '-77040000',
+        source: 'Xero',
+        external_id: 'xero_tx_6601',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=6601',
+        attachment_name: 'Bramley_Glass_Inv_6601.pdf',
+      },
+      {
+        id: 'tx_2000_2',
+        engagement_id: harlowEngId,
+        account_code: '2000',
+        account_name: 'Purchase Ledger Control Account',
+        date: '2026-09-22',
+        contact: 'Kentish Fruit Growers Co-op',
+        description: 'Bulk autumn berry harvest deliveries (Zero rated food)',
+        amount_p: '-104250000', // -£1,042,500.00 Cr
+        vat_p: '0',
+        gross_p: '-104250000',
+        source: 'Xero',
+        external_id: 'xero_tx_6602',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=6602',
+        attachment_name: 'Kentish_Fruit_Inv_6602.pdf',
+      },
+      // 6000 London Office Rent
+      {
+        id: 'tx_6000_1',
+        engagement_id: harlowEngId,
+        account_code: '6000',
+        account_name: 'London Office Rent and Service',
+        date: '2026-09-01',
+        contact: 'Crown Commercial Landlords Ltd',
+        description: 'Head office premises rent - Sept 2026',
+        amount_p: '10000000', // £100,000.00 Dr
+        vat_p: '2000000',
+        gross_p: '12000000',
+        source: 'Xero',
+        external_id: 'xero_tx_6001',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=6001',
+      },
+      {
+        id: 'tx_6000_2',
+        engagement_id: harlowEngId,
+        account_code: '6000',
+        account_name: 'London Office Rent and Service',
+        date: '2026-08-01',
+        contact: 'Crown Commercial Landlords Ltd',
+        description: 'Head office premises rent - Aug 2026',
+        amount_p: '10000000', // £100,000.00 Dr
+        vat_p: '2000000',
+        gross_p: '12000000',
+        source: 'Xero',
+        external_id: 'xero_tx_6002',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=6002',
+      },
+      {
+        id: 'tx_6000_3',
+        engagement_id: harlowEngId,
+        account_code: '6000',
+        account_name: 'London Office Rent and Service',
+        date: '2026-07-01',
+        contact: 'Crown Commercial Landlords Ltd',
+        description: 'Head office premises rent - Jul 2026',
+        amount_p: '10000000', // £100,000.00 Dr
+        vat_p: '2000000',
+        gross_p: '12000000',
+        source: 'Xero',
+        external_id: 'xero_tx_6003',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=6003',
+      },
+      // 7810 Special Transition Consulting Fee
+      {
+        id: 'tx_7810_1',
+        engagement_id: harlowEngId,
+        account_code: '7810',
+        account_name: 'Special Transition Consulting Fee',
+        date: '2026-09-15',
+        contact: 'Vanguard Advisory Partners',
+        description: 'Transition and process audit advisory fee',
+        amount_p: '4200000', // £42,000.00 Dr
+        vat_p: '840000',
+        gross_p: '5040000',
+        source: 'Xero',
+        external_id: 'xero_tx_7810',
+        external_url: 'https://go.xero.com/AccountsPayable/View.aspx?invoiceID=7810',
+        attachment_name: 'Vanguard_Advisory_Invoice.pdf',
+      },
+      // 7820 Special Warranty Reserve Contra
+      {
+        id: 'tx_7820_1',
+        engagement_id: harlowEngId,
+        account_code: '7820',
+        account_name: 'Special Warranty Reserve Contra',
+        date: '2026-09-30',
+        contact: 'Internal Entry',
+        description: 'Annual warranty indemnity provision contra',
+        amount_p: '-4200000', // -£42,000.00 Cr
+        vat_p: '0',
+        gross_p: '-4200000',
+        source: 'Xero',
+        external_id: 'xero_tx_7820',
       }
     );
 

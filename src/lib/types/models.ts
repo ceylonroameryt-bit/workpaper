@@ -457,6 +457,7 @@ export interface AiActionLogItem {
   firm_id: string;
   engagement_id: string;
   output_type: 'mapping' | 'extraction' | 'journal' | 'finding' | 'note' | 'commentary';
+  item_ref?: string;
   inputs_used: string;
   confidence: number;
   model_version: string;
@@ -538,4 +539,36 @@ export interface StatutoryNoteItem {
   status: 'draft' | 'reviewed' | 'updated_needs_review';
   is_custom_wording: boolean;
 }
+
+// Stage A DAT-07: Drill down to transactions
+export interface LedgerTransaction {
+  id: string;
+  engagement_id: string;
+  account_code: string;
+  account_name: string;
+  date: string;
+  contact: string;
+  description: string;
+  amount_p: string; // Net pence: debit positive, credit negative
+  vat_p: string;
+  gross_p: string;
+  source: 'Xero' | 'QuickBooks' | 'Bank Feed' | 'CSV Upload';
+  external_id?: string;
+  external_url?: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  invoice_id?: string;
+}
+
+// Stage A DAT-01 / DAT-06: Snapshot change detection between imports
+export interface TbSnapshotDiff {
+  account_code: string;
+  account_name: string;
+  prior_amount_p: string;
+  new_amount_p: string;
+  diff_p: string;
+  direction: 'increased' | 'decreased' | 'new';
+  affected_schedule_ref?: string;
+}
+
 
