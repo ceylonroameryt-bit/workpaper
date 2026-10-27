@@ -12,8 +12,13 @@ import {
   Lock,
   Mail,
   User as UserIcon,
+  Check,
+  Circle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { BlyntLogo } from '@/components/ui/BlyntLogo';
+import { emailError, passwordChecks, passwordError } from '@/lib/validation';
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState('');
@@ -21,7 +26,16 @@ export default function SignupPage() {
   const [firmName, setFirmName] = useState('');
   const [role, setRole] = useState<'manager' | 'partner' | 'preparer' | 'reviewer' | 'admin'>('manager');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [confirmTouched, setConfirmTouched] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(true);
+
+  const emailProblem = emailError(workEmail);
+  const checks = passwordChecks(password, { email: workEmail, name: fullName });
+  const passwordOk = checks.every((c) => c.ok);
+  const confirmProblem = confirmPassword && confirmPassword !== password ? 'The passwords don’t match.' : null;
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -34,6 +48,7 @@ export default function SignupPage() {
     setFirmName(`Sterling & Partners LLP`);
     setRole('manager');
     setPassword('AuditSecure2026!');
+    setConfirmPassword('AuditSecure2026!');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,8 +60,21 @@ export default function SignupPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setErrorMessage('Password must be at least 8 characters long.');
+    if (emailProblem) {
+      setEmailTouched(true);
+      setErrorMessage(emailProblem);
+      return;
+    }
+
+    const pwProblem = passwordError(password, { email: workEmail, name: fullName });
+    if (pwProblem) {
+      setErrorMessage(pwProblem);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setConfirmTouched(true);
+      setErrorMessage('The passwords don’t match.');
       return;
     }
 
@@ -89,7 +117,8 @@ export default function SignupPage() {
 
       setSuccessNotice(true);
       setTimeout(() => {
-        window.location.href = '/';
+        // Two-factor set-up first (when required), then the practice set-up wizard
+        window.location.href = data.mfa ? '/login/mfa?step=setup&from=%2Fonboarding' : '/onboarding';
       }, 800);
     } catch {
       setErrorMessage('Could not connect to the server. Please check your network and try again.');
@@ -221,9 +250,21 @@ export default function SignupPage() {
                 required
                 value={workEmail}
                 onChange={(e) => setWorkEmail(e.target.value)}
+                onBlur={() => setEmailTouched(true)}
+                autoComplete="email"
+                aria-invalid={emailTouched && !!emailProblem}
+                aria-describedby="signup-email-error"
                 placeholder="e.g. alex.wright@wrightaudit.co.uk"
-                className="w-full min-h-[44px] px-3.5 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs"
+                className={`w-full min-h-[44px] px-3.5 text-xs bg-white border rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs ${
+                  emailTouched && emailProblem ? 'border-[#B42318]' : 'border-[#D5DBE7]'
+                }`}
               />
+              {emailTouched && emailProblem && (
+                <p id="signup-email-error" className="text-[11px] text-[#B42318] mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  {emailProblem}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -267,15 +308,69 @@ export default function SignupPage() {
                 <Lock className="w-3.5 h-3.5 text-[#5B6478]" />
                 <span>Password</span>
               </label>
+              <div className="relative">
+                <input
+                  id="signup-password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  aria-describedby="signup-password-rules"
+                  placeholder="At least 12 characters"
+                  className="w-full min-h-[44px] px-3.5 pr-10 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5B6478] hover:text-[#102654] p-1 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <ul id="signup-password-rules" aria-live="polite" className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+                {checks.map((c) => (
+                  <li key={c.label} className={`flex items-center gap-1.5 text-[11px] ${c.ok ? 'text-[#0B6B52]' : 'text-[#5B6478]'}`}>
+                    {c.ok ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Circle className="w-3 h-3 shrink-0" />}
+                    <span>{c.label}</span>
+                    <span className="sr-only">{c.ok ? '(met)' : '(not met)'}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <label htmlFor="signup-confirm" className="block text-xs font-bold text-[#102654] mb-1.5 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-[#5B6478]" />
+                <span>Confirm Password</span>
+              </label>
               <input
-                id="signup-password"
-                type="password"
+                id="signup-confirm"
+                type={showPassword ? 'text' : 'password'}
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
-                className="w-full min-h-[44px] px-3.5 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                onBlur={() => setConfirmTouched(true)}
+                autoComplete="new-password"
+                aria-invalid={confirmTouched && !!confirmProblem}
+                placeholder="Type it again"
+                className={`w-full min-h-[44px] px-3.5 text-xs bg-white border rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs ${
+                  confirmTouched && confirmProblem ? 'border-[#B42318]' : 'border-[#D5DBE7]'
+                }`}
               />
+              {confirmTouched && confirmProblem && (
+                <p className="text-[11px] text-[#B42318] mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  {confirmProblem}
+                </p>
+              )}
+              {passwordOk && confirmPassword && !confirmProblem && (
+                <p className="text-[11px] text-[#0B6B52] mt-1.5 flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 shrink-0" />
+                  Passwords match
+                </p>
+              )}
             </div>
 
             <div className="flex items-start gap-2.5 text-xs text-[#5B6478] mt-1">

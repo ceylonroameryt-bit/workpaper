@@ -18,21 +18,37 @@ export function matchBlyntAccount(
   sourceType: string = '',
   sourceCode: string = ''
 ): MappingSuggestion | null {
+  const code = (sourceCode || '').trim();
+  const byName = matchByName(sourceName, sourceType);
+  const codeMatch = db.blynt_accounts.find((ba) => ba.code === code);
+  if (!codeMatch) return strip(byName);
+
+  const fromCode: MappingSuggestion = {
+    blynt_code: codeMatch.code,
+    name: codeMatch.name,
+    confidence: 100,
+    reason: `Code ${code} and the account name both point to ${codeMatch.name}`,
+    lead_letter: codeMatch.lead_letter,
+  };
+  // A client's nominal code only coincides with the Blynt chart by chance, so the name decides
+  if (byName.fallback) {
+    return { ...fromCode, confidence: 85, reason: `Code ${code} matches ${codeMatch.name} in the Blynt chart; the name gives no other clue` };
+  }
+  if (byName.blynt_code === codeMatch.code || byName.lead_letter === codeMatch.lead_letter) return fromCode;
+  // Name and code disagree (e.g. "Business Current Account" on code 1200 = Trade Debtors): follow the name, ask for a check
+  return {
+    ...strip(byName),
+    confidence: Math.min(byName.confidence, 80),
+    reason: `${byName.reason}. Code ${code} is ${codeMatch.name} in the Blynt chart, so check this`,
+  };
+}
+
+const strip = ({ fallback: _f, ...s }: MappingSuggestion & { fallback?: boolean }): MappingSuggestion => s;
+
+/** Classification from the account name and type alone. `fallback` marks the no-clue default. */
+function matchByName(sourceName: string, sourceType: string): MappingSuggestion & { fallback?: boolean } {
   const name = (sourceName || '').toLowerCase().trim();
   const type = (sourceType || '').toLowerCase().trim();
-  const code = (sourceCode || '').trim();
-
-  // 1. Exact code match against Blynt standard accounts
-  const directCodeMatch = db.blynt_accounts.find((ba) => ba.code === code);
-  if (directCodeMatch) {
-    return {
-      blynt_code: directCodeMatch.code,
-      name: directCodeMatch.name,
-      confidence: 100,
-      reason: `Exact nominal code match with Blynt standard chart (${directCodeMatch.code})`,
-      lead_letter: directCodeMatch.lead_letter,
-    };
-  }
 
   // 2. Cash and Bank Balances (Lead B: 1000, 1010, 1020)
   if (/petty cash|cash on hand|till float|cash float/i.test(name)) {
@@ -356,6 +372,7 @@ export function matchBlyntAccount(
     confidence: 60,
     reason: 'General operational overhead classification',
     lead_letter: 'E',
+    fallback: true,
   };
 }
 

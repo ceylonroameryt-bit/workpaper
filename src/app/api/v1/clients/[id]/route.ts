@@ -10,7 +10,7 @@ export async function GET(
     await syncIn();
     const params = await props.params;
     const actor = getActorFromRequest(req);
-    const client = services.getClient(actor.firmId, params.id);
+    const client = services.getClient(actor.firmId, params.id, actor.clientIds);
     if (!client) return jsonResponse({ error: 'Client not found' }, 404);
     return jsonResponse(client);
   } catch (err) {

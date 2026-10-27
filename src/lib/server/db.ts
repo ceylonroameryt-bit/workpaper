@@ -33,6 +33,7 @@ import {
   DisclosureChecklistItem,
   StatutoryNoteItem,
   LedgerTransaction,
+  Invite,
 } from '../types/models';
 import { toPence, sumPence } from '../money';
 import { packFor, templateFor, blankPaperData } from '../workpapers/templates';
@@ -75,8 +76,11 @@ class Database {
   checklist_items: DisclosureChecklistItem[] = [];
   statutory_notes: StatutoryNoteItem[] = [];
   transactions: LedgerTransaction[] = [];
+  invites: Invite[] = []; // Server-only, like credentials
+  // Server-only: which practice uploaded each stored file, so downloads can be checked
+  uploads: { file_key: string; firm_id: string; uploaded_by: string; uploaded_at: string }[] = [];
   // Server-only: password hashes. Never sent to the browser (see state-guard.ts)
-  credentials: { user_id: string; password_hash: string }[] = [];
+  credentials: { user_id: string; password_hash: string; mfa_secret?: string; mfa_pending_secret?: string; mfa_last_step?: number }[] = [];
 
   constructor() {
     this.seed(true);
@@ -89,7 +93,7 @@ class Database {
     'adjustments', 'templates', 'workpapers', 'procedures', 'comments', 'attachments',
     'attachment_links', 'signoffs', 'view_prefs', 'audit_logs', 'ai_lineage', 'credentials',
     'learned_rules', 'ai_action_logs', 'ai_review_findings', 'schedule_versions', 'checklist_items', 'statutory_notes',
-    'transactions',
+    'transactions', 'invites', 'uploads',
   ] as const;
 
   exportState(): Record<string, unknown[]> {
@@ -196,7 +200,8 @@ class Database {
     entity: string,
     entityId: string,
     before: any = null,
-    after: any = null
+    after: any = null,
+    reason: string | null = null
   ) {
     const entry: AuditLog = {
       id: `aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -210,8 +215,10 @@ class Database {
       before_json: before ? JSON.stringify(before) : null,
       after_json: after ? JSON.stringify(after) : null,
       at: new Date().toISOString(),
+      reason,
     };
-    this.audit_logs.push(entry);
+    // Immutable once written (AUD-01); the sync guard also refuses edits from the browser
+    this.audit_logs.push(Object.freeze(entry) as AuditLog);
     return entry;
   }
 
@@ -238,6 +245,15 @@ class Database {
     this.view_prefs = [];
     this.audit_logs = [];
     this.ai_lineage = [];
+    this.learned_rules = [];
+    this.ai_action_logs = [];
+    this.ai_review_findings = [];
+    this.schedule_versions = [];
+    this.checklist_items = [];
+    this.statutory_notes = [];
+    this.transactions = [];
+    this.invites = [];
+    this.uploads = [];
 
     const firmId = 'firm_blynt_uk';
     this.firms = [

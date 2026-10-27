@@ -1,5 +1,5 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { errorResponse, jsonResponse, requireCommentAccess } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 import { ServiceError } from '@/lib/server/services';
 
@@ -10,7 +10,7 @@ export async function POST(
   try {
     await syncIn();
     const params = await props.params;
-    const actor = getActorFromRequest(req);
+    const actor = requireCommentAccess(req, params.id);
     const body = await req.json();
 
     const comment = db.comments.find((c) => c.id === params.id);

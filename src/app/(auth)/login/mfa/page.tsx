@@ -2,44 +2,40 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Briefcase,
   ShieldCheck,
-  Smartphone,
   KeyRound,
   CheckCircle2,
-  RefreshCw,
   Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export default function MfaVerificationPage() {
-  const router = useRouter();
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
-  const [method, setMethod] = useState<'app' | 'sms'>('app');
-  const [trustBrowser, setTrustBrowser] = useState(true);
-  const [useBackupCode, setUseBackupCode] = useState(false);
-  const [backupCode, setBackupCode] = useState('');
-  const [countdown, setCountdown] = useState(28);
+  const [step, setStep] = useState<'setup' | 'verify'>('verify');
+  const [enrolment, setEnrolment] = useState<{ secret: string; otpauth: string } | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    // Focus first input on mount
-    if (!useBackupCode && inputRefs.current[0]) {
-      inputRefs.current[0].focus();
+    inputRefs.current[0]?.focus();
+    const s = new URLSearchParams(window.location.search).get('step') === 'setup' ? 'setup' : 'verify';
+    setStep(s);
+    if (s === 'setup') {
+      // First sign-in: fetch a new authenticator secret to enrol
+      fetch('/api/v1/auth/mfa/setup')
+        .then(async (r) => {
+          const body = await r.json().catch(() => ({}));
+          if (r.ok) setEnrolment(body);
+          else if (body.code === 'MFA_ENROLLED') setStep('verify');
+          else setErrorMessage(body.error || 'Could not start MFA set-up. Please sign in again.');
+        })
+        .catch(() => setErrorMessage('Could not reach the server. Please try again.'));
     }
-  }, [useBackupCode]);
-
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
+  }, []);
 
   const handleDigitChange = (index: number, value: string) => {
     setErrorMessage('');
@@ -77,37 +73,40 @@ export default function MfaVerificationPage() {
     }
   };
 
-  const triggerVerification = (_code: string) => {
+  const triggerVerification = async (code: string) => {
+    if (isVerifying) return;
     setIsVerifying(true);
-    setTimeout(() => {
+    setErrorMessage('');
+    try {
+      const res = await fetch('/api/v1/auth/mfa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      if (res.ok) {
+        const from = new URLSearchParams(window.location.search).get('from');
+        window.location.href = from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
+        return;
+      }
+      const body = await res.json().catch(() => ({}));
+      setErrorMessage(body.error || 'Verification failed. Please try again.');
+      setDigits(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
+    } catch {
+      setErrorMessage('Could not reach the server. Please try again.');
+    } finally {
       setIsVerifying(false);
-      // Demo validation: any 6 digit code succeeds
-      router.push('/clients');
-    }, 600);
+    }
   };
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (useBackupCode) {
-      if (backupCode.length < 8) {
-        setErrorMessage('Please enter a valid 8-character recovery code.');
-        return;
-      }
-      triggerVerification(backupCode);
-    } else {
-      const code = digits.join('');
-      if (code.length < 6) {
-        setErrorMessage('Please enter all 6 verification digits.');
-        return;
-      }
-      triggerVerification(code);
+    const code = digits.join('');
+    if (code.length < 6) {
+      setErrorMessage('Please enter all 6 verification digits.');
+      return;
     }
-  };
-
-  const handleResend = () => {
-    setCountdown(30);
-    setDigits(['', '', '', '', '', '']);
-    inputRefs.current[0]?.focus();
+    triggerVerification(code);
   };
 
   return (
@@ -137,43 +136,26 @@ export default function MfaVerificationPage() {
             </div>
 
             <h1 className="text-[26px] sm:text-[28px] font-semibold text-[#1B2430] tracking-tight">
-              Verify your identity
+              {step === 'setup' ? 'Set up two-factor sign-in' : 'Verify your identity'}
             </h1>
             <p className="text-sm text-[#5B6676] mt-1.5 mb-6 leading-relaxed">
-              {useBackupCode
-                ? 'Enter one of your 8-character emergency backup recovery codes.'
-                : method === 'app'
-                ? 'Enter the 6-digit code from your authenticator app (Google Authenticator, Microsoft Authenticator, or 1Password).'
-                : 'Enter the 6-digit verification code sent to your registered mobile ending in ••84.'}
+              {step === 'setup'
+                ? 'Two-factor sign-in is required. Add this account to your authenticator app (Google Authenticator, Microsoft Authenticator or 1Password), then enter the 6-digit code it shows.'
+                : 'Enter the 6-digit code from your authenticator app.'}
             </p>
 
-            {/* Verification Method Toggle */}
-            {!useBackupCode && (
-              <div className="flex rounded-[10px] border border-[#D5D9E0] p-1 bg-[#F4F5F7] mb-6">
-                <button
-                  type="button"
-                  onClick={() => setMethod('app')}
-                  className={`flex-1 py-1.5 px-3 rounded-[8px] text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                    method === 'app'
-                      ? 'bg-white text-[#1E4FD8] font-semibold shadow-2xs'
-                      : 'text-[#5B6676] hover:text-[#1B2430]'
-                  }`}
-                >
+            {step === 'setup' && enrolment && (
+              <div className="p-4 rounded-[10px] border border-[#D5D9E0] bg-[#F4F5F7] mb-6 text-xs">
+                <div className="flex items-center gap-2 font-semibold text-[#1B2430] mb-2">
                   <KeyRound className="w-3.5 h-3.5" />
-                  <span>Authenticator App</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMethod('sms')}
-                  className={`flex-1 py-1.5 px-3 rounded-[8px] text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                    method === 'sms'
-                      ? 'bg-white text-[#1E4FD8] font-semibold shadow-2xs'
-                      : 'text-[#5B6676] hover:text-[#1B2430]'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>SMS Code (••84)</span>
-                </button>
+                  <span>Set-up key</span>
+                </div>
+                <code className="block font-mono text-sm tracking-wider break-all text-[#1B2430] select-all">
+                  {enrolment.secret.replace(/(.{4})/g, '$1 ').trim()}
+                </code>
+                <a href={enrolment.otpauth} className="inline-block mt-2 text-[#1E4FD8] font-semibold hover:underline">
+                  Open in authenticator app on this device
+                </a>
               </div>
             )}
 
@@ -185,56 +167,29 @@ export default function MfaVerificationPage() {
             )}
 
             <form onSubmit={handleManualSubmit} className="flex flex-col gap-5">
-              {!useBackupCode ? (
-                <div>
-                  <label className="block text-xs font-medium text-[#5B6676] mb-3">
-                    6-Digit Security Code
-                  </label>
-                  <div className="flex items-center justify-between gap-2 sm:gap-2.5 on-paste" onPaste={handlePaste}>
-                    {digits.map((digit, index) => (
-                      <input
-                        key={index}
-                        ref={(el) => {
-                          inputRefs.current[index] = el;
-                        }}
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={digit}
-                        onChange={(e) => handleDigitChange(index, e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(index, e)}
-                        className="w-12 h-13 sm:w-13 sm:h-14 text-center font-mono-numbers text-xl font-bold bg-white border border-[#D5D9E0] rounded-[10px] text-[#1B2430] focus:border-[#1E4FD8] focus:ring-2 focus:ring-[#1E4FD8]/20 focus-visible:outline-none transition-all shadow-2xs"
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <label htmlFor="backup-code" className="block text-xs font-medium text-[#5B6676] mb-1.5">
-                    Emergency Recovery Code
-                  </label>
-                  <input
-                    id="backup-code"
-                    type="text"
-                    value={backupCode}
-                    onChange={(e) => setBackupCode(e.target.value.toUpperCase())}
-                    placeholder="e.g. 8K49-2M91"
-                    className="w-full h-11 px-3.5 font-mono text-base uppercase bg-white border border-[#D5D9E0] rounded-[10px] text-[#1B2430] focus:border-[#1E4FD8] focus:ring-2 focus:ring-[#1E4FD8]/20 focus-visible:outline-none"
-                  />
-                </div>
-              )}
-
-              {/* Trust Browser Checkbox */}
-              <div className="flex items-center justify-between text-xs text-[#1B2430] pt-1">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={trustBrowser}
-                    onChange={(e) => setTrustBrowser(e.target.checked)}
-                    className="w-4 h-4 rounded border-[#D5D9E0] text-[#1E4FD8] focus:ring-[#1E4FD8]"
-                  />
-                  <span>Don&apos;t ask again on this device for 30 days</span>
+              <div>
+                <label className="block text-xs font-medium text-[#5B6676] mb-3">
+                  6-Digit Security Code
                 </label>
+                <div className="flex items-center justify-between gap-2 sm:gap-2.5 on-paste" onPaste={handlePaste}>
+                  {digits.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                      aria-label={`Digit ${index + 1}`}
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleDigitChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      className="w-12 h-13 sm:w-13 sm:h-14 text-center font-mono-numbers text-xl font-bold bg-white border border-[#D5D9E0] rounded-[10px] text-[#1B2430] focus:border-[#1E4FD8] focus:ring-2 focus:ring-[#1E4FD8]/20 focus-visible:outline-none transition-all shadow-2xs"
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Submit Button */}
@@ -247,47 +202,6 @@ export default function MfaVerificationPage() {
               >
                 {isVerifying ? 'Verifying authentication...' : 'Verify & Continue'}
               </Button>
-
-              {/* Resend Code / Toggle Backup Code */}
-              <div className="flex flex-col items-center gap-2.5 pt-2 text-xs text-[#5B6676]">
-                {!useBackupCode ? (
-                  <>
-                    <div className="flex items-center gap-1.5">
-                      <span>Didn&apos;t receive a code?</span>
-                      {countdown > 0 ? (
-                        <span className="font-mono-numbers text-[#1E4FD8]">
-                          Resend in {countdown}s
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleResend}
-                          className="text-[#1E4FD8] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
-                        >
-                          <RefreshCw className="w-3 h-3" />
-                          <span>Resend code</span>
-                        </button>
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setUseBackupCode(true)}
-                      className="text-[#5B6676] hover:text-[#1B2430] underline pt-1 cursor-pointer"
-                    >
-                      Use emergency backup recovery code
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setUseBackupCode(false)}
-                    className="text-[#1E4FD8] font-semibold hover:underline cursor-pointer"
-                  >
-                    ← Back to standard 6-digit code
-                  </button>
-                )}
-              </div>
             </form>
 
             <div className="mt-8 pt-6 border-t border-[#E3E6EB] text-center">
@@ -355,9 +269,9 @@ export default function MfaVerificationPage() {
         </div>
 
         <div className="flex items-center gap-3 text-xs text-[#5B6676]">
-          <span className="font-mono-numbers">Session ID: sess_7a89f92</span>
+          <span className="font-mono-numbers">TOTP (RFC 6238)</span>
           <span>•</span>
-          <span>Verified Device</span>
+          <span>Required for every user</span>
         </div>
       </div>
     </div>

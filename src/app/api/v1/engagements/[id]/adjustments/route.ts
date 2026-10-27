@@ -1,16 +1,17 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { getActorFromRequest, jsonResponse, errorResponse, requireEngagementAccess } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 import { toPence } from '@/lib/money';
 import { ServiceError } from '@/lib/server/services';
 
 export async function GET(
-  _req: Request,
+  req: Request,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
     await syncIn();
     const params = await props.params;
+    requireEngagementAccess(req, params.id);
     const adjs = db.adjustments.filter((a) => a.engagement_id === params.id);
     return jsonResponse(adjs);
   } catch (err) {
@@ -25,6 +26,7 @@ export async function POST(
   try {
     await syncIn();
     const params = await props.params;
+    requireEngagementAccess(req, params.id);
     const actor = getActorFromRequest(req);
     const body = await req.json();
 

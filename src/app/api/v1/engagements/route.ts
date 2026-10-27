@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     await syncIn();
     const actor = getActorFromRequest(req);
     const body = await req.json();
-    const engagement = services.createEngagement(actor.firmId, actor, body);
+    const engagement = services.createEngagement(actor.firmId, actor, body, actor.clientIds);
     await syncOut();
     return jsonResponse(engagement, 201);
   } catch (err) {

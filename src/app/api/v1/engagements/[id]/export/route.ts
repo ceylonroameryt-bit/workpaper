@@ -1,5 +1,5 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { getActorFromRequest, jsonResponse, errorResponse, requireEngagementAccess } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 import crypto from 'crypto';
 
@@ -10,6 +10,7 @@ export async function POST(
   try {
     await syncIn();
     const params = await props.params;
+    requireEngagementAccess(req, params.id);
     const actor = getActorFromRequest(req);
 
     // Re-verify SHA-256 of all attachments on export

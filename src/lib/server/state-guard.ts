@@ -14,6 +14,7 @@ export interface Actor {
   name: string;
   role: UserRole;
   firmId: string;
+  clientIds?: string[] | null;
 }
 
 export class GuardError extends Error {
@@ -21,20 +22,32 @@ export class GuardError extends Error {
 }
 
 // Server-managed: a browser save never changes these
-const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'blynt_accounts', 'templates'];
+const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'invites', 'uploads', 'blynt_accounts', 'templates'];
 
 const REVIEWER_UP: UserRole[] = ['reviewer', 'manager', 'partner', 'admin'];
 const PARTNER_UP: UserRole[] = ['partner', 'admin'];
+const MANAGER_UP: UserRole[] = ['manager', 'partner', 'admin'];
 
 const rows = (s: State, k: string): Row[] => (Array.isArray(s?.[k]) ? s[k] : []);
 const ids = (list: Row[], key = 'id') => new Set(list.map((r) => r[key]));
 const keyOf = (k: string, r: Row) => (k === 'view_prefs' ? `${r.user_id}|${r.scope}|${r.key}` : k === 'attachment_links' ? `${r.attachment_id}|${JSON.stringify(r.anchor_json)}` : r.id);
 
-/** The parts of the workspace that belong to one firm (users without credentials). */
-export function firmSlice(state: State, firmId: string): State {
+/**
+ * Clients a member may see: null means all of the firm's clients (admins and partners, or
+ * members with no assignment list); otherwise only the clients they are assigned to.
+ */
+export function visibleClientIds(m: { role: UserRole; client_ids?: string[] } | undefined): string[] | null {
+  if (!m || PARTNER_UP.includes(m.role) || !Array.isArray(m.client_ids)) return null;
+  return m.client_ids;
+}
+
+/** The parts of the workspace that belong to one firm (users without credentials), narrowed to a user's assigned clients when given. */
+export function firmSlice(state: State, firmId: string, userId?: string): State {
   const members = rows(state, 'memberships').filter((m) => m.firm_id === firmId);
   const userIds = ids(members, 'user_id');
-  const engagements = rows(state, 'engagements').filter((e) => e.firm_id === firmId);
+  const assigned = userId ? visibleClientIds(members.find((m) => m.user_id === userId) as any) : null;
+  const clients = rows(state, 'clients').filter((c) => c.firm_id === firmId && (!assigned || assigned.includes(c.id)));
+  const engagements = rows(state, 'engagements').filter((e) => e.firm_id === firmId && (!assigned || assigned.includes(e.client_id)));
   const engIds = ids(engagements);
   const lists = rows(state, 'mapping_lists').filter((l) => l.firm_id === firmId);
   const listIds = ids(lists);
@@ -55,7 +68,7 @@ export function firmSlice(state: State, firmId: string): State {
     firms: rows(state, 'firms').filter((f) => f.id === firmId),
     users: rows(state, 'users').filter((u) => userIds.has(u.id)),
     memberships: members,
-    clients: rows(state, 'clients').filter((c) => c.firm_id === firmId),
+    clients,
     engagements,
     blynt_accounts: rows(state, 'blynt_accounts'),
     templates: rows(state, 'templates'),
@@ -116,6 +129,13 @@ export function checkRules(before: State, after: State, actor: Actor) {
     if (a.actor_id !== actor.id) deny('Audit entries must be recorded as the signed-in user.');
   }
 
+  // AUD-03: the AI action log decides when auto-accept is allowed, so it is append-only too
+  const aiLog = changed(rows(before, 'ai_action_logs'), rows(after, 'ai_action_logs'), 'ai_action_logs');
+  if (aiLog.updated.length || aiLog.removed.length) deny('The AI action log cannot be edited or deleted.');
+  for (const a of aiLog.added) {
+    if (a.decided_by !== actor.id) deny('AI decisions must be recorded as the signed-in user.');
+  }
+
   // Locked engagements: only a partner or admin may lock or unlock, and nothing inside may change
   const eng = changed(rows(before, 'engagements'), rows(after, 'engagements'), 'engagements');
   for (const { before: b, after: a } of eng.updated) {
@@ -127,12 +147,19 @@ export function checkRules(before: State, after: State, actor: Actor) {
   const stillLocked = new Set(
     rows(after, 'engagements').filter((e) => e.status === 'locked' && rows(before, 'engagements').some((b) => b.id === e.id && b.status === 'locked')).map((e) => e.id)
   );
+  // Archived clients: archiving goes through the API (audited), and their files are read-only
+  const cli = changed(rows(before, 'clients'), rows(after, 'clients'), 'clients');
+  for (const { before: b, after: a } of cli.updated) {
+    if ((b.archived_at ?? null) !== (a.archived_at ?? null)) deny('Archive or restore a client from the client list.');
+  }
+  const archivedClients = new Set(rows(before, 'clients').filter((c) => c.archived_at).map((c) => c.id));
+  for (const e of rows(before, 'engagements')) if (archivedClients.has(e.client_id)) stillLocked.add(e.id);
   const wpEng = new Map([...rows(before, 'workpapers'), ...rows(after, 'workpapers')].map((w) => [w.id, w.engagement_id]));
   for (const k of ['workpapers', 'adjustments', 'account_mappings', 'tb_snapshots', 'signoffs', 'procedures', 'comments', 'transactions']) {
     const c = changed(rows(before, k), rows(after, k), k);
     for (const r of [...c.added, ...c.updated.map((u) => u.after), ...c.removed]) {
       const engId = r.engagement_id ?? wpEng.get(r.workpaper_id);
-      if (engId && stillLocked.has(engId)) deny('This engagement is locked. Unlock it before making changes.');
+      if (engId && stillLocked.has(engId)) deny('This engagement is locked or its client is archived. Unlock or restore it before making changes.');
     }
   }
 
@@ -174,6 +201,15 @@ export function checkRules(before: State, after: State, actor: Actor) {
     }
   }
 
+  // DAT-09: a practice rule only runs once a manager or above has approved it
+  const rules = changed(rows(before, 'learned_rules'), rows(after, 'learned_rules'), 'learned_rules');
+  for (const r of [...rules.added, ...rules.updated.map((u) => u.after)]) {
+    const prev = rules.updated.find((u) => u.after === r)?.before;
+    const nowLive = r.scope === 'practice' && r.active && r.approved_by_manager;
+    const wasLive = prev && prev.scope === 'practice' && prev.active && prev.approved_by_manager;
+    if (nowLive && !wasLive && !MANAGER_UP.includes(actor.role)) deny('A practice rule needs a manager to approve it.');
+  }
+
   // Mapping confirmations are recorded as the signed-in user
   const map = changed(rows(before, 'account_mappings'), rows(after, 'account_mappings'), 'account_mappings');
   for (const m of [...map.added, ...map.updated.map((u) => u.after)]) {
@@ -189,7 +225,7 @@ export function checkRules(before: State, after: State, actor: Actor) {
  * the proposed slice (after rule checks), everything else is left exactly as it was.
  */
 export function mergeFirmState(full: State, proposed: State, actor: Actor): State {
-  const before = firmSlice(full, actor.firmId);
+  const before = firmSlice(full, actor.firmId, actor.id);
 
   // Pin firm ownership on top-level records and drop anything that points outside the firm
   const pinned: State = {};
@@ -207,7 +243,8 @@ export function mergeFirmState(full: State, proposed: State, actor: Actor): Stat
   }
   const after = firmSlice(
     { ...pinned, memberships: before.memberships, users: before.users, firms: before.firms },
-    actor.firmId
+    actor.firmId,
+    actor.id
   );
 
   checkRules(before, after, actor);
@@ -228,4 +265,4 @@ export function mergeFirmState(full: State, proposed: State, actor: Actor): Stat
 }
 
 /** What the browser is allowed to see. */
-export const publicSlice = (full: State, firmId: string) => firmSlice(full, firmId);
+export const publicSlice = (full: State, firmId: string, userId?: string) => firmSlice(full, firmId, userId);

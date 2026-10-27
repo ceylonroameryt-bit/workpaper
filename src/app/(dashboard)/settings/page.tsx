@@ -66,6 +66,9 @@ export default function PracticeSettingsPage() {
   const [inviteRole, setInviteRole] = useState<'preparer' | 'reviewer' | 'partner' | 'admin'>('preparer');
   const [inviteScope, setInviteScope] = useState<'all' | 'assigned'>('all');
   const [inviteError, setInviteError] = useState('');
+  const [inviteClientIds, setInviteClientIds] = useState<string[]>([]);
+  const [inviteLink, setInviteLink] = useState('');
+  const [inviteSending, setInviteSending] = useState(false);
 
   // DAT-09 Shared Rules Library & DAT-05 Mapping Rules
   const [rulesList, setRulesList] = useState<any[]>(() => {
@@ -195,34 +198,52 @@ export default function PracticeSettingsPage() {
     );
   };
 
-  const handleSendInvite = (e: React.FormEvent) => {
+  const closeInviteModal = () => {
+    setShowInviteModal(false);
+    setInviteName('');
+    setInviteEmail('');
+    setInviteError('');
+    setInviteClientIds([]);
+    setInviteLink('');
+  };
+
+  // ADM-01: the server records the invite and returns a one-time link for the new user
+  const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteName.trim() || !inviteEmail.trim() || !inviteEmail.includes('@')) {
       setInviteError('Please provide a valid name and professional email.');
       return;
     }
-    const initials = inviteName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
-    const newUser = {
-      id: `usr_${Date.now()}`,
-      name: inviteName.trim(),
-      email: inviteEmail.trim(),
-      initials,
-      title: inviteRole === 'partner' ? 'Engagement Partner' : inviteRole === 'reviewer' ? 'Audit Manager' : inviteRole === 'admin' ? 'System Administrator' : 'Senior Associate / Preparer',
-      mfa_enabled: true,
-    };
-    db.users.push(newUser);
-    db.memberships.push({
-      user_id: newUser.id,
-      firm_id: 'firm_blynt_uk',
-      role: inviteRole,
-    });
-    setUsersList([...db.users]);
-    setShowInviteModal(false);
-    setInviteName('');
-    setInviteEmail('');
+    const limited = inviteScope === 'assigned' && inviteRole !== 'partner' && inviteRole !== 'admin';
+    if (limited && inviteClientIds.length === 0) {
+      setInviteError('Choose at least one client, or give access to all clients.');
+      return;
+    }
+    setInviteSending(true);
     setInviteError('');
-    triggerSaveNotification(`Invitation sent to ${newUser.email} with ${inviteRole.toUpperCase()} credentials.`);
-    refreshCompanyData();
+    try {
+      const res = await fetch('/api/v1/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: inviteName.trim(),
+          email: inviteEmail.trim(),
+          role: inviteRole,
+          ...(limited ? { client_ids: inviteClientIds } : {}),
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setInviteError(body.error || 'Could not create the invitation.');
+        return;
+      }
+      setInviteLink(body.link);
+      triggerSaveNotification(`Invitation created for ${body.invite.email}. Send them the link to finish set-up.`);
+    } catch {
+      setInviteError('Could not reach the server. Please try again.');
+    } finally {
+      setInviteSending(false);
+    }
   };
 
   const handleToggleRule = (id: string) => {
@@ -1071,7 +1092,8 @@ export default function PracticeSettingsPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setShowInviteModal(false)}
+                onClick={closeInviteModal}
+                aria-label="Close"
                 className="text-[#5B6478] hover:text-[#102654]"
               >
                 <X className="w-4 h-4" />
@@ -1145,24 +1167,57 @@ export default function PracticeSettingsPage() {
                     <span>Assigned Clients Only</span>
                   </label>
                 </div>
+                {inviteScope === 'assigned' && (inviteRole === 'partner' || inviteRole === 'admin') && (
+                  <p className="text-[11px] text-[#5B6478] mt-2">Partners and admins always see every client.</p>
+                )}
+                {inviteScope === 'assigned' && inviteRole !== 'partner' && inviteRole !== 'admin' && (
+                  <div className="mt-2 max-h-36 overflow-y-auto border border-[#D5DBE7] rounded-lg p-2 space-y-1.5">
+                    {db.clients.map((c) => (
+                      <label key={c.id} className="flex items-center gap-2 text-xs cursor-pointer text-[#102654]">
+                        <input
+                          type="checkbox"
+                          checked={inviteClientIds.includes(c.id)}
+                          onChange={(e) =>
+                            setInviteClientIds((ids) => (e.target.checked ? [...ids, c.id] : ids.filter((x) => x !== c.id)))
+                          }
+                        />
+                        <span>{c.name}</span>
+                      </label>
+                    ))}
+                    {db.clients.length === 0 && <p className="text-[11px] text-[#5B6478]">No clients yet.</p>}
+                  </div>
+                )}
               </div>
 
               {inviteError && <p className="text-red-600 text-[11px] font-semibold">{inviteError}</p>}
 
+              {inviteLink && (
+                <div className="p-3 rounded-lg bg-[#EAF6F0] border border-[#0B6B4D]/20 text-xs text-[#102654] space-y-2">
+                  <p className="font-semibold">Invitation created. Send this link to {inviteEmail.trim()} (valid for 7 days):</p>
+                  <input readOnly value={inviteLink} onFocus={(e) => e.target.select()} className="w-full font-mono text-[11px] p-2 border border-[#D5DBE7] rounded bg-white" />
+                  <button type="button" onClick={() => navigator.clipboard?.writeText(inviteLink)} className="text-[#1D4E89] font-semibold hover:underline">
+                    Copy link
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E3E7EF]">
                 <button
                   type="button"
-                  onClick={() => setShowInviteModal(false)}
+                  onClick={closeInviteModal}
                   className="px-3.5 py-2 text-xs text-[#5B6478] hover:text-[#102654] font-medium"
                 >
-                  Cancel
+                  {inviteLink ? 'Done' : 'Cancel'}
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
-                >
-                  Send Invitation
-                </button>
+                {!inviteLink && (
+                  <button
+                    type="submit"
+                    disabled={inviteSending}
+                    className="px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {inviteSending ? 'Creating...' : 'Create Invitation'}
+                  </button>
+                )}
               </div>
             </form>
           </div>

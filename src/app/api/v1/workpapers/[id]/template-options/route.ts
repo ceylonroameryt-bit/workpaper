@@ -1,16 +1,17 @@
 import { syncIn } from '@/lib/server/store';
-import { jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { errorResponse, jsonResponse, requireWorkpaperAccess } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 import { services } from '@/lib/server/services';
 
 export async function GET(
-  _req: Request,
+  req: Request,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
     await syncIn();
     const params = await props.params;
-    const { workpaper } = services.getWorkpaper(params.id);
+    const { id: workpaperId } = requireWorkpaperAccess(req, params.id);
+    const { workpaper } = services.getWorkpaper(workpaperId);
     const eng = db.engagements.find((e) => e.id === workpaper.engagement_id);
     const client = db.clients.find((c) => c.id === eng?.client_id);
 

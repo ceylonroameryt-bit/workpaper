@@ -1,5 +1,5 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { errorResponse, jsonResponse, requireWorkpaperAccess } from '@/lib/server/api-helpers';
 import { services } from '@/lib/server/services';
 
 export async function POST(
@@ -9,12 +9,12 @@ export async function POST(
   try {
     await syncIn();
     const params = await props.params;
-    const actor = getActorFromRequest(req);
+    const { actor, id: workpaperId } = requireWorkpaperAccess(req, params.id);
     const body = await req.json();
     const result = services.changeTemplate(
       actor.firmId,
       actor,
-      params.id,
+      workpaperId,
       body.templateId,
       body.dryRun
     );

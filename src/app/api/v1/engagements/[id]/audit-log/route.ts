@@ -1,14 +1,15 @@
 import { syncIn } from '@/lib/server/store';
-import { jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { jsonResponse, errorResponse, requireEngagementAccess } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 
 export async function GET(
-  _req: Request,
+  req: Request,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
     await syncIn();
     const params = await props.params;
+    requireEngagementAccess(req, params.id);
     const engagementId = params.id;
 
     // Everything recorded against this engagement and the records that belong to it

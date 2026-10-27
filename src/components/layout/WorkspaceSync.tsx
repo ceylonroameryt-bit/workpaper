@@ -24,7 +24,7 @@ function snapshot() {
   return JSON.stringify(db.exportState(), (_, v) => (typeof v === 'bigint' ? v.toString() : v));
 }
 
-const AUTH_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password'];
+const AUTH_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password', '/invite'];
 
 class SignedOut extends Error {}
 

@@ -34,7 +34,7 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
   }, []);
 
   // Filtered clients list
-  const filteredClients = clients.filter(
+  const filteredClients = clients.filter((c) => !c.archived_at).filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       (c.company_no || '').toLowerCase().includes(search.toLowerCase())

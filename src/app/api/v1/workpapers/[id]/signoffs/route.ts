@@ -1,5 +1,5 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { errorResponse, jsonResponse, requireWorkpaperAccess } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 import { ServiceError } from '@/lib/server/services';
 
@@ -10,11 +10,11 @@ export async function POST(
   try {
     await syncIn();
     const params = await props.params;
-    const actor = getActorFromRequest(req);
+    const { actor, id: workpaperId } = requireWorkpaperAccess(req, params.id);
     const body = await req.json();
     const role = body.role || actor.role;
 
-    const wp = db.workpapers.find((w) => w.id === params.id);
+    const wp = db.workpapers.find((w) => w.id === workpaperId);
     if (!wp) throw new ServiceError('Workpaper not found', 404);
 
     // Ground Rule: "Mark as prepared" disabled with reason until procedures, checks and conclusion are done.
@@ -32,7 +32,7 @@ export async function POST(
 
     const signoff = {
       id: `sig_${Date.now()}`,
-      workpaper_id: params.id,
+      workpaper_id: workpaperId,
       role,
       user_id: actor.id,
       user_name: actor.name,

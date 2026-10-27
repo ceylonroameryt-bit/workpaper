@@ -1,7 +1,12 @@
 import crypto from 'crypto';
 import { db } from './db';
-import { UserRole, AccountMapping, Adjustment, Workpaper, Comment, Attachment, Signoff, BlyntAccount } from '../types/models';
+import { TbSnapshotDiff, UserRole, AccountMapping, Adjustment, Workpaper, Comment, Attachment, Signoff, BlyntAccount } from '../types/models';
 import { toPence, asPence, sumPence } from '../money';
+import { runGated, learnFromCorrection, recordDecision, GatedResult } from './gate';
+import { matchBlyntAccount } from '../mapping/auto-mapper';
+import { getStatutoryDetails } from '../mapping/auto-mapper';
+
+const abs = (n: bigint) => (n < 0n ? -n : n);
 
 export class ServiceError extends Error {
   status: number;
@@ -26,11 +31,13 @@ export const services = {
   },
 
   // 1. Clients
-  getClients(firmId: string) {
-    return db.clients.filter((c) => c.firm_id === firmId);
+  // clientIds: the member's assigned clients (null = all of the firm's clients)
+  getClients(firmId: string, clientIds: string[] | null = null) {
+    return db.clients.filter((c) => c.firm_id === firmId && (!clientIds || clientIds.includes(c.id)));
   },
 
-  getClient(firmId: string, clientId: string) {
+  getClient(firmId: string, clientId: string, clientIds: string[] | null = null) {
+    if (clientIds && !clientIds.includes(clientId)) return undefined;
     return db.clients.find((c) => c.firm_id === firmId && c.id === clientId);
   },
 
@@ -54,6 +61,37 @@ export const services = {
     return newClient;
   },
 
+  /**
+   * Archives or restores a client. Archived clients are hidden from everyday lists and their
+   * engagements are read-only; records are kept. Managers and above, or the practice owner.
+   */
+  setClientArchived(
+    firmId: string,
+    actor: { id: string; name: string; role: UserRole },
+    clientId: string,
+    archived: boolean,
+    reason = '',
+    clientIds: string[] | null = null
+  ) {
+    const client = this.getClient(firmId, clientId, clientIds);
+    if (!client) throw new ServiceError('Client not found', 404, 'NOT_FOUND');
+    const owner = db.firms.find((f) => f.id === firmId)?.owner_user_id === actor.id;
+    if (!owner && !['manager', 'partner', 'admin'].includes(actor.role)) {
+      throw new ServiceError('Only a manager, partner or admin can archive clients.', 403, 'FORBIDDEN');
+    }
+    if (Boolean(client.archived_at) === archived) return client;
+    const before = { archived_at: client.archived_at ?? null, archived_by: client.archived_by ?? null, archive_reason: client.archive_reason ?? null };
+    client.archived_at = archived ? new Date().toISOString() : null;
+    client.archived_by = archived ? actor.id : null;
+    client.archive_reason = archived ? reason.trim().slice(0, 300) || null : null;
+    db.logAudit(firmId, actor, archived ? 'ARCHIVE_CLIENT' : 'RESTORE_CLIENT', 'clients', client.id, before, {
+      archived_at: client.archived_at,
+      archived_by: client.archived_by,
+      archive_reason: client.archive_reason,
+    }, archived ? client.archive_reason : null);
+    return client;
+  },
+
   // 2. Engagements
   getEngagement(firmId: string, engagementId: string) {
     const eng = db.engagements.find((e) => e.firm_id === firmId && e.id === engagementId);
@@ -72,8 +110,12 @@ export const services = {
       framework: string;
       template_pack_id: string;
       prior_engagement_id?: string;
-    }
+    },
+    clientIds: string[] | null = null
   ) {
+    const client = this.getClient(firmId, data.client_id, clientIds);
+    if (!client) throw new ServiceError('Client not found', 404, 'NOT_FOUND');
+    if (client.archived_at) throw new ServiceError('This client is archived. Restore it before starting an engagement.', 409, 'ARCHIVED');
     const newEng = {
       id: `eng_${Date.now()}`,
       client_id: data.client_id,
@@ -112,6 +154,96 @@ export const services = {
     return { mappings, counts };
   },
 
+  /**
+   * DAT-03/04: client rules > practice rules > prior-year mapping > name and code patterns,
+   * through the shared confidence gate. Used by every TB import.
+   */
+  suggestMapping(
+    firmId: string,
+    engagementId: string,
+    line: { code: string; name: string; type?: string }
+  ): GatedResult<string> {
+    const eng = db.engagements.find((e) => e.id === engagementId);
+    const prior = eng?.prior_engagement_id
+      ? db.account_mappings.find((m) => m.engagement_id === eng.prior_engagement_id && m.source_code === line.code && m.status === 'confirmed' && m.blynt_code)
+      : undefined;
+    return runGated<string>({
+      firmId,
+      outputType: 'mapping',
+      ruleType: 'mapping',
+      keys: [`code:${line.code}`, `name:${line.name}`],
+      clientId: eng?.client_id,
+      decode: (target) => target,
+      ai: () => {
+        if (prior?.blynt_code) {
+          return { value: prior.blynt_code, confidence: 97, reason: `Mapped to ${prior.blynt_code} last year`, evidence: 'Prior-year mapping' };
+        }
+        const s = matchBlyntAccount(line.name, line.type || '', line.code);
+        return s ? { value: s.blynt_code, confidence: s.confidence, reason: s.reason, evidence: 'Name pattern > Nominal code range' } : null;
+      },
+    });
+  },
+
+  /** Builds the account mapping row for one imported TB line. */
+  buildMapping(firmId: string, engagementId: string, id: string, line: { code: string; name: string; type?: string }, balanceP: bigint): AccountMapping {
+    const g = this.suggestMapping(firmId, engagementId, line);
+    const stat = getStatutoryDetails(g.value, line.name, line.type || '');
+    return {
+      id,
+      engagement_id: engagementId,
+      source_code: line.code,
+      source_name: line.name,
+      source_type: line.type || 'General',
+      balance_p: balanceP.toString(),
+      blynt_code: g.value,
+      status: g.accepted ? 'confirmed' : g.value ? 'suggested' : 'needs_you',
+      confidence: g.confidence,
+      method: g.source === 'rule' ? 'rule' : g.source === 'ai' ? 'ai' : 'manual',
+      statutory_line: stat.statutory_line,
+      schedule_ref: stat.schedule_ref,
+      cash_flow_category: stat.cash_flow_category,
+      ai_reason: g.reason,
+      evidence_used: g.evidence,
+      sign_mismatch: g.value ? (stat.is_credit_area && balanceP > 0n) || (!stat.is_credit_area && balanceP < 0n) : false,
+      gate: g.gate,
+      // A rule-mapped account needs no review; the rule is the record of who decided
+      confirmed_by: g.accepted ? (g.rule_id ? `rule:${g.rule_id}` : 'auto_accept') : null,
+      confirmed_at: g.accepted ? new Date().toISOString() : null,
+      comment_count: 0,
+    };
+  },
+
+  /**
+   * DAT-06: account-level movements between two snapshots (net pence, debit positive).
+   * Direction follows the size of the balance, as accountants read it: a credit balance that grows has increased.
+   */
+  diffSnapshots(priorSnapshotId: string | null | undefined, lines: { code: string; name: string; net_p: bigint }[]): TbSnapshotDiff[] {
+    if (!priorSnapshotId) return [];
+    const prior = new Map<string, { name: string; net: bigint }>();
+    for (const l of db.tb_lines.filter((x) => x.snapshot_id === priorSnapshotId)) {
+      prior.set(l.source_code, { name: l.source_name, net: asPence(l.debit_p) - asPence(l.credit_p) });
+    }
+    const out: TbSnapshotDiff[] = [];
+    const seen = new Set<string>();
+    for (const l of lines) {
+      seen.add(l.code);
+      const p = prior.get(l.code);
+      const before = p?.net ?? 0n;
+      if (p && before === l.net_p) continue;
+      if (!p && l.net_p === 0n) continue;
+      out.push({
+        account_code: l.code, account_name: l.name, prior_amount_p: before.toString(), new_amount_p: l.net_p.toString(),
+        diff_p: (l.net_p - before).toString(), direction: !p ? 'new' : abs(l.net_p) > abs(before) ? 'increased' : 'decreased',
+      });
+    }
+    for (const [code, p] of prior) {
+      if (!seen.has(code) && p.net !== 0n) {
+        out.push({ account_code: code, account_name: p.name, prior_amount_p: p.net.toString(), new_amount_p: '0', diff_p: (-p.net).toString(), direction: 'decreased' });
+      }
+    }
+    return out;
+  },
+
   confirmSelectedMappings(
     firmId: string,
     actor: { id: string; name: string; role: UserRole },
@@ -127,11 +259,18 @@ export const services = {
       const mapping = db.account_mappings.find((m) => m.id === id && m.engagement_id === engagementId);
       if (mapping) {
         const before = { ...mapping };
+        if (mapping.status === 'confirmed') return;
         mapping.status = 'confirmed';
         mapping.confirmed_by = actor.id;
         mapping.confirmed_at = new Date().toISOString();
         updated.push(mapping);
         db.logAudit(firmId, actor, 'CONFIRM_MAPPING', 'account_mappings', mapping.id, before, mapping);
+        if (before.method === 'ai' && before.blynt_code) {
+          recordDecision({ ...actor, firmId }, {
+            engagementId, outputType: 'mapping', itemRef: mapping.source_code, confidence: before.confidence,
+            outcome: 'accepted', inputs: before.evidence_used || before.ai_reason || '',
+          });
+        }
       }
     });
 
@@ -146,13 +285,35 @@ export const services = {
   ) {
     const mapping = db.account_mappings.find((m) => m.id === mappingId);
     if (!mapping) throw new ServiceError('Mapping not found', 404);
+    if (!db.blynt_accounts.some((a) => a.code === blyntCode)) throw new ServiceError('Unknown statutory account code', 400);
     const before = { ...mapping };
+    const stat = getStatutoryDetails(blyntCode, mapping.source_name, mapping.source_type);
     mapping.blynt_code = blyntCode;
     mapping.status = 'confirmed';
     mapping.confirmed_by = actor.id;
     mapping.confirmed_at = new Date().toISOString();
     mapping.method = 'manual';
+    mapping.statutory_line = stat.statutory_line;
+    mapping.schedule_ref = stat.schedule_ref;
+    mapping.cash_flow_category = stat.cash_flow_category;
+    mapping.gate = 'ready';
     db.logAudit(firmId, actor, 'UPDATE_MAPPING', 'account_mappings', mapping.id, before, mapping);
+
+    const changed = before.blynt_code !== blyntCode;
+    if (before.method === 'ai' && before.blynt_code) {
+      recordDecision({ ...actor, firmId }, {
+        engagementId: mapping.engagement_id, outputType: 'mapping', itemRef: mapping.source_code, confidence: before.confidence,
+        outcome: changed ? 'edited' : 'accepted', inputs: before.evidence_used || before.ai_reason || '',
+      });
+    }
+    // DAT-05/09: a correction maps this account the same way on this client's next import
+    if (changed || before.status === 'needs_you') {
+      const clientId = db.engagements.find((e) => e.id === mapping.engagement_id)?.client_id ?? null;
+      learnFromCorrection({ ...actor, firmId }, {
+        type: 'mapping', scope: 'client', client_id: clientId, pattern: `code:${mapping.source_code}`, target_value: blyntCode,
+        explanation: `${mapping.source_code} ${mapping.source_name} maps to ${blyntCode}`,
+      });
+    }
     return mapping;
   },
 
