@@ -23,6 +23,7 @@ import {
   MessageSquare,
   AlertCircle,
   FileText,
+  X,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
@@ -69,8 +70,24 @@ export default function WorkingPaperIndexPage() {
   const [collapsedNa, setCollapsedNa] = useState<boolean>(true);
   const [showBulkReviewModal, setShowBulkReviewModal] = useState<boolean>(false);
 
-  // In-memory schedules data derived from workpapers and standard
+  // In-memory schedules data derived from workpapers and standard (REC-01 to REC-17, STD-01 to STD-05)
   const [schedules, setSchedules] = useState<ScheduleItem[]>([
+    {
+      id: 'A-10',
+      code: 'STD-01',
+      ref: 'A-10',
+      title: 'Planning, risk assessment and materiality',
+      section: 'leads',
+      templateName: 'Planning checklist & materiality calculation',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'approved',
+      applicable: true,
+      signoffs: { preparer: 'MV', manager: 'SJ', partner: 'PL' },
+      flags: {},
+    },
     {
       id: 'REC-02',
       code: 'REC-02',
@@ -88,76 +105,12 @@ export default function WorkingPaperIndexPage() {
       flags: {},
     },
     {
-      id: 'REC-03',
-      code: 'REC-03',
-      ref: 'F-10',
-      title: 'Fixed asset register',
-      section: 'balance_sheet',
-      templateName: 'Register by class with depreciation',
-      tbBalancePence: 270000000n, // £2,700,000.00
-      scheduleBalancePence: 270000000n,
-      differencePence: 0n,
-      priorYearPence: 245000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV', manager: 'SJ' },
-      flags: { aiWarning: 'Possible capital item in repairs: £8,500' },
-    },
-    {
-      id: 'REC-04',
-      code: 'REC-04',
-      ref: 'L-10',
-      title: 'Lease schedule (Right-of-use model)',
-      section: 'balance_sheet',
-      templateName: 'Lease register & amortisation',
-      tbBalancePence: 8400000n,
-      scheduleBalancePence: 8400000n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-05',
-      code: 'REC-05',
-      ref: 'T-10',
-      title: 'Payroll and wages reconciliation',
-      section: 'balance_sheet',
-      templateName: 'Wages, PAYE/NIC and pension rec',
-      tbBalancePence: 14200000n,
-      scheduleBalancePence: 14200000n,
-      differencePence: 0n,
-      priorYearPence: 13100000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-06',
-      code: 'REC-06',
-      ref: 'T-20',
-      title: 'VAT reconciliation (Quarterly standard)',
-      section: 'balance_sheet',
-      templateName: 'VAT control by return period',
-      tbBalancePence: 19820000n,
-      scheduleBalancePence: 19820000n,
-      differencePence: 0n,
-      priorYearPence: 16500000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
       id: 'REC-07',
       code: 'REC-07',
       ref: 'C-10',
-      title: 'Trade debtors and recoverability',
+      title: 'Trade debtors and recoverability review',
       section: 'balance_sheet',
-      templateName: 'Aged debtors with recoverability',
+      templateName: 'Aged debtors with recoverability review',
       tbBalancePence: 236450000n,
       scheduleBalancePence: 236450000n,
       differencePence: 0n,
@@ -168,25 +121,9 @@ export default function WorkingPaperIndexPage() {
       flags: { reviewPointOpen: 1 },
     },
     {
-      id: 'REC-08',
-      code: 'REC-08',
-      ref: 'K-10',
-      title: 'Trade creditors and unrecorded liabilities',
-      section: 'balance_sheet',
-      templateName: 'Aged creditors with unrecorded search',
-      tbBalancePence: 168450000n,
-      scheduleBalancePence: 168450000n,
-      differencePence: 0n,
-      priorYearPence: 142000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
       id: 'REC-09',
       code: 'REC-09',
-      ref: 'E-10',
+      ref: 'C-20',
       title: 'Prepayments and accrued income',
       section: 'balance_sheet',
       templateName: 'Itemised with release calculation',
@@ -200,36 +137,36 @@ export default function WorkingPaperIndexPage() {
       flags: {},
     },
     {
-      id: 'REC-09B',
-      code: 'REC-09B',
-      ref: 'K-20',
-      title: 'Accruals and deferred income',
+      id: 'C-30',
+      code: 'REC-17',
+      ref: 'C-30',
+      title: 'Other debtors and staff loans',
       section: 'balance_sheet',
-      templateName: 'Itemised with reversal check',
-      tbBalancePence: 45200000n,
-      scheduleBalancePence: 45200000n,
-      differencePence: 0n,
-      priorYearPence: 38000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-10',
-      code: 'REC-10',
-      ref: 'L-20',
-      title: 'Loans and hire purchase',
-      section: 'balance_sheet',
-      templateName: 'Loan schedule with repayment split',
+      templateName: 'Itemised listing',
       tbBalancePence: 0n,
       scheduleBalancePence: 0n,
       differencePence: 0n,
       priorYearPence: 0n,
       status: 'not_started',
       applicable: false,
-      naSuggestion: { reason: 'No bank loan balances or finance interest in ledger' },
+      naSuggestion: { reason: 'No other debtors balance in nominal ledger' },
       signoffs: {},
+      flags: {},
+    },
+    {
+      id: 'REC-14',
+      code: 'REC-14',
+      ref: 'D-10',
+      title: 'Stock and work in progress',
+      section: 'balance_sheet',
+      templateName: 'Stock summary from count',
+      tbBalancePence: 182400000n,
+      scheduleBalancePence: 182400000n,
+      differencePence: 0n,
+      priorYearPence: 165000000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
       flags: {},
     },
     {
@@ -251,10 +188,10 @@ export default function WorkingPaperIndexPage() {
     {
       id: 'REC-12',
       code: 'REC-12',
-      ref: 'Z-10',
+      ref: 'E-10',
       title: 'Share capital, reserves and dividends',
       section: 'balance_sheet',
-      templateName: 'Share register & dividend check',
+      templateName: 'Share register and dividend schedule',
       tbBalancePence: 50000000n,
       scheduleBalancePence: 50000000n,
       differencePence: 0n,
@@ -265,42 +202,223 @@ export default function WorkingPaperIndexPage() {
       flags: {},
     },
     {
-      id: 'REC-13',
-      code: 'REC-13',
-      ref: 'Q-10',
-      title: 'Corporation tax and deferred tax',
-      section: 'tax',
-      templateName: 'CT provision & timing differences',
-      tbBalancePence: 2250533n,
-      scheduleBalancePence: 2250533n,
-      differencePence: 0n,
-      priorYearPence: 1800000n,
-      status: 'in_progress',
-      applicable: true,
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'REC-14',
-      code: 'REC-14',
-      ref: 'D-10',
-      title: 'Stock and work in progress',
+      id: 'E-20',
+      code: 'REC-12',
+      ref: 'E-20',
+      title: 'Reserves movement and distributable profits',
       section: 'balance_sheet',
-      templateName: 'Stock summary from count',
-      tbBalancePence: 182400000n,
-      scheduleBalancePence: 182400000n,
+      templateName: 'Reserves movement',
+      tbBalancePence: 320000000n,
+      scheduleBalancePence: 320000000n,
       differencePence: 0n,
-      priorYearPence: 165000000n,
+      priorYearPence: 280000000n,
       status: 'reconciled',
       applicable: true,
       signoffs: { preparer: 'MV' },
       flags: {},
     },
     {
+      id: 'REC-03',
+      code: 'REC-03',
+      ref: 'F-10',
+      title: 'Fixed asset register and depreciation',
+      section: 'balance_sheet',
+      templateName: 'Register by class with depreciation',
+      tbBalancePence: 270000000n, // £2,700,000.00
+      scheduleBalancePence: 270000000n,
+      differencePence: 0n,
+      priorYearPence: 245000000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV', manager: 'SJ' },
+      flags: { aiWarning: 'Possible capital item in repairs: £8,500' },
+    },
+    {
+      id: 'G-10',
+      code: 'REC-17',
+      ref: 'G-10',
+      title: 'Investments and investment property',
+      section: 'balance_sheet',
+      templateName: 'Investment register',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'not_started',
+      applicable: false,
+      naSuggestion: { reason: 'No asset investments held on ledger' },
+      signoffs: {},
+      flags: {},
+    },
+    {
+      id: 'I-10',
+      code: 'REC-01',
+      ref: 'I-10',
+      title: 'Turnover, direct costs and gross margin',
+      section: 'pnl',
+      templateName: 'Revenue and direct costs analytical review',
+      tbBalancePence: 620000000n,
+      scheduleBalancePence: 620000000n,
+      differencePence: 0n,
+      priorYearPence: 580000000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'REC-08',
+      code: 'REC-08',
+      ref: 'K-10',
+      title: 'Trade creditors and unrecorded liabilities search',
+      section: 'balance_sheet',
+      templateName: 'Aged creditors with unrecorded liabilities search',
+      tbBalancePence: 168450000n,
+      scheduleBalancePence: 168450000n,
+      differencePence: 0n,
+      priorYearPence: 142000000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'REC-09B',
+      code: 'REC-09',
+      ref: 'K-20',
+      title: 'Accruals and deferred income',
+      section: 'balance_sheet',
+      templateName: 'Itemised with reversal check',
+      tbBalancePence: 45200000n,
+      scheduleBalancePence: 45200000n,
+      differencePence: 0n,
+      priorYearPence: 38000000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'REC-04',
+      code: 'REC-04',
+      ref: 'L-10',
+      title: 'Lease schedule (Right-of-use model FRS 102)',
+      section: 'balance_sheet',
+      templateName: 'Lease register, model set by standard and period',
+      tbBalancePence: 8400000n,
+      scheduleBalancePence: 8400000n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'REC-10',
+      code: 'REC-10',
+      ref: 'L-20',
+      title: 'Loans schedule with maturity split',
+      section: 'balance_sheet',
+      templateName: 'Loan schedule with repayment split',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'not_started',
+      applicable: false,
+      naSuggestion: { reason: 'No bank loan balances or finance interest in ledger' },
+      signoffs: {},
+      flags: {},
+    },
+    {
+      id: 'L-30',
+      code: 'REC-10',
+      ref: 'L-30',
+      title: 'Hire purchase with interest allocation',
+      section: 'balance_sheet',
+      templateName: 'HP schedule with interest allocation',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'not_started',
+      applicable: false,
+      naSuggestion: { reason: 'No hire purchase obligations found' },
+      signoffs: {},
+      flags: {},
+    },
+    {
+      id: 'P-10',
+      code: 'REC-01',
+      ref: 'P-10',
+      title: 'Overheads and administrative expenses',
+      section: 'pnl',
+      templateName: 'Administrative expenses review',
+      tbBalancePence: 38420000n,
+      scheduleBalancePence: 38420000n,
+      differencePence: 0n,
+      priorYearPence: 35000000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'REC-05',
+      code: 'REC-05',
+      ref: 'P-20',
+      title: 'Wages, PAYE/NIC and pension reconciliation',
+      section: 'balance_sheet',
+      templateName: 'Wages, PAYE/NIC and pension reconciliation',
+      tbBalancePence: 14200000n,
+      scheduleBalancePence: 14200000n,
+      differencePence: 0n,
+      priorYearPence: 13100000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'Q-10',
+      code: 'REC-17',
+      ref: 'Q-10',
+      title: 'Provisions for liabilities and charges',
+      section: 'balance_sheet',
+      templateName: 'Provision movement',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'not_started',
+      applicable: false,
+      naSuggestion: { reason: 'No provisions booked in ledger' },
+      signoffs: {},
+      flags: {},
+    },
+    {
+      id: 'Q-20',
+      code: 'REC-17',
+      ref: 'Q-20',
+      title: 'Grants and deferred income release',
+      section: 'balance_sheet',
+      templateName: 'Grant release schedule',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'not_started',
+      applicable: false,
+      naSuggestion: { reason: 'No capital or revenue grants received' },
+      signoffs: {},
+      flags: {},
+    },
+    {
       id: 'REC-15',
       code: 'REC-15',
       ref: 'R-10',
-      title: 'Related parties and intercompany',
+      title: 'Related parties and intercompany balances',
       section: 'balance_sheet',
       templateName: 'Related party register with balances',
       tbBalancePence: 0n,
@@ -316,7 +434,7 @@ export default function WorkingPaperIndexPage() {
       id: 'REC-16',
       code: 'REC-16',
       ref: 'S-10',
-      title: 'Suspense and clearing accounts (must be zero)',
+      title: 'Suspense, clearing and control accounts (must be zero)',
       section: 'balance_sheet',
       templateName: 'Must-be-zero check',
       tbBalancePence: 0n,
@@ -328,29 +446,145 @@ export default function WorkingPaperIndexPage() {
       signoffs: { preparer: 'MV' },
       flags: {},
     },
+    {
+      id: 'REC-13',
+      code: 'REC-13',
+      ref: 'T-10',
+      title: 'Corporation tax provision and computation',
+      section: 'tax',
+      templateName: 'CT provision schedule',
+      tbBalancePence: 2250533n,
+      scheduleBalancePence: 2250533n,
+      differencePence: 0n,
+      priorYearPence: 1800000n,
+      status: 'in_progress',
+      applicable: true,
+      signoffs: {},
+      flags: {},
+    },
+    {
+      id: 'REC-06',
+      code: 'REC-06',
+      ref: 'T-20',
+      title: 'VAT reconciliation (Quarterly standard scheme)',
+      section: 'tax',
+      templateName: 'VAT control by return period',
+      tbBalancePence: 19820000n,
+      scheduleBalancePence: 19820000n,
+      differencePence: 0n,
+      priorYearPence: 16500000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'T-30',
+      code: 'REC-13',
+      ref: 'T-30',
+      title: 'Deferred tax timing differences',
+      section: 'tax',
+      templateName: 'Timing differences on fixed assets',
+      tbBalancePence: 1850000n,
+      scheduleBalancePence: 1850000n,
+      differencePence: 0n,
+      priorYearPence: 1500000n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'Z-10',
+      code: 'STD-04',
+      ref: 'Z-10',
+      title: 'Disclosures, notes and statutory accounts production',
+      section: 'disclosures',
+      templateName: 'Draft statutory accounts and disclosure notes',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'reconciled',
+      applicable: true,
+      signoffs: { preparer: 'MV' },
+      flags: {},
+    },
+    {
+      id: 'Z-20',
+      code: 'REV-05',
+      ref: 'Z-20',
+      title: 'File completion and partner sign-off lock',
+      section: 'completion',
+      templateName: 'Completion checklist and partner sign-off',
+      tbBalancePence: 0n,
+      scheduleBalancePence: 0n,
+      differencePence: 0n,
+      priorYearPence: 0n,
+      status: 'in_progress',
+      applicable: true,
+      signoffs: {},
+      flags: {},
+    },
   ]);
+
+  const [sectionFilter, setSectionFilter] = useState<'all' | 'leads' | 'balance_sheet' | 'pnl' | 'tax' | 'disclosures' | 'completion'>('all');
+  const [pendingUntick, setPendingUntick] = useState<ScheduleItem | null>(null);
+  const [untickReason, setUntickReason] = useState<string>('');
 
   // Handle Applicable Toggle (WPS-03)
   const handleToggleApplicable = (id: string, reason?: string) => {
+    const s = schedules.find((x) => x.id === id);
+    if (!s) return;
+
+    if (s.applicable && !reason) {
+      setPendingUntick(s);
+      setUntickReason('');
+      return;
+    }
+
     setSchedules((prev) =>
-      prev.map((s) => {
-        if (s.id === id) {
-          const nextVal = !s.applicable;
-          // Log audit
+      prev.map((item) => {
+        if (item.id === id) {
+          const nextVal = !item.applicable;
           db.logAudit(
             activeEngagement?.firm_id || 'firm_blynt_uk',
             getActor(),
             nextVal ? 'TICK_APPLICABLE' : 'UNTICK_APPLICABLE',
             'workpapers',
             id,
-            { applicable: s.applicable },
+            { applicable: item.applicable },
             { applicable: nextVal, reason: reason || 'User action' }
           );
-          return { ...s, applicable: nextVal };
+          return { ...item, applicable: nextVal };
         }
-        return s;
+        return item;
       })
     );
+  };
+
+  const handleConfirmUntick = () => {
+    if (!pendingUntick) return;
+    const s = pendingUntick;
+    setSchedules((prev) =>
+      prev.map((item) => {
+        if (item.id === s.id) {
+          db.logAudit(
+            activeEngagement?.firm_id || 'firm_blynt_uk',
+            getActor(),
+            'UNTICK_APPLICABLE',
+            'workpapers',
+            s.id,
+            { applicable: true },
+            { applicable: false, reason: untickReason || 'Marked not applicable by user' }
+          );
+          return { ...item, applicable: false, naSuggestion: { reason: untickReason || 'Marked not applicable' } };
+        }
+        return item;
+      })
+    );
+    setPendingUntick(null);
+    setUntickReason('');
   };
 
   // Bulk Sign-Off (REV-01)
@@ -389,6 +623,7 @@ export default function WorkingPaperIndexPage() {
         s.ref.toLowerCase().includes(searchQuery.toLowerCase());
       if (!matchSearch) return false;
 
+      if (sectionFilter !== 'all' && s.section !== sectionFilter) return false;
       if (statusFilter !== 'all' && s.status !== statusFilter) return false;
 
       if (flagFilter === 'ai_warning' && !s.flags.aiWarning) return false;
@@ -397,7 +632,7 @@ export default function WorkingPaperIndexPage() {
 
       return true;
     });
-  }, [applicableSchedules, searchQuery, statusFilter, flagFilter]);
+  }, [applicableSchedules, searchQuery, sectionFilter, statusFilter, flagFilter]);
 
   // Statistics
   const totalApplicable = applicableSchedules.length;
@@ -490,6 +725,32 @@ export default function WorkingPaperIndexPage() {
             </>
           )}
         </div>
+      </div>
+
+      {/* Standard Sections Navigation (WPS-01) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-[#E3E7EF]">
+        {[
+          { id: 'all', label: 'All schedules' },
+          { id: 'leads', label: 'Lead schedules (WPS-04)' },
+          { id: 'balance_sheet', label: 'Balance sheet' },
+          { id: 'pnl', label: 'Profit and loss' },
+          { id: 'tax', label: 'Taxation' },
+          { id: 'disclosures', label: 'Disclosures & notes (STD-04)' },
+          { id: 'completion', label: 'Completion (REV-05)' },
+        ].map((sec) => (
+          <button
+            key={sec.id}
+            type="button"
+            onClick={() => setSectionFilter(sec.id as any)}
+            className={`px-3.5 py-2 text-xs font-semibold rounded-xl transition-all shrink-0 cursor-pointer ${
+              sectionFilter === sec.id
+                ? 'bg-[#102654] text-white shadow-xs'
+                : 'text-[#5B6478] hover:bg-[#F6F7FB] hover:text-[#102654]'
+            }`}
+          >
+            {sec.label}
+          </button>
+        ))}
       </div>
 
       {/* Filter and Search Bar */}
@@ -839,6 +1100,71 @@ export default function WorkingPaperIndexPage() {
                 className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
               >
                 Confirm Review Sign-Off
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Untick Schedule Dialog with Manager Approval Notice (WPS-03) */}
+      {pendingUntick && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div className="bg-white border border-[#E3E7EF] rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
+              <div className="flex items-center gap-2 text-[#102654]">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+                <h3 className="text-sm font-bold">Untick Applicable Schedule (WPS-03)</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingUntick(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#5B6478] leading-relaxed">
+              You are removing <strong>{pendingUntick.ref} {pendingUntick.title}</strong> from the applicable working papers.
+            </p>
+
+            {(pendingUntick.tbBalancePence !== 0n || ['A-10', 'B-10', 'F-10', 'Z-10', 'Z-20'].includes(pendingUntick.ref)) && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+                <strong>Manager approval required:</strong> This schedule has a balance or is mandatory under {standardLabel}.
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-[#102654] mb-1">
+                Reason for marking Not Applicable:
+              </label>
+              <textarea
+                rows={3}
+                placeholder="e.g. No transactions or commitments in this financial year..."
+                value={untickReason}
+                onChange={(e) => setUntickReason(e.target.value)}
+                className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg outline-none focus:ring-1 focus:ring-[#102654]"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setPendingUntick(null)}
+                className="px-3.5 py-2 text-xs font-semibold text-[#5B6478] hover:text-[#102654]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmUntick}
+                className="px-4 py-2 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-lg shadow-xs"
+              >
+                Confirm Untick
               </button>
             </div>
           </div>

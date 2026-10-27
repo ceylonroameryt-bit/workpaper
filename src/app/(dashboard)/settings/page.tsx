@@ -34,6 +34,18 @@ export default function PracticeSettingsPage() {
   const [activeTab, setActiveTab] = useState<'defaults' | 'roles' | 'rules' | 'branding' | 'security'>('defaults');
   const [savedToast, setSavedToast] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab === 'rules' || tab === 'ai-rules') setActiveTab('rules');
+      else if (tab === 'roles' || tab === 'users') setActiveTab('roles');
+      else if (tab === 'branding') setActiveTab('branding');
+      else if (tab === 'security') setActiveTab('security');
+      else if (tab === 'defaults') setActiveTab('defaults');
+    }
+  }, []);
+
   // ADM-02 Practice Defaults
   const [signOffLevels, setSignOffLevels] = useState<'3' | '2'>('3');
   const [reconciliationTolerance, setReconciliationTolerance] = useState('1.00');
@@ -55,18 +67,106 @@ export default function PracticeSettingsPage() {
   const [inviteScope, setInviteScope] = useState<'all' | 'assigned'>('all');
   const [inviteError, setInviteError] = useState('');
 
-  // DAT-05 Mapping Rules
-  const [mappingRules, setMappingRules] = useState([
-    { id: 'rule_1', pattern: '*Plant*Machinery*', scope: 'Practice', mappedTo: '1500 Plant & Equipment Cost', timesUsed: 412, active: true },
-    { id: 'rule_2', pattern: '*Director*Loan*', scope: 'Practice', mappedTo: '835b Director\'s Loan Account', timesUsed: 285, active: true },
-    { id: 'rule_3', pattern: '*Barclays*Current*', scope: 'Client (Harlow)', mappedTo: '1010 Barclays Operating Account', timesUsed: 24, active: true },
-    { id: 'rule_4', pattern: '*Rent*Unit*4*', scope: 'Client (Harlow)', mappedTo: '6000 London Office Rent and Service', timesUsed: 12, active: true },
-    { id: 'rule_5', pattern: '*Salaries*Gross*', scope: 'Practice', mappedTo: '6200 Staff Salaries', timesUsed: 156, active: true },
-  ]);
+  // DAT-09 Shared Rules Library & DAT-05 Mapping Rules
+  const [rulesList, setRulesList] = useState<any[]>(() => {
+    if (db.learned_rules.length > 0) return [...db.learned_rules];
+    return [
+      {
+        id: 'rule_1',
+        firm_id: 'firm_blynt_uk',
+        type: 'mapping',
+        pattern: '*Plant*Machinery*',
+        scope: 'practice',
+        target_value: '1500 Plant & Equipment Cost',
+        created_by: 'usr_test_reviewer',
+        created_by_name: 'Audit Manager',
+        created_at: '2026-09-01T10:00:00Z',
+        times_used: 412,
+        active: true,
+        approved_by_manager: true,
+      },
+      {
+        id: 'rule_2',
+        firm_id: 'firm_blynt_uk',
+        type: 'mapping',
+        pattern: '*Director*Loan*',
+        scope: 'practice',
+        target_value: "835b Director's Loan Account",
+        created_by: 'usr_test_reviewer',
+        created_by_name: 'Audit Manager',
+        created_at: '2026-09-01T10:00:00Z',
+        times_used: 285,
+        active: true,
+        approved_by_manager: true,
+      },
+      {
+        id: 'rule_3',
+        firm_id: 'firm_blynt_uk',
+        client_id: 'cli_harlow',
+        type: 'mapping',
+        pattern: '*Barclays*Current*',
+        scope: 'client',
+        target_value: '1010 Barclays Operating Account',
+        created_by: 'usr_test_preparer',
+        created_by_name: 'Senior Associate',
+        created_at: '2026-09-15T11:00:00Z',
+        times_used: 24,
+        active: true,
+        approved_by_manager: true,
+      },
+      {
+        id: 'rule_4',
+        firm_id: 'firm_blynt_uk',
+        client_id: 'cli_harlow',
+        type: 'mapping',
+        pattern: '*Rent*Unit*4*',
+        scope: 'client',
+        target_value: '6000 London Office Rent and Service',
+        created_by: 'usr_test_preparer',
+        created_by_name: 'Senior Associate',
+        created_at: '2026-09-20T14:30:00Z',
+        times_used: 12,
+        active: true,
+        approved_by_manager: true,
+      },
+      {
+        id: 'rule_5',
+        firm_id: 'firm_blynt_uk',
+        supplier_name: 'Dell Technologies UK',
+        type: 'extraction',
+        pattern: '*Dell Technologies*PowerEdge*',
+        scope: 'supplier',
+        target_value: 'REC-03: Fixed Assets Addition (Computer equipment)',
+        created_by: 'usr_test_reviewer',
+        created_by_name: 'Audit Manager',
+        created_at: '2026-10-01T09:00:00Z',
+        times_used: 18,
+        active: true,
+        approved_by_manager: true,
+      },
+      {
+        id: 'rule_6',
+        firm_id: 'firm_blynt_uk',
+        type: 'mapping',
+        pattern: '*Software*SaaS*Monthly*',
+        scope: 'practice',
+        target_value: '6000 Subscriptions & Software',
+        created_by: 'usr_test_preparer',
+        created_by_name: 'Senior Associate',
+        created_at: '2026-10-25T16:00:00Z',
+        times_used: 6,
+        active: true,
+        approved_by_manager: false, // Pending manager approval (DAT-09 criteria 5)
+      },
+    ];
+  });
+  const [ruleScopeFilter, setRuleScopeFilter] = useState<'all' | 'supplier' | 'client' | 'practice'>('all');
+  const [ruleTypeFilter, setRuleTypeFilter] = useState<'all' | 'mapping' | 'extraction' | 'proposal' | 'finding'>('all');
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [newRulePattern, setNewRulePattern] = useState('');
   const [newRuleTarget, setNewRuleTarget] = useState('1500 Plant & Equipment Cost');
-  const [newRuleScope, setNewRuleScope] = useState('Practice');
+  const [newRuleScope, setNewRuleScope] = useState<'supplier' | 'client' | 'practice'>('practice');
+  const [newRuleType, setNewRuleType] = useState<'mapping' | 'extraction' | 'proposal' | 'finding'>('mapping');
 
   // QTR-02 Branding
   const [brandPrimary, setBrandPrimary] = useState('#102654');
@@ -126,10 +226,38 @@ export default function PracticeSettingsPage() {
   };
 
   const handleToggleRule = (id: string) => {
-    setMappingRules((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r))
+    setRulesList((prev) =>
+      prev.map((r) => {
+        if (r.id === id) {
+          const nextActive = !r.active;
+          const found = db.learned_rules.find((lr) => lr.id === id);
+          if (found) found.active = nextActive;
+          return { ...r, active: nextActive };
+        }
+        return r;
+      })
     );
     triggerSaveNotification('Rule status updated.');
+  };
+
+  const handleApproveRule = (id: string) => {
+    setRulesList((prev) =>
+      prev.map((r) => {
+        if (r.id === id) {
+          const found = db.learned_rules.find((lr) => lr.id === id);
+          if (found) found.approved_by_manager = true;
+          return { ...r, approved_by_manager: true };
+        }
+        return r;
+      })
+    );
+    triggerSaveNotification('Rule approved for practice-wide deployment (DAT-09).');
+  };
+
+  const handleDeleteRule = (id: string) => {
+    setRulesList((prev) => prev.filter((r) => r.id !== id));
+    db.learned_rules = db.learned_rules.filter((r) => r.id !== id);
+    triggerSaveNotification('Rule deleted.');
   };
 
   const handleAddRule = (e: React.FormEvent) => {
@@ -137,13 +265,20 @@ export default function PracticeSettingsPage() {
     if (!newRulePattern.trim()) return;
     const rule = {
       id: `rule_${Date.now()}`,
+      firm_id: 'firm_blynt_uk',
+      type: newRuleType,
       pattern: newRulePattern.trim(),
-      mappedTo: newRuleTarget,
+      target_value: newRuleTarget,
       scope: newRuleScope,
-      timesUsed: 1,
+      created_by: 'usr_test_reviewer',
+      created_by_name: 'Audit Manager',
+      created_at: new Date().toISOString(),
+      times_used: 1,
       active: true,
+      approved_by_manager: true,
     };
-    setMappingRules([rule, ...mappingRules]);
+    db.learned_rules.unshift(rule as any);
+    setRulesList([rule, ...rulesList]);
     setShowRuleModal(false);
     setNewRulePattern('');
     triggerSaveNotification(`Rule created for pattern: ${rule.pattern}`);
@@ -190,6 +325,7 @@ export default function PracticeSettingsPage() {
       {/* Tabs Navigation (ADM-01, ADM-02, DAT-05, QTR-02, ADM-03) */}
       <div className="flex items-center gap-2 border-b border-[#E3E7EF] pb-1 overflow-x-auto">
         <button
+          id="tab-defaults"
           type="button"
           onClick={() => setActiveTab('defaults')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
@@ -203,6 +339,7 @@ export default function PracticeSettingsPage() {
         </button>
 
         <button
+          id="tab-roles"
           type="button"
           onClick={() => setActiveTab('roles')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
@@ -216,6 +353,7 @@ export default function PracticeSettingsPage() {
         </button>
 
         <button
+          id="tab-rules"
           type="button"
           onClick={() => setActiveTab('rules')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
@@ -229,6 +367,7 @@ export default function PracticeSettingsPage() {
         </button>
 
         <button
+          id="tab-branding"
           type="button"
           onClick={() => setActiveTab('branding')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
@@ -242,6 +381,7 @@ export default function PracticeSettingsPage() {
         </button>
 
         <button
+          id="tab-security"
           type="button"
           onClick={() => setActiveTab('security')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
@@ -444,25 +584,27 @@ export default function PracticeSettingsPage() {
         </div>
       )}
 
-      {/* TAB 3: AI Rules & Accuracy (DAT-05) */}
+      {/* TAB 3: Shared Rules Library & AI Accuracy (DAT-09, DAT-05, ADM-02) */}
       {activeTab === 'rules' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-xs p-6 sm:p-8 space-y-6">
+        <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-xs p-6 sm:p-8 space-y-8">
+          {/* Header */}
           <div className="border-b border-[#E3E7EF] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Learned Mapping Rules (DAT-05)</h2>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-base font-bold text-[#102654]">Shared Rules Library (DAT-09)</h2>
+                <span className="text-[10px] font-mono font-bold bg-[#EAF5FC] text-[#1D4E89] px-2 py-0.5 rounded-full border border-[#1D4E89]/20">
+                  Rules run before AI
+                </span>
+              </div>
               <p className="text-xs text-[#5B6478] mt-0.5">
-                Every manual correction is learned and becomes a rule at client or practice scope. Target accuracy: &gt;90%.
+                Every correction is learned and becomes a rule at supplier, client or practice scope. Target accuracy: &gt;90%.
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="bg-[#E6F4EF] text-[#0B6B52] border border-[#0B6B52]/30 px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#0B6B52]" />
-                <span>AI Accuracy: 94.2%</span>
-              </div>
               <button
                 type="button"
                 onClick={() => setShowRuleModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 text-[#FF7D6B]" />
                 <span>Add Rule</span>
@@ -470,44 +612,198 @@ export default function PracticeSettingsPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            {mappingRules.map((r) => (
-              <div
-                key={r.id}
-                className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
-                  r.active ? 'border-[#E3E7EF] bg-[#F6F7FB]/70' : 'border-gray-200 bg-gray-50 opacity-60'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono font-bold text-[#102654] bg-white px-2.5 py-1 rounded-lg border border-gray-200 shadow-2xs">
-                      {r.pattern}
-                    </span>
-                    <span className="text-[#7E8DA6]">&rarr;</span>
-                    <span className="font-bold text-[#1D4E89]">{r.mappedTo}</span>
-                  </div>
-                  <div className="text-[11px] text-[#5B6478] mt-1.5 flex items-center gap-3">
-                    <span>Scope: <strong className="text-[#102654]">{r.scope}</strong></span>
-                    <span>•</span>
-                    <span>Used: <strong className="text-[#102654]">{r.timesUsed} times</strong></span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleToggleRule(r.id)}
-                    className={`text-[10px] font-bold px-3 py-1 rounded-full cursor-pointer transition-colors ${
-                      r.active
-                        ? 'text-emerald-800 bg-emerald-100 hover:bg-emerald-200'
-                        : 'text-gray-600 bg-gray-200 hover:bg-gray-300'
-                    }`}
-                  >
-                    {r.active ? 'Active' : 'Disabled'}
-                  </button>
-                </div>
+          {/* AI Performance & Confidence Gate Card (DAT-08, DAT-05, RPT-03) */}
+          <div className="bg-[#F6F7FB] border border-[#E3E7EF] rounded-2xl p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
+                  AI Accuracy Performance &amp; Auto-Accept Controls (DAT-08)
+                </span>
+                <p className="text-[11px] text-[#5B6478] mt-0.5">
+                  Auto-accept is OFF at launch. Requires 3 consecutive months ≥90% accepted without change.
+                </p>
               </div>
-            ))}
+              <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-full w-max">
+                Overall Accuracy: 94.2% (Target: ≥90%)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="bg-white p-3 rounded-xl border border-gray-200">
+                <div className="text-[10px] uppercase font-bold text-[#7E8DA6]">Account Mapping</div>
+                <div className="text-lg font-mono font-bold text-emerald-700 mt-1">94.2%</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">Auto-accept: OFF (Month 1/3)</div>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-gray-200">
+                <div className="text-[10px] uppercase font-bold text-[#7E8DA6]">Document Extraction</div>
+                <div className="text-lg font-mono font-bold text-emerald-700 mt-1">91.5%</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">Auto-accept: OFF (Month 1/3)</div>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-gray-200">
+                <div className="text-[10px] uppercase font-bold text-[#7E8DA6]">Proposed Journals</div>
+                <div className="text-lg font-mono font-bold text-amber-700 mt-1">89.2%</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">Auto-accept: OFF (&lt;90%)</div>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-gray-200">
+                <div className="text-[10px] uppercase font-bold text-[#7E8DA6]">Review Findings</div>
+                <div className="text-lg font-mono font-bold text-emerald-700 mt-1">95.8%</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">Auto-accept: OFF (Month 2/3)</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pending Manager Approvals Queue (DAT-09 criteria 5) */}
+          {rulesList.some((r) => r.scope === 'practice' && !r.approved_by_manager) && (
+            <div className="border border-amber-300 bg-amber-50/60 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Manager Approval Queue (Practice-Scope Rules Requested by Preparers)</span>
+              </div>
+              <p className="text-[11px] text-amber-800 leading-relaxed">
+                Under DAT-09 criteria 5, practice-wide rules created by preparers require manager or partner approval before applying across all client files.
+              </p>
+              <div className="space-y-2 pt-1">
+                {rulesList
+                  .filter((r) => r.scope === 'practice' && !r.approved_by_manager)
+                  .map((rule) => (
+                    <div
+                      key={rule.id}
+                      className="bg-white p-3.5 rounded-xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono font-bold text-[#102654] bg-[#F6F7FB] px-2 py-0.5 rounded">
+                            {rule.pattern}
+                          </span>
+                          <span>&rarr;</span>
+                          <span className="font-bold text-[#1D4E89]">{rule.target_value}</span>
+                        </div>
+                        <div className="text-[10px] text-[#7E8DA6] mt-1">
+                          Requested by {rule.created_by_name} • Scope: Practice-wide
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleApproveRule(rule.id)}
+                          className="px-3 py-1.5 bg-[#0B6B52] hover:bg-[#095742] text-white text-xs font-bold rounded-lg shadow-2xs"
+                        >
+                          Approve for Practice
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRule(rule.id)}
+                          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Filter Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-[#5B6478] font-semibold text-[11px]">Scope:</span>
+              {(['all', 'practice', 'client', 'supplier'] as const).map((sc) => (
+                <button
+                  key={sc}
+                  type="button"
+                  onClick={() => setRuleScopeFilter(sc)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition-all ${
+                    ruleScopeFilter === sc
+                      ? 'bg-[#102654] text-white'
+                      : 'bg-[#F6F7FB] text-[#5B6478] hover:text-[#102654]'
+                  }`}
+                >
+                  {sc}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-[#5B6478] font-semibold text-[11px]">Type:</span>
+              {(['all', 'mapping', 'extraction', 'proposal', 'finding'] as const).map((tp) => (
+                <button
+                  key={tp}
+                  type="button"
+                  onClick={() => setRuleTypeFilter(tp)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition-all ${
+                    ruleTypeFilter === tp
+                      ? 'bg-[#1D4E89] text-white'
+                      : 'bg-[#F6F7FB] text-[#5B6478] hover:text-[#102654]'
+                  }`}
+                >
+                  {tp}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Rules List */}
+          <div className="space-y-3">
+            {rulesList
+              .filter((r) => ruleScopeFilter === 'all' || r.scope.toLowerCase() === ruleScopeFilter)
+              .filter((r) => ruleTypeFilter === 'all' || r.type === ruleTypeFilter)
+              .map((r) => (
+                <div
+                  key={r.id}
+                  className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
+                    r.active ? 'border-[#E3E7EF] bg-[#F6F7FB]/70' : 'border-gray-200 bg-gray-50 opacity-60'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono font-bold text-[#102654] bg-white px-2.5 py-1 rounded-lg border border-gray-200 shadow-2xs">
+                        {r.pattern}
+                      </span>
+                      <span className="text-[#7E8DA6]">&rarr;</span>
+                      <span className="font-bold text-[#1D4E89]">{r.target_value}</span>
+                    </div>
+                    <div className="text-[11px] text-[#5B6478] mt-1.5 flex items-center gap-3 flex-wrap">
+                      <span className="capitalize">
+                        Scope: <strong className="text-[#102654]">{r.scope}</strong>
+                      </span>
+                      <span>•</span>
+                      <span className="capitalize">
+                        Type: <strong className="text-[#102654]">{r.type}</strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Used: <strong className="text-[#102654]">{r.times_used || 1} times</strong>
+                      </span>
+                      <span>•</span>
+                      <span>Created by: {r.created_by_name || 'Staff'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleRule(r.id)}
+                      className={`text-[10px] font-bold px-3 py-1 rounded-full cursor-pointer transition-colors ${
+                        r.active
+                          ? 'text-emerald-800 bg-emerald-100 hover:bg-emerald-200'
+                          : 'text-gray-600 bg-gray-200 hover:bg-gray-300'
+                      }`}
+                    >
+                      {r.active ? 'Active' : 'Disabled'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRule(r.id)}
+                      className="text-gray-400 hover:text-red-600 p-1 rounded"
+                      title="Delete rule"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
       )}
@@ -898,11 +1194,27 @@ export default function PracticeSettingsPage() {
             <form onSubmit={handleAddRule} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-[#102654] mb-1">
-                  Account Name Pattern (Wildcard matching)
+                  Rule Type (DAT-09)
+                </label>
+                <select
+                  value={newRuleType}
+                  onChange={(e) => setNewRuleType(e.target.value as any)}
+                  className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
+                >
+                  <option value="mapping">Account Mapping Rule</option>
+                  <option value="extraction">Document Extraction Rule</option>
+                  <option value="proposal">Schedule / Journal Proposal Rule</option>
+                  <option value="finding">Review Finding Rule</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                  Matching Pattern (Wildcard matching)
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. *Software*Subscription*"
+                  placeholder="e.g. *Software*Subscription* or *Dell*PowerEdge*"
                   value={newRulePattern}
                   onChange={(e) => setNewRulePattern(e.target.value)}
                   className="w-full text-xs p-2.5 border border-[#D5DBE7] rounded-lg font-mono focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#102654]"
@@ -911,34 +1223,37 @@ export default function PracticeSettingsPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-[#102654] mb-1">
-                  Maps To Standard Blynt Account
+                  Target Value / Classification
                 </label>
                 <select
                   value={newRuleTarget}
                   onChange={(e) => setNewRuleTarget(e.target.value)}
                   className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
                 >
-                  <option value="1500 Plant & Equipment Cost">1500 Plant &amp; Equipment Cost</option>
-                  <option value="1510 Computer Equipment Cost">1510 Computer Equipment Cost</option>
-                  <option value="1010 Barclays Operating Account">1010 Barclays Operating Account</option>
+                  <option value="1500 Plant & Equipment Cost">1500 Plant &amp; Equipment Cost (REC-03)</option>
+                  <option value="1510 Computer Equipment Cost">1510 Computer Equipment Cost (REC-03)</option>
+                  <option value="1010 Barclays Operating Account">1010 Barclays Operating Account (REC-02)</option>
                   <option value="6000 London Office Rent and Service">6000 London Office Rent and Service</option>
-                  <option value="6200 Staff Salaries">6200 Staff Salaries</option>
-                  <option value="835b Director's Loan Account">835b Director&apos;s Loan Account</option>
-                  <option value="2000 Purchase Ledger Control Account">2000 Purchase Ledger Control Account</option>
+                  <option value="6200 Staff Salaries">6200 Staff Salaries (REC-05)</option>
+                  <option value="835b Director's Loan Account">835b Director&apos;s Loan Account (REC-11)</option>
+                  <option value="2000 Purchase Ledger Control Account">2000 Purchase Ledger Control Account (REC-08)</option>
+                  <option value="REC-03: Capital Addition">REC-03: Capital Addition</option>
+                  <option value="REC-04: Lease Agreement">REC-04: Lease Agreement</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-[#102654] mb-1">
-                  Rule Scope
+                  Rule Scope (DAT-09)
                 </label>
                 <select
                   value={newRuleScope}
-                  onChange={(e) => setNewRuleScope(e.target.value)}
+                  onChange={(e) => setNewRuleScope(e.target.value as any)}
                   className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
                 >
-                  <option value="Practice">Entire Practice (Applies to all clients)</option>
-                  <option value="Client (Harlow)">Harlow &amp; Finch Only</option>
+                  <option value="practice">Whole Practice (Requires Manager Approval)</option>
+                  <option value="client">Client Only (Harlow &amp; Finch Fine Goods Ltd)</option>
+                  <option value="supplier">Specific Supplier / Vendor</option>
                 </select>
               </div>
 

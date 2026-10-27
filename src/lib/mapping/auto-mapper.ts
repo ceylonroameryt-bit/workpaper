@@ -358,3 +358,189 @@ export function matchBlyntAccount(
     lead_letter: 'E',
   };
 }
+
+export interface StatutoryDetails {
+  statutory_line: string;
+  schedule_ref: string;
+  cash_flow_category: 'Operating activities' | 'Investing activities' | 'Financing activities' | 'Cash and cash equivalents';
+  is_credit_area: boolean;
+}
+
+export function getStatutoryDetails(
+  blyntCode: string | null,
+  sourceName: string = '',
+  sourceType: string = ''
+): StatutoryDetails {
+  const code = blyntCode || '';
+  const name = sourceName.toLowerCase();
+
+  if (/director.*loan|dla|s455/i.test(name)) {
+    return {
+      statutory_line: "Other debtors / Creditors: Director's loan account",
+      schedule_ref: 'REC-11',
+      cash_flow_category: 'Financing activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (/suspense|clearing|contra|wages control/i.test(name)) {
+    return {
+      statutory_line: 'Suspense & clearing control (must be zero)',
+      schedule_ref: 'REC-16',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (/lease|hire purchase|hp agreement|right-of-use/i.test(name)) {
+    return {
+      statutory_line: 'Lease liabilities and commitments',
+      schedule_ref: 'REC-04',
+      cash_flow_category: 'Financing activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code.startsWith('10')) {
+    return {
+      statutory_line: 'Cash at bank and in hand',
+      schedule_ref: 'REC-02',
+      cash_flow_category: 'Cash and cash equivalents',
+      is_credit_area: false,
+    };
+  }
+
+  if (code === '1200' || code === '1210') {
+    return {
+      statutory_line: 'Debtors: amounts falling due within one year - trade',
+      schedule_ref: 'REC-07',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (code === '1400') {
+    return {
+      statutory_line: 'Prepayments and accrued income',
+      schedule_ref: 'REC-09',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (code === '1300') {
+    return {
+      statutory_line: 'Stocks and work in progress',
+      schedule_ref: 'REC-14',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (code.startsWith('15') || code.startsWith('17')) {
+    return {
+      statutory_line: 'Tangible fixed assets',
+      schedule_ref: 'REC-03',
+      cash_flow_category: 'Investing activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (code === '2000') {
+    return {
+      statutory_line: 'Creditors: amounts falling due within one year - trade',
+      schedule_ref: 'REC-08',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code === '2100') {
+    return {
+      statutory_line: 'Accruals and deferred income',
+      schedule_ref: 'REC-09',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code === '2200') {
+    return {
+      statutory_line: 'Taxation and social security - VAT liability',
+      schedule_ref: 'REC-06',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code === '2300') {
+    return {
+      statutory_line: 'Taxation and social security - PAYE / NIC control',
+      schedule_ref: 'REC-05',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code === '2600') {
+    return {
+      statutory_line: 'Creditors: amounts falling due after more than one year - bank loans',
+      schedule_ref: 'REC-10',
+      cash_flow_category: 'Financing activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code === '3000') {
+    return {
+      statutory_line: 'Called up share capital',
+      schedule_ref: 'REC-12',
+      cash_flow_category: 'Financing activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code === '3100') {
+    return {
+      statutory_line: 'Profit and loss account (reserves)',
+      schedule_ref: 'REC-12',
+      cash_flow_category: 'Financing activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code.startsWith('4')) {
+    return {
+      statutory_line: 'Turnover',
+      schedule_ref: 'REC-01',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: true,
+    };
+  }
+
+  if (code.startsWith('5')) {
+    return {
+      statutory_line: 'Cost of sales',
+      schedule_ref: 'REC-01',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (code.startsWith('6')) {
+    return {
+      statutory_line: 'Administrative expenses',
+      schedule_ref: 'REC-01',
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  return {
+    statutory_line: 'Unclassified statutory balance',
+    schedule_ref: 'REC-01',
+    cash_flow_category: 'Operating activities',
+    is_credit_area: false,
+  };
+}
+

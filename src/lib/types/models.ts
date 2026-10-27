@@ -210,6 +210,13 @@ export interface AccountMapping {
   status: 'suggested' | 'confirmed' | 'needs_you';
   confidence: number; // 0 - 100
   method: 'rule' | 'ai' | 'manual';
+  statutory_line?: string;
+  schedule_ref?: string;
+  cash_flow_category?: string;
+  ai_reason?: string;
+  evidence_used?: string;
+  sign_mismatch?: boolean;
+  gate?: 'ready' | 'check' | 'exception';
   ai_alternatives?: { blynt_code: string; name: string; reason: string; confidence: number }[];
   confirmed_by: string | null;
   confirmed_at: string | null;
@@ -400,3 +407,135 @@ export interface AiLineage {
   accepted_by: string;
   accepted_at: string;
 }
+
+// ==========================================
+// v1.1 SPECIFICATION MODELS (Build Order v1.1)
+// ==========================================
+
+export type ConfidenceGate = 'Ready' | 'Check' | 'Exception';
+
+export interface EvidenceLink {
+  title: string;
+  url?: string;
+  attachment_id?: string;
+  page?: number;
+  clause?: string;
+}
+
+export interface AiOutputMeta {
+  confidence: number; // 0 - 100
+  gate: ConfidenceGate;
+  reason: string;
+  evidence_links?: EvidenceLink[];
+  auto_accepted?: boolean;
+  source_type?: string;
+}
+
+export type RuleScope = 'supplier' | 'client' | 'practice';
+export type RuleType = 'mapping' | 'extraction' | 'tagging' | 'proposal' | 'review' | 'na_choice';
+
+export interface LearnedRule {
+  id: string;
+  firm_id: string;
+  client_id?: string | null;
+  supplier_name?: string | null;
+  type: RuleType;
+  scope: RuleScope;
+  pattern: string;
+  target_value: string;
+  explanation?: string;
+  created_by: string;
+  created_by_name: string;
+  created_at: string;
+  times_used: number;
+  active: boolean;
+  approved_by_manager?: boolean;
+}
+
+export interface AiActionLogItem {
+  id: string;
+  firm_id: string;
+  engagement_id: string;
+  output_type: 'mapping' | 'extraction' | 'journal' | 'finding' | 'note' | 'commentary';
+  inputs_used: string;
+  confidence: number;
+  model_version: string;
+  outcome: 'accepted' | 'edited' | 'rejected' | 'auto_accepted';
+  decided_by: string;
+  decided_by_name: string;
+  decided_at: string;
+  rejection_reason?: string;
+}
+
+export interface AiReviewFinding {
+  id: string;
+  workpaper_id: string;
+  engagement_id?: string;
+  schedule_ref?: string;
+  severity: 'info' | 'warning' | 'error';
+  title: string;
+  explanation?: string;
+  detail?: string;
+  evidence_links?: EvidenceLink[];
+  status: 'open' | 'fixed' | 'dismissed';
+  dismiss_reason?: string;
+  rated_useful?: boolean | null;
+  feedback?: 'useful' | 'not_useful' | null;
+  created_at: string;
+}
+
+export interface ScheduleVersion {
+  id: string;
+  workpaper_id: string;
+  version_label?: string;
+  version_number?: number;
+  signed_by?: string;
+  signed_by_name?: string;
+  created_by_user_id?: string;
+  created_by_name?: string;
+  role?: 'preparer' | 'reviewer' | 'partner';
+  data_snapshot?: Record<string, any>;
+  snapshot_data_json?: Record<string, any>;
+  status_at_save?: StatusKey;
+  status?: string;
+  created_at: string;
+  reason?: string;
+}
+
+export interface DisclosureChecklistItem {
+  id: string;
+  engagement_id: string;
+  section:
+    | 'accounting_policies'
+    | 'balance_sheet_notes'
+    | 'pl_notes'
+    | 'directors'
+    | 'related_parties'
+    | 'commitments'
+    | 'post_balance_sheet'
+    | 'going_concern';
+  question: string;
+  standard_ref: string;
+  ai_suggested_answer: 'Yes' | 'No' | 'N/A';
+  ai_confidence: number;
+  ai_reason: string;
+  confirmed_answer: 'Yes' | 'No' | 'N/A' | null;
+  confirmed_by?: string | null;
+  confirmed_at?: string | null;
+  manager_override_reason?: string | null;
+  linked_note_id?: string | null;
+}
+
+export interface StatutoryNoteItem {
+  id: string;
+  engagement_id: string;
+  note_number: number;
+  title: string;
+  standard_ref: string;
+  why_included: string;
+  narrative_html: string;
+  figures: { label: string; amount_p: string; workpaper_ref?: string }[];
+  status: 'draft' | 'reviewed' | 'updated_needs_review';
+  is_custom_wording: boolean;
+}
+

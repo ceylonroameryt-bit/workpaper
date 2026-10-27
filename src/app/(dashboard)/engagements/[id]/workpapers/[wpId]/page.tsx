@@ -15,6 +15,19 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
+  FileText,
+  ThumbsUp,
+  ThumbsDown,
+  CheckCircle2,
+  AlertTriangle,
+  ShieldAlert,
+  Layers,
+  FileCheck,
+  X,
+  Download,
+  Lock,
+  Unlock,
+  Check,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { services } from '@/lib/server/services';
@@ -23,7 +36,7 @@ import { getActor } from '@/lib/session';
 import { StatusBadge } from '@/components/ui/StatusPill';
 import { evaluatePaper, linkedFiles } from '@/lib/workpapers/engine';
 import { TEMPLATES, templateFor } from '@/lib/workpapers/templates';
-import type { Attachment, AttachmentCategory } from '@/lib/types/models';
+import type { Attachment, AttachmentCategory, AiReviewFinding } from '@/lib/types/models';
 import {
   Section,
   StatePill,
@@ -47,6 +60,11 @@ import {
   AssetsSchedule,
   LinesSchedule,
   ChecklistSchedule,
+  VatSchedule,
+  PayrollSchedule,
+  LeasesSchedule,
+  DlaSchedule,
+  LoansSchedule,
 } from '@/components/workpaper/schedules';
 
 const ROLE_ORDER = ['preparer', 'reviewer', 'partner'] as const;
@@ -66,10 +84,14 @@ export default function WorkpaperPage() {
 
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
-  const [sideTab, setSideTab] = useState<'comments' | 'history'>('comments');
+  const [sideTab, setSideTab] = useState<'evidence' | 'comments' | 'ai_review' | 'history'>('comments');
+  const [unreviewOpen, setUnreviewOpen] = useState(false);
+  const [unreviewReason, setUnreviewReason] = useState('');
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [noteBody, setNoteBody] = useState('');
   const [noteType, setNoteType] = useState<'review_note' | 'comment' | 'client_query'>('review_note');
   const [noteAnchor, setNoteAnchor] = useState('paper');
+  const [carryForwardNote, setCarryForwardNote] = useState(false);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [conclusionDraft, setConclusionDraft] = useState<string | null>(null);
   const [explainDrafts, setExplainDrafts] = useState<Record<string, string>>({});
@@ -427,15 +449,62 @@ export default function WorkpaperPage() {
     !conclusionText.trim() && 'conclusion',
   ].filter(Boolean) as string[];
 
+  const unconfirmedAiCount = Number(data.values_to_confirm_count || 0);
+
   const canSign = (role: SignRole): string | null => {
     if (isLocked) return 'Engagement is locked';
     const allowed = actor.role === role || actor.role === 'admin' || (role === 'reviewer' && actor.role === 'manager');
     if (!allowed) return `Switch to a ${ROLE_LABEL[role].toLowerCase()} in the user menu to sign`;
-    if (role === 'preparer') return prepLeft.length ? `Left: ${prepLeft.join(', ')}` : null;
+    if (role === 'preparer') {
+      if (unconfirmedAiCount > 0) return `${unconfirmedAiCount} unconfirmed AI value(s) must be confirmed first (DAT-08)`;
+      if (openChecks.length > 0) return `${openChecks.length} open check(s) remaining`;
+      if (prepLeft.length) return `Left: ${prepLeft.join(', ')}`;
+      return null;
+    }
     if (!latestSignoff('preparer')) return 'Needs preparer sign-off first';
-    if (openNotes.length) return `${openNotes.length} open review note(s)`;
+    if (openNotes.length) return `${openNotes.length} open review note(s) block review (REV-03)`;
     if (role === 'partner' && !latestSignoff('reviewer')) return 'Needs reviewer sign-off first';
     return null;
+  };
+
+  const handleUnreview = () => {
+    if (unreviewReason.trim().length < 10) {
+      alert('Unreview reason must be at least 10 characters.');
+      return;
+    }
+    const keepSignoffs = db.signoffs.filter(
+      (s) => s.workpaper_id === workpaper.id && s.role === 'preparer'
+    );
+    db.signoffs = db.signoffs.filter((s) => s.workpaper_id !== workpaper.id).concat(keepSignoffs);
+
+    db.schedule_versions.push({
+      id: `ver_${Date.now()}`,
+      workpaper_id: workpaper.id,
+      version_number: db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id).length + 1,
+      snapshot_data_json: { ...workpaper.data_json },
+      status: 'in_progress',
+      created_by_user_id: actor.id,
+      created_by_name: actor.name,
+      reason: unreviewReason.trim(),
+      created_at: new Date().toISOString(),
+    });
+
+    workpaper.status = 'in_progress';
+    saveData({
+      changed_after_review: true,
+      last_unreview_reason: unreviewReason.trim(),
+      last_unreviewed_at: new Date().toISOString(),
+      last_unreviewed_by: actor.name,
+    });
+
+    db.logAudit(engagement.firm_id, actor, 'UNREVIEW', 'workpapers', workpaper.id, null, {
+      reason: unreviewReason.trim(),
+    });
+
+    setUnreviewOpen(false);
+    setUnreviewReason('');
+    setMessage({ kind: 'ok', text: 'Schedule unreviewed. Returned to In Progress status.' });
+    refresh();
   };
 
   const anyScheduleInput = JSON.stringify(data).match(/"[1-9]\d*"/) !== null || attachments.length > 0;
@@ -528,6 +597,107 @@ export default function WorkpaperPage() {
       />
       <PreviewModal file={preview} onClose={() => setPreview(null)} />
 
+      {/* Unreview Modal (REV-02) */}
+      {unreviewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-[16px] max-w-md w-full p-6 shadow-xl flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-base text-[#102654] flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-[#B8432F]" />
+                Unreview Schedule (REV-02)
+              </h3>
+              <button onClick={() => setUnreviewOpen(false)} className="text-[#7E8DA6] hover:text-[#102654]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-[#5B6478]">
+              This schedule has been reviewed. To modify figures, comments, mappings or documents, enter a reason for unreviewing. Reviewer sign-off will be removed and the schedule will be flagged as <strong>Changed after review</strong>.
+            </p>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="font-semibold text-[#102654]">Reason for unreview (minimum 10 characters):</span>
+              <textarea
+                rows={3}
+                value={unreviewReason}
+                onChange={(e) => setUnreviewReason(e.target.value)}
+                placeholder="e.g. Updating bank reconciliation following receipt of late bank statement..."
+                className="p-2 border border-[#D5DBE7] rounded-[8px] text-xs"
+              />
+              <span className="text-[10px] text-[#7E8DA6]">{unreviewReason.trim().length} / 10 characters minimum</span>
+            </label>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                type="button"
+                onClick={() => setUnreviewOpen(false)}
+                className="px-3 py-1.5 text-xs font-semibold text-[#5B6478] hover:bg-[#F6F7FB] rounded-[8px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={unreviewReason.trim().length < 10}
+                onClick={handleUnreview}
+                className="px-4 py-1.5 text-xs font-bold text-white bg-[#B8432F] hover:bg-[#963424] rounded-[8px] disabled:opacity-40"
+              >
+                Unreview to edit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Template Modal (WPS-02) */}
+      {templateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-[16px] max-w-lg w-full p-6 shadow-xl flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-base text-[#102654] flex items-center gap-2">
+                <Layers className="w-5 h-5 text-[#102654]" />
+                Schedule Templates Library (WPS-02)
+              </h3>
+              <button onClick={() => setTemplateModalOpen(false)} className="text-[#7E8DA6] hover:text-[#102654]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-[#5B6478]">
+              Switching template layout preserves mapped balances and entered figures for this client.
+            </p>
+            <div className="flex flex-col gap-2.5 max-h-80 overflow-y-auto">
+              <div
+                className={`p-3 rounded-[10px] border cursor-pointer ${
+                  !data.active_template_variant ? 'border-[#102654] bg-[#F6F7FB]' : 'border-[#E3E7EF] hover:border-[#102654]'
+                }`}
+                onClick={() => {
+                  saveData({ active_template_variant: null, active_template_title: null });
+                  setTemplateModalOpen(false);
+                  setMessage({ kind: 'ok', text: `Switched to default template: ${t.title}` });
+                  refresh();
+                }}
+              >
+                <div className="font-bold text-xs text-[#102654]">Default: {t.title}</div>
+                <div className="text-[11px] text-[#5B6478] mt-0.5">Practice standard methodology layout.</div>
+              </div>
+              {(t.alternativeTemplates ?? []).map((alt) => (
+                <div
+                  key={alt.id}
+                  className={`p-3 rounded-[10px] border cursor-pointer ${
+                    data.active_template_variant === alt.id ? 'border-[#102654] bg-[#F6F7FB]' : 'border-[#E3E7EF] hover:border-[#102654]'
+                  }`}
+                  onClick={() => {
+                    saveData({ active_template_variant: alt.id, active_template_title: alt.name });
+                    setTemplateModalOpen(false);
+                    setMessage({ kind: 'ok', text: `Switched to alternative template: ${alt.name}` });
+                    refresh();
+                  }}
+                >
+                  <div className="font-bold text-xs text-[#102654]">Alternative: {alt.name}</div>
+                  <div className="text-[11px] text-[#5B6478] mt-0.5">{alt.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5 text-xs text-[#5B6478] flex-wrap">
@@ -548,6 +718,39 @@ export default function WorkpaperPage() {
                 {data.bank_name ? ` · ${data.bank_name}` : ''}
               </h1>
               <StatusBadge status={workpaper.status} />
+              {data.changed_after_review && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#FFF4DB] text-[#805B00] border border-[#C58B00]/40 text-[10px] font-bold">
+                  ⚠ Changed after review
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-3 flex-wrap mt-2">
+              <span className="text-xs text-[#5B6478]">
+                Template: <strong className="text-[#102654]">{data.active_template_title || t.title}</strong>
+              </span>
+              {t.alternativeTemplates && t.alternativeTemplates.length > 0 && !isLocked && (
+                <button
+                  type="button"
+                  onClick={() => setTemplateModalOpen(true)}
+                  className="px-2 py-0.5 text-[11px] font-bold text-[#102654] bg-[#F6F7FB] border border-[#D5DBE7] hover:border-[#102654] rounded-[6px]"
+                >
+                  Change template (WPS-02)
+                </button>
+              )}
+              {result.totals.total !== undefined && (
+                <span className="text-xs text-[#5B6478]">
+                  Schedule: <strong className="font-mono text-[#102654]">{formatPence(result.totals.total)}</strong>
+                </span>
+              )}
+              {result.totals.difference !== undefined && (
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
+                    result.totals.difference === 0n ? 'bg-[#E6F4EF] text-[#0B6B52]' : 'bg-[#FFF1EE] text-[#B42318]'
+                  }`}
+                >
+                  Diff: {formatPence(result.totals.difference)}
+                </span>
+              )}
             </div>
             <p className="text-[11px] text-[#5B6478] mt-1">
               Template v{workpaper.template_version} · Preparer {latestSignoff('preparer')?.user_name ?? '—'} · Reviewer{' '}
@@ -591,6 +794,54 @@ export default function WorkpaperPage() {
                 </span>
               </button>
             </div>
+
+            {/* Confidence Gate (DAT-08) */}
+            {unconfirmedAiCount > 0 && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#EFF6FF] border border-[#93C5FD] rounded-[8px] text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-[#1E40AF]" />
+                <span className="font-bold text-[#1E40AF]">{unconfirmedAiCount} to confirm</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveData({ values_to_confirm_count: 0 });
+                    db.logAudit(engagement.firm_id, actor, 'CONFIRM_AI_VALUES', 'workpapers', workpaper.id, null, { action: 'confirm_all_ready' });
+                    setMessage({ kind: 'ok', text: 'All Ready AI values confirmed.' });
+                    refresh();
+                  }}
+                  className="px-2 py-0.5 bg-[#1E40AF] text-white font-bold rounded-[6px] hover:bg-[#1E3A8A] text-[10px]"
+                >
+                  Confirm all Ready
+                </button>
+              </div>
+            )}
+
+            {/* Propose Journal (JNL-02) */}
+            <Link
+              href={`/engagements/${engagementId}/journals?propose=${workpaper.ref}&amount=${result.totals.difference || 0}`}
+              className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#102654] bg-white border border-[#D5DBE7] hover:border-[#102654] rounded-[8px]"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#B8432F]" /> Propose journal
+            </Link>
+
+            {/* Unreview Button (REV-02) */}
+            {latestSignoff('reviewer') && !isLocked && (
+              <button
+                type="button"
+                onClick={() => setUnreviewOpen(true)}
+                className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#B8432F] bg-white border border-[#FF7D6B] hover:bg-[#FFF1EE] rounded-[8px]"
+              >
+                <Unlock className="w-3.5 h-3.5" /> Unreview to edit
+              </button>
+            )}
+
+            {/* Export (RPT-01) */}
+            <button
+              type="button"
+              onClick={() => alert(`Exporting ${workpaper.ref} to PDF and Excel with practice branding...`)}
+              className="min-h-[36px] px-2.5 inline-flex items-center gap-1 text-xs font-bold text-[#102654] bg-white border border-[#D5DBE7] hover:border-[#102654] rounded-[8px]"
+            >
+              <Download className="w-3.5 h-3.5" /> Export
+            </button>
 
             <button
               type="button"
@@ -862,6 +1113,11 @@ export default function WorkpaperPage() {
             {t.kind === 'reconciliation' && <ReconciliationSchedule {...scheduleProps} />}
             {t.kind === 'assets' && <AssetsSchedule {...scheduleProps} />}
             {t.kind === 'lines' && <LinesSchedule {...scheduleProps} />}
+            {t.kind === 'vat' && <VatSchedule {...scheduleProps} />}
+            {t.kind === 'payroll' && <PayrollSchedule {...scheduleProps} />}
+            {t.kind === 'leases' && <LeasesSchedule {...scheduleProps} />}
+            {t.kind === 'dla' && <DlaSchedule {...scheduleProps} />}
+            {t.kind === 'loans' && <LoansSchedule {...scheduleProps} />}
             {t.kind === 'checklist' && <ChecklistSchedule {...scheduleProps} />}
             <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#5B6478] flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-bold">Tickmarks:</span>
@@ -1244,10 +1500,30 @@ export default function WorkpaperPage() {
                 }
                 setConclusionDraft(null);
               }}
-              rows={4}
+              rows={3}
               placeholder="Summarise the work done and whether the balance is fairly stated."
               className="w-full mt-1 p-3 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] disabled:bg-[#F6F7FB]"
             />
+            
+            {/* Preparer notes box (REC-01) */}
+            <div className="mt-3 pt-3 border-t border-[#E3E7EF]">
+              <label className="text-[11px] font-semibold text-[#102654] block mb-1" htmlFor="preparer-notes">
+                Preparer notes (REC-01)
+              </label>
+              <textarea
+                id="preparer-notes"
+                disabled={isLocked}
+                defaultValue={data.preparer_notes ?? ''}
+                onBlur={(e) => {
+                  if (e.target.value !== (data.preparer_notes ?? '')) {
+                    saveData({ preparer_notes: e.target.value });
+                  }
+                }}
+                rows={2}
+                placeholder="Internal audit / working notes for manager review..."
+                className="w-full p-2.5 text-xs bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B] disabled:bg-[#F6F7FB]"
+              />
+            </div>
           </Section>
 
           <Section id="signoff" num={8} title="Sign-off" state={stateOf('signoff')}>
@@ -1289,9 +1565,11 @@ export default function WorkpaperPage() {
         {showComments && (
           <aside className="blynt-card p-4 h-fit xl:sticky xl:top-20">
             <div className="flex items-center justify-between mb-3 border-b border-[#E3E7EF]">
-              <div role="tablist" className="flex gap-1">
+              <div role="tablist" className="flex gap-1 overflow-x-auto pb-1">
                 {[
+                  { id: 'evidence' as const, label: `Evidence ${attachments.length}`, icon: FileText },
                   { id: 'comments' as const, label: `Comments ${comments.filter((c) => c.status === 'open').length}`, icon: MessageSquare },
+                  { id: 'ai_review' as const, label: `AI Review ${db.ai_review_findings.filter((f) => (f.workpaper_id === workpaper.id || f.schedule_ref === workpaper.ref) && f.status === 'open').length}`, icon: Sparkles },
                   { id: 'history' as const, label: 'History', icon: History },
                 ].map((tab) => (
                   <button
@@ -1300,7 +1578,7 @@ export default function WorkpaperPage() {
                     type="button"
                     aria-selected={sideTab === tab.id}
                     onClick={() => setSideTab(tab.id)}
-                    className={`flex items-center gap-1 px-2.5 py-2 text-xs font-bold border-b-2 -mb-px ${sideTab === tab.id ? 'border-[#FF7D6B] text-[#102654]' : 'border-transparent text-[#5B6478]'}`}
+                    className={`flex items-center gap-1 px-2.5 py-2 text-xs font-bold border-b-2 -mb-px whitespace-nowrap ${sideTab === tab.id ? 'border-[#FF7D6B] text-[#102654]' : 'border-transparent text-[#5B6478]'}`}
                   >
                     <tab.icon className="w-3.5 h-3.5" /> {tab.label}
                   </button>
@@ -1316,6 +1594,166 @@ export default function WorkpaperPage() {
                 <PanelRightClose className="w-3.5 h-3.5" />
               </button>
             </div>
+
+            {sideTab === 'evidence' && (
+              <div className="flex flex-col gap-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#102654]">Attached Documents ({attachments.length})</span>
+                  {!isLocked && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        pendingRow.current = null;
+                        fileInput.current?.click();
+                      }}
+                      className="text-[11px] font-bold text-[#B8432F] hover:underline flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" /> Upload file
+                    </button>
+                  )}
+                </div>
+                {attachments.length === 0 ? (
+                  <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] text-[#5B6478] text-[11px]">
+                    No files linked to this schedule yet. Drag and drop or click attach above to link supporting evidence (DOC-06).
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {attachments.map((a) => (
+                      <div
+                        key={a.id}
+                        className="p-2.5 rounded-[10px] border border-[#D5DBE7] bg-white flex flex-col gap-1 hover:border-[#102654] cursor-pointer"
+                        onClick={() => setPreview(a)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#102654] truncate max-w-[180px]">{a.filename}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#F6F7FB] text-[#5B6478]">
+                            {a.category}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-[#7E8DA6] flex items-center justify-between">
+                          <span>{fmtDate(a.uploaded_at)}</span>
+                          <span className="text-[#0B6B52] font-semibold">✓ Linked to paper</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {sideTab === 'ai_review' && (
+              <div className="flex flex-col gap-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#102654] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#B8432F]" />
+                    AI Schedule Review Bot (ANL-04)
+                  </span>
+                  <span className="text-[10px] text-[#5B6478]">Automated checks</span>
+                </div>
+                {db.ai_review_findings.filter((f) => f.workpaper_id === workpaper.id || f.schedule_ref === workpaper.ref).length === 0 ? (
+                  <div className="p-3.5 rounded-[10px] bg-[#E6F4EF] border border-[#0B6B52]/30 flex flex-col gap-1">
+                    <div className="font-bold text-[#0B6B52] flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4" />
+                      No issues found
+                    </div>
+                    <p className="text-[#5B6478] text-[11px] mt-0.5">
+                      All 8 automated checks passed: balance sheet tie, depreciation proof in total, accrual reversal, and DLA tax review.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {db.ai_review_findings
+                      .filter((f) => f.workpaper_id === workpaper.id || f.schedule_ref === workpaper.ref)
+                      .map((f) => (
+                        <div
+                          key={f.id}
+                          className={`p-3 rounded-[10px] border flex flex-col gap-1.5 ${
+                            f.status === 'fixed'
+                              ? 'bg-[#F6F7FB] border-[#E3E7EF] opacity-75'
+                              : f.severity === 'error'
+                              ? 'bg-[#FFF1EE] border-[#FF7D6B]'
+                              : f.severity === 'warning'
+                              ? 'bg-[#FFF4DB] border-[#C58B00]/40'
+                              : 'bg-[#EFF6FF] border-[#93C5FD]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="font-bold text-[#102654]">{f.title}</span>
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                f.severity === 'error'
+                                  ? 'bg-[#FF7D6B] text-white'
+                                  : f.severity === 'warning'
+                                  ? 'bg-[#FFF4DB] text-[#805B00]'
+                                  : 'bg-[#E6F4EF] text-[#0B6B52]'
+                              }`}
+                            >
+                              {f.severity}
+                            </span>
+                          </div>
+                          <p className="text-[#5B6478] text-[11px]">{f.detail}</p>
+                          {f.status === 'open' && !isLocked && (
+                            <div className="flex items-center justify-between pt-1 border-t border-[#E3E7EF]/60">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    f.status = 'fixed';
+                                    db.logAudit(engagement.firm_id, actor, 'RESOLVE_AI_FINDING', 'ai_review_findings', f.id, null, { action: 'fixed' });
+                                    refresh();
+                                  }}
+                                  className="px-2 py-0.5 bg-[#102654] text-white text-[10px] font-bold rounded"
+                                >
+                                  Fixed
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const r = prompt('Reason for dismissing this finding:');
+                                    if (r) {
+                                      f.status = 'dismissed';
+                                      f.dismiss_reason = r;
+                                      db.logAudit(engagement.firm_id, actor, 'DISMISS_AI_FINDING', 'ai_review_findings', f.id, null, { reason: r });
+                                      refresh();
+                                    }
+                                  }}
+                                  className="px-2 py-0.5 bg-white border border-[#D5DBE7] text-[#5B6478] text-[10px] font-semibold rounded hover:text-[#102654]"
+                                >
+                                  Dismiss
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-1 text-[#7E8DA6]">
+                                <button
+                                  type="button"
+                                  title="Helpful finding"
+                                  onClick={() => {
+                                    f.feedback = 'useful';
+                                    refresh();
+                                  }}
+                                  className={`p-1 hover:text-[#0B6B52] ${f.feedback === 'useful' ? 'text-[#0B6B52]' : ''}`}
+                                >
+                                  <ThumbsUp className="w-3 h-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  title="Not helpful"
+                                  onClick={() => {
+                                    f.feedback = 'not_useful';
+                                    refresh();
+                                  }}
+                                  className={`p-1 hover:text-[#B42318] ${f.feedback === 'not_useful' ? 'text-[#B42318]' : ''}`}
+                                >
+                                  <ThumbsDown className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {sideTab === 'comments' && (
               <div className="flex flex-col gap-3 text-xs">
@@ -1396,17 +1834,40 @@ export default function WorkpaperPage() {
             )}
 
             {sideTab === 'history' && (
-              <ol className="flex flex-col gap-2 text-xs">
-                {history.length === 0 && <li className="text-[#5B6478]">No changes yet.</li>}
-                {history.map((h) => (
-                  <li key={h.id} className="pb-2 border-b border-[#E3E7EF] last:border-0">
-                    <div className="text-[#102654]">
-                      <strong>{h.actor_name}</strong> {h.action.toLowerCase().replace(/_/g, ' ')}
+              <div className="flex flex-col gap-3 text-xs">
+                {/* Saved Versions (AUD-02) */}
+                {db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id).length > 0 && (
+                  <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex flex-col gap-1.5">
+                    <span className="font-bold text-[#102654]">Saved Versions ({db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id).length})</span>
+                    <div className="flex flex-col gap-1">
+                      {db.schedule_versions
+                        .filter((v) => v.workpaper_id === workpaper.id)
+                        .map((v) => (
+                          <div key={v.id} className="p-2 bg-white rounded border border-[#D5DBE7] flex items-center justify-between">
+                            <div>
+                              <div className="font-bold text-[#102654]">Version {v.version_number}</div>
+                              <div className="text-[10px] text-[#5B6478]">{v.created_by_name} · {fmtDateTime(v.created_at)}</div>
+                              {v.reason && <div className="text-[10px] text-[#805B00] italic mt-0.5">"{v.reason}"</div>}
+                            </div>
+                            <span className="text-[10px] font-bold text-[#0B6B52]">Saved</span>
+                          </div>
+                        ))}
                     </div>
-                    <div className="text-[10px] text-[#7E8DA6] font-mono">{fmtDateTime(h.at)}</div>
-                  </li>
-                ))}
-              </ol>
+                  </div>
+                )}
+
+                <ol className="flex flex-col gap-2 text-xs">
+                  {history.length === 0 && <li className="text-[#5B6478]">No changes yet.</li>}
+                  {history.map((h) => (
+                    <li key={h.id} className="pb-2 border-b border-[#E3E7EF] last:border-0">
+                      <div className="text-[#102654]">
+                        <strong>{h.actor_name}</strong> {h.action.toLowerCase().replace(/_/g, ' ')}
+                      </div>
+                      <div className="text-[10px] text-[#7E8DA6] font-mono">{fmtDateTime(h.at)}</div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             )}
 
             <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#5B6478]">

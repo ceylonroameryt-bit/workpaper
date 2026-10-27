@@ -26,9 +26,16 @@ import {
   AuditLog,
   AiLineage,
   CompanyType,
+  LearnedRule,
+  AiActionLogItem,
+  AiReviewFinding,
+  ScheduleVersion,
+  DisclosureChecklistItem,
+  StatutoryNoteItem,
 } from '../types/models';
 import { toPence, sumPence } from '../money';
 import { packFor, templateFor, blankPaperData } from '../workpapers/templates';
+import { getStatutoryDetails } from '../mapping/auto-mapper';
 
 export interface ServerSession {
   user: User;
@@ -59,6 +66,13 @@ class Database {
   view_prefs: ViewPrefs[] = [];
   audit_logs: AuditLog[] = []; // APPEND ONLY!
   ai_lineage: AiLineage[] = [];
+  // v1.1 Collections
+  learned_rules: LearnedRule[] = [];
+  ai_action_logs: AiActionLogItem[] = [];
+  ai_review_findings: AiReviewFinding[] = [];
+  schedule_versions: ScheduleVersion[] = [];
+  checklist_items: DisclosureChecklistItem[] = [];
+  statutory_notes: StatutoryNoteItem[] = [];
   // Server-only: password hashes. Never sent to the browser (see state-guard.ts)
   credentials: { user_id: string; password_hash: string }[] = [];
 
@@ -72,6 +86,7 @@ class Database {
     'mapping_lists', 'mapping_rules', 'tb_snapshots', 'tb_lines', 'account_mappings',
     'adjustments', 'templates', 'workpapers', 'procedures', 'comments', 'attachments',
     'attachment_links', 'signoffs', 'view_prefs', 'audit_logs', 'ai_lineage', 'credentials',
+    'learned_rules', 'ai_action_logs', 'ai_review_findings', 'schedule_versions', 'checklist_items', 'statutory_notes',
   ] as const;
 
   exportState(): Record<string, unknown[]> {
@@ -144,6 +159,12 @@ class Database {
     this.view_prefs = [];
     this.audit_logs = [];
     this.ai_lineage = [];
+    this.learned_rules = [];
+    this.ai_action_logs = [];
+    this.ai_review_findings = [];
+    this.schedule_versions = [];
+    this.checklist_items = [];
+    this.statutory_notes = [];
   }
 
   // Delete a specific client and cascade remove associated engagements and workpapers
@@ -988,6 +1009,20 @@ class Database {
       });
 
       const netBalance = line.debit_p - line.credit_p;
+      const stat = getStatutoryDetails(line.blynt_code, line.name, line.type);
+      const isSignMismatch = (stat.is_credit_area && netBalance > 0n) || (!stat.is_credit_area && netBalance < 0n);
+      const gate = line.confidence >= 90 ? 'ready' : line.confidence >= 70 ? 'check' : 'exception';
+      const aiReason = line.status === 'confirmed'
+        ? `Rule: Matched pattern on ${line.name}`
+        : line.confidence >= 90
+        ? `Name contains '${line.name.split(' ')[0]}'; same mapping on 412 other clients`
+        : line.confidence >= 70
+        ? `Account type '${line.type}' suggests standard schedule ${stat.schedule_ref}`
+        : 'Multiple possible classifications found (confidence under 70%)';
+      const evidence = line.status === 'confirmed'
+        ? 'Client rule > Practice rule > Prior-year mapping'
+        : 'Name pattern > Nominal code range > Transaction history';
+
       this.account_mappings.push({
         id: `map_${idx + 1}`,
         engagement_id: engId,
@@ -999,6 +1034,13 @@ class Database {
         status: line.status,
         confidence: line.confidence,
         method: line.status === 'confirmed' ? 'rule' : line.status === 'suggested' ? 'ai' : 'manual',
+        statutory_line: stat.statutory_line,
+        schedule_ref: stat.schedule_ref,
+        cash_flow_category: stat.cash_flow_category,
+        ai_reason: aiReason,
+        evidence_used: evidence,
+        sign_mismatch: isSignMismatch,
+        gate: gate,
         ai_alternatives:
           line.status === 'needs_you'
             ? [
@@ -1015,6 +1057,20 @@ class Database {
     // Seed for Acme Precision Engineering Ltd (eng_acme_fy26) matching redesign boards (6 unmapped, 12 suggested)
     seedLines.forEach((line, idx) => {
       const netBalance = line.debit_p - line.credit_p;
+      const stat = getStatutoryDetails(line.blynt_code, line.name, line.type);
+      const isSignMismatch = (stat.is_credit_area && netBalance > 0n) || (!stat.is_credit_area && netBalance < 0n);
+      const gate = line.confidence >= 90 ? 'ready' : line.confidence >= 70 ? 'check' : 'exception';
+      const aiReason = line.status === 'confirmed'
+        ? `Rule: Matched pattern on ${line.name}`
+        : line.confidence >= 90
+        ? `Name contains '${line.name.split(' ')[0]}'; same mapping on 412 other clients`
+        : line.confidence >= 70
+        ? `Account type '${line.type}' suggests standard schedule ${stat.schedule_ref}`
+        : 'Multiple possible classifications found (confidence under 70%)';
+      const evidence = line.status === 'confirmed'
+        ? 'Client rule > Practice rule > Prior-year mapping'
+        : 'Name pattern > Nominal code range > Transaction history';
+
       this.account_mappings.push({
         id: `map_acme_${idx + 1}`,
         engagement_id: acmeEngId,
@@ -1026,6 +1082,13 @@ class Database {
         status: line.status,
         confidence: line.confidence,
         method: line.status === 'confirmed' ? 'rule' : line.status === 'suggested' ? 'ai' : 'manual',
+        statutory_line: stat.statutory_line,
+        schedule_ref: stat.schedule_ref,
+        cash_flow_category: stat.cash_flow_category,
+        ai_reason: aiReason,
+        evidence_used: evidence,
+        sign_mismatch: isSignMismatch,
+        gate: gate,
         ai_alternatives:
           line.status === 'needs_you'
             ? [
@@ -1290,6 +1353,143 @@ class Database {
       mbSnapId,
       null,
       { source: 'csv', filename: 'mb_therapy_trial_balance.csv', sha256: mbSnapHash }
+    );
+
+    const now = new Date().toISOString();
+
+    // Seed v1.1 Learned Rules (DAT-09)
+    this.learned_rules.push(
+      {
+        id: 'rule_1',
+        firm_id: firmId,
+        scope: 'practice',
+        type: 'mapping',
+        client_id: null,
+        supplier_name: 'British Telecom',
+        pattern: 'telecom|telephone|broadband|bt',
+        target_value: '7500 Telephone and internet',
+        explanation: 'Default practice mapping for UK telecom providers',
+        created_by: 'usr_test_manager',
+        created_by_name: 'Test Manager',
+        active: true,
+        times_used: 42,
+        created_at: now,
+      },
+      {
+        id: 'rule_2',
+        firm_id: firmId,
+        scope: 'practice',
+        type: 'mapping',
+        client_id: null,
+        supplier_name: 'Companies House',
+        pattern: 'companies house|confirmation statement',
+        target_value: '7600 Legal & professional fees',
+        explanation: 'Default practice mapping for statutory filing fees',
+        created_by: 'usr_test_manager',
+        created_by_name: 'Test Manager',
+        active: true,
+        times_used: 19,
+        created_at: now,
+      },
+      {
+        id: 'rule_3',
+        firm_id: firmId,
+        scope: 'client',
+        type: 'proposal',
+        client_id: 'cli_harlow',
+        supplier_name: 'Commercial Properties Ltd',
+        pattern: 'rent unit 4',
+        target_value: 'C-20 Prepayments',
+        explanation: 'Quarterly in advance rent adjustment',
+        created_by: 'usr_test_preparer',
+        created_by_name: 'Test Preparer',
+        active: true,
+        times_used: 4,
+        created_at: now,
+      }
+    );
+
+    // Seed v1.1 AI Action Logs (AUD-03)
+    this.ai_action_logs.push(
+      {
+        id: 'act_1',
+        firm_id: firmId,
+        engagement_id: engId,
+        output_type: 'mapping',
+        model_version: 'claude-3-5-sonnet-20241022',
+        inputs_used: 'Account 1200 Bank Account mapped to Cash & Cash Equivalents',
+        confidence: 96,
+        outcome: 'accepted',
+        decided_by: 'usr_test_preparer',
+        decided_by_name: 'Test Preparer',
+        decided_at: now,
+      },
+      {
+        id: 'act_2',
+        firm_id: firmId,
+        engagement_id: engId,
+        output_type: 'extraction',
+        model_version: 'claude-3-5-sonnet-20241022',
+        inputs_used: 'Dell Technologies Invoice #99218 extracted additions cost £1,200',
+        confidence: 94,
+        outcome: 'accepted',
+        decided_by: 'usr_test_preparer',
+        decided_by_name: 'Test Preparer',
+        decided_at: now,
+      },
+      {
+        id: 'act_3',
+        firm_id: firmId,
+        engagement_id: engId,
+        output_type: 'finding',
+        model_version: 'claude-3-5-sonnet-20241022',
+        inputs_used: 'Quarterly reasonableness test on Box 1 output VAT',
+        confidence: 92,
+        outcome: 'accepted',
+        decided_by: 'usr_test_manager',
+        decided_by_name: 'Test Manager',
+        decided_at: now,
+      }
+    );
+
+    // Seed v1.1 AI Review Findings (ANL-04)
+    this.ai_review_findings.push(
+      {
+        id: 'find_1',
+        workpaper_id: 'wp_harlow_b10',
+        schedule_ref: 'B-10',
+        severity: 'info',
+        title: 'Bank feed agrees to statement',
+        explanation: 'Closing balance of £48,291.50 matches uploaded PDF bank statement with no uncleared items older than 30 days.',
+        detail: 'Closing balance of £48,291.50 matches uploaded PDF bank statement with no uncleared items older than 30 days.',
+        status: 'fixed',
+        feedback: 'useful',
+        created_at: now,
+      },
+      {
+        id: 'find_2',
+        workpaper_id: 'wp_harlow_f10',
+        schedule_ref: 'F-10',
+        severity: 'info',
+        title: 'Depreciation policy check',
+        explanation: 'Depreciation charge of £45.48 calculated at 20% on office equipment matches prior year policy with zero variance.',
+        detail: 'Depreciation charge of £45.48 calculated at 20% on office equipment matches prior year policy with zero variance.',
+        status: 'fixed',
+        feedback: 'useful',
+        created_at: now,
+      },
+      {
+        id: 'find_3',
+        workpaper_id: 'wp_harlow_s10',
+        schedule_ref: 'S-10',
+        severity: 'info',
+        title: 'Zero tolerance check passed',
+        explanation: 'Suspense, clearing and wages control accounts are nil at period end. No unexplained postings detected.',
+        detail: 'Suspense, clearing and wages control accounts are nil at period end. No unexplained postings detected.',
+        status: 'open',
+        feedback: 'useful',
+        created_at: now,
+      }
     );
 
     if (!withDemo) this.clearWorkspaceData();

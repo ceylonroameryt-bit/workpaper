@@ -74,6 +74,12 @@ export function firmSlice(state: State, firmId: string): State {
     view_prefs: rows(state, 'view_prefs').filter((v) => userIds.has(v.user_id)),
     audit_logs: rows(state, 'audit_logs').filter((a) => a.firm_id === firmId),
     ai_lineage: rows(state, 'ai_lineage').filter((a) => entityIds.has(a.entity_id)),
+    learned_rules: rows(state, 'learned_rules').filter((r) => r.firm_id === firmId),
+    ai_action_logs: rows(state, 'ai_action_logs').filter((a) => a.firm_id === firmId),
+    ai_review_findings: rows(state, 'ai_review_findings').filter((f) => engIds.has(f.engagement_id)),
+    schedule_versions: rows(state, 'schedule_versions').filter((v) => wpIds.has(v.workpaper_id)),
+    checklist_items: rows(state, 'checklist_items').filter((c) => engIds.has(c.engagement_id)),
+    statutory_notes: rows(state, 'statutory_notes').filter((n) => engIds.has(n.engagement_id)),
   };
 }
 
