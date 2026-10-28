@@ -14,7 +14,7 @@
   --input-border: #D5DBE7;
   --muted: #5B6478;
   --muted-strong: #3A4560;
-  
+
   --ok-bg: #E6F4EF;
   --ok: #0B6B52;
   --warn-bg: #FFF4DB;
@@ -91,11 +91,3 @@ body {
     scroll-behavior: auto !important;
   }
 }
-
-/* Hide Next.js floating development indicator badge that covers bottom-left sidebar */
-[data-nextjs-dev-overlay-button],
-[data-nextjs-toast],
-nextjs-portal {
-  display: none !important;
-}
-
