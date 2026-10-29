@@ -9,7 +9,7 @@ export const SESSION_COOKIE = 'blynt_session';
 export const SESSION_TTL_SECONDS = 60 * 60 * 12;
 const DEV_SECRET = 'blynt-dev-only-secret-change-me';
 
-function secret(): string {
+export function secret(): string {
   const s = process.env.AUTH_SECRET;
   if (s && s.length >= 32) return s;
   return DEV_SECRET + '-fallback-prod-security-hash-2026';

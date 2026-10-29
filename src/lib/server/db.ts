@@ -36,6 +36,7 @@ import {
   Invite,
 } from '../types/models';
 import { toPence, sumPence } from '../money';
+import type { XeroConnection as XeroConnectionRecord } from './xero';
 import { packFor, templateFor, blankPaperData } from '../workpapers/templates';
 import { getStatutoryDetails } from '../mapping/auto-mapper';
 
@@ -79,6 +80,8 @@ class Database {
   invites: Invite[] = []; // Server-only, like credentials
   // Server-only: which practice uploaded each stored file, so downloads can be checked
   uploads: { file_key: string; firm_id: string; uploaded_by: string; uploaded_at: string }[] = [];
+  // Server-only: Xero connections with encrypted tokens (see xero.ts)
+  xero_connections: XeroConnectionRecord[] = [];
   // Server-only: password hashes. Never sent to the browser (see state-guard.ts)
   credentials: { user_id: string; password_hash: string; mfa_secret?: string; mfa_pending_secret?: string; mfa_last_step?: number }[] = [];
 
@@ -93,7 +96,7 @@ class Database {
     'adjustments', 'templates', 'workpapers', 'procedures', 'comments', 'attachments',
     'attachment_links', 'signoffs', 'view_prefs', 'audit_logs', 'ai_lineage', 'credentials',
     'learned_rules', 'ai_action_logs', 'ai_review_findings', 'schedule_versions', 'checklist_items', 'statutory_notes',
-    'transactions', 'invites', 'uploads',
+    'transactions', 'invites', 'uploads', 'xero_connections',
   ] as const;
 
   exportState(): Record<string, unknown[]> {
@@ -254,6 +257,7 @@ class Database {
     this.transactions = [];
     this.invites = [];
     this.uploads = [];
+    this.xero_connections = [];
 
     const firmId = 'firm_blynt_uk';
     this.firms = [
@@ -1038,7 +1042,7 @@ class Database {
         : line.confidence >= 90
         ? `Name contains '${line.name.split(' ')[0]}'; same mapping on 412 other clients`
         : line.confidence >= 70
-        ? `Account type '${line.type}' suggests standard schedule ${stat.schedule_ref}`
+        ? `Account type '${line.type}' suggests ${stat.schedule_ref ? `standard schedule ${stat.schedule_ref}` : stat.statutory_line}`
         : 'Multiple possible classifications found (confidence under 70%)';
       const evidence = line.status === 'confirmed'
         ? 'Client rule > Practice rule > Prior-year mapping'
@@ -1086,7 +1090,7 @@ class Database {
         : line.confidence >= 90
         ? `Name contains '${line.name.split(' ')[0]}'; same mapping on 412 other clients`
         : line.confidence >= 70
-        ? `Account type '${line.type}' suggests standard schedule ${stat.schedule_ref}`
+        ? `Account type '${line.type}' suggests ${stat.schedule_ref ? `standard schedule ${stat.schedule_ref}` : stat.statutory_line}`
         : 'Multiple possible classifications found (confidence under 70%)';
       const evidence = line.status === 'confirmed'
         ? 'Client rule > Practice rule > Prior-year mapping'

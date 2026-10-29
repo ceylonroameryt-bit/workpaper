@@ -60,7 +60,9 @@ function matchByName(sourceName: string, sourceType: string): MappingSuggestion 
       lead_letter: 'B',
     };
   }
-  if (/starling|barclays|hsbc|lloyds|natwest|santander|revolut|tide|monzo|bank|current account|checking|operating account/i.test(name) || /bank/i.test(type)) {
+  // Income and expense accounts named after a bank ("Bank Fees", "HSBC charges") are not cash at bank
+  const profitAndLoss = /expense|overhead|cost|revenue|income|sales|direct/i.test(type);
+  if ((!profitAndLoss && /starling|barclays|hsbc|lloyds|natwest|santander|revolut|tide|monzo|bank|current account|checking|operating account/i.test(name)) || /bank/i.test(type)) {
     return {
       blynt_code: '1010',
       name: 'Barclays Current Account',
@@ -400,7 +402,8 @@ export function getStatutoryDetails(
     };
   }
 
-  if (/suspense|clearing|contra|wages control/i.test(name)) {
+  // Whole words only: "Subcontract" contains "contra" but is a cost, not a suspense account
+  if (/\b(suspense|clearing|contra|wages control)\b/i.test(name)) {
     return {
       statutory_line: 'Suspense & clearing control (must be zero)',
       schedule_ref: 'REC-16',
@@ -526,10 +529,30 @@ export function getStatutoryDetails(
     };
   }
 
+  // Income and expense lines are covered by P&L analysis (ANL-01); only those with a
+  // supporting schedule point at one. REC-01 is the schedule framework, not a schedule.
+  if (code === '6200') {
+    return {
+      statutory_line: 'Administrative expenses',
+      schedule_ref: 'REC-05', // payroll
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (code === '6900' || code === '6950') {
+    return {
+      statutory_line: 'Administrative expenses',
+      schedule_ref: 'REC-03', // fixed asset register: depreciation and disposals
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
   if (code.startsWith('4')) {
     return {
       statutory_line: 'Turnover',
-      schedule_ref: 'REC-01',
+      schedule_ref: '',
       cash_flow_category: 'Operating activities',
       is_credit_area: true,
     };
@@ -538,7 +561,7 @@ export function getStatutoryDetails(
   if (code.startsWith('5')) {
     return {
       statutory_line: 'Cost of sales',
-      schedule_ref: 'REC-01',
+      schedule_ref: '',
       cash_flow_category: 'Operating activities',
       is_credit_area: false,
     };
@@ -547,7 +570,7 @@ export function getStatutoryDetails(
   if (code.startsWith('6')) {
     return {
       statutory_line: 'Administrative expenses',
-      schedule_ref: 'REC-01',
+      schedule_ref: '',
       cash_flow_category: 'Operating activities',
       is_credit_area: false,
     };
@@ -555,7 +578,7 @@ export function getStatutoryDetails(
 
   return {
     statutory_line: 'Unclassified statutory balance',
-    schedule_ref: 'REC-01',
+    schedule_ref: '',
     cash_flow_category: 'Operating activities',
     is_credit_area: false,
   };

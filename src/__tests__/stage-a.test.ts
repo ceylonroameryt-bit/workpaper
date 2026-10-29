@@ -27,7 +27,7 @@ import { POST as login } from '../app/api/v1/auth/login/route';
 import { POST as mfaVerify } from '../app/api/v1/auth/mfa/verify/route';
 import { GET as mfaSetup } from '../app/api/v1/auth/mfa/setup/route';
 import { POST as importTb } from '../app/api/v1/engagements/[id]/imports/route';
-import { matchBlyntAccount } from '../lib/mapping/auto-mapper';
+import { matchBlyntAccount, getStatutoryDetails } from '../lib/mapping/auto-mapper';
 
 const FIRM = 'firm_blynt_uk';
 const admin: Actor = { id: 'usr_admin', name: 'Dev Administrator', role: 'admin', firmId: FIRM };
@@ -206,6 +206,34 @@ describe('Step 3 · A late posting is detected on refresh', () => {
 });
 
 describe('Step 4 · Account mapping, confidence gate and rules library', () => {
+  it('a subcontract cost is cost of sales, not a suspense account ("contra" inside "Subcontract")', () => {
+    const s = getStatutoryDetails('5100', 'Direct Subcontract Wages', 'Cost of Sales');
+    expect(s.statutory_line).toBe('Cost of sales');
+    expect(s.schedule_ref).not.toBe('REC-16');
+    // A real contra or suspense account still goes to REC-16
+    expect(getStatutoryDetails(null, 'Sales Contra Account', 'Other').schedule_ref).toBe('REC-16');
+    expect(getStatutoryDetails(null, 'Suspense', 'Other').schedule_ref).toBe('REC-16');
+  });
+
+  it('income and expense accounts never point at REC-01, which is not a schedule', () => {
+    const pl = db.blynt_accounts.filter((a) => /^[456]/.test(a.code));
+    expect(pl.length).toBeGreaterThan(0);
+    for (const a of pl) expect(getStatutoryDetails(a.code, a.name, a.type).schedule_ref).not.toBe('REC-01');
+    // P&L lines that do have a supporting schedule keep it
+    expect(getStatutoryDetails('6200', 'Staff Salaries', 'Overhead').schedule_ref).toBe('REC-05'); // payroll
+    expect(getStatutoryDetails('6900', 'Depreciation Charge for Year', 'Overhead').schedule_ref).toBe('REC-03'); // fixed assets
+    expect(getStatutoryDetails('6950', 'Loss / (Profit) on Disposal of Assets', 'Overhead').schedule_ref).toBe('REC-03');
+    expect(getStatutoryDetails(null, 'Mystery balance', 'Other').schedule_ref).not.toBe('REC-01');
+  });
+
+  it('an expense account with "bank" in its name is not mapped to a bank account (found in Xero Demo Company)', () => {
+    const fees = matchBlyntAccount('Bank Fees', 'Expense', '404')!;
+    expect(fees.lead_letter).not.toBe('B');
+    expect(fees.blynt_code).toMatch(/^6/); // an overhead, not cash at bank
+    // A real bank account is still cash at bank
+    expect(matchBlyntAccount('Business Bank Account', 'Bank', '090')).toMatchObject({ blynt_code: '1010', lead_letter: 'B' });
+  });
+
   it('a client code that clashes with the Blynt chart does not override a clear account name', () => {
     // 1200 is Trade Debtors in the Blynt chart; the name says bank
     const bank = matchBlyntAccount('Business Current Account', 'Bank', '1200')!;
