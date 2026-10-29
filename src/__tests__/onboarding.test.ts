@@ -68,6 +68,7 @@ describe('practice onboarding', () => {
     expect(() => saveOnboardingStep(actor, 0, { ...profile, regulator: '' })).toThrow(/supervisory body/);
     expect(() => saveOnboardingStep(actor, 0, { ...profile, postcode: 'nope' })).toThrow(/postcode/);
     expect(() => saveOnboardingStep(actor, 0, { ...profile, company_number: '' })).toThrow(/Companies House/);
+    expect(() => saveOnboardingStep(actor, 0, { ...profile, company_number: '12345678' })).toThrow(/LLP numbers start OC/);
     expect(() => saveOnboardingStep(actor, 0, { ...profile, vat_number: '' })).toThrow(/VAT number/);
     // A sole practitioner who is not VAT registered needs neither
     expect(() => saveOnboardingStep(actor, 0, { ...profile, structure: 'sole', company_number: '', vat_registered: false, vat_number: '' })).not.toThrow();

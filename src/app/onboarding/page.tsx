@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, Building2, Check, Copy, FlaskConical, Pencil, Plus, TableProperties, X, Zap } from 'lucide-react';
 import { BlyntLogo } from '@/components/ui/BlyntLogo';
 import { db } from '@/lib/server/db';
+import { structureFields, companyNumberError } from '@/lib/practice-structure';
 
 /**
  * Practice set-up wizard, shown once after firm sign-up (adaptive: each answer shows what it
@@ -219,7 +220,9 @@ export default function OnboardingPage() {
   }, []);
 
   const p = profile;
-  const onRegister = p.structure === 'llp' || p.structure === 'ltd';
+  const sf = structureFields(p.structure);
+  const onRegister = sf.companyNumber;
+  const crnError = p.company_number.trim() ? companyNumberError(p.structure, p.company_number, p.jurisdiction) : '';
   const setP = (k: keyof typeof profile) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setProfile({ ...p, [k]: e.target.value });
   const money = (s: string) => `£${Number(s || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const pendingInvites = invitees.filter((r) => r.email.trim() && !r.link);
@@ -319,7 +322,7 @@ export default function OnboardingPage() {
   const handleNext = async () => {
     setError('');
     if (step === 0) {
-      const missing = !p.legal_name.trim() || !p.regulator || !p.address_line.trim() || !p.postcode.trim() || (onRegister && !p.company_number.trim()) || (p.vat_registered && !p.vat_number.trim());
+      const missing = !p.legal_name.trim() || !p.regulator || !p.address_line.trim() || !p.postcode.trim() || (onRegister && (!p.company_number.trim() || Boolean(crnError))) || (p.vat_registered && !p.vat_number.trim());
       if (missing) {
         setError('Fill in the questions marked *.');
         return;
@@ -398,7 +401,7 @@ export default function OnboardingPage() {
 
   const reviewRows: [string, string, number][] = [
     ['Practice', `${p.trading_name || p.legal_name} · ${label(STRUCTURES, p.structure)}${onRegister && p.company_number ? ` · ${p.company_number}` : ''}`, 0],
-    ['Registered office', `${p.address_line}, ${p.postcode.toUpperCase()}`, 0],
+    [sf.addressLabel, `${p.address_line}, ${p.postcode.toUpperCase()}`, 0],
     ['Regulation', `${p.regulator}${p.registration_number ? ` · ${p.registration_number}` : ''} · ${p.vat_registered ? `VAT ${p.vat_number}` : 'Not VAT registered'}`, 0],
     ['Standards', work.standards.join(', '), 1],
     ['Services', work.services.map((s) => label(SERVICES, s)).join(', '), 1],
@@ -459,23 +462,25 @@ export default function OnboardingPage() {
               <p className="text-sm text-[#5B6478] mt-1">How your practice appears on statutory accounts and client packs.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Q htmlFor="legal" required>Legal name</Q>
-                  <input id="legal" className={inputCls} value={p.legal_name} onChange={setP('legal_name')} placeholder="Wright and Co LLP" />
+                  <Q htmlFor="legal" required>{sf.legalLabel}</Q>
+                  <input id="legal" className={inputCls} value={p.legal_name} onChange={setP('legal_name')} placeholder={sf.legalPlaceholder} />
                 </div>
                 <div>
-                  <Q htmlFor="trading">Trading name</Q>
+                  <Q htmlFor="trading">{sf.tradingLabel}</Q>
                   <input id="trading" className={inputCls} value={p.trading_name} onChange={setP('trading_name')} placeholder="Wright Accountants" />
                 </div>
               </div>
               <Q required>How is your practice set up?</Q>
-              <Cards cols={4} options={STRUCTURES} value={[p.structure]} onChange={(v) => setProfile({ ...p, structure: v[0] })} />
+              <Cards cols={4} options={STRUCTURES} value={[p.structure]} onChange={(v) => setProfile({ ...p, structure: v[0], company_number: v[0] === p.structure ? p.company_number : '' })} />
               {onRegister && (
                 <div className="sm:w-1/2">
                   <Q htmlFor="crn" required>Companies House number</Q>
-                  <input id="crn" className={inputCls} value={p.company_number} onChange={setP('company_number')} placeholder={p.structure === 'llp' ? 'OC123456' : '12345678'} />
+                  <input id="crn" className={inputCls} value={p.company_number} onChange={setP('company_number')} placeholder={sf.companyPlaceholder(p.jurisdiction)} aria-invalid={Boolean(crnError)} />
+                  {crnError && <p className="text-xs text-[#B8432F] mt-1">{crnError}</p>}
                 </div>
               )}
               <Q required>Who supervises your practice?</Q>
+              <p className="text-xs text-[#5B6478] -mt-1 mb-2">{sf.regulatorHint}</p>
               <Pills options={REGULATORS.map((r) => [r, r] as [string, string])} value={[p.regulator]} onChange={(v) => setProfile({ ...p, regulator: v[0] })} />
               {p.regulator && (
                 <div className="sm:w-1/2">
@@ -483,7 +488,7 @@ export default function OnboardingPage() {
                   <input id="regno" className={inputCls} value={p.registration_number} onChange={setP('registration_number')} placeholder="C001234567" />
                 </div>
               )}
-              <Q required>Registered office</Q>
+              <Q required>{sf.addressLabel}</Q>
               <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-3">
                 <input aria-label="Address" className={inputCls} value={p.address_line} onChange={setP('address_line')} placeholder="12 High Street, Leeds" />
                 <input aria-label="Postcode" className={inputCls} value={p.postcode} onChange={setP('postcode')} placeholder="LS1 4AB" />

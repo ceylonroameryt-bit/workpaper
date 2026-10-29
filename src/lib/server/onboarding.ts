@@ -2,6 +2,7 @@ import { db } from './db';
 import { ServiceError } from './services';
 import { Actor } from './state-guard';
 import { toPence } from '../money';
+import { structureFields, companyNumberError } from '../practice-structure';
 import { Firm, PracticeDefaults, PracticeProfile, PracticeWorkProfile, Regulator } from '../types/models';
 
 /**
@@ -65,10 +66,11 @@ function parseProfile(d: any): PracticeProfile {
   if (!address || !postcode) throw new ServiceError('Enter your registered office address and postcode.');
   if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/.test(postcode)) throw new ServiceError('Enter a valid UK postcode.');
   const structure = pick(d.structure, STRUCTURES, 'practice structure');
-  const companyNo = opt(d.company_number, 10)?.toUpperCase();
+  const jurisdiction = pick(d.jurisdiction, JURISDICTIONS, 'country');
   // LLPs and companies are on the Companies House register; partnerships and sole practitioners are not
-  if ((structure === 'llp' || structure === 'ltd') && !companyNo) throw new ServiceError('Enter your Companies House number.');
-  if (companyNo && !/^(OC|SC|NI|SO|NC|R0)?\d{6,8}$/.test(companyNo.replace(/\s/g, ''))) throw new ServiceError('Enter a valid Companies House number.');
+  const companyNo = structureFields(structure).companyNumber ? (opt(d.company_number, 12) ?? '').toUpperCase().replace(/\s/g, '') : undefined;
+  const companyErr = companyNumberError(structure, companyNo ?? '', jurisdiction);
+  if (companyErr) throw new ServiceError(companyErr);
   const vatRegistered = d.vat_registered !== false;
   const vat = vatRegistered ? opt(d.vat_number, 20)?.toUpperCase().replace(/\s/g, '') : undefined;
   if (vatRegistered && !vat) throw new ServiceError('Enter your VAT number, or choose not registered.');
@@ -77,10 +79,10 @@ function parseProfile(d: any): PracticeProfile {
     legal_name: legal,
     trading_name: opt(d.trading_name),
     structure,
-    company_number: structure === 'llp' || structure === 'ltd' ? companyNo : undefined,
+    company_number: companyNo,
     address_line: address,
     postcode,
-    jurisdiction: pick(d.jurisdiction, JURISDICTIONS, 'country'),
+    jurisdiction,
     regulator: pick(d.regulator, REGULATORS, 'supervisory body'),
     registration_number: opt(d.registration_number, 30),
     vat_registered: vatRegistered,
