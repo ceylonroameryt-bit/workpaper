@@ -37,6 +37,7 @@ import {
 } from '../types/models';
 import { toPence, sumPence } from '../money';
 import type { XeroConnection as XeroConnectionRecord } from './xero';
+import type { QboConnection as QboConnectionRecord } from './quickbooks';
 import { packFor, templateFor, blankPaperData } from '../workpapers/templates';
 import { getStatutoryDetails } from '../mapping/auto-mapper';
 
@@ -82,6 +83,8 @@ class Database {
   uploads: { file_key: string; firm_id: string; uploaded_by: string; uploaded_at: string }[] = [];
   // Server-only: Xero connections with encrypted tokens (see xero.ts)
   xero_connections: XeroConnectionRecord[] = [];
+  // Server-only: QuickBooks Online connections with encrypted tokens (see quickbooks.ts)
+  qbo_connections: QboConnectionRecord[] = [];
   // Server-only: password hashes. Never sent to the browser (see state-guard.ts)
   credentials: { user_id: string; password_hash: string; mfa_secret?: string; mfa_pending_secret?: string; mfa_last_step?: number }[] = [];
 
@@ -96,7 +99,7 @@ class Database {
     'adjustments', 'templates', 'workpapers', 'procedures', 'comments', 'attachments',
     'attachment_links', 'signoffs', 'view_prefs', 'audit_logs', 'ai_lineage', 'credentials',
     'learned_rules', 'ai_action_logs', 'ai_review_findings', 'schedule_versions', 'checklist_items', 'statutory_notes',
-    'transactions', 'invites', 'uploads', 'xero_connections',
+    'transactions', 'invites', 'uploads', 'xero_connections', 'qbo_connections',
   ] as const;
 
   exportState(): Record<string, unknown[]> {
@@ -258,6 +261,7 @@ class Database {
     this.invites = [];
     this.uploads = [];
     this.xero_connections = [];
+    this.qbo_connections = [];
 
     const firmId = 'firm_blynt_uk';
     this.firms = [

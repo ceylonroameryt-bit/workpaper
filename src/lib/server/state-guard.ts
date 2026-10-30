@@ -22,7 +22,7 @@ export class GuardError extends Error {
 }
 
 // Server-managed: a browser save never changes these
-const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'invites', 'uploads', 'xero_connections', 'blynt_accounts', 'templates'];
+const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'invites', 'uploads', 'xero_connections', 'qbo_connections', 'blynt_accounts', 'templates'];
 
 const REVIEWER_UP: UserRole[] = ['reviewer', 'manager', 'partner', 'admin'];
 const PARTNER_UP: UserRole[] = ['partner', 'admin'];

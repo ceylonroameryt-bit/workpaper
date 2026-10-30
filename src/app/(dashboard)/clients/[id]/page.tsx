@@ -21,7 +21,7 @@ import {
   Database,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
-import { XeroPanel } from '@/components/integrations/XeroPanel';
+import { QuickBooksPanel, XeroPanel } from '@/components/integrations/XeroPanel';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 
@@ -77,7 +77,9 @@ export default function ClientRecordPage() {
   };
 
   // Result of "Connect Xero", passed back by the callback
-  const xeroResult = useSearchParams().get('xero');
+  const search = useSearchParams();
+  const xeroResult = search.get('xero');
+  const qboResult = search.get('qbo');
   const xeroMessage =
     xeroResult === 'connected'
       ? { ok: true, text: 'Xero connected. Pull the trial balance from an engagement.' }
@@ -85,7 +87,13 @@ export default function ClientRecordPage() {
         ? { ok: false, text: 'Xero access was not granted, so nothing was connected.' }
         : xeroResult === 'error'
           ? { ok: false, text: 'The Xero connection didn\u2019t complete. Try again, and sign in as the same user who started it.' }
-          : null;
+          : qboResult === 'connected'
+            ? { ok: true, text: 'QuickBooks connected. Pull the trial balance from an engagement.' }
+            : qboResult === 'declined'
+              ? { ok: false, text: 'QuickBooks access was not granted, so nothing was connected.' }
+              : qboResult === 'error'
+                ? { ok: false, text: 'The QuickBooks connection didn’t complete. Try again, and sign in as the same user who started it.' }
+                : null;
   const latestEngagement = [...clientEngagements].sort((a, b) => b.period_end.localeCompare(a.period_end))[0];
 
   return (
@@ -134,6 +142,7 @@ export default function ClientRecordPage() {
         {/* Left 2 Cols: Client Facts & Engagements */}
         <div className="lg:col-span-2 space-y-6">
           <XeroPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
+          <QuickBooksPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           {/* Engagements List */}
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[#E3E7EF] pb-3">
