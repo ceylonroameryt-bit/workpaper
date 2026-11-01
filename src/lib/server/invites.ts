@@ -14,7 +14,7 @@ import { passwordError } from '../validation';
  */
 
 const INVITE_TTL_DAYS = 7;
-const ROLES: UserRole[] = ['preparer', 'reviewer', 'manager', 'partner', 'admin'];
+const ROLES: UserRole[] = ['readonly', 'preparer', 'reviewer', 'manager', 'partner', 'admin'];
 const sha256 = (s: string) => crypto.createHash('sha256').update(s).digest('hex');
 
 export function createInvite(

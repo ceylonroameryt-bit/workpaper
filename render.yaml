@@ -8,6 +8,8 @@ services:
     plan: free
     region: frankfurt
     branch: phase-a-completion
+    # Deploy only after the GitHub CI checks pass
+    autoDeployTrigger: checksPass
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /login
@@ -20,8 +22,9 @@ services:
         fromDatabase:
           name: blynt-db
           property: connectionString
+      # Two-factor sign-in for everyone (Build Order step 1)
       - key: MFA_REQUIRED
-        value: "false"
+        value: "true"
       # Optional: Xero and QuickBooks. Render asks for these; leave blank to skip.
       # Redirect URIs are https://<your-app>.onrender.com/api/v1/integrations/{xero,quickbooks}/callback
       - key: XERO_CLIENT_ID

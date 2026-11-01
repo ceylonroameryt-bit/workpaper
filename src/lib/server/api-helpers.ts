@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { logError } from './log-error';
 import { ServiceError } from './services';
 import { db } from './db';
 import { readCookie, verifySessionToken } from './auth';
@@ -11,6 +12,8 @@ export function getActorFromRequest(req: Request) {
   const user = db.users.find((u) => u.id === session.uid);
   const membership = db.memberships.find((m) => m.user_id === session.uid);
   if (!user || !membership || membership.status === 'deactivated') throw new ServiceError('Your account no longer has access.', 401, 'UNAUTHENTICATED');
+  // Readonly members can look at everything they are assigned but change nothing (sign-in routes don't come through here)
+  if (membership.role === 'readonly' && req.method !== 'GET' && req.method !== 'HEAD') throw new ServiceError('Your access is read-only.', 403, 'READONLY');
   return {
     id: user.id,
     name: user.name,
@@ -91,6 +94,7 @@ export function errorResponse(err: any) {
   if (err instanceof ServiceError) {
     return jsonResponse({ error: err.message, code: err.code }, err.status);
   }
-  console.error('API Error:', err);
-  return jsonResponse({ error: err?.message || 'Internal Server Error' }, 500);
+  logError('api', err);
+  // Don't send internal error text to the browser
+  return jsonResponse({ error: 'Something went wrong on our side. Try again.', code: 'SERVER_ERROR' }, 500);
 }

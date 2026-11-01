@@ -66,6 +66,7 @@ export async function POST(req: Request) {
       reviewer: 'Audit Reviewer',
       preparer: 'Senior Associate / Preparer',
       admin: 'Firm Administrator',
+      readonly: 'Read only',
     };
 
     const newUser: User = {

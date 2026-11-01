@@ -71,3 +71,16 @@ describe('staff management', () => {
     expect(getActorFromRequest(session).id).toBe(user.id);
   });
 });
+
+describe('readonly role', () => {
+  it('a readonly member can read but every write is refused', () => {
+    const m = member();
+    updateStaff(admin, m.user_id, { role: 'readonly' });
+    const cookie = `${SESSION_COOKIE}=${createSessionToken(m.user_id)}`;
+    const read = new Request('http://localhost/api/v1/clients', { headers: { cookie } });
+    expect(getActorFromRequest(read).role).toBe('readonly');
+    for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
+      expect(() => getActorFromRequest(new Request('http://localhost/api/v1/state', { method, headers: { cookie } }))).toThrow(/read-only/);
+    }
+  });
+});

@@ -9,7 +9,7 @@ import { UserRole } from '../types/models';
  * clients they see, and when they last signed in (from the audit log's LOGIN entries).
  */
 
-const ROLES: UserRole[] = ['preparer', 'reviewer', 'manager', 'partner', 'admin'];
+const ROLES: UserRole[] = ['readonly', 'preparer', 'reviewer', 'manager', 'partner', 'admin'];
 
 export function listStaff(actor: Actor) {
   const lastLogin = new Map<string, string>();

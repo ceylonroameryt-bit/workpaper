@@ -75,7 +75,7 @@ export default function PracticeSettingsPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<'preparer' | 'reviewer' | 'partner' | 'admin'>('preparer');
+  const [inviteRole, setInviteRole] = useState<'readonly' | 'preparer' | 'reviewer' | 'partner' | 'admin'>('preparer');
   const [inviteScope, setInviteScope] = useState<'all' | 'assigned'>('all');
   const [inviteError, setInviteError] = useState('');
   const [inviteClientIds, setInviteClientIds] = useState<string[]>([]);
@@ -1139,6 +1139,7 @@ export default function PracticeSettingsPage() {
                   onChange={(e) => setInviteRole(e.target.value as any)}
                   className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
                 >
+                  <option value="readonly">Read only (View assigned files, no changes)</option>
                   <option value="preparer">Preparer (Reconcile &amp; prepare schedules)</option>
                   <option value="reviewer">Manager / Reviewer (Review schedules &amp; raise points)</option>
                   <option value="partner">Partner (Final sign-off, approval &amp; lock)</option>

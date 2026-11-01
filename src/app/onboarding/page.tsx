@@ -20,7 +20,7 @@ const STRUCTURES: [string, string, string][] = [
   ['sole', 'Sole practitioner', 'Not on the register'],
 ];
 const REGULATORS = ['ICAEW', 'ACCA', 'ICAS', 'CAI', 'AAT', 'CIMA', 'ATT', 'CIOT'];
-const ROLES = ['preparer', 'reviewer', 'manager', 'partner', 'admin'];
+const ROLES = ['readonly', 'preparer', 'reviewer', 'manager', 'partner', 'admin'];
 const label = (list: [string | number, string, ...string[]][], key: string | number) => list.find((x) => x[0] === key)?.[1] ?? String(key);
 
 const inputCls =

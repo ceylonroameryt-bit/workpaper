@@ -3,7 +3,7 @@
  * Exactly matches the database schema & ground rules.
  */
 
-export type UserRole = 'preparer' | 'reviewer' | 'manager' | 'partner' | 'admin';
+export type UserRole = 'readonly' | 'preparer' | 'reviewer' | 'manager' | 'partner' | 'admin';
 
 export type StatusKey =
   | 'not_started'

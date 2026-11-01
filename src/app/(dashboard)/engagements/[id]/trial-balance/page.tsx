@@ -349,24 +349,6 @@ export default function TrialBalancePage() {
           drillAccount.code === 'TOTAL' ||
           !drillAccount.code)
     );
-    if (list.length === 0) {
-      list = [
-        {
-          id: `tx_${drillAccount.code}_1`,
-          engagement_id: engagementId,
-          account_code: drillAccount.code,
-          account_name: drillAccount.name,
-          date: '2026-09-30',
-          contact: 'Primary Vendor / Customer',
-          description: `Period end ledger posting for ${drillAccount.name}`,
-          amount_p: '500000',
-          vat_p: '100000',
-          gross_p: '600000',
-          source: 'Xero',
-          external_url: 'https://go.xero.com',
-        },
-      ];
-    }
     if (drillSearch) {
       const q = drillSearch.toLowerCase();
       list = list.filter(
@@ -1486,7 +1468,9 @@ export default function TrialBalancePage() {
             <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
               {accountTransactions.length === 0 ? (
                 <div className="text-center py-12 text-xs text-[#5B6478]">
-                  No transactions found matching your search.
+                  {drillSearch
+                    ? 'No transactions found matching your search.'
+                    : 'No transactions for this account. They come in when the trial balance is pulled from Xero.'}
                 </div>
               ) : (
                 accountTransactions.map((tx) => {

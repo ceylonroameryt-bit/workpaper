@@ -19,6 +19,7 @@ interface StaffRow {
 }
 
 const ROLES: [string, string][] = [
+  ['readonly', 'Can view assigned client files but not change anything'],
   ['preparer', 'Prepares working papers on assigned clients'],
   ['reviewer', 'Reviews and signs off prepared papers'],
   ['manager', 'Runs client files and manages the team’s work'],

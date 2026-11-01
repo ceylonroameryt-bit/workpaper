@@ -14,3 +14,14 @@ export function periodStart(end: string, months: number): string {
   const daysThen = new Date(Date.UTC(y, m - 1 - months + 1, 0)).getUTCDate();
   return iso(y, m - 1 - months, Math.min(d, daysThen) + 1);
 }
+
+const fmt = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const NAME: Record<Frequency, string> = { year_end: 'Year', quarterly: 'Quarter', monthly: 'Month' };
+
+/** "Year ended 31 Mar 2026", or "Short period ended …" when the start was moved. */
+export function periodLabel(e: { period_start: string; period_end: string; frequency?: Frequency }): string {
+  const f = e.frequency ?? 'year_end';
+  const standard = periodStart(e.period_end, FREQUENCY_MONTHS[f]);
+  const name = e.period_start === standard ? NAME[f] : e.period_start < standard ? 'Long period' : 'Short period';
+  return `${name} ended ${fmt(e.period_end)}`;
+}

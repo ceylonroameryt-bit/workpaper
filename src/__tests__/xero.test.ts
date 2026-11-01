@@ -72,6 +72,21 @@ const trialBalance = (expenses = '2500.00', funds = '10000.00') => ({
   ],
 });
 
+const INVOICES = [
+  { InvoiceID: 'inv-1', Type: 'ACCREC', Status: 'PAID', DateString: '2026-05-10T00:00:00', Contact: { Name: 'Acme Ltd' }, Reference: 'INV-001',
+    LineItems: [{ AccountCode: '200', Description: 'Consulting', LineAmount: 1000, TaxAmount: 200 }] },
+  { InvoiceID: 'inv-2', Type: 'ACCPAY', Status: 'DRAFT', DateString: '2026-05-11T00:00:00', Contact: { Name: 'Draft Co' },
+    LineItems: [{ AccountCode: '429', Description: 'Not posted', LineAmount: 50, TaxAmount: 0 }] },
+];
+const BANK_TXS = [
+  { BankTransactionID: 'bt-1', Type: 'SPEND', Status: 'AUTHORISED', Date: '/Date(1780000000000+0000)/', Contact: { Name: 'Stationers' }, BankAccount: { Code: '090' },
+    LineItems: [{ AccountCode: '429', Description: 'Paper', LineAmount: 30, TaxAmount: 6 }] },
+];
+const JOURNALS = [
+  { ManualJournalID: 'mj-1', Status: 'POSTED', DateString: '2026-09-30T00:00:00', Narration: 'Year-end accrual',
+    JournalLines: [{ AccountCode: '429', LineAmount: 75, Description: 'Accrual' }, { AccountCode: '970', LineAmount: -75 }] },
+];
+
 /** A fake Xero: answers the token, connections and accounting endpoints and records each call. */
 function fakeXero(opts: { tb?: () => unknown; tokenError?: string } = {}) {
   const calls: { url: string; init?: RequestInit }[] = [];
@@ -89,6 +104,11 @@ function fakeXero(opts: { tb?: () => unknown; tokenError?: string } = {}) {
     if (url.startsWith('https://api.xero.com/api.xro/2.0/Organisation')) return json({ Organisations: [{ Name: 'Harlow Demo Ltd', ShortCode: '!aB3cD' }] });
     if (url.startsWith('https://api.xero.com/api.xro/2.0/Accounts')) return json(ACCOUNTS);
     if (url.startsWith('https://api.xero.com/api.xro/2.0/Reports/TrialBalance')) return json((opts.tb ?? trialBalance)());
+    // One page of each document type; page 2 is empty
+    const page2 = url.includes('page=2');
+    if (url.startsWith('https://api.xero.com/api.xro/2.0/Invoices')) return json({ Invoices: page2 ? [] : INVOICES });
+    if (url.startsWith('https://api.xero.com/api.xro/2.0/BankTransactions')) return json({ BankTransactions: page2 ? [] : BANK_TXS });
+    if (url.startsWith('https://api.xero.com/api.xro/2.0/ManualJournals')) return json({ ManualJournals: page2 ? [] : JOURNALS });
     return json({ error: 'unexpected' }, 404);
   });
   vi.stubGlobal('fetch', impl);
@@ -231,6 +251,29 @@ describe('Pulling the trial balance from Xero', () => {
     expect((tbCall.init!.headers as Record<string, string>)['xero-tenant-id']).toBe('tenant-1');
     expect(db.tb_snapshots.find((s) => s.id === body.snapshot.id)!.source).toBe('xero');
     expect(db.account_mappings.filter((m) => m.engagement_id === ENG)).toHaveLength(4);
+  });
+
+  it('brings in posted transactions per account, each linking back to the record in Xero', async () => {
+    await connected();
+    fakeXero();
+    await sync(post('/api/v1/integrations/xero/sync', { engagementId: ENG }));
+    const tx = db.transactions.filter((x) => x.engagement_id === ENG && x.source === 'Xero');
+    // Sales invoice: income is a credit
+    expect(tx.find((x) => x.external_id === 'inv-1' && x.account_code === '200')).toMatchObject({ amount_p: '-100000', vat_p: '-20000', contact: 'Acme Ltd', date: '2026-05-10' });
+    // Drafts are not in the ledger
+    expect(tx.some((x) => x.external_id === 'inv-2')).toBe(false);
+    // Spend money: expense debit, and the bank account credited with the gross
+    expect(tx.find((x) => x.external_id === 'bt-1' && x.account_code === '429')).toMatchObject({ amount_p: '3000' });
+    expect(tx.find((x) => x.external_id === 'bt-1' && x.account_code === '090')).toMatchObject({ amount_p: '-3600' });
+    expect(tx.find((x) => x.external_id === 'mj-1' && x.account_code === '970')).toMatchObject({ amount_p: '-7500', description: 'Year-end accrual' });
+    // Deep links open the record in this client's Xero organisation
+    expect(tx.find((x) => x.external_id === 'inv-1')!.external_url).toBe(
+      'https://go.xero.com/organisationlogin/default.aspx?shortcode=!aB3cD&redirecturl=/AccountsReceivable/View.aspx?InvoiceID=inv-1'
+    );
+    // A second pull replaces them rather than doubling up
+    fakeXero();
+    await sync(post('/api/v1/integrations/xero/sync', { engagementId: ENG }));
+    expect(db.transactions.filter((x) => x.engagement_id === ENG && x.source === 'Xero')).toHaveLength(tx.length);
   });
 
   it('a late posting in Xero shows up on the next pull', async () => {
