@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { AppSidebar } from './AppSidebar';
 import { AppHeader } from './AppHeader';
-import { db } from '@/lib/server/db';
-import { getActor } from '@/lib/session';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -12,14 +10,6 @@ interface DashboardShellProps {
 
 export const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // A new practice's owner, admins and partners finish the set-up wizard first; other members carry on
-  useEffect(() => {
-    const firm = db.firms[0];
-    const me = getActor();
-    const canSetUp = me.role === 'admin' || me.role === 'partner' || firm?.owner_user_id === me.id;
-    if (canSetUp && firm?.onboarding && !firm.onboarding.completed_at) window.location.replace('/onboarding');
-  }, []);
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#F6F7FB] text-[#102654]">

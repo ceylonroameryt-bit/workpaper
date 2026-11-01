@@ -38,7 +38,7 @@ import {
 import { toPence, sumPence } from '../money';
 import type { XeroConnection as XeroConnectionRecord } from './xero';
 import type { QboConnection as QboConnectionRecord } from './quickbooks';
-import { packFor, templateFor, blankPaperData } from '../workpapers/templates';
+import { packFor, packForClient, templateFor, blankPaperData } from '../workpapers/templates';
 import { getStatutoryDetails } from '../mapping/auto-mapper';
 
 export interface ServerSession {
@@ -115,9 +115,10 @@ class Database {
     }
   }
 
-  // Working papers for a new engagement, from the pack for its company type
-  createEngagementWorkpapers(engagementId: string, companyType?: string, includeOptional = true) {
-    for (const ref of packFor(companyType, includeOptional)) this.addWorkpaper(engagementId, ref);
+  // Working papers for a new engagement: the client's profile, or just a company type
+  createEngagementWorkpapers(engagementId: string, profile?: string | { company_type?: string; vat_registered?: boolean; payroll?: boolean }) {
+    const refs = typeof profile === 'object' ? packForClient(profile) : packFor(profile);
+    for (const ref of refs) this.addWorkpaper(engagementId, ref);
   }
 
   addWorkpaper(engagementId: string, ref: string) {

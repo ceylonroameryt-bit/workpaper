@@ -51,7 +51,6 @@ export async function POST(req: Request) {
       name: firmName,
       created_at: new Date().toISOString(),
       owner_user_id: userId,
-      onboarding: { step: 0, completed_at: null }, // the set-up wizard runs next
     };
     db.firms.push(newFirm);
 

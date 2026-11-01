@@ -106,7 +106,6 @@ export interface Firm {
   // ADM-02 practice settings; DAT-08 gate thresholds per AI output type
   settings?: {
     gate?: Partial<Record<AiActionLogItem['output_type'], { ready?: number; check?: number; auto_accept?: boolean }>>;
-    work?: PracticeWorkProfile;
     defaults?: PracticeDefaults;
   };
 }
@@ -129,17 +128,8 @@ export interface PracticeProfile {
   logo_attachment_id?: string;
 }
 
-export interface PracticeWorkProfile {
-  standards: ('FRS 105' | 'FRS 102 1A' | 'FRS 102' | 'IFRS' | 'Charities SORP')[];
-  services: ('year_end' | 'management' | 'vat' | 'payroll' | 'quarterly' | 'corporation_tax')[];
-  software: ('xero' | 'qbo' | 'sage' | 'freeagent' | 'spreadsheets')[];
-  client_count: '1-50' | '51-200' | '201-500' | '500+';
-  team_size: '1' | '2-10' | '11-50' | '50+';
-}
-
+// ADM-02 practice settings skeleton (Build Order step 2)
 export interface PracticeDefaults {
-  year_end: 'per_client' | '03-31' | '12-31';
-  standard: 'FRS 105' | 'FRS 102 1A' | 'FRS 102';
   tolerance_p: string; // pence; differences below this count as reconciled
   review_threshold_p: string; // pence; movements above this are flagged
   signoff_levels: 1 | 2 | 3; // preparer / + reviewer / + partner
@@ -187,6 +177,18 @@ export interface Client {
   yearEnd?: string;
   data_source?: DataSource;
   reconnect_needed?: boolean;
+  // Client profile (Build Order step 2): decides which working papers each engagement gets
+  trading_name?: string;
+  address_line?: string;
+  postcode?: string;
+  jurisdiction?: 'england_wales' | 'scotland' | 'northern_ireland';
+  vat_number?: string;
+  vat_registered?: boolean;
+  vat_scheme?: 'standard' | 'flat_rate' | 'cash' | 'annual';
+  payroll?: boolean;
+  services?: ('year_end' | 'management' | 'vat' | 'payroll' | 'quarterly' | 'corporation_tax')[];
+  signoff_levels?: 1 | 2 | 3; // overrides the practice default
+  team_user_ids?: string[];
   industry?: string;
   framework?: string;
   currentEngagementId?: string;

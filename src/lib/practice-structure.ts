@@ -71,3 +71,10 @@ export function companyNumberError(structure: string, value: string, jurisdictio
   if (prefix) return new RegExp(`^${prefix}\\d{6}$`).test(v) ? '' : `Company numbers here start ${prefix} followed by 6 digits, e.g. ${prefix}123456.`;
   return /^\d{8}$/.test(v) ? '' : 'Company numbers are 8 digits, e.g. 01234567.';
 }
+
+export const UK_POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/;
+export const UK_VAT = /^(GB)?(\d{9}|\d{12})$/;
+
+/** The legal structure behind a client's company type, for the Companies House number rules. */
+export const structureForCompanyType = (t: string): Structure =>
+  t === 'Sole trader' ? 'sole' : t === 'Partnership' ? 'partnership' : t.startsWith('LLP') ? 'llp' : 'ltd';

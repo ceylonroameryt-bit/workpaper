@@ -44,12 +44,23 @@ export default function PracticeSettingsPage() {
       else if (tab === 'security') setActiveTab('security');
       else if (tab === 'defaults') setActiveTab('defaults');
     }
+    // Saved practice defaults (ADM-02)
+    fetch('/api/v1/firm/settings')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.defaults) return;
+        setSignOffLevels(d.defaults.signoff_levels === 2 ? '2' : '3');
+        setReconciliationTolerance((Number(d.defaults.tolerance_p) / 100).toFixed(2));
+        setReviewThreshold((Number(d.defaults.review_threshold_p) / 100).toFixed(2));
+      })
+      .catch(() => {});
   }, []);
 
   // ADM-02 Practice Defaults
   const [signOffLevels, setSignOffLevels] = useState<'3' | '2'>('3');
   const [reconciliationTolerance, setReconciliationTolerance] = useState('1.00');
   const [materialityThreshold, setMaterialityThreshold] = useState('5000.00');
+  const [reviewThreshold, setReviewThreshold] = useState('500.00');
   const [capitalisationThreshold, setCapitalisationThreshold] = useState('500.00');
   const [aiReadyThreshold, setAiReadyThreshold] = useState('90');
   const [aiCheckThreshold, setAiCheckThreshold] = useState('70');
@@ -189,8 +200,17 @@ export default function PracticeSettingsPage() {
     setTimeout(() => setSavedToast(null), 3000);
   };
 
-  const handleConfirmSave = (mode: 'new_only' | 'all') => {
+  const handleConfirmSave = async (mode: 'new_only' | 'all') => {
     setShowSaveConfirmModal(false);
+    const res = await fetch('/api/v1/firm/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tolerance: reconciliationTolerance, review_threshold: reviewThreshold, signoff_levels: Number(signOffLevels) }),
+    }).catch(() => null);
+    if (!res?.ok) {
+      triggerSaveNotification((await res?.json().catch(() => null))?.error || 'Could not save the practice defaults. Try again.');
+      return;
+    }
     triggerSaveNotification(
       mode === 'new_only'
         ? 'Settings saved successfully. Changes will apply to all new engagements.'
@@ -423,7 +443,11 @@ export default function PracticeSettingsPage() {
             <h2 className="text-base font-bold text-[#102654]">Practice Engagement Defaults (ADM-02)</h2>
             <p className="text-xs text-[#5B6478] mt-0.5">
               Parameters enforced automatically on schedules, lead sheets, variance calculations, and statutory reviews.
+              Each client can override the sign-off levels on its client page.
             </p>
+            <a href="/onboarding" className="inline-block mt-2 text-xs font-semibold text-[#1D4E89] hover:underline">
+              Edit practice details (name, structure, regulator, address, VAT)
+            </a>
           </div>
 
           <div className="space-y-6">
@@ -491,6 +515,22 @@ export default function PracticeSettingsPage() {
                 />
                 <span className="text-[11px] text-[#7E8DA6] mt-1 block">
                   Default £1.00. Differences within tolerance are treated as Reconciled automatically.
+                </span>
+              </div>
+
+              <div className="p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
+                <label htmlFor="review-threshold" className="block text-xs font-bold text-[#102654] mb-1">
+                  Review Threshold (£)
+                </label>
+                <input
+                  id="review-threshold"
+                  type="text"
+                  value={reviewThreshold}
+                  onChange={(e) => setReviewThreshold(e.target.value)}
+                  className="w-full text-xs p-2.5 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
+                />
+                <span className="text-[11px] text-[#7E8DA6] mt-1 block">
+                  Movements above this are flagged for review.
                 </span>
               </div>
 

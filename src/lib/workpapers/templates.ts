@@ -927,6 +927,13 @@ export function packFor(companyType: string | undefined, includeOptional = true)
   return includeOptional ? refs : refs.filter((r) => !OPTIONAL_REFS.includes(r));
 }
 
+/** The papers a client needs: the pack for its company type, less VAT and payroll papers it has no use for. */
+export function packForClient(client: { company_type?: string; vat_registered?: boolean; payroll?: boolean }): string[] {
+  return packFor(client.company_type).filter(
+    (r) => !(r === 'T-20' && client.vat_registered === false) && !(r === 'P-20' && client.payroll === false)
+  );
+}
+
 export function templateFor(ref: string): TemplateDef | undefined {
   return TEMPLATES.find((t) => t.ref === ref);
 }

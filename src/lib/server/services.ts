@@ -129,7 +129,7 @@ export const services = {
       prior_engagement_id: data.prior_engagement_id || null,
     };
     db.engagements.push(newEng);
-    db.createEngagementWorkpapers(newEng.id);
+    db.createEngagementWorkpapers(newEng.id, db.clients.find((c) => c.id === newEng.client_id));
     db.logAudit(firmId, actor, 'CREATE_ENGAGEMENT', 'engagements', newEng.id, null, newEng);
     return newEng;
   },

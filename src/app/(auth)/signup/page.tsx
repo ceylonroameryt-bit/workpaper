@@ -117,8 +117,8 @@ export default function SignupPage() {
 
       setSuccessNotice(true);
       setTimeout(() => {
-        // Two-factor set-up first (when required), then the practice set-up wizard
-        window.location.href = data.mfa ? '/login/mfa?step=setup&from=%2Fonboarding' : '/onboarding';
+        // Two-factor set-up first (when required), then straight in: each client's profile is set on the client page
+        window.location.href = data.mfa ? '/login/mfa?step=setup&from=%2Fclients' : '/clients';
       }, 800);
     } catch {
       setErrorMessage('Could not connect to the server. Please check your network and try again.');
