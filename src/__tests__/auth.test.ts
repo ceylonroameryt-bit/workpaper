@@ -137,3 +137,22 @@ describe('role rules on save', () => {
   });
 });
 
+
+describe('session secret', () => {
+  it('a production server refuses to run without AUTH_SECRET', async () => {
+    const { secret } = await import('../lib/server/auth');
+    const env = process.env as Record<string, string | undefined>;
+    const [node, auth] = [env.NODE_ENV, env.AUTH_SECRET];
+    try {
+      env.NODE_ENV = 'production';
+      delete env.AUTH_SECRET;
+      expect(() => secret()).toThrow(/AUTH_SECRET/);
+      env.AUTH_SECRET = 'x'.repeat(40);
+      expect(secret()).toBe('x'.repeat(40));
+    } finally {
+      env.NODE_ENV = node;
+      env.AUTH_SECRET = auth;
+      if (auth === undefined) delete env.AUTH_SECRET;
+    }
+  });
+});

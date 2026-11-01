@@ -12,7 +12,9 @@ const DEV_SECRET = 'blynt-dev-only-secret-change-me';
 export function secret(): string {
   const s = process.env.AUTH_SECRET;
   if (s && s.length >= 32) return s;
-  return DEV_SECRET + '-fallback-prod-security-hash-2026';
+  // A fallback in the code would let anyone forge sessions on a live site
+  if (process.env.NODE_ENV === 'production') throw new Error('Set AUTH_SECRET (32+ random characters) before running in production.');
+  return DEV_SECRET;
 }
 
 // scrypt with a per-password salt: "scrypt$<salt>$<hash>"
