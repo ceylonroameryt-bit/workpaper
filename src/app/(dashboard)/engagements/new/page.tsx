@@ -9,14 +9,15 @@ import { Client, CompanyType } from '@/lib/types/models';
 import { packForClient } from '@/lib/workpapers/templates';
 import { useCompany } from '@/context/CompanyContext';
 import { companyNumberError, structureFields, structureForCompanyType } from '@/lib/practice-structure';
+import { Frequency, FREQUENCY_MONTHS, periodStart as startOf } from '@/lib/periods';
 
 /**
  * New engagement wizard (ENG-01), in the same adaptive style as practice set-up: each answer
- * shows what it changes. Client details (which decide the working papers), then the period,
- * then the data source; choosing Xero or QuickBooks connects straight after creating.
+ * shows what it changes. Client details (which decide the working papers), the period, the
+ * team, then the data source; choosing Xero or QuickBooks connects straight after creating.
  */
 
-const STEPS = ['Client details', 'Period', 'Data source'];
+const STEPS = ['Client details', 'Period', 'Team', 'Data source'];
 
 type Source = 'xero' | 'quickbooks' | 'csv';
 const SOURCES: [Source, string, string][] = [
@@ -80,12 +81,12 @@ function YesNo({ value, yes, no, onChange, label }: { value: boolean; yes: strin
   );
 }
 
-const nextDay = (iso: string) => new Date(new Date(`${iso}T00:00:00Z`).getTime() + 86_400_000).toISOString().slice(0, 10);
-const yearBefore = (iso: string) => {
-  const d = new Date(`${iso}T00:00:00Z`);
-  d.setUTCFullYear(d.getUTCFullYear() - 1);
-  return nextDay(d.toISOString().slice(0, 10));
-};
+const FREQUENCIES: [Frequency, string, string][] = [
+  ['year_end', 'Year-end', 'Annual accounts for the financial year'],
+  ['quarterly', 'Quarterly', 'A file for each quarter'],
+  ['monthly', 'Monthly', 'A file for each month'],
+];
+const END_LABEL: Record<Frequency, string> = { year_end: 'Year end', quarterly: 'Quarter end', monthly: 'Month end' };
 
 export default function NewEngagementWizard() {
   const router = useRouter();
@@ -104,7 +105,13 @@ export default function NewEngagementWizard() {
   const [payroll, setPayroll] = useState(existing?.payroll ?? true);
   const [details, setDetails] = useState(detailsOf(existing));
   const [yearEnd, setYearEnd] = useState('2026-03-31');
-  const [periodStart, setPeriodStart] = useState(yearBefore('2026-03-31'));
+  const [frequency, setFrequency] = useState<Frequency>('year_end');
+  const [periodStart, setPeriodStart] = useState(startOf('2026-03-31', 12));
+  const firmId = db.memberships[0]?.firm_id;
+  const firmUsers = db.users.filter((u) => db.memberships.some((m) => m.user_id === u.id && m.firm_id === firmId));
+  const roleOf = (userId: string) => db.memberships.find((m) => m.user_id === userId)?.role;
+  const [team, setTeam] = useState<string[]>(existing?.team_user_ids ?? []);
+  const toggleTeam = (id: string) => setTeam(team.includes(id) ? team.filter((x) => x !== id) : [...team, id]);
   const [source, setSource] = useState<Source>('csv');
 
   const isNew = clientId === NEW_CLIENT;
@@ -125,6 +132,11 @@ export default function NewEngagementWizard() {
     setVat(c?.vat_registered ?? true);
     setPayroll(c?.payroll ?? true);
     setDetails(detailsOf(c));
+    setTeam(c?.team_user_ids ?? []);
+  };
+  const setEnd = (end: string, f = frequency) => {
+    setYearEnd(end);
+    if (end) setPeriodStart(startOf(end, FREQUENCY_MONTHS[f]));
   };
 
   const changes: string[][] = [
@@ -135,9 +147,11 @@ export default function NewEngagementWizard() {
       payroll ? 'Payroll and PAYE/NIC (P-20) is included.' : 'No payroll paper (P-20): the client runs no payroll.',
     ],
     [
-      periodStart && yearEnd ? `The engagement covers ${periodStart} to ${yearEnd}.` : '',
+      periodStart && yearEnd ? `A ${FREQUENCIES.find((f) => f[0] === frequency)?.[1].toLowerCase()} file covering ${periodStart} to ${yearEnd}.` : '',
+      yearEnd && periodStart && periodStart !== startOf(yearEnd, FREQUENCY_MONTHS[frequency]) ? 'This is a short or long period: the start date was changed by hand.' : '',
       prior ? 'Last year’s locked file is linked, so closing balances roll forward.' : 'First year for this client: no prior file to roll forward.',
     ].filter(Boolean),
+    [team.length ? `${team.length} ${team.length === 1 ? 'person is' : 'people are'} assigned to ${clientName || 'this client'}.` : 'No one assigned yet. Partners and admins see every client.'],
     [source === 'csv' ? 'You’ll upload the trial balance after creating.' : `You’ll sign in to ${sourceName} after creating, and choose the client’s organisation.`],
   ];
 
@@ -158,7 +172,7 @@ export default function NewEngagementWizard() {
     let id = clientId;
     if (isNew) id = (await api('/api/v1/clients', 'POST', { name: clientName, company_no: '', company_type: type, year_end: yearEnd, data_source: 'csv' })).id;
     // The profile saves the details and decides the papers; the engagement is then created from it
-    await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll });
+    await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll, team_user_ids: team });
     const eng = await api('/api/v1/engagements', 'POST', {
       client_id: id,
       period_start: periodStart,
@@ -166,6 +180,7 @@ export default function NewEngagementWizard() {
       framework,
       template_pack_id: `pack_${type.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
       prior_engagement_id: prior?.id,
+      frequency,
     });
     refreshCompanyData();
     setActiveCompanyId(id);
@@ -178,7 +193,7 @@ export default function NewEngagementWizard() {
     setError('');
     if (step === 0 && !clientName) return setError('Enter the client’s name.');
     if (step === 0 && crnError) return setError(crnError);
-    if (step === 1 && (!periodStart || !yearEnd || periodStart >= yearEnd)) return setError('Set a period start before the year end.');
+    if (step === 1 && (!periodStart || !yearEnd || periodStart >= yearEnd)) return setError(`Set a period start before the ${END_LABEL[frequency].toLowerCase()}.`);
     if (step < STEPS.length - 1) return go(step + 1);
     setSaving(true);
     try {
@@ -199,7 +214,7 @@ export default function NewEngagementWizard() {
         {/* Step rail */}
         <aside className="bg-[#0B1B3D] text-white px-6 py-8">
           <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF7D6B]">New engagement</p>
-          <p className="mt-2 text-xs text-[#A6B4D0] leading-relaxed">Three short steps. Each answer shows what it changes.</p>
+          <p className="mt-2 text-xs text-[#A6B4D0] leading-relaxed">Four short steps. Each answer shows what it changes.</p>
           <ol className="mt-8 flex lg:flex-col gap-1 overflow-x-auto" aria-label="Steps">
             {STEPS.map((s, i) => {
               const done = i < step;
@@ -295,30 +310,60 @@ export default function NewEngagementWizard() {
             {step === 1 && (
               <>
                 <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#102654]">Period</h1>
-                <p className="text-sm text-[#5B6478] mt-1">The accounting period this file covers.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Q htmlFor="year-end">Year end</Q>
-                    <input
-                      id="year-end"
-                      type="date"
-                      className={inputCls}
-                      value={yearEnd}
-                      onChange={(e) => {
-                        setYearEnd(e.target.value);
-                        if (e.target.value) setPeriodStart(yearBefore(e.target.value));
+                <p className="text-sm text-[#5B6478] mt-1">How often you prepare a file for this client, and the period it covers.</p>
+                <Q>How often?</Q>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup" aria-label="Frequency">
+                  {FREQUENCIES.map(([k, title, sub]) => (
+                    <Card
+                      key={k}
+                      on={frequency === k}
+                      title={title}
+                      sub={sub}
+                      onClick={() => {
+                        setFrequency(k);
+                        setEnd(yearEnd, k);
                       }}
                     />
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Q htmlFor="year-end">{END_LABEL[frequency]}</Q>
+                    <input id="year-end" type="date" className={inputCls} value={yearEnd} onChange={(e) => setEnd(e.target.value)} />
                   </div>
                   <div>
                     <Q htmlFor="period-start">Period start</Q>
                     <input id="period-start" type="date" className={inputCls} value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
+                    <p className="text-[11px] text-[#7E8DA6] mt-1">Change it for a short or long first period.</p>
                   </div>
                 </div>
               </>
             )}
 
             {step === 2 && (
+              <>
+                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#102654]">Team</h1>
+                <p className="text-sm text-[#5B6478] mt-1">Who works on this client. Optional: you can change it later on the client page.</p>
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="group" aria-label="Team">
+                  {firmUsers.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={team.includes(u.id)}
+                      onClick={() => toggleTeam(u.id)}
+                      className={`relative text-left px-3.5 py-3 rounded-[10px] border cursor-pointer ${team.includes(u.id) ? 'bg-[#EEF3FD] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D5DBE7] hover:border-[#A6B4D0]'}`}
+                    >
+                      {team.includes(u.id) && <Check className="absolute top-2.5 right-2.5 w-3.5 h-3.5 text-[#1D4E89]" />}
+                      <span className="block text-sm font-semibold text-[#102654] pr-4">{u.name}</span>
+                      <span className="block text-[11px] text-[#5B6478] mt-0.5 capitalize">{roleOf(u.id)}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {step === 3 && (
               <>
                 <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#102654]">Data source</h1>
                 <p className="text-sm text-[#5B6478] mt-1">Where the client’s books are.</p>

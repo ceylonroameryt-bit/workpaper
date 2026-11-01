@@ -10,7 +10,7 @@ export function getActorFromRequest(req: Request) {
   if (!session) throw new ServiceError('Please sign in.', 401, 'UNAUTHENTICATED');
   const user = db.users.find((u) => u.id === session.uid);
   const membership = db.memberships.find((m) => m.user_id === session.uid);
-  if (!user || !membership) throw new ServiceError('Your account no longer has access.', 401, 'UNAUTHENTICATED');
+  if (!user || !membership || membership.status === 'deactivated') throw new ServiceError('Your account no longer has access.', 401, 'UNAUTHENTICATED');
   return {
     id: user.id,
     name: user.name,

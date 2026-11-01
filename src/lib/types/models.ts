@@ -150,6 +150,7 @@ export interface Membership {
   firm_id: string;
   role: UserRole;
   client_ids?: string[]; // ADM-01: clients a non-partner may see; absent = all
+  status?: 'active' | 'deactivated'; // deactivated members can't sign in; absent = active
 }
 
 // ADM-01: invitation to join a practice. Server-only (the token hash never reaches the browser).
@@ -208,6 +209,7 @@ export interface Engagement {
   framework: string;
   template_pack_id: string;
   status: 'planning' | 'fieldwork' | 'review' | 'locked';
+  frequency?: 'year_end' | 'quarterly' | 'monthly'; // absent = year-end
   locked_at: string | null;
   locked_by?: string | null;
   prior_engagement_id: string | null;

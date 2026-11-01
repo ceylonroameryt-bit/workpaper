@@ -35,6 +35,8 @@ export async function POST(req: Request) {
       return jsonResponse({ error: INVALID }, 401);
     }
     clearFailures(email);
+    // Checked after the password so the message can't be used to find accounts
+    if (membership.status === 'deactivated') return jsonResponse({ error: 'Your account has been deactivated. Ask your practice admin.', code: 'DEACTIVATED' }, 403);
 
     // ADM-01: when MFA is switched on, password alone never signs in; the MFA endpoints finish it
     if (mfaRequired()) {

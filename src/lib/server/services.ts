@@ -110,6 +110,7 @@ export const services = {
       framework: string;
       template_pack_id: string;
       prior_engagement_id?: string;
+      frequency?: string;
     },
     clientIds: string[] | null = null
   ) {
@@ -127,6 +128,7 @@ export const services = {
       status: 'planning' as const,
       locked_at: null,
       prior_engagement_id: data.prior_engagement_id || null,
+      frequency: (['quarterly', 'monthly'].includes(data.frequency ?? '') ? data.frequency : 'year_end') as 'year_end' | 'quarterly' | 'monthly',
     };
     db.engagements.push(newEng);
     db.createEngagementWorkpapers(newEng.id, db.clients.find((c) => c.id === newEng.client_id));

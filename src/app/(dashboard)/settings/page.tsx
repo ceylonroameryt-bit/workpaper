@@ -26,6 +26,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
+import { StaffManager } from '@/components/settings/StaffManager';
+import { getCurrentUserId } from '@/lib/session';
 import { useCompany } from '@/context/CompanyContext';
 
 export default function PracticeSettingsPage() {
@@ -70,7 +72,6 @@ export default function PracticeSettingsPage() {
   const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false);
 
   // ADM-01 Users & Roles
-  const [usersList, setUsersList] = useState(() => [...db.users]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
@@ -603,45 +604,7 @@ export default function PracticeSettingsPage() {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-[#0B1B3D] text-white text-[11px] font-bold uppercase tracking-wider">
-                <tr>
-                  <th className="py-3 px-4">User Name</th>
-                  <th className="py-3 px-4">Email Address</th>
-                  <th className="py-3 px-4">Role &amp; Title</th>
-                  <th className="py-3 px-4">Access Scope</th>
-                  <th className="py-3 px-4 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E3E7EF] text-[#102654]">
-                {usersList.map((u) => (
-                  <tr key={u.id} className="hover:bg-[#F6F7FB]/70 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-[#102654] text-white flex items-center justify-center font-bold text-[10px]">
-                          {u.initials || 'U'}
-                        </div>
-                        <span className="font-bold text-[#102654]">{u.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-[#5B6478]">{u.email}</td>
-                    <td className="py-3 px-4">
-                      <span className="text-[10px] font-mono font-bold bg-[#EAF5FC] text-[#1D4E89] px-2 py-0.5 rounded-full border border-[#1D4E89]/20 uppercase">
-                        {u.title || 'Senior Auditor'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-[#5B6478]">All Practice Clients</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full">
-                        Active
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <StaffManager currentUserId={getCurrentUserId()} />
         </div>
       )}
 
