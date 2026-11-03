@@ -8,6 +8,8 @@ export type UserRole = 'readonly' | 'preparer' | 'reviewer' | 'manager' | 'partn
 export type StatusKey =
   | 'not_started'
   | 'in_progress'
+  | 'unreconciled'
+  | 'reconciled'
   | 'prepared'
   | 'signed_off'
   | 'needs_you'
@@ -37,6 +39,20 @@ export const STATUS_DEFINITIONS: Record<StatusKey, StatusMeta> = {
     label: 'In progress',
     colorClass: 'text-[#1D4E89]',
     bgClass: 'bg-[#EAF5FC]',
+  },
+  unreconciled: {
+    key: 'unreconciled',
+    symbol: '≠',
+    label: 'Unreconciled',
+    colorClass: 'text-[#B8432F]',
+    bgClass: 'bg-[#FFF1EE]',
+  },
+  reconciled: {
+    key: 'reconciled',
+    symbol: '=',
+    label: 'Reconciled',
+    colorClass: 'text-[#0B6B52]',
+    bgClass: 'bg-[#E6F4EF]',
   },
   prepared: {
     key: 'prepared',
@@ -338,6 +354,9 @@ export interface Workpaper {
   data_json: Record<string, any>;
   status: StatusKey;
   rolled_from_workpaper_id: string | null;
+  // WPS-03: unticked papers move to the N/A list with the reason; absent = applicable
+  applicable?: boolean;
+  na_reason?: string | null;
   created_at: string;
   updated_at: string;
 }

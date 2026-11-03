@@ -1,6 +1,6 @@
 import { db } from '../server/db';
 import { asPence, formatPence } from '../money';
-import { TemplateDef, templateFor } from './templates';
+import { TemplateDef, blankPaperData, templateFor } from './templates';
 import type { Workpaper } from '../types/models';
 
 /**
@@ -484,4 +484,29 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
   for (const c of checks) if (!c.passed && explanations[c.id]?.trim()) c.explanation = explanations[c.id];
 
   return { template: t, leads, checks, anchors, draftConclusion: draft, totals };
+}
+
+// Statuses the engine works out; anything else (prepared, signed off, stale…) is set by people
+const COMPUTED: Workpaper['status'][] = ['not_started', 'in_progress', 'unreconciled', 'reconciled'];
+
+/** The practice's reconciliation tolerance in pence (ADM-02), £1 when not set. */
+export function toleranceFor(engagementId: string): bigint {
+  const firmId = db.engagements.find((e) => e.id === engagementId)?.firm_id;
+  return asPence(db.firms.find((f) => f.id === firmId)?.settings?.defaults?.tolerance_p ?? '100');
+}
+
+/**
+ * Status engine (WPS-04): Not started until something is entered, then Unreconciled or
+ * Reconciled by whether the difference to the TB is within the practice tolerance. Papers
+ * without a difference (checklists) are In progress once started.
+ */
+export function paperStatus(wp: Workpaper): Workpaper['status'] {
+  if (!COMPUTED.includes(wp.status)) return wp.status;
+  const t = templateFor(wp.ref);
+  if (!t) return wp.status;
+  const started = JSON.stringify(wp.data_json) !== JSON.stringify(blankPaperData(t));
+  if (!started) return 'not_started';
+  const diff = evaluatePaper(wp)?.totals.difference;
+  if (diff === undefined) return 'in_progress';
+  return (diff < 0n ? -diff : diff) <= toleranceFor(wp.engagement_id) ? 'reconciled' : 'unreconciled';
 }

@@ -2,35 +2,23 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
-  FileCheck2,
-  FileSpreadsheet,
   AlertTriangle,
   CheckCircle2,
   Lock,
   ChevronDown,
   ChevronRight,
-  Filter,
   Search,
   Sparkles,
-  ArrowRight,
-  ExternalLink,
-  ShieldCheck,
-  Plus,
-  RefreshCw,
-  Clock,
   MessageSquare,
-  AlertCircle,
-  FileText,
   X,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
-import { useLocale } from '@/context/LocaleContext';
-import { formatPence, toPence, asPence } from '@/lib/money';
-import { StatusBadge } from '@/components/ui/StatusPill';
-import { TEMPLATES } from '@/lib/workpapers/templates';
+import { formatPence } from '@/lib/money';
+import { templateFor } from '@/lib/workpapers/templates';
+import { evaluatePaper, paperStatus } from '@/lib/workpapers/engine';
 import { getActor } from '@/lib/session';
 
 interface ScheduleItem {
@@ -56,477 +44,67 @@ interface ScheduleItem {
   };
 }
 
+const SECTION_OF = (ref: string): ScheduleItem['section'] =>
+  ref === 'A-10' ? 'leads' : ref === 'Z-10' ? 'completion' : ref === 'Z-20' || ref.startsWith('R') ? 'disclosures' : ref.startsWith('T') ? 'tax' : ref.startsWith('I') || ref.startsWith('P') ? 'pnl' : 'balance_sheet';
+const initials = (name: string) => name.split(' ').map((n) => n[0]).join('').slice(0, 3).toUpperCase();
+
+/** One index row per paper: TB balance, schedule, difference and status from the engine (WPS-02, WPS-04). */
+function buildSchedules(engagementId: string): ScheduleItem[] {
+  return db.workpapers
+    .filter((w) => w.engagement_id === engagementId)
+    .map((wp) => {
+      const t = templateFor(wp.ref);
+      const r = evaluatePaper(wp);
+      const sign = t?.creditArea ? -1n : 1n;
+      const tb = sign * (r?.leads.reduce((a, l) => a + l.final, 0n) ?? 0n);
+      const diff = r?.totals.difference ?? 0n;
+      const prior = sign * (r?.leads.reduce((a, l) => a + (l.prior ?? 0n), 0n) ?? 0n);
+      const live = db.signoffs.filter((s) => s.workpaper_id === wp.id && !s.stale_at);
+      const by = (role: string) => live.find((s) => s.role === role)?.user_name;
+      const status: ScheduleItem['status'] = by('partner') ? 'approved' : by('reviewer') ? 'reviewed' : by('preparer') ? 'prepared' : (paperStatus(wp) as ScheduleItem['status']);
+      const openPoints = db.comments.filter((c) => c.workpaper_id === wp.id && c.type === 'review_note' && c.status === 'open').length;
+      return {
+        id: wp.id,
+        code: t?.recRef ?? wp.ref,
+        ref: wp.ref,
+        title: t?.title ?? wp.ref,
+        section: SECTION_OF(wp.ref),
+        templateName: wp.data_json.active_template_title || 'Default template',
+        tbBalancePence: tb,
+        scheduleBalancePence: tb + sign * diff,
+        differencePence: diff,
+        priorYearPence: prior,
+        status: ['not_started', 'in_progress', 'unreconciled', 'reconciled', 'prepared', 'reviewed', 'approved'].includes(status) ? status : 'in_progress',
+        applicable: wp.applicable !== false,
+        naSuggestion: wp.na_reason ? { reason: wp.na_reason } : undefined,
+        signoffs: {
+          preparer: by('preparer') && initials(by('preparer')!),
+          manager: by('reviewer') && initials(by('reviewer')!),
+          partner: by('partner') && initials(by('partner')!),
+        },
+        flags: {
+          changedSinceReviewed: db.signoffs.some((s) => s.workpaper_id === wp.id && s.stale_at) || undefined,
+          reviewPointOpen: openPoints || undefined,
+        },
+      };
+    })
+    .sort((a, b) => a.ref.localeCompare(b.ref));
+}
+
 export default function WorkingPaperIndexPage() {
   const params = useParams();
-  const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
-  const { activeEngagement, activeCompany, refreshCompanyData } = useCompany();
-  const { formatDate } = useLocale();
+  const { activeEngagement } = useCompany();
 
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [flagFilter, setFlagFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedScheduleIds, setSelectedScheduleIds] = useState<Set<string>>(new Set());
   const [collapsedNa, setCollapsedNa] = useState<boolean>(true);
-  const [showBulkReviewModal, setShowBulkReviewModal] = useState<boolean>(false);
 
-  // In-memory schedules data derived from workpapers and standard (REC-01 to REC-17, STD-01 to STD-05)
-  const [schedules, setSchedules] = useState<ScheduleItem[]>([
-    {
-      id: 'A-10',
-      code: 'STD-01',
-      ref: 'A-10',
-      title: 'Planning, risk assessment and materiality',
-      section: 'leads',
-      templateName: 'Planning checklist & materiality calculation',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'approved',
-      applicable: true,
-      signoffs: { preparer: 'MV', manager: 'SJ', partner: 'PL' },
-      flags: {},
-    },
-    {
-      id: 'REC-02',
-      code: 'REC-02',
-      ref: 'B-10',
-      title: 'Bank and cash reconciliation',
-      section: 'balance_sheet',
-      templateName: 'Bank reconciliation per account',
-      tbBalancePence: 130535000n, // £1,305,350.00
-      scheduleBalancePence: 130535000n,
-      differencePence: 0n,
-      priorYearPence: 94000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-07',
-      code: 'REC-07',
-      ref: 'C-10',
-      title: 'Trade debtors and recoverability review',
-      section: 'balance_sheet',
-      templateName: 'Aged debtors with recoverability review',
-      tbBalancePence: 236450000n,
-      scheduleBalancePence: 236450000n,
-      differencePence: 0n,
-      priorYearPence: 195000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: { reviewPointOpen: 1 },
-    },
-    {
-      id: 'REC-09',
-      code: 'REC-09',
-      ref: 'C-20',
-      title: 'Prepayments and accrued income',
-      section: 'balance_sheet',
-      templateName: 'Itemised with release calculation',
-      tbBalancePence: 3240000n,
-      scheduleBalancePence: 3240000n,
-      differencePence: 0n,
-      priorYearPence: 2800000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'C-30',
-      code: 'REC-17',
-      ref: 'C-30',
-      title: 'Other debtors and staff loans',
-      section: 'balance_sheet',
-      templateName: 'Itemised listing',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'not_started',
-      applicable: false,
-      naSuggestion: { reason: 'No other debtors balance in nominal ledger' },
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'REC-14',
-      code: 'REC-14',
-      ref: 'D-10',
-      title: 'Stock and work in progress',
-      section: 'balance_sheet',
-      templateName: 'Stock summary from count',
-      tbBalancePence: 182400000n,
-      scheduleBalancePence: 182400000n,
-      differencePence: 0n,
-      priorYearPence: 165000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-11',
-      code: 'REC-11',
-      ref: 'D-20',
-      title: "Director's loan accounts & s455 tax",
-      section: 'balance_sheet',
-      templateName: 'Per-director movements with s455 check',
-      tbBalancePence: 2424996n,
-      scheduleBalancePence: 2424996n,
-      differencePence: 0n,
-      priorYearPence: 1200000n,
-      status: 'in_progress',
-      applicable: true,
-      signoffs: {},
-      flags: { aiWarning: 'Overdrawn balance at year end: s455 charge applies if not repaid in 9 months' },
-    },
-    {
-      id: 'REC-12',
-      code: 'REC-12',
-      ref: 'E-10',
-      title: 'Share capital, reserves and dividends',
-      section: 'balance_sheet',
-      templateName: 'Share register and dividend schedule',
-      tbBalancePence: 50000000n,
-      scheduleBalancePence: 50000000n,
-      differencePence: 0n,
-      priorYearPence: 50000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'E-20',
-      code: 'REC-12',
-      ref: 'E-20',
-      title: 'Reserves movement and distributable profits',
-      section: 'balance_sheet',
-      templateName: 'Reserves movement',
-      tbBalancePence: 320000000n,
-      scheduleBalancePence: 320000000n,
-      differencePence: 0n,
-      priorYearPence: 280000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-03',
-      code: 'REC-03',
-      ref: 'F-10',
-      title: 'Fixed asset register and depreciation',
-      section: 'balance_sheet',
-      templateName: 'Register by class with depreciation',
-      tbBalancePence: 270000000n, // £2,700,000.00
-      scheduleBalancePence: 270000000n,
-      differencePence: 0n,
-      priorYearPence: 245000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV', manager: 'SJ' },
-      flags: { aiWarning: 'Possible capital item in repairs: £8,500' },
-    },
-    {
-      id: 'G-10',
-      code: 'REC-17',
-      ref: 'G-10',
-      title: 'Investments and investment property',
-      section: 'balance_sheet',
-      templateName: 'Investment register',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'not_started',
-      applicable: false,
-      naSuggestion: { reason: 'No asset investments held on ledger' },
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'I-10',
-      code: 'REC-01',
-      ref: 'I-10',
-      title: 'Turnover, direct costs and gross margin',
-      section: 'pnl',
-      templateName: 'Revenue and direct costs analytical review',
-      tbBalancePence: 620000000n,
-      scheduleBalancePence: 620000000n,
-      differencePence: 0n,
-      priorYearPence: 580000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-08',
-      code: 'REC-08',
-      ref: 'K-10',
-      title: 'Trade creditors and unrecorded liabilities search',
-      section: 'balance_sheet',
-      templateName: 'Aged creditors with unrecorded liabilities search',
-      tbBalancePence: 168450000n,
-      scheduleBalancePence: 168450000n,
-      differencePence: 0n,
-      priorYearPence: 142000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-09B',
-      code: 'REC-09',
-      ref: 'K-20',
-      title: 'Accruals and deferred income',
-      section: 'balance_sheet',
-      templateName: 'Itemised with reversal check',
-      tbBalancePence: 45200000n,
-      scheduleBalancePence: 45200000n,
-      differencePence: 0n,
-      priorYearPence: 38000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-04',
-      code: 'REC-04',
-      ref: 'L-10',
-      title: 'Lease schedule (Right-of-use model FRS 102)',
-      section: 'balance_sheet',
-      templateName: 'Lease register, model set by standard and period',
-      tbBalancePence: 8400000n,
-      scheduleBalancePence: 8400000n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-10',
-      code: 'REC-10',
-      ref: 'L-20',
-      title: 'Loans schedule with maturity split',
-      section: 'balance_sheet',
-      templateName: 'Loan schedule with repayment split',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'not_started',
-      applicable: false,
-      naSuggestion: { reason: 'No bank loan balances or finance interest in ledger' },
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'L-30',
-      code: 'REC-10',
-      ref: 'L-30',
-      title: 'Hire purchase with interest allocation',
-      section: 'balance_sheet',
-      templateName: 'HP schedule with interest allocation',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'not_started',
-      applicable: false,
-      naSuggestion: { reason: 'No hire purchase obligations found' },
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'P-10',
-      code: 'REC-01',
-      ref: 'P-10',
-      title: 'Overheads and administrative expenses',
-      section: 'pnl',
-      templateName: 'Administrative expenses review',
-      tbBalancePence: 38420000n,
-      scheduleBalancePence: 38420000n,
-      differencePence: 0n,
-      priorYearPence: 35000000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-05',
-      code: 'REC-05',
-      ref: 'P-20',
-      title: 'Wages, PAYE/NIC and pension reconciliation',
-      section: 'balance_sheet',
-      templateName: 'Wages, PAYE/NIC and pension reconciliation',
-      tbBalancePence: 14200000n,
-      scheduleBalancePence: 14200000n,
-      differencePence: 0n,
-      priorYearPence: 13100000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'Q-10',
-      code: 'REC-17',
-      ref: 'Q-10',
-      title: 'Provisions for liabilities and charges',
-      section: 'balance_sheet',
-      templateName: 'Provision movement',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'not_started',
-      applicable: false,
-      naSuggestion: { reason: 'No provisions booked in ledger' },
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'Q-20',
-      code: 'REC-17',
-      ref: 'Q-20',
-      title: 'Grants and deferred income release',
-      section: 'balance_sheet',
-      templateName: 'Grant release schedule',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'not_started',
-      applicable: false,
-      naSuggestion: { reason: 'No capital or revenue grants received' },
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'REC-15',
-      code: 'REC-15',
-      ref: 'R-10',
-      title: 'Related parties and intercompany balances',
-      section: 'balance_sheet',
-      templateName: 'Related party register with balances',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-16',
-      code: 'REC-16',
-      ref: 'S-10',
-      title: 'Suspense, clearing and control accounts (must be zero)',
-      section: 'balance_sheet',
-      templateName: 'Must-be-zero check',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'REC-13',
-      code: 'REC-13',
-      ref: 'T-10',
-      title: 'Corporation tax provision and computation',
-      section: 'tax',
-      templateName: 'CT provision schedule',
-      tbBalancePence: 2250533n,
-      scheduleBalancePence: 2250533n,
-      differencePence: 0n,
-      priorYearPence: 1800000n,
-      status: 'in_progress',
-      applicable: true,
-      signoffs: {},
-      flags: {},
-    },
-    {
-      id: 'REC-06',
-      code: 'REC-06',
-      ref: 'T-20',
-      title: 'VAT reconciliation (Quarterly standard scheme)',
-      section: 'tax',
-      templateName: 'VAT control by return period',
-      tbBalancePence: 19820000n,
-      scheduleBalancePence: 19820000n,
-      differencePence: 0n,
-      priorYearPence: 16500000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'T-30',
-      code: 'REC-13',
-      ref: 'T-30',
-      title: 'Deferred tax timing differences',
-      section: 'tax',
-      templateName: 'Timing differences on fixed assets',
-      tbBalancePence: 1850000n,
-      scheduleBalancePence: 1850000n,
-      differencePence: 0n,
-      priorYearPence: 1500000n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'Z-10',
-      code: 'STD-04',
-      ref: 'Z-10',
-      title: 'Disclosures, notes and statutory accounts production',
-      section: 'disclosures',
-      templateName: 'Draft statutory accounts and disclosure notes',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'reconciled',
-      applicable: true,
-      signoffs: { preparer: 'MV' },
-      flags: {},
-    },
-    {
-      id: 'Z-20',
-      code: 'REV-05',
-      ref: 'Z-20',
-      title: 'File completion and partner sign-off lock',
-      section: 'completion',
-      templateName: 'Completion checklist and partner sign-off',
-      tbBalancePence: 0n,
-      scheduleBalancePence: 0n,
-      differencePence: 0n,
-      priorYearPence: 0n,
-      status: 'in_progress',
-      applicable: true,
-      signoffs: {},
-      flags: {},
-    },
-  ]);
+  // Rows come from this engagement's papers (created from the client's standard and profile)
+  const [rev, setRev] = useState(0);
+  const schedules = useMemo(() => buildSchedules(engagementId), [engagementId, rev]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [sectionFilter, setSectionFilter] = useState<'all' | 'leads' | 'balance_sheet' | 'pnl' | 'tax' | 'disclosures' | 'completion'>('all');
   const [pendingUntick, setPendingUntick] = useState<ScheduleItem | null>(null);
@@ -543,67 +121,25 @@ export default function WorkingPaperIndexPage() {
       return;
     }
 
-    setSchedules((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const nextVal = !item.applicable;
-          db.logAudit(
-            activeEngagement?.firm_id || 'firm_blynt_uk',
-            getActor(),
-            nextVal ? 'TICK_APPLICABLE' : 'UNTICK_APPLICABLE',
-            'workpapers',
-            id,
-            { applicable: item.applicable },
-            { applicable: nextVal, reason: reason || 'User action' }
-          );
-          return { ...item, applicable: nextVal };
-        }
-        return item;
-      })
-    );
+    setApplicable(s, !s.applicable, reason || 'User action');
   };
 
   const handleConfirmUntick = () => {
     if (!pendingUntick) return;
     const s = pendingUntick;
-    setSchedules((prev) =>
-      prev.map((item) => {
-        if (item.id === s.id) {
-          db.logAudit(
-            activeEngagement?.firm_id || 'firm_blynt_uk',
-            getActor(),
-            'UNTICK_APPLICABLE',
-            'workpapers',
-            s.id,
-            { applicable: true },
-            { applicable: false, reason: untickReason || 'Marked not applicable by user' }
-          );
-          return { ...item, applicable: false, naSuggestion: { reason: untickReason || 'Marked not applicable' } };
-        }
-        return item;
-      })
-    );
+    setApplicable(s, false, untickReason || 'Marked not applicable');
     setPendingUntick(null);
     setUntickReason('');
   };
 
-  // Bulk Sign-Off (REV-01)
-  const handleBulkReview = () => {
-    const actor = getActor();
-    setSchedules((prev) =>
-      prev.map((s) => {
-        if (selectedScheduleIds.has(s.id)) {
-          return {
-            ...s,
-            status: 'reviewed',
-            signoffs: { ...s.signoffs, manager: actor.name.split(' ').map((n) => n[0]).join('') },
-          };
-        }
-        return s;
-      })
-    );
-    setSelectedScheduleIds(new Set());
-    setShowBulkReviewModal(false);
+  const setApplicable = (s: ScheduleItem, applicable: boolean, reason: string) => {
+    const wp = db.workpapers.find((w) => w.id === s.id);
+    if (!wp) return;
+    db.logAudit(activeEngagement?.firm_id || wp.engagement_id, getActor(), applicable ? 'TICK_APPLICABLE' : 'UNTICK_APPLICABLE', 'workpapers', wp.id, { applicable: wp.applicable !== false }, { applicable, reason });
+    wp.applicable = applicable;
+    wp.na_reason = applicable ? null : reason;
+    wp.updated_at = new Date().toISOString();
+    setRev((r) => r + 1);
   };
 
   // Filter schedules
@@ -793,17 +329,6 @@ export default function WorkingPaperIndexPage() {
           </select>
         </div>
 
-        {/* Bulk Sign-Off Action (REV-01) */}
-        {selectedScheduleIds.size > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowBulkReviewModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Review selected ({selectedScheduleIds.size})</span>
-          </button>
-        )}
       </div>
 
       {/* Main Working Paper Index Table */}
@@ -1069,42 +594,6 @@ export default function WorkingPaperIndexPage() {
           </div>
         )}
       </div>
-
-      {/* Bulk Review Modal (REV-01) */}
-      {showBulkReviewModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4"
-        >
-          <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-center gap-3 text-purple-700 mb-3">
-              <ShieldCheck className="w-6 h-6 shrink-0" />
-              <h3 className="text-base font-bold text-[#102654]">Bulk Sign-off: Manager Review</h3>
-            </div>
-            <p className="text-xs text-[#5B6478] leading-relaxed mb-4">
-              You are about to sign off {selectedScheduleIds.size} schedules as <strong>Reviewed</strong>.
-              Each sign-off records your user details, role, and current timestamp in the audit trail.
-            </p>
-            <div className="flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setShowBulkReviewModal(false)}
-                className="px-3.5 py-2 text-xs text-[#5B6478] hover:text-[#102654] font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleBulkReview}
-                className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
-              >
-                Confirm Review Sign-Off
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Untick Schedule Dialog with Manager Approval Notice (WPS-03) */}
       {pendingUntick && (
