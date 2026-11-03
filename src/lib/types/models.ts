@@ -318,12 +318,25 @@ export interface AdjustmentLine {
   narrative?: string;
 }
 
+// Journals in the adjusted TB (a reversed journal still counts; its reversal cancels it)
+export const JOURNAL_IN_TB: Adjustment['status'][] = ['accepted', 'approved', 'posted', 'reversed'];
+
 export interface Adjustment {
   id: string;
   engagement_id: string;
   ref: string; // e.g. AJE-001
   narrative: string;
-  status: 'proposed' | 'approved' | 'posted';
+  // proposed = Draft (JNL-02); accepted = in the adjusted TB; reversed = cancelled by a reversing journal
+  status: 'proposed' | 'accepted' | 'approved' | 'posted' | 'reversed' | 'rejected';
+  type?: 'adjusting' | 'reclassification' | 'client_posted' | 'proposed_by_ai';
+  date?: string;
+  source_schedule?: string;
+  calculation?: string;
+  evidence?: { file_key: string; filename: string }[];
+  auto_reverse?: boolean;
+  reverses_id?: string;
+  reversed_by_id?: string;
+  reject_reason?: string;
   proposed_by: string;
   proposed_by_name: string;
   approved_by: string | null;

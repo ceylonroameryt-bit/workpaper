@@ -101,11 +101,10 @@ describe('role rules on save', () => {
     allow(so('partner', 'part'), actor('part', 'partner'));
   });
 
-  it('adjustment approval', () => {
-    const approve = (by: string) => (v: State) => Object.assign(v.adjustments[0], { status: 'approved', approved_by: by });
-    reject(approve('prep'), actor('prep', 'preparer'));
-    allow(approve('rev'), actor('rev', 'reviewer'));
-    reject(approve('part'), actor('rev', 'reviewer'));
+  it('journals cannot be approved from the browser; the server keeps its copy', () => {
+    const before = base();
+    const out = mergeFirmState(before, edit(before, (v) => Object.assign(v.adjustments[0], { status: 'approved', approved_by: 'rev' })), actor('rev', 'reviewer'));
+    expect(out.adjustments[0].status).toBe('proposed');
   });
 
   it('locking and locked engagements', () => {

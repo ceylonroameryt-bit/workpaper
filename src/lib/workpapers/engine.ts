@@ -1,7 +1,7 @@
 import { db } from '../server/db';
 import { asPence, formatPence } from '../money';
 import { TemplateDef, blankPaperData, templateFor } from './templates';
-import type { Workpaper } from '../types/models';
+import { JOURNAL_IN_TB, type Workpaper } from '../types/models';
 
 /**
  * Calculations for every working paper: lead figures from the Blynt chart,
@@ -50,7 +50,7 @@ function tbFor(engagementId: string, prefix: string) {
   );
   const draft = rows.reduce((acc, m) => acc + asPence(m.balance_p), 0n);
   const adjustments = db.adjustments
-    .filter((a) => a.engagement_id === engagementId && (a.status === 'approved' || a.status === 'posted'))
+    .filter((a) => a.engagement_id === engagementId && JOURNAL_IN_TB.includes(a.status))
     .flatMap((a) => a.lines)
     .filter((l) => matches(l.blynt_code, prefix))
     .reduce((acc, l) => acc + asPence(l.debit_p) - asPence(l.credit_p), 0n);
@@ -509,4 +509,20 @@ export function paperStatus(wp: Workpaper): Workpaper['status'] {
   const diff = evaluatePaper(wp)?.totals.difference;
   if (diff === undefined) return 'in_progress';
   return (diff < 0n ? -diff : diff) <= toleranceFor(wp.engagement_id) ? 'reconciled' : 'unreconciled';
+}
+
+/** Effect of the journals in the TB on profit (credit-positive P&L lines) and net assets (assets less liabilities). */
+export function registerTotals(engagementId: string) {
+  const typeOf = new Map(db.blynt_accounts.map((a) => [a.code, a.type]));
+  let profit = 0n;
+  let netAssets = 0n;
+  for (const j of db.adjustments.filter((a) => a.engagement_id === engagementId && JOURNAL_IN_TB.includes(a.status))) {
+    for (const l of j.lines) {
+      const move = BigInt(l.debit_p) - BigInt(l.credit_p);
+      const t = typeOf.get(l.blynt_code);
+      if (t === 'Revenue' || t === 'Cost of Sales' || t === 'Overhead') profit -= move;
+      else if (t === 'Asset' || t === 'Liability') netAssets += move;
+    }
+  }
+  return { profit_p: profit, net_assets_p: netAssets };
 }

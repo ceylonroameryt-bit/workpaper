@@ -397,94 +397,46 @@ export default function TrialBalancePage() {
     setTimeout(() => setDrillExportToast(null), 3000);
   };
 
-  // Handle Propose Adjustment (Balanced lines)
-  const handleProposeAdjustment = (e: React.FormEvent) => {
+  // Propose an adjustment (JNL-02): a draft journal through the server, which checks balancing and the period
+  const handleProposeAdjustment = async (e: React.FormEvent) => {
     e.preventDefault();
-    const debP = toPence(adjDebitAmount);
-    const credP = toPence(adjCreditAmount);
-
-    if (debP !== credP || debP === 0n) {
+    if (toPence(adjDebitAmount) !== toPence(adjCreditAmount) || toPence(adjDebitAmount) === 0n) {
       setProposeError('Adjustment lines must balance. Debit must equal Credit.');
       return;
     }
-
-    const newAdj = {
-      id: `aje_${Date.now()}`,
-      engagement_id: engagementId,
-      ref: `AJE-${String(db.adjustments.filter((a) => a.engagement_id === engagementId).length + 1).padStart(3, '0')}`,
-      narrative: adjNarrative || 'Audit journal adjustment',
-      status: 'proposed' as const,
-      proposed_by: getCurrentUserId(),
-      proposed_by_name: getActor().name,
-      approved_by: null,
-      created_at: new Date().toISOString(),
-      lines: [
-        {
-          id: `line_${Date.now()}_1`,
-          adjustment_id: `aje_${Date.now()}`,
-          blynt_code: adjDebitAccount,
-          debit_p: debP.toString(),
-          credit_p: '0',
-          narrative: 'Debit line',
-        },
-        {
-          id: `line_${Date.now()}_2`,
-          adjustment_id: `aje_${Date.now()}`,
-          blynt_code: adjCreditAccount,
-          debit_p: '0',
-          credit_p: credP.toString(),
-          narrative: 'Credit line',
-        },
-      ],
-    };
-
-    db.adjustments.push(newAdj);
-    setAdjustments([...db.adjustments.filter((a) => a.engagement_id === engagementId)]);
+    const eng = db.engagements.find((x) => x.id === engagementId);
+    const res = await fetch(`/api/v1/engagements/${encodeURIComponent(engagementId)}/adjustments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'adjusting',
+        source_schedule: 'TB',
+        date: eng?.period_end,
+        narrative: adjNarrative || 'Audit journal adjustment',
+        lines: [
+          { blynt_code: adjDebitAccount, debit_p: adjDebitAmount, credit_p: '0', narrative: 'Debit line' },
+          { blynt_code: adjCreditAccount, debit_p: '0', credit_p: adjCreditAmount, narrative: 'Credit line' },
+        ],
+      }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) return setProposeError(out.error || 'Could not propose the adjustment.');
+    setAdjustments(db.adjustments.filter((a) => a.engagement_id === engagementId));
     setShowProposeModal(false);
     setAdjNarrative('');
     setProposeError('');
-
-    db.logAudit(
-      firmId,
-      getActor(),
-      'PROPOSE_ADJUSTMENT',
-      'adjustments',
-      newAdj.id,
-      null,
-      newAdj
-    );
   };
 
-  // Handle Approve Adjustment with role check
-  const handleApproveAdjustment = (adjId: string) => {
+  // Approve through the server: a reviewer or above who didn't propose it (audited either way)
+  const handleApproveAdjustment = async (adjId: string) => {
     setApprovalError(null);
-    const adj = db.adjustments.find((a) => a.id === adjId);
-    if (!adj) return;
-
-    // Ground Rule: Preparer cannot approve their own adjustment (403, audited)
-    // Here simulate attempt by current user:
-    const currentUser = getActor();
-
-    if (adj.proposed_by === currentUser.id) {
-      setApprovalError('403 Forbidden: You proposed this adjustment and cannot approve it. A different reviewer is required.');
-      return;
-    }
-
-    adj.status = 'approved';
-    adj.approved_by = currentUser.id;
-    adj.approved_by_name = currentUser.name;
-
-    setAdjustments([...db.adjustments.filter((a) => a.engagement_id === engagementId)]);
-
-    db.logAudit(
-      firmId,
-      currentUser,
-      'APPROVE_ADJUSTMENT',
-      'adjustments',
-      adj.id,
-      null,
-      adj
-    );
+    const res = await fetch(`/api/v1/adjustments/${encodeURIComponent(adjId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'approve' }),
+    });
+    if (!res.ok) setApprovalError((await res.json().catch(() => ({}))).error || 'Could not approve the adjustment.');
+    setAdjustments(db.adjustments.filter((a) => a.engagement_id === engagementId));
   };
 
   return (

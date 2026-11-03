@@ -22,7 +22,7 @@ export class GuardError extends Error {
 }
 
 // Server-managed: a browser save never changes these
-const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'invites', 'uploads', 'xero_connections', 'qbo_connections', 'blynt_accounts', 'templates'];
+const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'invites', 'uploads', 'xero_connections', 'qbo_connections', 'blynt_accounts', 'templates', 'adjustments'];
 
 const REVIEWER_UP: UserRole[] = ['reviewer', 'manager', 'partner', 'admin'];
 const PARTNER_UP: UserRole[] = ['partner', 'admin'];
@@ -179,19 +179,7 @@ export function checkRules(before: State, after: State, actor: Actor) {
     if (s.user_id !== actor.id && !PARTNER_UP.includes(actor.role)) deny('Only the signer or a partner can remove a sign-off.');
   }
 
-  // Adjustments: proposed as yourself; approved/posted by a reviewer or above who did not propose it
-  const adj = changed(rows(before, 'adjustments'), rows(after, 'adjustments'), 'adjustments');
-  for (const a of adj.added) {
-    if (a.proposed_by !== actor.id) deny('Adjustments must be proposed as the signed-in user.');
-    if (a.status !== 'proposed') deny('New adjustments start as proposed.');
-  }
-  for (const { before: b, after: a } of adj.updated) {
-    if (b.status !== a.status && (a.status === 'approved' || a.status === 'posted')) {
-      if (!REVIEWER_UP.includes(actor.role)) deny('Only a reviewer or above may approve or post adjustments.');
-      if (a.proposed_by === actor.id) deny('You cannot approve an adjustment you proposed.');
-      if (a.status === 'approved' && a.approved_by !== actor.id) deny('Approvals must be recorded as the signed-in user.');
-    }
-  }
+  // Journals are server-managed (journals.ts checks balancing, roles and approval)
 
   // Review notes may only be resolved by a reviewer or above
   const com = changed(rows(before, 'comments'), rows(after, 'comments'), 'comments');
