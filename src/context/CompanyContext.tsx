@@ -159,12 +159,15 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const activeEngagement = useMemo(() => {
     if (!activeCompany) return null;
+    // The period chosen in the top bar is the engagement in the address
+    const fromUrl = engagements.find((e) => e.id === pathname?.match(/\/engagements\/([^/]+)/)?.[1] && e.client_id === activeCompany.id);
     return (
+      fromUrl ||
       engagements.find((e) => e.client_id === activeCompany.id && e.status !== 'locked') ||
       engagements.find((e) => e.client_id === activeCompany.id) ||
       null
     );
-  }, [engagements, activeCompany]);
+  }, [engagements, activeCompany, pathname]);
 
   const addCompany = useCallback(
     (newClient: Client, framework = 'FRS 102 1A') => {

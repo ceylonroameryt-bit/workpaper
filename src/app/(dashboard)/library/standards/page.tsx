@@ -12,80 +12,21 @@ import {
   Calendar,
   AlertCircle,
 } from 'lucide-react';
+import { STANDARDS, requiredSchedules } from '@/lib/standards';
+import { templateFor } from '@/lib/workpapers/templates';
 
 export default function StandardsLibraryPage() {
-  const [selectedStandard, setSelectedStandard] = useState<'frs102_1a' | 'frs105' | 'frs102_full'>('frs102_1a');
-  const [search, setSearch] = useState('');
-
-  const standards = [
-    {
-      id: 'frs102_1a',
-      name: 'FRS 102 Section 1A (Small Entities)',
-      version: '2024 Amendments (Effective 1 Jan 2026)',
-      status: 'Current & Active',
-      requiredSchedules: ['REC-02 Bank', 'REC-03 Fixed Assets', 'REC-04 Leases (Right-of-use)', 'REC-05 Payroll', 'REC-06 VAT', 'REC-07 Debtors', 'REC-08 Creditors', 'REC-09 Prepayments & Accruals', 'REC-11 Director Loan', 'REC-12 Share Capital', 'REC-13 Corporation Tax & Deferred Tax'],
-      sections: [
-        {
-          code: '1A.3',
-          title: 'Basis of Preparation and True & Fair View',
-          requirements: 'Statement that accounts comply with FRS 102 Section 1A and the Companies Act 2006.',
-        },
-        {
-          code: '1A.17',
-          title: 'Tangible Fixed Assets & Depreciation',
-          requirements: 'Measurement at cost or revalued amount; disclosure of depreciation rates and class movements.',
-        },
-        {
-          code: '1A.20 (2024)',
-          title: 'Leases - Right-of-Use Model',
-          requirements: 'Recognition of lease liability and right-of-use asset on balance sheet; short-term exemptions.',
-        },
-        {
-          code: '1A.33',
-          title: 'Directors’ Advances and Related Parties',
-          requirements: 'Full disclosure of advances, interest rates, security, and amounts repaid post period-end.',
-        },
-      ],
-    },
-    {
-      id: 'frs105',
-      name: 'FRS 105 (Micro-Entities)',
-      version: '2024 Edition',
-      status: 'Current',
-      requiredSchedules: ['REC-02 Bank', 'REC-03 Fixed Assets', 'REC-05 Payroll', 'REC-06 VAT', 'REC-07 Debtors', 'REC-08 Creditors', 'REC-12 Share Capital', 'REC-13 Corporation Tax (Deferred Tax Hidden)'],
-      sections: [
-        {
-          code: 'FRS 105.3',
-          title: 'Presumed True & Fair View',
-          requirements: 'Compliance with micro-entity format is legally presumed to give a true and fair view without additional disclosures.',
-        },
-        {
-          code: 'FRS 105.12',
-          title: 'No Deferred Tax',
-          requirements: 'Deferred tax is prohibited under FRS 105; only current corporation tax liability is recognized.',
-        },
-      ],
-    },
-    {
-      id: 'frs102_full',
-      name: 'FRS 102 (The Financial Reporting Standard)',
-      version: 'Full Standard Edition',
-      status: 'Available',
-      requiredSchedules: ['All 17 REC Schedules', 'Cash Flow Statement (MGT-04)', 'Full Strategic & Directors Report'],
-      sections: [
-        {
-          code: 'Section 7',
-          title: 'Statement of Cash Flows',
-          requirements: 'Mandatory indirect cash flow statement presenting operating, investing, and financing cash flows.',
-        },
-        {
-          code: 'Section 29',
-          title: 'Income Tax and Deferred Tax',
-          requirements: 'Comprehensive deferred tax accounting on all timing differences and unused tax losses.',
-        },
-      ],
-    },
-  ];
+  // Versions in force today, one card per standard; older versions are listed under each
+  const standards = STANDARDS.filter((s) => !s.effective_to).map((s) => ({
+    id: s.id,
+    name: s.name,
+    version: `${s.version} · periods ending from ${s.effective_from}`,
+    status: 'In force',
+    requiredSchedules: requiredSchedules(s).map((ref) => `${ref} ${templateFor(ref)?.title ?? ''}`.trim()),
+    sections: s.disclosures.map((d) => ({ code: d.code, title: d.title, requirements: d.requirement })),
+    earlier: STANDARDS.filter((o) => o.code === s.code && o.effective_to).map((o) => `${o.version} (to ${o.effective_to})`),
+  }));
+  const [selectedStandard, setSelectedStandard] = useState(standards[0].id);
 
   const current = standards.find((s) => s.id === selectedStandard) || standards[0];
 
@@ -119,7 +60,7 @@ export default function StandardsLibraryPage() {
         {standards.map((std) => (
           <div
             key={std.id}
-            onClick={() => setSelectedStandard(std.id as any)}
+            onClick={() => setSelectedStandard(std.id)}
             className={`p-4 rounded-xl border transition-all cursor-pointer ${
               selectedStandard === std.id
                 ? 'bg-white border-[#102654] shadow-md ring-1 ring-[#102654]'
@@ -144,10 +85,20 @@ export default function StandardsLibraryPage() {
           <div>
             <h2 className="text-base font-bold text-[#102654]">{current.name}</h2>
             <p className="text-xs text-[#5B6478]">{current.version}</p>
+            {current.earlier.length > 0 && <p className="text-[11px] text-[#7E8DA6]">Earlier versions: {current.earlier.join(', ')}</p>}
           </div>
           <span className="text-xs font-bold text-[#0B6B52] bg-[#E6F4EF] px-2.5 py-1 rounded-full">
             {current.status}
           </span>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs font-bold text-[#102654] uppercase tracking-wider">Required schedules ({current.requiredSchedules.length})</div>
+          <div className="flex flex-wrap gap-1.5">
+            {current.requiredSchedules.map((r) => (
+              <span key={r} className="text-[11px] bg-[#F6F7FB] border border-[#E3E7EF] rounded px-2 py-0.5 text-[#102654]">{r}</span>
+            ))}
+          </div>
         </div>
 
         {/* Requirements List */}

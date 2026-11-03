@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   try {
     await syncIn();
     const actor = getActorFromRequest(req);
-    const clients = services.getClients(actor.firmId);
+    const clients = services.getClients(actor.firmId, actor.clientIds);
     return jsonResponse(clients);
   } catch (err) {
     return errorResponse(err);

@@ -34,7 +34,7 @@ import { services } from '@/lib/server/services';
 import { formatPence } from '@/lib/money';
 import { getActor } from '@/lib/session';
 import { StatusBadge } from '@/components/ui/StatusPill';
-import { evaluatePaper, linkedFiles } from '@/lib/workpapers/engine';
+import { evaluatePaper, linkedFiles, paperStatus } from '@/lib/workpapers/engine';
 import { TEMPLATES, templateFor } from '@/lib/workpapers/templates';
 import type { Attachment, AttachmentCategory, AiReviewFinding } from '@/lib/types/models';
 import {
@@ -250,8 +250,9 @@ export default function WorkpaperPage() {
     services.updateWorkpaperData(engagement.firm_id, actor, workpaper.id, patch);
     // A changed paper needs preparing (and signing) again
     const current = db.workpapers.find((w) => w.id === workpaper.id);
-    if (current && (current.status === 'not_started' || db.signoffs.some((so) => so.workpaper_id === workpaper.id))) {
-      current.status = 'in_progress';
+    if (current) {
+      if (db.signoffs.some((so) => so.workpaper_id === workpaper.id)) current.status = 'in_progress';
+      current.status = paperStatus(current); // WPS-04: Unreconciled / Reconciled from the difference
     }
     setSavedAt(Date.now());
     setMessage(null);
@@ -261,7 +262,7 @@ export default function WorkpaperPage() {
   const touchPaper = () => {
     const current = db.workpapers.find((w) => w.id === workpaper.id);
     if (current) {
-      if (current.status === 'not_started') current.status = 'in_progress';
+      current.status = paperStatus(current);
       current.updated_at = new Date().toISOString();
     }
     setSavedAt(Date.now());
@@ -490,6 +491,7 @@ export default function WorkpaperPage() {
     });
 
     workpaper.status = 'in_progress';
+    workpaper.status = paperStatus(workpaper);
     saveData({
       changed_after_review: true,
       last_unreview_reason: unreviewReason.trim(),

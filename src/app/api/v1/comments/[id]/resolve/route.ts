@@ -1,5 +1,5 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { errorResponse, jsonResponse, requireCommentAccess } from '@/lib/server/api-helpers';
 import { services } from '@/lib/server/services';
 
 export async function POST(
@@ -9,7 +9,7 @@ export async function POST(
   try {
     await syncIn();
     const params = await props.params;
-    const actor = getActorFromRequest(req);
+    const actor = requireCommentAccess(req, params.id);
     const resolved = services.resolveComment(actor.firmId, actor, params.id);
     await syncOut();
     return jsonResponse(resolved);

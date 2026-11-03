@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
+import { LedgerPanel } from '@/components/integrations/XeroPanel';
 import { toPence, formatPence } from '@/lib/money';
 
 interface ParsedRow {
@@ -559,8 +560,8 @@ export default function ImportDataPage() {
         {[
           { id: 'csv', name: 'CSV / Excel Upload', desc: 'Real column matching & ingestion' },
           { id: 'blynt', name: 'Blynt Accounting', desc: 'Native chart of accounts feed' },
-          { id: 'xero', name: 'Xero OAuth API', desc: 'Live authenticated sync' },
-          { id: 'quickbooks', name: 'QuickBooks Online', desc: 'Encrypted OAuth connection' },
+          { id: 'xero', name: 'Xero', desc: 'Pull the trial balance from Xero' },
+          { id: 'quickbooks', name: 'QuickBooks Online', desc: 'Pull the trial balance from QuickBooks' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -578,8 +579,18 @@ export default function ImportDataPage() {
         ))}
       </div>
 
+      {(activeSource === 'xero' || activeSource === 'quickbooks') && (
+        <LedgerPanel
+          key={activeSource}
+          provider={activeSource}
+          clientId={db.engagements.find((e) => e.id === engagementId)?.client_id ?? ''}
+          engagementId={engagementId}
+          reconnectNeeded={Boolean(db.clients.find((c) => c.id === db.engagements.find((e) => e.id === engagementId)?.client_id)?.reconnect_needed)}
+        />
+      )}
+
       {/* Main Flow Card */}
-      <div className="blynt-card p-6 sm:p-8 flex flex-col gap-6">
+      <div className={`blynt-card p-6 sm:p-8 flex flex-col gap-6 ${activeSource === 'xero' || activeSource === 'quickbooks' ? 'hidden' : ''}`}>
         {/* Hidden Real File Input */}
         <input
           type="file"

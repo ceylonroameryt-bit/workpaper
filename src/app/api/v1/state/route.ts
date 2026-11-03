@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 function view(actor: ReturnType<typeof getActorFromRequest>) {
   return {
     version: currentVersion(),
-    data: publicSlice(db.exportState() as State, actor.firmId),
+    data: publicSlice(db.exportState() as State, actor.firmId, actor.id),
     persistent: hasDatabase(),
     me: actor,
   };

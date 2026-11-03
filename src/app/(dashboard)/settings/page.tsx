@@ -26,6 +26,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
+import { StaffManager } from '@/components/settings/StaffManager';
+import { getCurrentUserId } from '@/lib/session';
 import { useCompany } from '@/context/CompanyContext';
 
 export default function PracticeSettingsPage() {
@@ -44,12 +46,23 @@ export default function PracticeSettingsPage() {
       else if (tab === 'security') setActiveTab('security');
       else if (tab === 'defaults') setActiveTab('defaults');
     }
+    // Saved practice defaults (ADM-02)
+    fetch('/api/v1/firm/settings')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.defaults) return;
+        setSignOffLevels(d.defaults.signoff_levels === 2 ? '2' : '3');
+        setReconciliationTolerance((Number(d.defaults.tolerance_p) / 100).toFixed(2));
+        setReviewThreshold((Number(d.defaults.review_threshold_p) / 100).toFixed(2));
+      })
+      .catch(() => {});
   }, []);
 
   // ADM-02 Practice Defaults
   const [signOffLevels, setSignOffLevels] = useState<'3' | '2'>('3');
   const [reconciliationTolerance, setReconciliationTolerance] = useState('1.00');
   const [materialityThreshold, setMaterialityThreshold] = useState('5000.00');
+  const [reviewThreshold, setReviewThreshold] = useState('500.00');
   const [capitalisationThreshold, setCapitalisationThreshold] = useState('500.00');
   const [aiReadyThreshold, setAiReadyThreshold] = useState('90');
   const [aiCheckThreshold, setAiCheckThreshold] = useState('70');
@@ -59,13 +72,15 @@ export default function PracticeSettingsPage() {
   const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false);
 
   // ADM-01 Users & Roles
-  const [usersList, setUsersList] = useState(() => [...db.users]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<'preparer' | 'reviewer' | 'partner' | 'admin'>('preparer');
+  const [inviteRole, setInviteRole] = useState<'readonly' | 'preparer' | 'reviewer' | 'partner' | 'admin'>('preparer');
   const [inviteScope, setInviteScope] = useState<'all' | 'assigned'>('all');
   const [inviteError, setInviteError] = useState('');
+  const [inviteClientIds, setInviteClientIds] = useState<string[]>([]);
+  const [inviteLink, setInviteLink] = useState('');
+  const [inviteSending, setInviteSending] = useState(false);
 
   // DAT-09 Shared Rules Library & DAT-05 Mapping Rules
   const [rulesList, setRulesList] = useState<any[]>(() => {
@@ -186,8 +201,17 @@ export default function PracticeSettingsPage() {
     setTimeout(() => setSavedToast(null), 3000);
   };
 
-  const handleConfirmSave = (mode: 'new_only' | 'all') => {
+  const handleConfirmSave = async (mode: 'new_only' | 'all') => {
     setShowSaveConfirmModal(false);
+    const res = await fetch('/api/v1/firm/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tolerance: reconciliationTolerance, review_threshold: reviewThreshold, signoff_levels: Number(signOffLevels) }),
+    }).catch(() => null);
+    if (!res?.ok) {
+      triggerSaveNotification((await res?.json().catch(() => null))?.error || 'Could not save the practice defaults. Try again.');
+      return;
+    }
     triggerSaveNotification(
       mode === 'new_only'
         ? 'Settings saved successfully. Changes will apply to all new engagements.'
@@ -195,34 +219,52 @@ export default function PracticeSettingsPage() {
     );
   };
 
-  const handleSendInvite = (e: React.FormEvent) => {
+  const closeInviteModal = () => {
+    setShowInviteModal(false);
+    setInviteName('');
+    setInviteEmail('');
+    setInviteError('');
+    setInviteClientIds([]);
+    setInviteLink('');
+  };
+
+  // ADM-01: the server records the invite and returns a one-time link for the new user
+  const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteName.trim() || !inviteEmail.trim() || !inviteEmail.includes('@')) {
       setInviteError('Please provide a valid name and professional email.');
       return;
     }
-    const initials = inviteName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
-    const newUser = {
-      id: `usr_${Date.now()}`,
-      name: inviteName.trim(),
-      email: inviteEmail.trim(),
-      initials,
-      title: inviteRole === 'partner' ? 'Engagement Partner' : inviteRole === 'reviewer' ? 'Audit Manager' : inviteRole === 'admin' ? 'System Administrator' : 'Senior Associate / Preparer',
-      mfa_enabled: true,
-    };
-    db.users.push(newUser);
-    db.memberships.push({
-      user_id: newUser.id,
-      firm_id: 'firm_blynt_uk',
-      role: inviteRole,
-    });
-    setUsersList([...db.users]);
-    setShowInviteModal(false);
-    setInviteName('');
-    setInviteEmail('');
+    const limited = inviteScope === 'assigned' && inviteRole !== 'partner' && inviteRole !== 'admin';
+    if (limited && inviteClientIds.length === 0) {
+      setInviteError('Choose at least one client, or give access to all clients.');
+      return;
+    }
+    setInviteSending(true);
     setInviteError('');
-    triggerSaveNotification(`Invitation sent to ${newUser.email} with ${inviteRole.toUpperCase()} credentials.`);
-    refreshCompanyData();
+    try {
+      const res = await fetch('/api/v1/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: inviteName.trim(),
+          email: inviteEmail.trim(),
+          role: inviteRole,
+          ...(limited ? { client_ids: inviteClientIds } : {}),
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setInviteError(body.error || 'Could not create the invitation.');
+        return;
+      }
+      setInviteLink(body.link);
+      triggerSaveNotification(`Invitation created for ${body.invite.email}. Send them the link to finish set-up.`);
+    } catch {
+      setInviteError('Could not reach the server. Please try again.');
+    } finally {
+      setInviteSending(false);
+    }
   };
 
   const handleToggleRule = (id: string) => {
@@ -402,7 +444,11 @@ export default function PracticeSettingsPage() {
             <h2 className="text-base font-bold text-[#102654]">Practice Engagement Defaults (ADM-02)</h2>
             <p className="text-xs text-[#5B6478] mt-0.5">
               Parameters enforced automatically on schedules, lead sheets, variance calculations, and statutory reviews.
+              Each client can override the sign-off levels on its client page.
             </p>
+            <a href="/onboarding" className="inline-block mt-2 text-xs font-semibold text-[#1D4E89] hover:underline">
+              Edit practice details (name, structure, regulator, address, VAT)
+            </a>
           </div>
 
           <div className="space-y-6">
@@ -470,6 +516,22 @@ export default function PracticeSettingsPage() {
                 />
                 <span className="text-[11px] text-[#7E8DA6] mt-1 block">
                   Default £1.00. Differences within tolerance are treated as Reconciled automatically.
+                </span>
+              </div>
+
+              <div className="p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
+                <label htmlFor="review-threshold" className="block text-xs font-bold text-[#102654] mb-1">
+                  Review Threshold (£)
+                </label>
+                <input
+                  id="review-threshold"
+                  type="text"
+                  value={reviewThreshold}
+                  onChange={(e) => setReviewThreshold(e.target.value)}
+                  className="w-full text-xs p-2.5 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
+                />
+                <span className="text-[11px] text-[#7E8DA6] mt-1 block">
+                  Movements above this are flagged for review.
                 </span>
               </div>
 
@@ -542,45 +604,7 @@ export default function PracticeSettingsPage() {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-[#0B1B3D] text-white text-[11px] font-bold uppercase tracking-wider">
-                <tr>
-                  <th className="py-3 px-4">User Name</th>
-                  <th className="py-3 px-4">Email Address</th>
-                  <th className="py-3 px-4">Role &amp; Title</th>
-                  <th className="py-3 px-4">Access Scope</th>
-                  <th className="py-3 px-4 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E3E7EF] text-[#102654]">
-                {usersList.map((u) => (
-                  <tr key={u.id} className="hover:bg-[#F6F7FB]/70 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-[#102654] text-white flex items-center justify-center font-bold text-[10px]">
-                          {u.initials || 'U'}
-                        </div>
-                        <span className="font-bold text-[#102654]">{u.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-[#5B6478]">{u.email}</td>
-                    <td className="py-3 px-4">
-                      <span className="text-[10px] font-mono font-bold bg-[#EAF5FC] text-[#1D4E89] px-2 py-0.5 rounded-full border border-[#1D4E89]/20 uppercase">
-                        {u.title || 'Senior Auditor'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-[#5B6478]">All Practice Clients</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full">
-                        Active
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <StaffManager currentUserId={getCurrentUserId()} />
         </div>
       )}
 
@@ -1071,7 +1095,8 @@ export default function PracticeSettingsPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setShowInviteModal(false)}
+                onClick={closeInviteModal}
+                aria-label="Close"
                 className="text-[#5B6478] hover:text-[#102654]"
               >
                 <X className="w-4 h-4" />
@@ -1114,6 +1139,7 @@ export default function PracticeSettingsPage() {
                   onChange={(e) => setInviteRole(e.target.value as any)}
                   className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
                 >
+                  <option value="readonly">Read only (View assigned files, no changes)</option>
                   <option value="preparer">Preparer (Reconcile &amp; prepare schedules)</option>
                   <option value="reviewer">Manager / Reviewer (Review schedules &amp; raise points)</option>
                   <option value="partner">Partner (Final sign-off, approval &amp; lock)</option>
@@ -1145,24 +1171,57 @@ export default function PracticeSettingsPage() {
                     <span>Assigned Clients Only</span>
                   </label>
                 </div>
+                {inviteScope === 'assigned' && (inviteRole === 'partner' || inviteRole === 'admin') && (
+                  <p className="text-[11px] text-[#5B6478] mt-2">Partners and admins always see every client.</p>
+                )}
+                {inviteScope === 'assigned' && inviteRole !== 'partner' && inviteRole !== 'admin' && (
+                  <div className="mt-2 max-h-36 overflow-y-auto border border-[#D5DBE7] rounded-lg p-2 space-y-1.5">
+                    {db.clients.map((c) => (
+                      <label key={c.id} className="flex items-center gap-2 text-xs cursor-pointer text-[#102654]">
+                        <input
+                          type="checkbox"
+                          checked={inviteClientIds.includes(c.id)}
+                          onChange={(e) =>
+                            setInviteClientIds((ids) => (e.target.checked ? [...ids, c.id] : ids.filter((x) => x !== c.id)))
+                          }
+                        />
+                        <span>{c.name}</span>
+                      </label>
+                    ))}
+                    {db.clients.length === 0 && <p className="text-[11px] text-[#5B6478]">No clients yet.</p>}
+                  </div>
+                )}
               </div>
 
               {inviteError && <p className="text-red-600 text-[11px] font-semibold">{inviteError}</p>}
 
+              {inviteLink && (
+                <div className="p-3 rounded-lg bg-[#EAF6F0] border border-[#0B6B4D]/20 text-xs text-[#102654] space-y-2">
+                  <p className="font-semibold">Invitation created. Send this link to {inviteEmail.trim()} (valid for 7 days):</p>
+                  <input readOnly value={inviteLink} onFocus={(e) => e.target.select()} className="w-full font-mono text-[11px] p-2 border border-[#D5DBE7] rounded bg-white" />
+                  <button type="button" onClick={() => navigator.clipboard?.writeText(inviteLink)} className="text-[#1D4E89] font-semibold hover:underline">
+                    Copy link
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E3E7EF]">
                 <button
                   type="button"
-                  onClick={() => setShowInviteModal(false)}
+                  onClick={closeInviteModal}
                   className="px-3.5 py-2 text-xs text-[#5B6478] hover:text-[#102654] font-medium"
                 >
-                  Cancel
+                  {inviteLink ? 'Done' : 'Cancel'}
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
-                >
-                  Send Invitation
-                </button>
+                {!inviteLink && (
+                  <button
+                    type="submit"
+                    disabled={inviteSending}
+                    className="px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {inviteSending ? 'Creating...' : 'Create Invitation'}
+                  </button>
+                )}
               </div>
             </form>
           </div>

@@ -3,11 +3,13 @@
  * Exactly matches the database schema & ground rules.
  */
 
-export type UserRole = 'preparer' | 'reviewer' | 'manager' | 'partner' | 'admin';
+export type UserRole = 'readonly' | 'preparer' | 'reviewer' | 'manager' | 'partner' | 'admin';
 
 export type StatusKey =
   | 'not_started'
   | 'in_progress'
+  | 'unreconciled'
+  | 'reconciled'
   | 'prepared'
   | 'signed_off'
   | 'needs_you'
@@ -37,6 +39,20 @@ export const STATUS_DEFINITIONS: Record<StatusKey, StatusMeta> = {
     label: 'In progress',
     colorClass: 'text-[#1D4E89]',
     bgClass: 'bg-[#EAF5FC]',
+  },
+  unreconciled: {
+    key: 'unreconciled',
+    symbol: '≠',
+    label: 'Unreconciled',
+    colorClass: 'text-[#B8432F]',
+    bgClass: 'bg-[#FFF1EE]',
+  },
+  reconciled: {
+    key: 'reconciled',
+    symbol: '=',
+    label: 'Reconciled',
+    colorClass: 'text-[#0B6B52]',
+    bgClass: 'bg-[#E6F4EF]',
   },
   prepared: {
     key: 'prepared',
@@ -99,6 +115,40 @@ export interface Firm {
   id: string;
   name: string;
   created_at: string;
+  owner_user_id?: string; // the person who created the firm; may run set-up and invite
+  // Practice onboarding wizard; absent on firms created before it existed (treated as done)
+  onboarding?: { step: number; completed_at: string | null };
+  profile?: PracticeProfile;
+  // ADM-02 practice settings; DAT-08 gate thresholds per AI output type
+  settings?: {
+    gate?: Partial<Record<AiActionLogItem['output_type'], { ready?: number; check?: number; auto_accept?: boolean }>>;
+    defaults?: PracticeDefaults;
+  };
+}
+
+export type Regulator = 'ICAEW' | 'ACCA' | 'ICAS' | 'CAI' | 'AAT' | 'CIMA' | 'ATT' | 'CIOT';
+
+export interface PracticeProfile {
+  legal_name: string;
+  trading_name?: string;
+  structure: 'llp' | 'ltd' | 'partnership' | 'sole';
+  company_number?: string;
+  address_line: string;
+  postcode: string;
+  jurisdiction: 'england_wales' | 'scotland' | 'northern_ireland';
+  regulator: Regulator;
+  registration_number?: string;
+  vat_registered?: boolean;
+  vat_number?: string;
+  phone?: string;
+  logo_attachment_id?: string;
+}
+
+// ADM-02 practice settings skeleton (Build Order step 2)
+export interface PracticeDefaults {
+  tolerance_p: string; // pence; differences below this count as reconciled
+  review_threshold_p: string; // pence; movements above this are flagged
+  signoff_levels: 1 | 2 | 3; // preparer / + reviewer / + partner
 }
 
 export interface User {
@@ -115,6 +165,23 @@ export interface Membership {
   user_id: string;
   firm_id: string;
   role: UserRole;
+  client_ids?: string[]; // ADM-01: clients a non-partner may see; absent = all
+  status?: 'active' | 'deactivated'; // deactivated members can't sign in; absent = active
+}
+
+// ADM-01: invitation to join a practice. Server-only (the token hash never reaches the browser).
+export interface Invite {
+  id: string;
+  firm_id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  client_ids?: string[];
+  token_hash: string;
+  invited_by: string;
+  created_at: string;
+  expires_at: string;
+  accepted_at?: string | null;
 }
 
 export interface Client {
@@ -127,9 +194,25 @@ export interface Client {
   yearEnd?: string;
   data_source?: DataSource;
   reconnect_needed?: boolean;
+  // Client profile (Build Order step 2): decides which working papers each engagement gets
+  trading_name?: string;
+  address_line?: string;
+  postcode?: string;
+  jurisdiction?: 'england_wales' | 'scotland' | 'northern_ireland';
+  vat_number?: string;
+  vat_registered?: boolean;
+  vat_scheme?: 'standard' | 'flat_rate' | 'cash' | 'annual';
+  payroll?: boolean;
+  services?: ('year_end' | 'management' | 'vat' | 'payroll' | 'quarterly' | 'corporation_tax')[];
+  signoff_levels?: 1 | 2 | 3; // overrides the practice default
+  team_user_ids?: string[];
   industry?: string;
   framework?: string;
   currentEngagementId?: string;
+  // Archived clients drop out of everyday lists and their files become read-only; nothing is deleted
+  archived_at?: string | null;
+  archived_by?: string | null;
+  archive_reason?: string | null;
   [key: string]: any;
 }
 
@@ -142,6 +225,7 @@ export interface Engagement {
   framework: string;
   template_pack_id: string;
   status: 'planning' | 'fieldwork' | 'review' | 'locked';
+  frequency?: 'year_end' | 'quarterly' | 'monthly'; // absent = year-end
   locked_at: string | null;
   locked_by?: string | null;
   prior_engagement_id: string | null;
@@ -187,6 +271,8 @@ export interface TbSnapshot {
   sha256: string;
   created_by: string;
   created_at: string;
+  prior_snapshot_id?: string | null;
+  changes?: TbSnapshotDiff[]; // DAT-06: movements since the previous snapshot (late postings)
 }
 
 export interface TbLine {
@@ -232,12 +318,25 @@ export interface AdjustmentLine {
   narrative?: string;
 }
 
+// Journals in the adjusted TB (a reversed journal still counts; its reversal cancels it)
+export const JOURNAL_IN_TB: Adjustment['status'][] = ['accepted', 'approved', 'posted', 'reversed'];
+
 export interface Adjustment {
   id: string;
   engagement_id: string;
   ref: string; // e.g. AJE-001
   narrative: string;
-  status: 'proposed' | 'approved' | 'posted';
+  // proposed = Draft (JNL-02); accepted = in the adjusted TB; reversed = cancelled by a reversing journal
+  status: 'proposed' | 'accepted' | 'approved' | 'posted' | 'reversed' | 'rejected';
+  type?: 'adjusting' | 'reclassification' | 'client_posted' | 'proposed_by_ai';
+  date?: string;
+  source_schedule?: string;
+  calculation?: string;
+  evidence?: { file_key: string; filename: string }[];
+  auto_reverse?: boolean;
+  reverses_id?: string;
+  reversed_by_id?: string;
+  reject_reason?: string;
   proposed_by: string;
   proposed_by_name: string;
   approved_by: string | null;
@@ -268,6 +367,9 @@ export interface Workpaper {
   data_json: Record<string, any>;
   status: StatusKey;
   rolled_from_workpaper_id: string | null;
+  // WPS-03: unticked papers move to the N/A list with the reason; absent = applicable
+  applicable?: boolean;
+  na_reason?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -393,6 +495,7 @@ export interface AuditLog {
   before_json: string | null;
   after_json: string | null;
   at: string;
+  reason?: string | null; // AUD-01: why, where the action asks for one (unreview, unlock, corrections)
 }
 
 export interface AiLineage {

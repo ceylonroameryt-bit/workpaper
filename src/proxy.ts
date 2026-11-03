@@ -10,6 +10,9 @@ const PUBLIC_PATHS = [
   '/api/v1/auth/login',
   '/api/v1/auth/signup',
   '/api/v1/auth/logout',
+  '/api/v1/auth/mfa', // guarded by the MFA challenge cookie instead
+  '/invite',
+  '/api/v1/invites/accept', // guarded by the invite token
   '/samples',
 ];
 

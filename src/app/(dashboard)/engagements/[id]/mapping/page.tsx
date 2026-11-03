@@ -37,6 +37,9 @@ export default function AccountMappingPage() {
   const params = useParams();
   const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
+  const engagementRow = db.engagements.find((e) => e.id === engagementId);
+  const firmId = engagementRow?.firm_id ?? 'firm_blynt_uk';
+  const engagementClientId = engagementRow?.client_id ?? null;
 
   const [mappings, setMappings] = useState<AccountMapping[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -187,7 +190,7 @@ export default function AccountMappingPage() {
         // Log AI action
         db.ai_action_logs.push({
           id: `ail_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-          firm_id: 'firm_blynt_uk',
+          firm_id: firmId,
           engagement_id: engagementId,
           output_type: 'mapping',
           inputs_used: `${item.source_code} ${item.source_name}`,
@@ -201,7 +204,7 @@ export default function AccountMappingPage() {
 
         // Audit log entry
         db.logAudit(
-          'firm_blynt_uk',
+          firmId,
           actor,
           'CONFIRM_MAPPING',
           'account_mappings',
@@ -254,7 +257,7 @@ export default function AccountMappingPage() {
 
         db.ai_action_logs.push({
           id: `ail_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-          firm_id: 'firm_blynt_uk',
+          firm_id: firmId,
           engagement_id: engagementId,
           output_type: 'mapping',
           inputs_used: `${item.source_code} ${item.source_name}`,
@@ -267,7 +270,7 @@ export default function AccountMappingPage() {
         });
 
         db.logAudit(
-          'firm_blynt_uk',
+          firmId,
           actor,
           'CONFIRM_MAPPING',
           'account_mappings',
@@ -320,8 +323,8 @@ export default function AccountMappingPage() {
       createdRuleId = `rule_${Date.now()}`;
       const newRule: LearnedRule = {
         id: createdRuleId,
-        firm_id: 'firm_blynt_uk',
-        client_id: ruleScope === 'client' ? engagementId : null,
+        firm_id: firmId,
+        client_id: ruleScope === 'client' ? engagementClientId : null,
         supplier_name: ruleScope === 'supplier' ? sourceName : null,
         type: 'mapping',
         scope: ruleScope,
@@ -332,13 +335,14 @@ export default function AccountMappingPage() {
         created_by_name: actor.name,
         created_at: now,
         times_used: 1,
-        active: true,
-        approved_by_manager: ruleScope === 'practice' ? actor.role === 'manager' || actor.role === 'partner' : true,
+        // Practice rules wait for a manager (DAT-09); the server refuses anything else
+        active: ruleScope !== 'practice' || ['manager', 'partner', 'admin'].includes(actor.role),
+        approved_by_manager: ruleScope === 'practice' ? ['manager', 'partner', 'admin'].includes(actor.role) : true,
       };
       db.learned_rules.unshift(newRule);
 
       db.logAudit(
-        'firm_blynt_uk',
+        firmId,
         actor,
         'CREATE_LEARNED_RULE',
         'learned_rules',
@@ -382,7 +386,7 @@ export default function AccountMappingPage() {
       // Log to AI Action Log (AUD-03)
       db.ai_action_logs.push({
         id: `ail_${Date.now()}`,
-        firm_id: 'firm_blynt_uk',
+        firm_id: firmId,
         engagement_id: engagementId,
         output_type: 'mapping',
         inputs_used: `${item.source_code} ${item.source_name}`,
@@ -395,7 +399,7 @@ export default function AccountMappingPage() {
       });
 
       db.logAudit(
-        'firm_blynt_uk',
+        firmId,
         actor,
         'UPDATE_MAPPING_WITH_RULE',
         'account_mappings',
@@ -447,7 +451,7 @@ export default function AccountMappingPage() {
         item.gate = 'ready';
 
         db.logAudit(
-          'firm_blynt_uk',
+          firmId,
           actor,
           'BATCH_MAP_ACCOUNTS',
           'account_mappings',
@@ -979,7 +983,7 @@ export default function AccountMappingPage() {
                               row.status = 'confirmed';
                               row.confirmed_by = actor.id;
                               row.confirmed_at = new Date().toISOString();
-                              db.logAudit('firm_blynt_uk', actor, 'CONFIRM_MAPPING', 'account_mappings', row.id, null, row);
+                              db.logAudit(firmId, actor, 'CONFIRM_MAPPING', 'account_mappings', row.id, null, row);
                               reloadData();
                             }}
                             className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] rounded-lg shadow-2xs"

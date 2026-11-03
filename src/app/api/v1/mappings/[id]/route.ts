@@ -1,5 +1,6 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { requireEngagementAccess, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { db } from '@/lib/server/db';
 import { services } from '@/lib/server/services';
 
 export async function PATCH(
@@ -9,7 +10,8 @@ export async function PATCH(
   try {
     await syncIn();
     const params = await props.params;
-    const actor = getActorFromRequest(req);
+    const engagementId = db.account_mappings.find((m) => m.id === params.id)?.engagement_id ?? '';
+    const actor = requireEngagementAccess(req, engagementId);
     const body = await req.json();
     const updated = services.updateMapping(actor.firmId, actor, params.id, body.blynt_code);
     await syncOut();

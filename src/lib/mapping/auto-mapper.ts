@@ -18,21 +18,37 @@ export function matchBlyntAccount(
   sourceType: string = '',
   sourceCode: string = ''
 ): MappingSuggestion | null {
+  const code = (sourceCode || '').trim();
+  const byName = matchByName(sourceName, sourceType);
+  const codeMatch = db.blynt_accounts.find((ba) => ba.code === code);
+  if (!codeMatch) return strip(byName);
+
+  const fromCode: MappingSuggestion = {
+    blynt_code: codeMatch.code,
+    name: codeMatch.name,
+    confidence: 100,
+    reason: `Code ${code} and the account name both point to ${codeMatch.name}`,
+    lead_letter: codeMatch.lead_letter,
+  };
+  // A client's nominal code only coincides with the Blynt chart by chance, so the name decides
+  if (byName.fallback) {
+    return { ...fromCode, confidence: 85, reason: `Code ${code} matches ${codeMatch.name} in the Blynt chart; the name gives no other clue` };
+  }
+  if (byName.blynt_code === codeMatch.code || byName.lead_letter === codeMatch.lead_letter) return fromCode;
+  // Name and code disagree (e.g. "Business Current Account" on code 1200 = Trade Debtors): follow the name, ask for a check
+  return {
+    ...strip(byName),
+    confidence: Math.min(byName.confidence, 80),
+    reason: `${byName.reason}. Code ${code} is ${codeMatch.name} in the Blynt chart, so check this`,
+  };
+}
+
+const strip = ({ fallback: _f, ...s }: MappingSuggestion & { fallback?: boolean }): MappingSuggestion => s;
+
+/** Classification from the account name and type alone. `fallback` marks the no-clue default. */
+function matchByName(sourceName: string, sourceType: string): MappingSuggestion & { fallback?: boolean } {
   const name = (sourceName || '').toLowerCase().trim();
   const type = (sourceType || '').toLowerCase().trim();
-  const code = (sourceCode || '').trim();
-
-  // 1. Exact code match against Blynt standard accounts
-  const directCodeMatch = db.blynt_accounts.find((ba) => ba.code === code);
-  if (directCodeMatch) {
-    return {
-      blynt_code: directCodeMatch.code,
-      name: directCodeMatch.name,
-      confidence: 100,
-      reason: `Exact nominal code match with Blynt standard chart (${directCodeMatch.code})`,
-      lead_letter: directCodeMatch.lead_letter,
-    };
-  }
 
   // 2. Cash and Bank Balances (Lead B: 1000, 1010, 1020)
   if (/petty cash|cash on hand|till float|cash float/i.test(name)) {
@@ -44,7 +60,9 @@ export function matchBlyntAccount(
       lead_letter: 'B',
     };
   }
-  if (/starling|barclays|hsbc|lloyds|natwest|santander|revolut|tide|monzo|bank|current account|checking|operating account/i.test(name) || /bank/i.test(type)) {
+  // Income and expense accounts named after a bank ("Bank Fees", "HSBC charges") are not cash at bank
+  const profitAndLoss = /expense|overhead|cost|revenue|income|sales|direct/i.test(type);
+  if ((!profitAndLoss && /starling|barclays|hsbc|lloyds|natwest|santander|revolut|tide|monzo|bank|current account|checking|operating account/i.test(name)) || /bank/i.test(type)) {
     return {
       blynt_code: '1010',
       name: 'Barclays Current Account',
@@ -356,6 +374,7 @@ export function matchBlyntAccount(
     confidence: 60,
     reason: 'General operational overhead classification',
     lead_letter: 'E',
+    fallback: true,
   };
 }
 
@@ -383,7 +402,8 @@ export function getStatutoryDetails(
     };
   }
 
-  if (/suspense|clearing|contra|wages control/i.test(name)) {
+  // Whole words only: "Subcontract" contains "contra" but is a cost, not a suspense account
+  if (/\b(suspense|clearing|contra|wages control)\b/i.test(name)) {
     return {
       statutory_line: 'Suspense & clearing control (must be zero)',
       schedule_ref: 'REC-16',
@@ -509,10 +529,30 @@ export function getStatutoryDetails(
     };
   }
 
+  // Income and expense lines are covered by P&L analysis (ANL-01); only those with a
+  // supporting schedule point at one. REC-01 is the schedule framework, not a schedule.
+  if (code === '6200') {
+    return {
+      statutory_line: 'Administrative expenses',
+      schedule_ref: 'REC-05', // payroll
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
+  if (code === '6900' || code === '6950') {
+    return {
+      statutory_line: 'Administrative expenses',
+      schedule_ref: 'REC-03', // fixed asset register: depreciation and disposals
+      cash_flow_category: 'Operating activities',
+      is_credit_area: false,
+    };
+  }
+
   if (code.startsWith('4')) {
     return {
       statutory_line: 'Turnover',
-      schedule_ref: 'REC-01',
+      schedule_ref: '',
       cash_flow_category: 'Operating activities',
       is_credit_area: true,
     };
@@ -521,7 +561,7 @@ export function getStatutoryDetails(
   if (code.startsWith('5')) {
     return {
       statutory_line: 'Cost of sales',
-      schedule_ref: 'REC-01',
+      schedule_ref: '',
       cash_flow_category: 'Operating activities',
       is_credit_area: false,
     };
@@ -530,7 +570,7 @@ export function getStatutoryDetails(
   if (code.startsWith('6')) {
     return {
       statutory_line: 'Administrative expenses',
-      schedule_ref: 'REC-01',
+      schedule_ref: '',
       cash_flow_category: 'Operating activities',
       is_credit_area: false,
     };
@@ -538,7 +578,7 @@ export function getStatutoryDetails(
 
   return {
     statutory_line: 'Unclassified statutory balance',
-    schedule_ref: 'REC-01',
+    schedule_ref: '',
     cash_flow_category: 'Operating activities',
     is_credit_area: false,
   };

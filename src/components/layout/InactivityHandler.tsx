@@ -8,7 +8,7 @@ import { useCompany } from '@/context/CompanyContext';
 
 const LAST_ACTIVITY_KEY = 'blynt_last_activity_timestamp';
 const WARNING_WINDOW_SECONDS = 60; // Show warning modal 60s before logout
-const AUTH_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password'];
+const AUTH_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password', '/invite'];
 
 export const InactivityHandler: React.FC = () => {
   const pathname = usePathname();

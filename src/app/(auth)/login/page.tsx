@@ -56,6 +56,14 @@ export default function LoginPage() {
       });
       if (res.ok) {
         const from = new URLSearchParams(window.location.search).get('from');
+        const okBody = await res.json().catch(() => ({}));
+        if (okBody.mfa) {
+          // Password accepted; the MFA page finishes the sign-in
+          const qs = new URLSearchParams({ step: okBody.mfa });
+          if (from) qs.set('from', from);
+          window.location.href = `/login/mfa?${qs}`;
+          return;
+        }
         window.location.href = from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
         return;
       }

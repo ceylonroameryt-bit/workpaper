@@ -9,10 +9,12 @@ export const SESSION_COOKIE = 'blynt_session';
 export const SESSION_TTL_SECONDS = 60 * 60 * 12;
 const DEV_SECRET = 'blynt-dev-only-secret-change-me';
 
-function secret(): string {
+export function secret(): string {
   const s = process.env.AUTH_SECRET;
   if (s && s.length >= 32) return s;
-  return DEV_SECRET + '-fallback-prod-security-hash-2026';
+  // A fallback in the code would let anyone forge sessions on a live site
+  if (process.env.NODE_ENV === 'production') throw new Error('Set AUTH_SECRET (32+ random characters) before running in production.');
+  return DEV_SECRET;
 }
 
 // scrypt with a per-password salt: "scrypt$<salt>$<hash>"
@@ -34,6 +36,7 @@ export function verifyPassword(password: string, stored: string | undefined): bo
 export interface SessionPayload {
   uid: string;
   exp: number; // unix seconds
+  mfa?: 'pending'; // set only on the short-lived challenge issued between password and MFA code
 }
 
 const b64 = (s: string | Buffer) => Buffer.from(s).toString('base64url');
@@ -45,6 +48,36 @@ export function createSessionToken(uid: string, ttlSeconds = SESSION_TTL_SECONDS
 }
 
 export function verifySessionToken(token: string | undefined | null): SessionPayload | null {
+  const payload = verifyToken(token);
+  // A password-only challenge is never a session
+  return payload && !payload.mfa ? payload : null;
+}
+
+// Password checked, MFA code still owed: valid for 10 minutes and only at the MFA endpoints
+export const MFA_COOKIE = 'blynt_mfa';
+export const MFA_TTL_SECONDS = 600;
+
+export function createChallengeToken(uid: string): string {
+  const body = b64(JSON.stringify({ uid, exp: Math.floor(Date.now() / 1000) + MFA_TTL_SECONDS, mfa: 'pending' }));
+  return `${body}.${sign(body)}`;
+}
+
+export function verifyChallengeToken(token: string | undefined | null): SessionPayload | null {
+  const payload = verifyToken(token);
+  return payload?.mfa === 'pending' ? payload : null;
+}
+
+export const challengeCookie = (token: string) =>
+  `${MFA_COOKIE}=${token}; Path=/api/v1/auth/mfa; HttpOnly; SameSite=Lax; Max-Age=${MFA_TTL_SECONDS}${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+export const clearChallengeCookie = () => `${MFA_COOKIE}=; Path=/api/v1/auth/mfa; HttpOnly; SameSite=Lax; Max-Age=0`;
+
+/**
+ * ADM-01 makes MFA mandatory; it is switched off until launch, and then nobody is asked for a
+ * code. Set MFA_REQUIRED=true to enforce it (enrolled authenticators are kept for then).
+ */
+export const mfaRequired = () => process.env.MFA_REQUIRED === 'true';
+
+function verifyToken(token: string | undefined | null): SessionPayload | null {
   if (!token) return null;
   const [body, sig] = token.split('.');
   if (!body || !sig) return null;

@@ -1,6 +1,5 @@
 import { MOCK_BANK_REC, MOCK_TEMPLATES, CURRENT_USER, TEAM_MEMBERS } from '../mock';
 import { db } from '../server/db';
-import { asPence } from '../money';
 
 import {
   Client,
@@ -9,7 +8,6 @@ import {
   BankRecWorkpaperData,
   TrialBalanceItem,
   ReviewNoteItem,
-  AdjustingJournalEntry,
   LockBlockerItem,
   TemplateCardItem,
   AuditLogItem,
@@ -284,48 +282,6 @@ export async function getReviewNotes(engagementId: string, workpaperId?: string)
         })),
       } as ReviewNoteItem;
     });
-}
-
-export async function getAdjustingEntries(
-  engagementId: string,
-  stage?: 'Proposed' | 'Approved' | 'Posted'
-): Promise<AdjustingJournalEntry[]> {
-  const STAGE = { proposed: 'Proposed', approved: 'Approved', posted: 'Posted' } as const;
-  const accountName = (code: string) => db.blynt_accounts.find((a) => a.code === code)?.name ?? code;
-  const list = db.adjustments
-    .filter((a) => a.engagement_id === engagementId)
-    .map((a) => {
-      const history = db.audit_logs
-        .filter((l) => l.entity_id === a.id)
-        .map((l) => ({ action: l.action.toLowerCase().replace(/_/g, ' '), user: l.actor_name, timestamp: fmtWhen(l.at), note: '' }));
-      return {
-        id: a.id,
-        reference: a.ref,
-        ref: a.ref,
-        title: a.narrative,
-        narrative: a.narrative,
-        date: new Date(a.created_at).toLocaleDateString('en-GB'),
-        stage: STAGE[a.status],
-        preparedBy: a.proposed_by_name,
-        proposedBy: a.proposed_by,
-        approvedBy: a.approved_by_name ?? undefined,
-        reason: a.narrative,
-        impactSummary: a.lines
-          .map((l) => `${asPence(l.debit_p) > 0n ? 'Dr' : 'Cr'} ${l.blynt_code} ${accountName(l.blynt_code)}`)
-          .join(' · '),
-        supportDocument: 'See the linked working paper',
-        lines: a.lines.map((l) => ({
-          id: l.id,
-          accountCode: l.blynt_code,
-          accountName: accountName(l.blynt_code),
-          description: l.narrative,
-          debitCents: Number(asPence(l.debit_p)),
-          creditCents: Number(asPence(l.credit_p)),
-        })),
-        auditHistory: history,
-      } as AdjustingJournalEntry;
-    });
-  return stage ? list.filter((e) => e.stage === stage) : list;
 }
 
 export async function getSignOffBlockers(_engagementId: string): Promise<LockBlockerItem[]> {

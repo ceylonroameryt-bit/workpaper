@@ -32,7 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
+    // Browser extensions add attributes to <html> before React hydrates.
+    <html lang="en" className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-[#F6F7FB] text-[#102654] antialiased">
         <WorkspaceSync>
           <LocaleProvider>
