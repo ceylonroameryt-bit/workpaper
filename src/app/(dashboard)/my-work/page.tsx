@@ -43,28 +43,28 @@ export default function MyWorkPage() {
   return (
     <div className="flex flex-col gap-4 max-w-4xl">
       <div>
-        <h1 className="text-xl font-bold text-[#102654]">My work</h1>
-        <p className="text-xs text-[#5B6478] mt-1">Schedules assigned to you, mentions, review points, schedules changed after your review and journals to approve.</p>
+        <h1 className="text-xl font-bold text-[#122654]">My work</h1>
+        <p className="text-xs text-[#4A5878] mt-1">Schedules assigned to you, mentions, review points, schedules changed after your review and journals to approve.</p>
       </div>
       {error && <p role="alert" className="text-xs text-[#B42318]">{error}</p>}
-      {!items && !error && <p className="text-xs text-[#5B6478]">Loading…</p>}
-      {items && !items.length && <p className="text-sm text-[#5B6478] bg-white border border-[#E3E7EF] rounded-[12px] p-6">Nothing waiting on you.</p>}
+      {!items && !error && <p className="text-xs text-[#4A5878]">Loading…</p>}
+      {items && !items.length && <p className="text-sm text-[#4A5878] bg-white border border-[#E3E7EF] rounded-[12px] p-6">Nothing waiting on you.</p>}
       {items && items.length > 0 && (
         <ul className="bg-white border border-[#E3E7EF] rounded-[12px] divide-y divide-[#E3E7EF]">
           {items.map((i, n) => {
             const k = KIND[i.kind];
             return (
               <li key={`${i.kind}-${i.ref}-${n}`}>
-                <Link href={href(i)} className="flex items-start gap-3 px-4 py-3 hover:bg-[#F6F7FB]">
+                <Link href={href(i)} className="flex items-start gap-3 px-4 py-3 hover:bg-[#F5F8FD]">
                   <k.icon className={`w-4 h-4 mt-0.5 shrink-0 ${i.overdue ? 'text-[#B8432F]' : 'text-[#1D4E89]'}`} />
                   <span className="flex-1 min-w-0">
-                    <span className="block text-xs font-bold text-[#102654]">
+                    <span className="block text-xs font-bold text-[#122654]">
                       <span className="font-mono mr-2">{i.ref}</span>
                       {k.label}
                     </span>
-                    <span className="block text-[11px] text-[#5B6478] truncate">{i.detail}</span>
+                    <span className="block text-[11px] text-[#4A5878] truncate">{i.detail}</span>
                   </span>
-                  {i.due && <span className={`text-[11px] font-semibold whitespace-nowrap ${i.overdue ? 'text-[#B8432F]' : 'text-[#5B6478]'}`}>{i.overdue ? 'Overdue · ' : 'Due '}{i.due}</span>}
+                  {i.due && <span className={`text-[11px] font-semibold whitespace-nowrap ${i.overdue ? 'text-[#B8432F]' : 'text-[#4A5878]'}`}>{i.overdue ? 'Overdue · ' : 'Due '}{i.due}</span>}
                 </Link>
               </li>
             );

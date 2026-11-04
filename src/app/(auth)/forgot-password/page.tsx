@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
                 Workpapers
               </span>
               <span className="text-[10px] uppercase font-bold tracking-wider text-[#5B6676]">
-                Audit Platform
+                Working Papers
               </span>
             </div>
           </Link>
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. name@vanguard-audit.com"
+                      placeholder="e.g. name@yourpractice.co.uk"
                       autoFocus
                     />
                   </Field>
@@ -160,20 +160,20 @@ export default function ForgotPasswordPage() {
             Enterprise Security Standards
           </h2>
           <p className="text-sm text-[#5B6676] leading-relaxed mb-6">
-            For audit firms utilizing single sign-on (SSO) with Microsoft Azure AD / Entra or Okta, password recovery is centrally managed by your firm IT administrator.
+            For practices using single sign-on (SSO) with Microsoft Azure AD / Entra or Okta, password recovery is centrally managed by your firm IT administrator.
           </p>
 
           <div className="p-4 rounded-[12px] bg-white border border-[#D5D9E0] text-xs text-[#5B6676] flex items-start gap-3">
             <ShieldAlert className="w-5 h-5 text-[#1E4FD8] shrink-0 mt-0.5" />
             <div className="leading-relaxed">
               <strong className="text-[#1B2430] block mb-0.5">Need IT Helpdesk Assistance?</strong>
-              Contact your audit engagement administrator or email support@workpapers.com with your firm domain ID.
+              Contact your practice administrator or email support@workpapers.com with your firm domain ID.
             </div>
           </div>
         </div>
 
         <div className="text-xs text-[#5B6676]">
-          Workpapers Audit Compliance Portal
+          Blynt Workpapers
         </div>
       </div>
     </div>

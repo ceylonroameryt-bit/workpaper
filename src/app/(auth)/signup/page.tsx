@@ -41,16 +41,6 @@ export default function SignupPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successNotice, setSuccessNotice] = useState(false);
 
-  const handlePrefillSample = () => {
-    const randomSuffix = Math.floor(100 + Math.random() * 900);
-    setFullName('Marcus Sterling');
-    setWorkEmail(`marcus.sterling${randomSuffix}@sterlingaudit.co.uk`);
-    setFirmName(`Sterling & Partners LLP`);
-    setRole('manager');
-    setPassword('AuditSecure2026!');
-    setConfirmPassword('AuditSecure2026!');
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
@@ -79,7 +69,7 @@ export default function SignupPage() {
     }
 
     if (!agreedToTerms) {
-      setErrorMessage('Please confirm agreement to the audit processing terms.');
+      setErrorMessage('Please confirm you agree to the practice terms.');
       return;
     }
 
@@ -110,9 +100,6 @@ export default function SignupPage() {
       // Mark onboarding as ready so user isn't prompted with redundant first-time setup
       if (typeof window !== 'undefined') {
         localStorage.setItem('blynt_onboarding_completed', 'true');
-        if (data.clientId) {
-          localStorage.setItem('blynt_active_client_id', data.clientId);
-        }
       }
 
       setSuccessNotice(true);
@@ -127,9 +114,9 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F6F7FB] text-[#102654]">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F5F8FD] text-[#122654]">
       {/* Brand Panel Left (Blynt Navy) */}
-      <div className="lg:col-span-6 xl:col-span-5 bg-[#0B1B3D] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-between">
+      <div className="lg:col-span-6 xl:col-span-5 bg-[#0B1A3B] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-between">
         <div>
           {/* Blynt Logo */}
           <div className="mb-12">
@@ -137,18 +124,18 @@ export default function SignupPage() {
           </div>
 
           <div className="max-w-[440px]">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#FF7D6B] bg-[#102654] px-3 py-1 rounded-full border border-[#FF7D6B]/30 inline-block mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#FF7A66] bg-[#122654] px-3 py-1 rounded-full border border-[#FF7A66]/30 inline-block mb-4">
               Practice Onboarding
             </span>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight mb-4">
-              Set up your audit firm workspace in seconds
+              Set up your practice workspace in seconds
             </h1>
             <p className="text-sm text-[#A6B4D0] leading-relaxed mb-8">
               Create an isolated firm tenant with role-based sign-offs, standardized working paper packs, and intelligent nominal ledger mapping.
             </p>
 
             <div className="flex flex-col gap-4 text-xs text-[#A6B4D0]">
-              <div className="flex items-start gap-3 bg-[#102654]/60 border border-[#1D4E89]/40 p-3.5 rounded-xl">
+              <div className="flex items-start gap-3 bg-[#122654]/60 border border-[#1D4E89]/40 p-3.5 rounded-xl">
                 <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white block font-semibold mb-0.5">Firm Tenant Isolation</strong>
@@ -156,15 +143,15 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 bg-[#102654]/60 border border-[#1D4E89]/40 p-3.5 rounded-xl">
-                <CheckCircle2 className="w-5 h-5 text-[#FF7D6B] shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 bg-[#122654]/60 border border-[#1D4E89]/40 p-3.5 rounded-xl">
+                <CheckCircle2 className="w-5 h-5 text-[#FF7A66] shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white block font-semibold mb-0.5">Automated Working Paper Packs</strong>
                   Pre-configured lead schedules (A-Z) and materiality calculators for FRS 102 1A, FRS 105, and IFRS.
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 bg-[#102654]/60 border border-[#1D4E89]/40 p-3.5 rounded-xl">
+              <div className="flex items-start gap-3 bg-[#122654]/60 border border-[#1D4E89]/40 p-3.5 rounded-xl">
                 <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white block font-semibold mb-0.5">Instant Working Sample</strong>
@@ -175,7 +162,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-[#1D4E89]/40 text-xs text-[#5B6478] flex items-center justify-between">
+        <div className="mt-12 pt-6 border-t border-[#1D4E89]/40 text-xs text-[#4A5878] flex items-center justify-between">
           <span>&copy; {new Date().getFullYear()} Blynt Workpapers.</span>
           <span className="text-[#A6B4D0]">ISA &amp; UK GAAP Compliant</span>
         </div>
@@ -184,32 +171,17 @@ export default function SignupPage() {
       {/* Signup Form Right */}
       <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16">
         <div className="w-full max-w-[460px]">
-          {/* Quick Prefill helper */}
-          <div className="mb-6 p-3.5 bg-[#EAF5FC] border border-[#1D4E89]/20 rounded-xl flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-[#1D4E89]">
-              <Sparkles className="w-4 h-4 text-[#1D4E89] shrink-0" />
-              <span>Testing out the platform?</span>
-            </div>
-            <button
-              type="button"
-              onClick={handlePrefillSample}
-              className="text-xs font-bold text-[#1D4E89] hover:underline cursor-pointer bg-white px-2.5 py-1 rounded-md border border-[#1D4E89]/30"
-            >
-              Fill sample firm details
-            </button>
-          </div>
-
           <div className="mb-6">
-            <h2 className="text-2xl font-extrabold text-[#102654] tracking-tight">
+            <h2 className="text-2xl font-extrabold text-[#122654] tracking-tight">
               Create a firm account
             </h2>
-            <p className="text-xs text-[#5B6478] mt-1">
+            <p className="text-xs text-[#4A5878] mt-1">
               Start your practice workspace. No credit card required.
             </p>
           </div>
 
           {errorMessage && (
-            <div className="mb-5 p-3.5 bg-[#FFF1EE] border border-[#FF7D6B]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#B8432F] animate-in fade-in">
+            <div className="mb-5 p-3.5 bg-[#FFF1EE] border border-[#FF7A66]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#B8432F] animate-in fade-in">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -224,8 +196,8 @@ export default function SignupPage() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label htmlFor="signup-name" className="block text-xs font-bold text-[#102654] mb-1.5 flex items-center gap-1.5">
-                <UserIcon className="w-3.5 h-3.5 text-[#5B6478]" />
+              <label htmlFor="signup-name" className="block text-xs font-bold text-[#122654] mb-1.5 flex items-center gap-1.5">
+                <UserIcon className="w-3.5 h-3.5 text-[#4A5878]" />
                 <span>Your Full Name</span>
               </label>
               <input
@@ -235,13 +207,13 @@ export default function SignupPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="e.g. Alex Wright"
-                className="w-full min-h-[44px] px-3.5 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs"
+                className="w-full min-h-[44px] px-3.5 text-xs bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] shadow-2xs"
               />
             </div>
 
             <div>
-              <label htmlFor="signup-email" className="block text-xs font-bold text-[#102654] mb-1.5 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-[#5B6478]" />
+              <label htmlFor="signup-email" className="block text-xs font-bold text-[#122654] mb-1.5 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-[#4A5878]" />
                 <span>Work Email Address</span>
               </label>
               <input
@@ -255,8 +227,8 @@ export default function SignupPage() {
                 aria-invalid={emailTouched && !!emailProblem}
                 aria-describedby="signup-email-error"
                 placeholder="e.g. alex.wright@wrightaudit.co.uk"
-                className={`w-full min-h-[44px] px-3.5 text-xs bg-white border rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs ${
-                  emailTouched && emailProblem ? 'border-[#B42318]' : 'border-[#D5DBE7]'
+                className={`w-full min-h-[44px] px-3.5 text-xs bg-white border rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] shadow-2xs ${
+                  emailTouched && emailProblem ? 'border-[#B42318]' : 'border-[#D3DCEE]'
                 }`}
               />
               {emailTouched && emailProblem && (
@@ -269,8 +241,8 @@ export default function SignupPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="signup-firm" className="block text-xs font-bold text-[#102654] mb-1.5 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-[#5B6478]" />
+                <label htmlFor="signup-firm" className="block text-xs font-bold text-[#122654] mb-1.5 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-[#4A5878]" />
                   <span>Firm / Practice Name</span>
                 </label>
                 <input
@@ -280,23 +252,23 @@ export default function SignupPage() {
                   value={firmName}
                   onChange={(e) => setFirmName(e.target.value)}
                   placeholder="e.g. Wright & Co LLP"
-                  className="w-full min-h-[44px] px-3.5 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs"
+                  className="w-full min-h-[44px] px-3.5 text-xs bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] shadow-2xs"
                 />
               </div>
 
               <div>
-                <label htmlFor="signup-role" className="block text-xs font-bold text-[#102654] mb-1.5">
-                  Your Audit Role
+                <label htmlFor="signup-role" className="block text-xs font-bold text-[#122654] mb-1.5">
+                  Your role
                 </label>
                 <select
                   id="signup-role"
                   value={role}
                   onChange={(e) => setRole(e.target.value as any)}
-                  className="w-full min-h-[44px] px-3 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs"
+                  className="w-full min-h-[44px] px-3 text-xs bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] shadow-2xs"
                 >
-                  <option value="manager">Audit Manager</option>
+                  <option value="manager">Manager</option>
                   <option value="partner">Engagement Partner</option>
-                  <option value="reviewer">Audit Reviewer</option>
+                  <option value="reviewer">Reviewer</option>
                   <option value="preparer">Senior Associate (Preparer)</option>
                   <option value="admin">Firm Administrator</option>
                 </select>
@@ -304,8 +276,8 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="signup-password" className="block text-xs font-bold text-[#102654] mb-1.5 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-[#5B6478]" />
+              <label htmlFor="signup-password" className="block text-xs font-bold text-[#122654] mb-1.5 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-[#4A5878]" />
                 <span>Password</span>
               </label>
               <div className="relative">
@@ -318,20 +290,20 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   aria-describedby="signup-password-rules"
                   placeholder="At least 12 characters"
-                  className="w-full min-h-[44px] px-3.5 pr-10 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs"
+                  className="w-full min-h-[44px] px-3.5 pr-10 text-xs bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] shadow-2xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5B6478] hover:text-[#102654] p-1 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A5878] hover:text-[#122654] p-1 cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               <ul id="signup-password-rules" aria-live="polite" className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                 {checks.map((c) => (
-                  <li key={c.label} className={`flex items-center gap-1.5 text-[11px] ${c.ok ? 'text-[#0B6B52]' : 'text-[#5B6478]'}`}>
+                  <li key={c.label} className={`flex items-center gap-1.5 text-[11px] ${c.ok ? 'text-[#0B6B52]' : 'text-[#4A5878]'}`}>
                     {c.ok ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Circle className="w-3 h-3 shrink-0" />}
                     <span>{c.label}</span>
                     <span className="sr-only">{c.ok ? '(met)' : '(not met)'}</span>
@@ -341,8 +313,8 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="signup-confirm" className="block text-xs font-bold text-[#102654] mb-1.5 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-[#5B6478]" />
+              <label htmlFor="signup-confirm" className="block text-xs font-bold text-[#122654] mb-1.5 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-[#4A5878]" />
                 <span>Confirm Password</span>
               </label>
               <input
@@ -355,8 +327,8 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 aria-invalid={confirmTouched && !!confirmProblem}
                 placeholder="Type it again"
-                className={`w-full min-h-[44px] px-3.5 text-xs bg-white border rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] shadow-2xs ${
-                  confirmTouched && confirmProblem ? 'border-[#B42318]' : 'border-[#D5DBE7]'
+                className={`w-full min-h-[44px] px-3.5 text-xs bg-white border rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] shadow-2xs ${
+                  confirmTouched && confirmProblem ? 'border-[#B42318]' : 'border-[#D3DCEE]'
                 }`}
               />
               {confirmTouched && confirmProblem && (
@@ -373,37 +345,37 @@ export default function SignupPage() {
               )}
             </div>
 
-            <div className="flex items-start gap-2.5 text-xs text-[#5B6478] mt-1">
+            <div className="flex items-start gap-2.5 text-xs text-[#4A5878] mt-1">
               <input
                 id="signup-terms"
                 type="checkbox"
                 required
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 rounded border-[#D5DBE7] text-[#102654] focus:ring-[#FF7D6B] mt-0.5 cursor-pointer"
+                className="w-4 h-4 rounded border-[#D3DCEE] text-[#122654] focus:ring-[#FF7A66] mt-0.5 cursor-pointer"
               />
               <label htmlFor="signup-terms" className="cursor-pointer select-none leading-relaxed">
-                I agree to the practice terms and confirm processing of audit engagement records under confidentiality.
+                I agree to the practice terms and confirm processing of client records under confidentiality.
               </label>
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="mt-2 min-h-[46px] w-full bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[10px] flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-transform active:scale-[0.99] disabled:opacity-50"
+              className="mt-2 min-h-[46px] w-full bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[10px] flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-transform active:scale-[0.99] disabled:opacity-50"
             >
               {submitting ? (
                 <span>Creating workspace…</span>
               ) : (
                 <>
                   <span>Create Practice Workspace</span>
-                  <ArrowRight className="w-4 h-4 text-[#FF7D6B]" />
+                  <ArrowRight className="w-4 h-4 text-[#FF7A66]" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-[#E3E7EF] text-center text-xs text-[#5B6478]">
+          <div className="mt-8 pt-6 border-t border-[#E3E7EF] text-center text-xs text-[#4A5878]">
             Already have a practice account?{' '}
             <Link href="/login" className="text-[#B8432F] font-bold hover:underline">
               Sign in to your firm

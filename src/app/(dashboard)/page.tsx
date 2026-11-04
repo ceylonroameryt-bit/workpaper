@@ -135,7 +135,7 @@ export default function PracticeHomePage() {
           title: `Map ${eng.unmapped} accounts on ${eng.client}`,
           meta: `Year end ${eng.yearEnd} • ${eng.framework}`,
           tag: '! Needs you',
-          tagColor: 'text-[#A23A27] bg-[#FFF1EE] border border-[#FF7D6B]/40',
+          tagColor: 'text-[#A23A27] bg-[#FFF1EE] border border-[#FF7A66]/40',
           actionLabel: 'Review mappings',
           href: `/engagements/${eng.id}/mapping`,
         },
@@ -169,10 +169,10 @@ export default function PracticeHomePage() {
       actor: log.actor_name,
       action: `${log.action.toLowerCase().replace(/_/g, ' ')} (${log.entity.replace(/_/g, ' ')})`,
       time: timeAgo(log.at),
-      color: 'bg-[#102654]',
+      color: 'bg-[#122654]',
     }));
 
-  const emptyNote = (text: string) => <p className="text-xs text-[#5B6478] py-3">{text}</p>;
+  const emptyNote = (text: string) => <p className="text-xs text-[#4A5878] py-3">{text}</p>;
 
   const handleAskBot = (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,10 +189,10 @@ export default function PracticeHomePage() {
       {/* Top Greeting & Practice Header (Page 1 Spec) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
             {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening'}
           </h1>
-          <p className="text-sm text-[#5B6478] mt-1">
+          <p className="text-sm text-[#4A5878] mt-1">
             {nextActions.length === 0
               ? 'Nothing needs you right now.'
               : `${nextActions.length} thing${nextActions.length === 1 ? ' needs' : 's need'} you today.`}
@@ -202,18 +202,18 @@ export default function PracticeHomePage() {
         <div className="flex items-center gap-3">
           <Link
             href={companyEng ? `/engagements/${companyEng.id}/import` : '/engagements/new'}
-            className="min-h-[44px] px-4 py-2 border border-[#D5DBE7] hover:border-[#102654] bg-white text-[#102654] text-xs font-semibold rounded-[10px] flex items-center gap-2 transition-colors shadow-2xs"
+            className="min-h-[44px] px-4 py-2 border border-[#D3DCEE] hover:border-[#122654] bg-white text-[#122654] text-xs font-semibold rounded-[10px] flex items-center gap-2 transition-colors shadow-2xs"
           >
-            <Upload className="w-4 h-4 text-[#5B6478]" />
+            <Upload className="w-4 h-4 text-[#4A5878]" />
             Import trial balance
           </Link>
           <Link
             href="/engagements/new"
-            className="min-h-[44px] px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
+            className="min-h-[44px] px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>New engagement</span>
-            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#0B1B3D]/15 text-[#0B1B3D] ml-0.5">
+            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#0B1A3B]/15 text-[#0B1A3B] ml-0.5">
               N
             </kbd>
           </Link>
@@ -222,20 +222,20 @@ export default function PracticeHomePage() {
 
       {/* Fresh workspace welcome banner if no company added yet */}
       {clients.length === 0 && (
-        <div className="blynt-card p-8 bg-gradient-to-br from-white via-[#F6F7FB] to-[#EDF2F9] border-[#D5DBE7] shadow-sm relative overflow-hidden text-center flex flex-col items-center justify-center py-12">
-          <div className="w-16 h-16 rounded-3xl bg-[#0B1B3D] text-[#FF7D6B] flex items-center justify-center font-bold shadow-md mb-4">
-            <Building2 className="w-8 h-8 text-[#FF7D6B]" />
+        <div className="blynt-card p-8 bg-gradient-to-br from-white via-[#F5F8FD] to-[#EDF2F9] border-[#D3DCEE] shadow-sm relative overflow-hidden text-center flex flex-col items-center justify-center py-12">
+          <div className="w-16 h-16 rounded-3xl bg-[#0B1A3B] text-[#FF7A66] flex items-center justify-center font-bold shadow-md mb-4">
+            <Building2 className="w-8 h-8 text-[#FF7A66]" />
           </div>
-          <h2 className="text-2xl font-extrabold text-[#102654] tracking-tight">
+          <h2 className="text-2xl font-extrabold text-[#122654] tracking-tight">
             Welcome to Blynt Workpapers
           </h2>
-          <p className="text-sm text-[#5B6478] max-w-md mt-2 mb-6">
-            Your environment is clean with zero demo data. Add your first accounting client or company to start managing workpapers, trial balances, and statutory audits.
+          <p className="text-sm text-[#4A5878] max-w-md mt-2 mb-6">
+            Your environment is clean with zero demo data. Add your first accounting client or company to start managing workpapers, trial balances, and statutory accounts.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/engagements/new"
-              className="px-5 py-2.5 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
+              className="px-5 py-2.5 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Create First Company &amp; Engagement</span>
@@ -246,15 +246,15 @@ export default function PracticeHomePage() {
 
       {/* If companies exist but none selected, show interactive Company Selector Cards */}
       {!activeCompany && clients.length > 0 && (
-        <div className="blynt-card p-6 bg-white border-[#D5DBE7] shadow-sm animate-in fade-in">
+        <div className="blynt-card p-6 bg-white border-[#D3DCEE] shadow-sm animate-in fade-in">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E3E7EF]">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Select a company to open its working papers</h2>
-              <p className="text-xs text-[#5B6478] mt-0.5">Click any company below to load all options, engagement stages, and statutory audits.</p>
+              <h2 className="text-base font-bold text-[#122654]">Select a company to open its working papers</h2>
+              <p className="text-xs text-[#4A5878] mt-0.5">Click any company below to load all options, engagement stages, and statutory accounts.</p>
             </div>
             <Link
               href="/engagements/new"
-              className="px-3.5 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs shrink-0 self-start sm:self-auto"
+              className="px-3.5 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs shrink-0 self-start sm:self-auto"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Company</span>
@@ -266,21 +266,21 @@ export default function PracticeHomePage() {
                 key={c.id}
                 type="button"
                 onClick={() => setActiveCompanyId(c.id)}
-                className="p-4 rounded-xl border border-[#E3E7EF] hover:border-[#102654] hover:shadow-md bg-white text-left transition-all group cursor-pointer flex flex-col justify-between min-h-[120px]"
+                className="p-4 rounded-xl border border-[#E3E7EF] hover:border-[#122654] hover:shadow-md bg-white text-left transition-all group cursor-pointer flex flex-col justify-between min-h-[120px]"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAF5FC] text-[#1D4E89] uppercase">
                     {c.company_type}
                   </span>
-                  <span className="text-xs font-bold text-[#FF7D6B] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span className="text-xs font-bold text-[#FF7A66] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                     Open <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors mt-2">
+                  <div className="text-sm font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors mt-2">
                     {c.name}
                   </div>
-                  <div className="text-xs text-[#5B6478] mt-1 font-mono-numbers">
+                  <div className="text-xs text-[#4A5878] mt-1 font-mono-numbers">
                     Co #{c.company_no} · Year End: {c.year_end || '2026-12-31'}
                   </div>
                 </div>
@@ -292,15 +292,15 @@ export default function PracticeHomePage() {
 
       {/* Active Selected Company Command Center */}
       {activeCompany && companyEng && (
-        <div className="blynt-card p-6 bg-gradient-to-r from-white via-white to-[#F6F7FB] border-[#D5DBE7] shadow-sm relative overflow-hidden">
+        <div className="blynt-card p-6 bg-gradient-to-r from-white via-white to-[#F5F8FD] border-[#D3DCEE] shadow-sm relative overflow-hidden">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#E3E7EF]">
             <div className="flex items-start sm:items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#0B1B3D] text-[#FF7D6B] flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
-                <Building2 className="w-6 h-6 text-[#FF7D6B]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#0B1A3B] text-[#FF7A66] flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                <Building2 className="w-6 h-6 text-[#FF7A66]" />
               </div>
               <div className="flex flex-col">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-xl font-extrabold text-[#102654] tracking-tight">
+                  <h2 className="text-xl font-extrabold text-[#122654] tracking-tight">
                     {activeCompany.name}
                   </h2>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAF5FC] text-[#1D4E89] border border-[#1D4E89]/20 uppercase">
@@ -310,7 +310,7 @@ export default function PracticeHomePage() {
                     ● {companyEng.status.toUpperCase()}
                   </span>
                 </div>
-                <div className="text-xs text-[#5B6478] mt-1 flex flex-wrap items-center gap-3 font-mono-numbers">
+                <div className="text-xs text-[#4A5878] mt-1 flex flex-wrap items-center gap-3 font-mono-numbers">
                   <span>Companies House #{activeCompany.company_no}</span>
                   <span>•</span>
                   <span>Year End: {new Date(activeCompany.year_end || (activeCompany as any).yearEnd || '2026-09-30').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
@@ -322,32 +322,32 @@ export default function PracticeHomePage() {
 
             {/* Switch Company Dropdown Button */}
             <div className="flex items-center gap-2.5">
-              <span className="text-xs text-[#5B6478] font-medium hidden sm:inline">Selected Company:</span>
+              <span className="text-xs text-[#4A5878] font-medium hidden sm:inline">Selected Company:</span>
               <CompanySelector variant="header" onAddNewCompany={() => router.push('/engagements/new')} />
             </div>
           </div>
 
           {/* Company-Specific 6 Modules / Options Grid */}
           <div className="mt-5">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5B6478] mb-3 flex items-center justify-between">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#4A5878] mb-3 flex items-center justify-between">
               <span>Working Paper Modules for {activeCompany.name}</span>
-              <span className="text-[#FF7D6B] font-bold">Statutory Workflow</span>
+              <span className="text-[#FF7A66] font-bold">Statutory Workflow</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {/* 1 Import Data */}
               <Link
                 href={`/engagements/${companyEng.id}/import`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#102654] hover:shadow-sm transition-all group flex flex-col justify-between"
+                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#122654] hover:shadow-sm transition-all group flex flex-col justify-between"
               >
                 <div>
                   <div className="w-8 h-8 rounded-lg bg-[#EAF5FC] text-[#1D4E89] flex items-center justify-center mb-2">
                     <Upload className="w-4 h-4" />
                   </div>
-                  <div className="text-xs font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors">
+                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
                     1. Import TB
                   </div>
-                  <p className="text-[10px] text-[#5B6478] mt-0.5 line-clamp-1">
+                  <p className="text-[10px] text-[#4A5878] mt-0.5 line-clamp-1">
                     Upload trial balance
                   </p>
                 </div>
@@ -360,16 +360,16 @@ export default function PracticeHomePage() {
               {/* 2 Account Mapping */}
               <Link
                 href={`/engagements/${companyEng.id}/mapping`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#FF7D6B] hover:shadow-sm transition-all group flex flex-col justify-between"
+                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#FF7A66] hover:shadow-sm transition-all group flex flex-col justify-between"
               >
                 <div>
                   <div className="w-8 h-8 rounded-lg bg-[#FFF1EE] text-[#A23A27] flex items-center justify-center mb-2">
                     <TableProperties className="w-4 h-4" />
                   </div>
-                  <div className="text-xs font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors">
+                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
                     2. Map Accounts
                   </div>
-                  <p className="text-[10px] text-[#5B6478] mt-0.5">
+                  <p className="text-[10px] text-[#4A5878] mt-0.5">
                     {companyUnmapped > 0 ? (
                       <span className="text-[#B8432F] font-bold">{companyUnmapped} unmapped</span>
                     ) : (
@@ -386,20 +386,20 @@ export default function PracticeHomePage() {
               {/* 3 Trial Balance & Leads */}
               <Link
                 href={`/engagements/${companyEng.id}/trial-balance`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#102654] hover:shadow-sm transition-all group flex flex-col justify-between"
+                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#122654] hover:shadow-sm transition-all group flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#F6F7FB] text-[#102654] flex items-center justify-center mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#F5F8FD] text-[#122654] flex items-center justify-center mb-2">
                     <FileSpreadsheet className="w-4 h-4" />
                   </div>
-                  <div className="text-xs font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors">
+                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
                     3. Trial Balance
                   </div>
-                  <p className="text-[10px] text-[#5B6478] mt-0.5 line-clamp-1">
+                  <p className="text-[10px] text-[#4A5878] mt-0.5 line-clamp-1">
                     Lead schedules A–Z
                   </p>
                 </div>
-                <div className="text-[10px] font-semibold text-[#102654] mt-2 flex items-center gap-1">
+                <div className="text-[10px] font-semibold text-[#122654] mt-2 flex items-center gap-1">
                   <span>View</span>
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -414,10 +414,10 @@ export default function PracticeHomePage() {
                   <div className="w-8 h-8 rounded-lg bg-[#E6F4EF] text-[#0B6B52] flex items-center justify-center mb-2">
                     <FileCheck2 className="w-4 h-4" />
                   </div>
-                  <div className="text-xs font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors">
+                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
                     4. Workpapers
                   </div>
-                  <p className="text-[10px] text-[#5B6478] mt-0.5">
+                  <p className="text-[10px] text-[#4A5878] mt-0.5">
                     {companyPrepared}/{companyPapers.length} prepared
                   </p>
                 </div>
@@ -430,20 +430,20 @@ export default function PracticeHomePage() {
               {/* 5 Sign-off & Lock */}
               <Link
                 href={`/engagements/${companyEng.id}/sign-off`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#102654] hover:shadow-sm transition-all group flex flex-col justify-between"
+                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#122654] hover:shadow-sm transition-all group flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#F6F7FB] text-[#102654] flex items-center justify-center mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#F5F8FD] text-[#122654] flex items-center justify-center mb-2">
                     <Lock className="w-4 h-4" />
                   </div>
-                  <div className="text-xs font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors">
+                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
                     5. Sign-off &amp; Lock
                   </div>
-                  <p className="text-[10px] text-[#5B6478] mt-0.5 line-clamp-1">
+                  <p className="text-[10px] text-[#4A5878] mt-0.5 line-clamp-1">
                     Partner lock status
                   </p>
                 </div>
-                <div className="text-[10px] font-semibold text-[#102654] mt-2 flex items-center gap-1">
+                <div className="text-[10px] font-semibold text-[#122654] mt-2 flex items-center gap-1">
                   <span>Sign</span>
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -452,16 +452,16 @@ export default function PracticeHomePage() {
               {/* Review Notes */}
               <Link
                 href={`/engagements/${companyEng.id}/review`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#FF7D6B] hover:shadow-sm transition-all group flex flex-col justify-between"
+                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#FF7A66] hover:shadow-sm transition-all group flex flex-col justify-between"
               >
                 <div>
                   <div className="w-8 h-8 rounded-lg bg-[#FFF4DB] text-[#6B4700] flex items-center justify-center mb-2">
                     <MessageSquare className="w-4 h-4" />
                   </div>
-                  <div className="text-xs font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors">
+                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
                     Review Notes
                   </div>
-                  <p className="text-[10px] text-[#5B6478] mt-0.5">
+                  <p className="text-[10px] text-[#4A5878] mt-0.5">
                     {companyNotes > 0 ? `${companyNotes} open notes` : 'No open notes'}
                   </p>
                 </div>
@@ -483,31 +483,31 @@ export default function PracticeHomePage() {
         {/* Card 1: 12 in progress */}
         <Link
           href="/clients"
-          className="blynt-card p-5 hover:border-[#102654]/40 hover:shadow-sm transition-all group"
+          className="blynt-card p-5 hover:border-[#122654]/40 hover:shadow-sm transition-all group"
         >
-          <div className="flex items-center justify-between text-[#5B6478] text-xs font-semibold mb-2">
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
             <span>In progress</span>
-            <Clock className="w-4 h-4 text-[#102654]" />
+            <Clock className="w-4 h-4 text-[#122654]" />
           </div>
-          <div className="text-3xl font-extrabold text-[#102654] font-mono-numbers">
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
             {engagementsInProgress.length}
           </div>
-          <div className="text-[11px] text-[#5B6478] mt-2 flex items-center justify-between">
+          <div className="text-[11px] text-[#4A5878] mt-2 flex items-center justify-between">
             <span>Active engagements</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#5B6478] group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#4A5878] group-hover:translate-x-0.5 transition-transform" />
           </div>
         </Link>
 
         {/* Card 2: 7 review notes for you */}
         <Link
           href="/clients"
-          className="blynt-card p-5 hover:border-[#FF7D6B]/50 hover:shadow-sm transition-all group"
+          className="blynt-card p-5 hover:border-[#FF7A66]/50 hover:shadow-sm transition-all group"
         >
-          <div className="flex items-center justify-between text-[#5B6478] text-xs font-semibold mb-2">
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
             <span>Review notes for you</span>
-            <MessageSquare className="w-4 h-4 text-[#FF7D6B]" />
+            <MessageSquare className="w-4 h-4 text-[#FF7A66]" />
           </div>
-          <div className="text-3xl font-extrabold text-[#102654] font-mono-numbers">
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
             {openReviewNotes.length}
           </div>
           <div className="text-[11px] text-[#A23A27] font-semibold mt-2 flex items-center justify-between">
@@ -519,13 +519,13 @@ export default function PracticeHomePage() {
         {/* Card 3: 18 accounts to map */}
         <Link
           href="/clients"
-          className="blynt-card p-5 hover:border-[#102654]/40 hover:shadow-sm transition-all group"
+          className="blynt-card p-5 hover:border-[#122654]/40 hover:shadow-sm transition-all group"
         >
-          <div className="flex items-center justify-between text-[#5B6478] text-xs font-semibold mb-2">
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
             <span>Accounts to map</span>
             <TableProperties className="w-4 h-4 text-[#1D4E89]" />
           </div>
-          <div className="text-3xl font-extrabold text-[#102654] font-mono-numbers">
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
             {accountsToMap.length}
           </div>
           <div className="text-[11px] text-[#0B6B52] font-semibold mt-2 flex items-center justify-between">
@@ -539,11 +539,11 @@ export default function PracticeHomePage() {
           href="/clients"
           className="blynt-card p-5 hover:border-[#0B6B52]/40 hover:shadow-sm transition-all group"
         >
-          <div className="flex items-center justify-between text-[#5B6478] text-xs font-semibold mb-2">
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
             <span>Ready for sign-off</span>
             <CheckCircle2 className="w-4 h-4 text-[#0B6B52]" />
           </div>
-          <div className="text-3xl font-extrabold text-[#102654] font-mono-numbers">
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
             {readyForSignoff.length}
           </div>
           <div className="text-[11px] text-[#0B6B52] mt-2 flex items-center justify-between">
@@ -561,14 +561,14 @@ export default function PracticeHomePage() {
           <div className="blynt-card p-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#E3E7EF]">
               <div>
-                <h2 className="text-base font-bold text-[#102654]">
+                <h2 className="text-base font-bold text-[#122654]">
                   Your next actions
                 </h2>
-                <p className="text-xs text-[#5B6478] mt-0.5">
-                  Ordered by statutory urgency and auditor review bottlenecks
+                <p className="text-xs text-[#4A5878] mt-0.5">
+                  Ordered by statutory urgency and review bottlenecks
                 </p>
               </div>
-              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-[#F6F7FB] border border-[#D5DBE7] text-[#5B6478]">
+              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-[#F5F8FD] border border-[#D3DCEE] text-[#4A5878]">
                 {nextActions.length} items
               </span>
             </div>
@@ -578,25 +578,25 @@ export default function PracticeHomePage() {
               {nextActions.map((act) => (
                 <div
                   key={act.id}
-                  className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#F6F7FB]/70 px-2.5 rounded-lg transition-colors group"
+                  className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#F5F8FD]/70 px-2.5 rounded-lg transition-colors group"
                 >
                   <div className="flex flex-col min-w-0 pr-2">
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${act.tagColor}`}>
                         {act.tag}
                       </span>
-                      <span className="text-xs font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors truncate">
+                      <span className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors truncate">
                         {act.title}
                       </span>
                     </div>
-                    <span className="text-[11px] text-[#5B6478] mt-1 truncate">
+                    <span className="text-[11px] text-[#4A5878] mt-1 truncate">
                       {act.meta}
                     </span>
                   </div>
 
                   <Link
                     href={act.href}
-                    className="min-h-[36px] px-3.5 py-1.5 bg-white hover:bg-[#F6F7FB] border border-[#D5DBE7] hover:border-[#102654] text-[#102654] text-xs font-bold rounded-[8px] flex items-center justify-center gap-1.5 shrink-0 transition-colors shadow-2xs"
+                    className="min-h-[36px] px-3.5 py-1.5 bg-white hover:bg-[#F5F8FD] border border-[#D3DCEE] hover:border-[#122654] text-[#122654] text-xs font-bold rounded-[8px] flex items-center justify-center gap-1.5 shrink-0 transition-colors shadow-2xs"
                   >
                     <span>{act.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -610,10 +610,10 @@ export default function PracticeHomePage() {
           <div className="blynt-card p-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#E3E7EF]">
               <div>
-                <h2 className="text-base font-bold text-[#102654]">
+                <h2 className="text-base font-bold text-[#122654]">
                   Active engagements
                 </h2>
-                <p className="text-xs text-[#5B6478] mt-0.5">
+                <p className="text-xs text-[#4A5878] mt-0.5">
                   Stages: Import → Map → Prepare → Review → Sign &amp; Lock
                 </p>
               </div>
@@ -627,8 +627,8 @@ export default function PracticeHomePage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-[#102654]">
-                <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
+              <table className="w-full text-left text-xs text-[#122654]">
+                <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
                   <tr>
                     <th scope="col" className="p-3 pl-4">Client</th>
                     <th scope="col" className="p-3">Year End</th>
@@ -641,7 +641,7 @@ export default function PracticeHomePage() {
                 <tbody className="divide-y divide-[#E3E7EF]">
                   {engagements.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="p-4 text-xs text-[#5B6478]">
+                      <td colSpan={6} className="p-4 text-xs text-[#4A5878]">
                         No active engagements yet.{' '}
                         <Link href="/engagements/new" className="text-[#B8432F] font-bold hover:underline">
                           Create your first engagement
@@ -653,13 +653,13 @@ export default function PracticeHomePage() {
                     <tr
                       key={eng.id}
                       onClick={() => router.push(eng.targetHref)}
-                      className="hover:bg-[#F6F7FB] transition-colors cursor-pointer group"
+                      className="hover:bg-[#F5F8FD] transition-colors cursor-pointer group"
                     >
                       <td className="p-3 pl-4">
-                        <div className="font-bold text-[#102654] group-hover:text-[#B8432F] transition-colors">
+                        <div className="font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
                           {eng.client}
                         </div>
-                        <div className="text-[10px] text-[#5B6478]">
+                        <div className="text-[10px] text-[#4A5878]">
                           {eng.framework}
                         </div>
                       </td>
@@ -672,11 +672,11 @@ export default function PracticeHomePage() {
                       <td className="p-3">
                         <div className="flex items-center gap-1">
                           {eng.stages.map((st, sidx) => {
-                            let pillStyle = 'bg-[#F4F5F7] text-[#7E8DA6] border-[#D5DBE7]';
+                            let pillStyle = 'bg-[#F4F5F7] text-[#7E8DA6] border-[#D3DCEE]';
                             if (st.status === 'done') {
                               pillStyle = 'bg-[#E6F4EF] text-[#0B6B52] border-[#0B6B52]/30 font-semibold';
                             } else if (st.status === 'alert') {
-                              pillStyle = 'bg-[#FFF1EE] text-[#A23A27] border-[#FF7D6B] font-bold shadow-2xs';
+                              pillStyle = 'bg-[#FFF1EE] text-[#A23A27] border-[#FF7A66] font-bold shadow-2xs';
                             } else if (st.status === 'in_progress') {
                               pillStyle = 'bg-[#EAF5FC] text-[#1D4E89] border-[#1D4E89]/40 font-semibold';
                             }
@@ -741,25 +741,25 @@ export default function PracticeHomePage() {
           <div className="blynt-card p-5">
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#E3E7EF]">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#102654]" />
-                <h3 className="text-sm font-bold text-[#102654]">
+                <Calendar className="w-4 h-4 text-[#122654]" />
+                <h3 className="text-sm font-bold text-[#122654]">
                   Upcoming deadlines
                 </h3>
               </div>
-              <span className="text-[10px] text-[#5B6478] font-mono">Statutory</span>
+              <span className="text-[10px] text-[#4A5878] font-mono">Statutory</span>
             </div>
 
             <div className="flex flex-col gap-3">
               {upcomingDeadlines.length === 0 && emptyNote('No upcoming deadlines.')}
               {upcomingDeadlines.map((dl, idx) => (
-                <div key={idx} className="p-2.5 rounded-[10px] bg-[#F6F7FB] border border-[#E3E7EF]">
+                <div key={idx} className="p-2.5 rounded-[10px] bg-[#F5F8FD] border border-[#E3E7EF]">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-[#102654]">{dl.client}</span>
+                    <span className="font-bold text-[#122654]">{dl.client}</span>
                     <span className="text-[10px] font-semibold text-[#B8432F]">
                       {dl.remaining}
                     </span>
                   </div>
-                  <div className="text-[11px] text-[#5B6478] mt-0.5">{dl.label}</div>
+                  <div className="text-[11px] text-[#4A5878] mt-0.5">{dl.label}</div>
                   <div className="text-[10px] font-mono text-[#7E8DA6] mt-1">
                     Due: {dl.date}
                   </div>
@@ -769,24 +769,24 @@ export default function PracticeHomePage() {
           </div>
 
           {/* Ask Blynt Bot Card (Page 1 Spec) */}
-          <div className="blynt-card p-5 bg-[#FFF1EE] border border-[#FF7D6B]/50">
+          <div className="blynt-card p-5 bg-[#FFF1EE] border border-[#FF7A66]/50">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-md bg-[#FF7D6B] flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-[#0B1B3D]" />
+              <div className="w-6 h-6 rounded-md bg-[#FF7A66] flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-[#0B1A3B]" />
               </div>
               <h3 className="text-sm font-bold text-[#A23A27] tracking-tight">
                 ✦ BLYNT BOT
               </h3>
             </div>
-            <p className="text-xs text-[#5B6478] mb-2 leading-relaxed">
+            <p className="text-xs text-[#4A5878] mb-2 leading-relaxed">
               Ask Blynt Bot anything about your practice or engagements:
             </p>
-            <p className="text-[11px] text-[#A23A27] bg-white/70 border border-[#FF7D6B]/30 p-2.5 rounded-[8px] italic mb-3">
+            <p className="text-[11px] text-[#A23A27] bg-white/70 border border-[#FF7A66]/30 p-2.5 rounded-[8px] italic mb-3">
               &ldquo;Which engagements have unmapped accounts over £10k?&rdquo; or &ldquo;Which papers are ready for review?&rdquo;
             </p>
 
             {botAnswer && (
-              <div className="bg-white p-3 rounded-[10px] border border-[#FF7D6B]/40 text-xs text-[#102654] mb-3 leading-relaxed">
+              <div className="bg-white p-3 rounded-[10px] border border-[#FF7A66]/40 text-xs text-[#122654] mb-3 leading-relaxed">
                 <span className="font-bold text-[#A23A27]">✦ suggestion: </span>
                 {botAnswer}
               </div>
@@ -798,18 +798,18 @@ export default function PracticeHomePage() {
                 placeholder="Ask about mappings, variances, papers..."
                 value={botPrompt}
                 onChange={(e) => setBotPrompt(e.target.value)}
-                className="flex-1 min-h-[40px] px-3 text-xs bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+                className="flex-1 min-h-[40px] px-3 text-xs bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66]"
               />
               <button
                 type="submit"
-                className="min-h-[40px] px-3.5 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] font-bold text-xs rounded-[8px] flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+                className="min-h-[40px] px-3.5 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] font-bold text-xs rounded-[8px] flex items-center gap-1 cursor-pointer transition-colors shrink-0"
               >
                 <Send className="w-3 h-3" />
                 <span>Ask</span>
               </button>
             </form>
-            <div className="text-[10px] text-[#5B6478] mt-2">
-              AI suggests, people decide. All outputs logged to audit trail.
+            <div className="text-[10px] text-[#4A5878] mt-2">
+              AI suggests, people decide. All outputs logged to the activity log.
             </div>
           </div>
 
@@ -818,11 +818,11 @@ export default function PracticeHomePage() {
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#E3E7EF]">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#0B6B52]" />
-                <h3 className="text-sm font-bold text-[#102654]">
+                <h3 className="text-sm font-bold text-[#122654]">
                   Recent activity
                 </h3>
               </div>
-              <span className="text-[10px] text-[#5B6478] font-mono">Live feed</span>
+              <span className="text-[10px] text-[#4A5878] font-mono">Live feed</span>
             </div>
 
             <div className="flex flex-col gap-3 text-xs">
@@ -831,7 +831,7 @@ export default function PracticeHomePage() {
                 <div key={i} className="flex items-start gap-2.5 pb-2.5 border-b border-[#E3E7EF]/60 last:border-0 last:pb-0">
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${act.color}`} />
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[#102654]">
+                    <span className="text-[#122654]">
                       <span className="font-bold">{act.actor}</span> {act.action}
                     </span>
                     <span className="text-[10px] text-[#7E8DA6] font-mono mt-0.5">

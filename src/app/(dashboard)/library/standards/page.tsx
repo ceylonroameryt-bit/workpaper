@@ -36,20 +36,20 @@ export default function StandardsLibraryPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">Accounting Standards Library (STD-01)</h1>
-            <span className="text-xs bg-[#102654] text-white px-2.5 py-1 rounded-full font-mono font-semibold">
+            <h1 className="text-xl font-bold text-[#122654]">Accounting Standards Library (STD-01)</h1>
+            <span className="text-xs bg-[#122654] text-white px-2.5 py-1 rounded-full font-mono font-semibold">
               UK GAAP
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Maintained UK accounting standards governing schedule generation, lease models, and statutory disclosures.
           </p>
         </div>
       </div>
 
       {/* 2024 Amendments Notification Banner (STD-01) */}
-      <div className="bg-[#FFF1EE] border border-[#FF7D6B]/40 p-4 rounded-xl flex items-start gap-3">
-        <Sparkles className="w-5 h-5 text-[#FF7D6B] shrink-0 mt-0.5" />
+      <div className="bg-[#FFF1EE] border border-[#FF7A66]/40 p-4 rounded-xl flex items-start gap-3">
+        <Sparkles className="w-5 h-5 text-[#FF7A66] shrink-0 mt-0.5" />
         <div className="text-xs text-[#A23A27] leading-relaxed">
           <strong>FRS 102 Updated (2024 Amendments):</strong> Leases starting on or after 1 January 2026 now transition to the on-balance-sheet Right-of-Use model in schedule REC-04. Micro-entities under FRS 105 continue under commitment disclosure rules.
         </div>
@@ -63,16 +63,16 @@ export default function StandardsLibraryPage() {
             onClick={() => setSelectedStandard(std.id)}
             className={`p-4 rounded-xl border transition-all cursor-pointer ${
               selectedStandard === std.id
-                ? 'bg-white border-[#102654] shadow-md ring-1 ring-[#102654]'
+                ? 'bg-white border-[#122654] shadow-md ring-1 ring-[#122654]'
                 : 'bg-white border-[#E3E7EF] hover:border-gray-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#102654]">{std.name}</span>
+              <span className="text-xs font-bold text-[#122654]">{std.name}</span>
               {selectedStandard === std.id && <CheckCircle2 className="w-4 h-4 text-[#0B6B52]" />}
             </div>
             <div className="text-[11px] text-[#7E8DA6] mt-1 font-mono">{std.version}</div>
-            <div className="mt-3 text-[10px] bg-[#F6F7FB] p-2 rounded text-[#5B6478]">
+            <div className="mt-3 text-[10px] bg-[#F5F8FD] p-2 rounded text-[#4A5878]">
               {std.requiredSchedules.length} Required Schedules
             </div>
           </div>
@@ -83,8 +83,8 @@ export default function StandardsLibraryPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
         <div className="border-b border-[#E3E7EF] pb-3 flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-[#102654]">{current.name}</h2>
-            <p className="text-xs text-[#5B6478]">{current.version}</p>
+            <h2 className="text-base font-bold text-[#122654]">{current.name}</h2>
+            <p className="text-xs text-[#4A5878]">{current.version}</p>
             {current.earlier.length > 0 && <p className="text-[11px] text-[#7E8DA6]">Earlier versions: {current.earlier.join(', ')}</p>}
           </div>
           <span className="text-xs font-bold text-[#0B6B52] bg-[#E6F4EF] px-2.5 py-1 rounded-full">
@@ -93,29 +93,29 @@ export default function StandardsLibraryPage() {
         </div>
 
         <div className="space-y-2">
-          <div className="text-xs font-bold text-[#102654] uppercase tracking-wider">Required schedules ({current.requiredSchedules.length})</div>
+          <div className="text-xs font-bold text-[#122654] uppercase tracking-wider">Required schedules ({current.requiredSchedules.length})</div>
           <div className="flex flex-wrap gap-1.5">
             {current.requiredSchedules.map((r) => (
-              <span key={r} className="text-[11px] bg-[#F6F7FB] border border-[#E3E7EF] rounded px-2 py-0.5 text-[#102654]">{r}</span>
+              <span key={r} className="text-[11px] bg-[#F5F8FD] border border-[#E3E7EF] rounded px-2 py-0.5 text-[#122654]">{r}</span>
             ))}
           </div>
         </div>
 
         {/* Requirements List */}
         <div className="space-y-3">
-          <div className="text-xs font-bold text-[#102654] uppercase tracking-wider">
+          <div className="text-xs font-bold text-[#122654] uppercase tracking-wider">
             Mandatory Sections &amp; Disclosure Rules
           </div>
           <div className="divide-y divide-[#E3E7EF] border border-[#E3E7EF] rounded-xl overflow-hidden">
             {current.sections.map((sec, idx) => (
-              <div key={idx} className="p-4 hover:bg-[#F6F7FB] transition-colors">
+              <div key={idx} className="p-4 hover:bg-[#F5F8FD] transition-colors">
                 <div className="flex items-center gap-2">
                   <span className="font-mono font-bold text-xs text-[#1D4E89] bg-[#EAF5FC] px-2 py-0.5 rounded">
                     {sec.code}
                   </span>
-                  <span className="text-xs font-bold text-[#102654]">{sec.title}</span>
+                  <span className="text-xs font-bold text-[#122654]">{sec.title}</span>
                 </div>
-                <p className="text-xs text-[#5B6478] mt-1.5 leading-relaxed">{sec.requirements}</p>
+                <p className="text-xs text-[#4A5878] mt-1.5 leading-relaxed">{sec.requirements}</p>
               </div>
             ))}
           </div>

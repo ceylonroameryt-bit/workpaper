@@ -142,37 +142,37 @@ export const InactivityHandler: React.FC = () => {
       aria-modal="true"
       aria-labelledby="inactivity-title"
       aria-describedby="inactivity-desc"
-      className="fixed inset-0 z-[100] bg-[#0B1B3D]/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+      className="fixed inset-0 z-[100] bg-[#0B1A3B]/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
     >
       <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-2xl max-w-md w-full p-6 flex flex-col gap-5 text-center relative overflow-hidden">
         {/* Animated Top Progress Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#F6F7FB]">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#F5F8FD]">
           <div
-            className="h-full bg-[#FF7D6B] transition-all duration-1000 ease-linear"
+            className="h-full bg-[#FF7A66] transition-all duration-1000 ease-linear"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
 
         {/* Warning Icon */}
-        <div className="w-14 h-14 rounded-2xl bg-[#FFF1EE] text-[#B8432F] border border-[#FF7D6B]/30 flex items-center justify-center mx-auto shadow-inner">
+        <div className="w-14 h-14 rounded-2xl bg-[#FFF1EE] text-[#B8432F] border border-[#FF7A66]/30 flex items-center justify-center mx-auto shadow-inner">
           <Clock className="w-7 h-7 stroke-[2.2] animate-pulse" />
         </div>
 
         <div>
-          <h2 id="inactivity-title" className="text-xl font-extrabold text-[#102654] tracking-tight">
+          <h2 id="inactivity-title" className="text-xl font-extrabold text-[#122654] tracking-tight">
             Session Inactivity Warning
           </h2>
-          <p id="inactivity-desc" className="text-xs text-[#5B6478] mt-2 leading-relaxed">
-            For client data security and compliance with statutory audit standards, your session will automatically be signed out due to inactivity in:
+          <p id="inactivity-desc" className="text-xs text-[#4A5878] mt-2 leading-relaxed">
+            For client data security, your session will automatically be signed out due to inactivity in:
           </p>
         </div>
 
         {/* Big Countdown Timer */}
-        <div className="py-2.5 px-4 bg-[#F6F7FB] border border-[#E3E7EF] rounded-[14px] flex items-center justify-center gap-2">
-          <span className="text-3xl font-black font-mono tracking-tight text-[#102654]">
+        <div className="py-2.5 px-4 bg-[#F5F8FD] border border-[#E3E7EF] rounded-[14px] flex items-center justify-center gap-2">
+          <span className="text-3xl font-black font-mono tracking-tight text-[#122654]">
             {secondsRemaining}
           </span>
-          <span className="text-xs font-semibold text-[#5B6478] uppercase tracking-wider">
+          <span className="text-xs font-semibold text-[#4A5878] uppercase tracking-wider">
             seconds remaining
           </span>
         </div>
@@ -187,7 +187,7 @@ export const InactivityHandler: React.FC = () => {
             type="button"
             onClick={handleStaySignedIn}
             autoFocus
-            className="flex-1 min-h-[44px] bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[10px] shadow-sm transition-transform active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+            className="flex-1 min-h-[44px] bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[10px] shadow-sm transition-transform active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span>Stay signed in</span>
@@ -196,7 +196,7 @@ export const InactivityHandler: React.FC = () => {
           <button
             type="button"
             onClick={handleManualSignOut}
-            className="min-h-[44px] px-4 bg-white hover:bg-[#F6F7FB] border border-[#D5DBE7] text-[#5B6478] hover:text-[#B42318] text-xs font-semibold rounded-[10px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            className="min-h-[44px] px-4 bg-white hover:bg-[#F5F8FD] border border-[#D3DCEE] text-[#4A5878] hover:text-[#B42318] text-xs font-semibold rounded-[10px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign out now</span>

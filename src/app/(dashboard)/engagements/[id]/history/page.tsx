@@ -80,7 +80,7 @@ export default function HistoryPage() {
           entity: 'adjustments',
           entity_id: 'jnl_003',
           before_json: null,
-          after_json: JSON.stringify({ ref: 'JNL-003', amount: '£2,750.00', narrative: 'Audit fee accrual' }),
+          after_json: JSON.stringify({ ref: 'JNL-003', amount: '£2,750.00', narrative: 'Accountancy fee accrual' }),
           at: '2026-10-24T14:45:00Z',
         },
         {
@@ -156,22 +156,22 @@ export default function HistoryPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">Full Audit Trail &amp; Version History (AUD)</h1>
+            <h1 className="text-xl font-bold text-[#122654]">Activity log &amp; version history</h1>
             <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] px-2.5 py-1 rounded-full font-mono font-semibold">
               Append-Only Immutability
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Complete regulatory audit trail of every change, sign-off, mapping confirmation, and version comparison (AUD-01 to AUD-03).
           </p>
         </div>
 
         <button
           type="button"
-          className="flex items-center gap-2 px-3.5 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
+          className="flex items-center gap-2 px-3.5 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>Export Audit Log (CSV)</span>
+          <span>Export activity log (CSV)</span>
         </button>
       </div>
 
@@ -182,12 +182,12 @@ export default function HistoryPage() {
           onClick={() => setActiveTab('audit')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'audit'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <History className="w-4 h-4 text-[#1D4E89]" />
-          <span>Full Engagement Audit Trail (AUD-01)</span>
+          <span>Activity log</span>
           <span className="text-[10px] bg-gray-200 text-gray-800 px-1.5 py-0.2 rounded font-mono">
             {filteredLogs.length}
           </span>
@@ -198,8 +198,8 @@ export default function HistoryPage() {
           onClick={() => setActiveTab('versions')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'versions'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <GitCompare className="w-4 h-4 text-[#1D4E89]" />
@@ -211,11 +211,11 @@ export default function HistoryPage() {
           onClick={() => setActiveTab('ai_log')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'ai_log'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
-          <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
+          <Sparkles className="w-4 h-4 text-[#FF7A66]" />
           <span>AI Decision &amp; Lineage Log (AUD-03)</span>
         </button>
       </div>
@@ -233,14 +233,14 @@ export default function HistoryPage() {
                   placeholder="Filter by user, action, or entity..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full text-xs pl-8 pr-3 py-1.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] outline-none"
+                  className="w-full text-xs pl-8 pr-3 py-1.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] outline-none"
                 />
               </div>
 
               <select
                 value={actionFilter}
                 onChange={(e) => setActionFilter(e.target.value)}
-                className="text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg px-2.5 py-1.5 text-[#102654] font-medium outline-none"
+                className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"
               >
                 <option value="all">All Action Types</option>
                 <option value="sign_off">Sign-offs</option>
@@ -256,10 +256,10 @@ export default function HistoryPage() {
             </span>
           </div>
 
-          {/* Audit Log Table */}
+          {/* Activity log table */}
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0B1B3D] text-white text-[11px] font-bold uppercase tracking-wider">
+              <thead className="bg-[#0B1A3B] text-white text-[11px] font-bold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4 w-44">Timestamp</th>
                   <th className="py-3 px-3">User &amp; Role</th>
@@ -271,7 +271,7 @@ export default function HistoryPage() {
               <tbody className="divide-y divide-[#E3E7EF]">
                 {filteredLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-gray-50/50">
-                    <td className="py-3 px-4 font-mono text-[11px] text-[#5B6478]">
+                    <td className="py-3 px-4 font-mono text-[11px] text-[#4A5878]">
                       {formatDate(log.at, {
                         day: 'numeric',
                         month: 'short',
@@ -282,7 +282,7 @@ export default function HistoryPage() {
                     </td>
 
                     <td className="py-3 px-3">
-                      <div className="font-bold text-[#102654]">{log.actor_name}</div>
+                      <div className="font-bold text-[#122654]">{log.actor_name}</div>
                       <span className="text-[10px] text-[#1D4E89] uppercase font-mono">{log.actor_role}</span>
                     </td>
 
@@ -292,12 +292,12 @@ export default function HistoryPage() {
                       </span>
                     </td>
 
-                    <td className="py-3 px-3 font-mono text-[11px] text-[#102654]">
+                    <td className="py-3 px-3 font-mono text-[11px] text-[#122654]">
                       <span className="text-[#7E8DA6]">{log.entity} / </span>
                       <span className="font-bold">{log.entity_id}</span>
                     </td>
 
-                    <td className="py-3 px-4 font-mono text-[10px] text-[#5B6478] max-w-xs truncate">
+                    <td className="py-3 px-4 font-mono text-[10px] text-[#4A5878] max-w-xs truncate">
                       {log.after_json ? (
                         <span className="text-[#0B6B52]">{log.after_json}</span>
                       ) : (
@@ -317,8 +317,8 @@ export default function HistoryPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E3E7EF] pb-4">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Schedule Version Comparison (AUD-02)</h2>
-              <p className="text-xs text-[#5B6478]">
+              <h2 className="text-base font-bold text-[#122654]">Schedule Version Comparison (AUD-02)</h2>
+              <p className="text-xs text-[#4A5878]">
                 Compare snapshots taken at prior manager reviews against current working paper state.
               </p>
             </div>
@@ -327,7 +327,7 @@ export default function HistoryPage() {
               <select
                 value={versionA}
                 onChange={(e) => setVersionA(e.target.value)}
-                className="text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg px-2.5 py-1.5 font-medium"
+                className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 font-medium"
               >
                 <option value="v1_initial">v1: Initial Preparer Draft (15 Oct)</option>
                 <option value="v2_review">v2: At Manager Review (22 Oct)</option>
@@ -338,14 +338,14 @@ export default function HistoryPage() {
               <select
                 value={versionB}
                 onChange={(e) => setVersionB(e.target.value)}
-                className="text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg px-2.5 py-1.5 font-medium"
+                className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 font-medium"
               >
                 <option value="v3_current">v3: Current Working Paper State</option>
               </select>
 
               <button
                 type="button"
-                className="px-3.5 py-1.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-xs"
+                className="px-3.5 py-1.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-xs"
               >
                 Compare Side-by-Side
               </button>
@@ -354,21 +354,21 @@ export default function HistoryPage() {
 
           {/* Visual Diff View */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-[#E3E7EF] rounded-xl p-4 bg-[#F6F7FB]/40">
+            <div className="border border-[#E3E7EF] rounded-xl p-4 bg-[#F5F8FD]/40">
               <div className="flex items-center justify-between pb-2 border-b border-gray-200 mb-3">
-                <span className="text-xs font-bold text-[#102654]">Version 2 (At Review - Sarah Jenkins)</span>
-                <span className="text-[10px] font-mono text-[#5B6478]">22 Oct 2026 14:10</span>
+                <span className="text-xs font-bold text-[#122654]">Version 2 (At Review - Sarah Jenkins)</span>
+                <span className="text-[10px] font-mono text-[#4A5878]">22 Oct 2026 14:10</span>
               </div>
               <div className="space-y-2 text-xs font-mono">
                 <div className="flex justify-between py-1 border-b border-gray-100">
-                  <span className="text-[#5B6478]">Plant Machinery Cost</span>
+                  <span className="text-[#4A5878]">Plant Machinery Cost</span>
                   <span>£4,500,000.00</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-gray-100">
-                  <span className="text-[#5B6478]">Accumulated Depreciation</span>
+                  <span className="text-[#4A5878]">Accumulated Depreciation</span>
                   <span>(£1,800,000.00)</span>
                 </div>
-                <div className="flex justify-between py-1 font-bold text-[#102654]">
+                <div className="flex justify-between py-1 font-bold text-[#122654]">
                   <span>Net Book Value</span>
                   <span>£2,700,000.00</span>
                 </div>
@@ -382,11 +382,11 @@ export default function HistoryPage() {
               </div>
               <div className="space-y-2 text-xs font-mono">
                 <div className="flex justify-between py-1 border-b border-emerald-100">
-                  <span className="text-[#5B6478]">Plant Machinery Cost</span>
+                  <span className="text-[#4A5878]">Plant Machinery Cost</span>
                   <span>£4,500,000.00</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-emerald-100">
-                  <span className="text-[#5B6478]">Accumulated Depreciation</span>
+                  <span className="text-[#4A5878]">Accumulated Depreciation</span>
                   <span>(£1,800,000.00)</span>
                 </div>
                 <div className="flex justify-between py-1 font-bold text-[#0B6B52]">
@@ -402,8 +402,8 @@ export default function HistoryPage() {
       {/* TAB 3: AI Action Log (AUD-03) */}
       {activeTab === 'ai_log' && (
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
-          <div className="p-4 bg-[#F6F7FB] border-b border-[#E3E7EF] flex items-center justify-between">
-            <span className="text-xs font-bold text-[#102654]">
+          <div className="p-4 bg-[#F5F8FD] border-b border-[#E3E7EF] flex items-center justify-between">
+            <span className="text-xs font-bold text-[#122654]">
               AI Decision Lineage &amp; Model Accuracy (AUD-03)
             </span>
             <span className="text-[11px] text-[#0B6B52] bg-[#E6F4EF] font-bold px-2 py-0.5 rounded-full">
@@ -412,7 +412,7 @@ export default function HistoryPage() {
           </div>
 
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#0B1B3D] text-white text-[10px] font-bold uppercase">
+            <thead className="bg-[#0B1A3B] text-white text-[10px] font-bold uppercase">
               <tr>
                 <th className="py-3 px-4">Output Type</th>
                 <th className="py-3 px-3">Inputs Used</th>
@@ -425,11 +425,11 @@ export default function HistoryPage() {
             <tbody className="divide-y divide-[#E3E7EF]">
               {aiLogEntries.map((entry) => (
                 <tr key={entry.id} className="hover:bg-gray-50/50">
-                  <td className="py-3 px-4 font-bold text-[#102654]">{entry.outputType}</td>
-                  <td className="py-3 px-3 text-[#5B6478]">{entry.inputs}</td>
+                  <td className="py-3 px-4 font-bold text-[#122654]">{entry.outputType}</td>
+                  <td className="py-3 px-3 text-[#4A5878]">{entry.inputs}</td>
                   <td className="py-3 px-3 font-mono font-bold text-emerald-700">{entry.confidence}</td>
                   <td className="py-3 px-3 font-mono text-[10px] text-[#7E8DA6]">{entry.modelVersion}</td>
-                  <td className="py-3 px-3 text-[#102654]">{entry.decidedBy}</td>
+                  <td className="py-3 px-3 text-[#122654]">{entry.decidedBy}</td>
                   <td className="py-3 px-4 text-emerald-700 font-semibold">{entry.outcome}</td>
                 </tr>
               ))}

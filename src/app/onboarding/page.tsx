@@ -24,11 +24,11 @@ const ROLES = ['readonly', 'preparer', 'reviewer', 'manager', 'partner', 'admin'
 const label = (list: [string | number, string, ...string[]][], key: string | number) => list.find((x) => x[0] === key)?.[1] ?? String(key);
 
 const inputCls =
-  'w-full min-h-[42px] px-3 text-sm bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] focus:ring-2 focus:ring-[#FF7D6B]/20 placeholder:text-[#9AA6BC]';
+  'w-full min-h-[42px] px-3 text-sm bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] focus:ring-2 focus:ring-[#FF7A66]/20 placeholder:text-[#9AA6BC]';
 
 function Q({ children, htmlFor, required }: { children: React.ReactNode; htmlFor?: string; required?: boolean }) {
   return (
-    <label htmlFor={htmlFor} className="block text-sm font-semibold text-[#102654] mt-6 mb-2">
+    <label htmlFor={htmlFor} className="block text-sm font-semibold text-[#122654] mt-6 mb-2">
       {children}
       {required && <span className="text-[#B8432F]"> *</span>}
     </label>
@@ -49,7 +49,7 @@ function Pills<T extends string | number>({ options, value, onChange, multi }: {
             aria-checked={on}
             onClick={() => onChange(multi ? (on ? value.filter((v) => v !== key) : [...value, key]) : [key])}
             className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-full border transition-colors cursor-pointer ${
-              on ? 'bg-[#102654] border-[#102654] text-white' : 'bg-white border-[#D5DBE7] text-[#102654] hover:border-[#A6B4D0]'
+              on ? 'bg-[#122654] border-[#122654] text-white' : 'bg-white border-[#D3DCEE] text-[#122654] hover:border-[#A6B4D0]'
             }`}
           >
             {multi && on && <Check className="w-3.5 h-3.5" />}
@@ -76,12 +76,12 @@ function Cards<T extends string | number>({ options, value, onChange, multi, col
             aria-checked={on}
             onClick={() => onChange(multi ? (on ? value.filter((v) => v !== key) : [...value, key]) : [key])}
             className={`relative text-left px-3.5 py-3 rounded-[10px] border transition-colors cursor-pointer ${
-              on ? 'bg-[#EEF3FD] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D5DBE7] hover:border-[#A6B4D0]'
+              on ? 'bg-[#EEF2F9] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D3DCEE] hover:border-[#A6B4D0]'
             }`}
           >
             {on && <Check className="absolute top-2.5 right-2.5 w-3.5 h-3.5 text-[#1D4E89]" />}
-            <span className="block text-sm font-semibold text-[#102654] pr-4">{title}</span>
-            <span className="block text-[11px] text-[#5B6478] mt-0.5">{sub}</span>
+            <span className="block text-sm font-semibold text-[#122654] pr-4">{title}</span>
+            <span className="block text-[11px] text-[#4A5878] mt-0.5">{sub}</span>
           </button>
         );
       })}
@@ -93,12 +93,12 @@ function Cards<T extends string | number>({ options, value, onChange, multi, col
 function Changes({ lines }: { lines: string[] }) {
   if (!lines.length) return null;
   return (
-    <div className="mt-8 flex gap-3 p-4 rounded-[12px] bg-[#EEF3FD] border border-[#1D4E89]/15">
+    <div className="mt-8 flex gap-3 p-4 rounded-[12px] bg-[#EEF2F9] border border-[#1D4E89]/15">
       <Zap className="w-4 h-4 text-[#1D4E89] shrink-0 mt-0.5" />
       <div>
         <p className="text-[11px] font-bold uppercase tracking-wider text-[#1D4E89] mb-1">What this changes in Blynt</p>
         {lines.map((l) => (
-          <p key={l} className="text-xs text-[#102654] leading-relaxed">{l}</p>
+          <p key={l} className="text-xs text-[#122654] leading-relaxed">{l}</p>
         ))}
       </div>
     </div>
@@ -249,14 +249,14 @@ export default function OnboardingPage() {
     }
   };
 
-  if (!loaded) return <div className="min-h-screen flex items-center justify-center text-sm text-[#5B6478]">Loading your practice…</div>;
+  if (!loaded) return <div className="min-h-screen flex items-center justify-center text-sm text-[#4A5878]">Loading your practice…</div>;
 
   if (!canEdit) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md bg-white border border-[#D5DBE7] rounded-[14px] p-8 text-sm">
-          <p className="font-bold text-[#102654] mb-2">Your practice is still being set up</p>
-          <p className="text-[#5B6478] mb-4">A practice admin or partner will finish set-up. You can start working in the meantime.</p>
+        <div className="max-w-md bg-white border border-[#D3DCEE] rounded-[14px] p-8 text-sm">
+          <p className="font-bold text-[#122654] mb-2">Your practice is still being set up</p>
+          <p className="text-[#4A5878] mb-4">A practice admin or partner will finish set-up. You can start working in the meantime.</p>
           <a href="/" className="text-[#1D4E89] font-semibold hover:underline">Go to dashboard</a>
         </div>
       </div>
@@ -271,11 +271,11 @@ export default function OnboardingPage() {
   ];
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] bg-[#F6F7FB] text-[#102654]">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] bg-[#F5F8FD] text-[#122654]">
       {/* Step rail */}
-      <aside className="bg-[#0B1B3D] text-white px-6 py-8 lg:min-h-screen flex flex-col">
+      <aside className="bg-[#0B1A3B] text-white px-6 py-8 lg:min-h-screen flex flex-col">
         <BlyntLogo variant="full" theme="dark" size="md" />
-        <p className="mt-10 text-[11px] font-bold uppercase tracking-wider text-[#FF7D6B]">Set up your practice</p>
+        <p className="mt-10 text-[11px] font-bold uppercase tracking-wider text-[#FF7A66]">Set up your practice</p>
         <p className="mt-2 text-xs text-[#A6B4D0] leading-relaxed">Three short steps. Each answer shows what it changes in Blynt.</p>
         <ol className="mt-8 flex lg:flex-col gap-1 overflow-x-auto" aria-label="Set-up steps">
           {STEPS.map((s, i) => {
@@ -292,12 +292,12 @@ export default function OnboardingPage() {
                 >
                   <span
                     className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold border ${
-                      on ? 'bg-[#FF7D6B] border-[#FF7D6B] text-[#0B1B3D]' : done ? 'border-emerald-400/60 text-emerald-300' : 'border-white/20 text-[#7E8DA6]'
+                      on ? 'bg-[#FF7A66] border-[#FF7A66] text-[#0B1A3B]' : done ? 'border-emerald-400/60 text-emerald-300' : 'border-white/20 text-[#7E8DA6]'
                     }`}
                   >
                     {done ? <Check className="w-3.5 h-3.5" /> : i + 1}
                   </span>
-                  <span className={`hidden sm:block text-sm ${on ? 'font-bold text-white' : done ? 'text-[#D5DBE7]' : 'text-[#7E8DA6]'}`}>{s}</span>
+                  <span className={`hidden sm:block text-sm ${on ? 'font-bold text-white' : done ? 'text-[#D3DCEE]' : 'text-[#7E8DA6]'}`}>{s}</span>
                 </button>
               </li>
             );
@@ -318,7 +318,7 @@ export default function OnboardingPage() {
           {step === 0 && (
             <>
               <h1 className="text-[28px] font-extrabold tracking-tight mt-1">Your practice</h1>
-              <p className="text-sm text-[#5B6478] mt-1">How your practice appears on statutory accounts and client packs.</p>
+              <p className="text-sm text-[#4A5878] mt-1">How your practice appears on statutory accounts and client packs.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Q htmlFor="legal" required>{sf.legalLabel}</Q>
@@ -339,7 +339,7 @@ export default function OnboardingPage() {
                 </div>
               )}
               <Q required>Who supervises your practice?</Q>
-              <p className="text-xs text-[#5B6478] -mt-1 mb-2">{sf.regulatorHint}</p>
+              <p className="text-xs text-[#4A5878] -mt-1 mb-2">{sf.regulatorHint}</p>
               <Pills options={REGULATORS.map((r) => [r, r] as [string, string])} value={[p.regulator]} onChange={(v) => setProfile({ ...p, regulator: v[0] })} />
               {p.regulator && (
                 <div className="sm:w-1/2">
@@ -371,14 +371,14 @@ export default function OnboardingPage() {
           {step === 1 && (
             <>
               <h1 className="text-[28px] font-extrabold tracking-tight mt-1">Your team</h1>
-              <p className="text-sm text-[#5B6478] mt-1">Each person gets a link to set their password. Optional: you can do this later.</p>
+              <p className="text-sm text-[#4A5878] mt-1">Each person gets a link to set their password. Optional: you can do this later.</p>
               <div className="mt-6 space-y-2.5">
                 {invitees.map((r, i) => (
                   <div key={i}>
                     <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1.6fr)_40px] gap-2 items-center">
                       <input aria-label="Email" className={inputCls} value={r.email} disabled={!!r.link} placeholder="name@practice.co.uk" onChange={(e) => setInvitees(invitees.map((x, k) => (k === i ? { ...x, email: e.target.value, error: undefined } : x)))} />
                       <input aria-label="Name" className={inputCls} value={r.name} disabled={!!r.link} placeholder="Full name" onChange={(e) => setInvitees(invitees.map((x, k) => (k === i ? { ...x, name: e.target.value } : x)))} />
-                      <button type="button" aria-label="Remove" disabled={!!r.link} onClick={() => setInvitees(invitees.length > 1 ? invitees.filter((_, k) => k !== i) : [{ email: '', name: '', role: 'preparer' }])} className="h-[42px] flex items-center justify-center text-[#5B6478] hover:text-[#B8432F] disabled:opacity-30 cursor-pointer">
+                      <button type="button" aria-label="Remove" disabled={!!r.link} onClick={() => setInvitees(invitees.length > 1 ? invitees.filter((_, k) => k !== i) : [{ email: '', name: '', role: 'preparer' }])} className="h-[42px] flex items-center justify-center text-[#4A5878] hover:text-[#B8432F] disabled:opacity-30 cursor-pointer">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -409,13 +409,13 @@ export default function OnboardingPage() {
           {step === 2 && (
             <>
               <h1 className="text-[28px] font-extrabold tracking-tight mt-1">Review your set-up</h1>
-              <p className="text-sm text-[#5B6478] mt-1">Check everything, then finish. You can change any of this later in Settings.</p>
+              <p className="text-sm text-[#4A5878] mt-1">Check everything, then finish. You can change any of this later in Settings.</p>
               <dl className="mt-6 bg-white border border-[#E3E7EF] rounded-[12px] divide-y divide-[#E3E7EF]">
                 {reviewRows.map(([k, v, s]) => (
                   <div key={k} className="grid grid-cols-[140px_minmax(0,1fr)_auto] gap-3 items-start px-4 py-3">
-                    <dt className="text-xs font-semibold text-[#5B6478]">{k}</dt>
-                    <dd className="text-sm text-[#102654] break-words">{v}</dd>
-                    <button type="button" onClick={() => go(s)} aria-label={`Edit ${k}`} className="text-[#1D4E89] hover:text-[#102654] cursor-pointer">
+                    <dt className="text-xs font-semibold text-[#4A5878]">{k}</dt>
+                    <dd className="text-sm text-[#122654] break-words">{v}</dd>
+                    <button type="button" onClick={() => go(s)} aria-label={`Edit ${k}`} className="text-[#1D4E89] hover:text-[#122654] cursor-pointer">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -434,7 +434,7 @@ export default function OnboardingPage() {
 
           <div className="mt-8 flex items-center gap-3">
             {step > 0 && (
-              <button type="button" onClick={() => go(step - 1)} className="inline-flex items-center gap-1.5 min-h-[42px] px-4 bg-white border border-[#D5DBE7] rounded-[10px] text-xs font-bold text-[#102654] hover:border-[#A6B4D0] cursor-pointer">
+              <button type="button" onClick={() => go(step - 1)} className="inline-flex items-center gap-1.5 min-h-[42px] px-4 bg-white border border-[#D3DCEE] rounded-[10px] text-xs font-bold text-[#122654] hover:border-[#A6B4D0] cursor-pointer">
                 <ArrowLeft className="w-3.5 h-3.5" /> Back
               </button>
             )}
@@ -442,7 +442,7 @@ export default function OnboardingPage() {
               type="button"
               onClick={handleNext}
               disabled={saving}
-              className="inline-flex items-center gap-2 min-h-[42px] px-5 bg-[#102654] hover:bg-[#0B1B3D] text-white font-bold text-xs rounded-[10px] cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-2 min-h-[42px] px-5 bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold text-xs rounded-[10px] cursor-pointer disabled:opacity-60"
             >
               {saving ? 'Saving…' : step === 2 ? 'Finish set-up' : step === 1 && pendingInvites.length ? 'Send invitations' : 'Continue'}
               {!saving && (step === 2 ? <Check className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />)}

@@ -476,22 +476,22 @@ export default function AccountMappingPage() {
       {/* Header with Title and v1.1 Breadcrumbs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#5B6478] mb-1">
-            <Link href="/" className="hover:text-[#FF7D6B] transition-colors">Blynt</Link>
+          <div className="flex items-center gap-2 text-xs text-[#4A5878] mb-1">
+            <Link href="/" className="hover:text-[#FF7A66] transition-colors">Blynt</Link>
             <span>/</span>
-            <span className="text-[#102654] font-semibold">{engagementSummary(engagementId).clientName}</span>
+            <span className="text-[#122654] font-semibold">{engagementSummary(engagementId).clientName}</span>
             <span>/</span>
             <span>Step 4 Account mapping</span>
           </div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
               Account mapping &amp; Confidence Gate
             </h1>
             <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] border border-[#1D4E89]/20 px-2.5 py-0.5 rounded-full font-mono font-bold">
               DAT-03 · DAT-08
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1 max-w-3xl leading-relaxed">
+          <p className="text-xs text-[#4A5878] mt-1 max-w-3xl leading-relaxed">
             Every nominal account is mapped to a statutory line, schedule, and cash flow category. Rules engine runs first (client &gt; practice &gt; prior-year), followed by the AI confidence gate.
           </p>
         </div>
@@ -502,7 +502,7 @@ export default function AccountMappingPage() {
             className={`min-h-[42px] px-5 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${
               isFullyMapped
                 ? 'bg-[#0B6B52] hover:bg-[#095742] text-white shadow-xs'
-                : 'bg-[#F4F5F7] text-[#5B6478] border border-[#D5DBE7]'
+                : 'bg-[#F4F5F7] text-[#4A5878] border border-[#D3DCEE]'
             }`}
           >
             {isFullyMapped ? <Unlock className="w-4 h-4 text-emerald-300" /> : <Lock className="w-4 h-4" />}
@@ -529,7 +529,7 @@ export default function AccountMappingPage() {
             <div className="text-2xl font-extrabold text-emerald-800 font-mono-numbers mt-2">
               {readyCount}
             </div>
-            <div className="text-[11px] text-[#5B6478] mt-0.5">High confidence suggestions</div>
+            <div className="text-[11px] text-[#4A5878] mt-0.5">High confidence suggestions</div>
           </div>
           {readyCount > 0 && (
             <button
@@ -558,7 +558,7 @@ export default function AccountMappingPage() {
             <div className="text-2xl font-extrabold text-amber-800 font-mono-numbers mt-2">
               {checkCount}
             </div>
-            <div className="text-[11px] text-[#5B6478] mt-0.5">Review in small groups</div>
+            <div className="text-[11px] text-[#4A5878] mt-0.5">Review in small groups</div>
           </div>
           <div className="text-[10px] text-amber-700 font-medium bg-amber-50 p-1.5 rounded-lg border border-amber-200 mt-2">
             Requires preparer review before sign-off
@@ -580,7 +580,7 @@ export default function AccountMappingPage() {
             <div className="text-2xl font-extrabold text-red-800 font-mono-numbers mt-2">
               {exceptionCount}
             </div>
-            <div className="text-[11px] text-[#5B6478] mt-0.5">Map one at a time by hand</div>
+            <div className="text-[11px] text-[#4A5878] mt-0.5">Map one at a time by hand</div>
           </div>
           <div className="text-[10px] text-red-700 font-medium bg-red-50 p-1.5 rounded-lg border border-red-200 mt-2">
             Cannot be bulk confirmed
@@ -590,7 +590,7 @@ export default function AccountMappingPage() {
         {/* CONFIRMED */}
         <div className="bg-white border border-[#E3E7EF] rounded-2xl p-4 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between text-xs font-bold text-[#102654]">
+            <div className="flex items-center justify-between text-xs font-bold text-[#122654]">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#0B6B52]" />
                 Confirmed
@@ -599,12 +599,12 @@ export default function AccountMappingPage() {
                 {totalImported > 0 ? Math.round((confirmedCount / totalImported) * 100) : 0}%
               </span>
             </div>
-            <div className="text-2xl font-extrabold text-[#102654] font-mono-numbers mt-2">
+            <div className="text-2xl font-extrabold text-[#122654] font-mono-numbers mt-2">
               {confirmedCount} / {totalImported}
             </div>
-            <div className="text-[11px] text-[#5B6478] mt-0.5">Agreed by accountant</div>
+            <div className="text-[11px] text-[#4A5878] mt-0.5">Agreed by accountant</div>
           </div>
-          <div className="text-[10px] text-[#5B6478] mt-2 font-mono">
+          <div className="text-[10px] text-[#4A5878] mt-2 font-mono">
             {confirmedCount === totalImported ? 'All accounts verified' : `${totalImported - confirmedCount} unconfirmed`}
           </div>
         </div>
@@ -632,11 +632,11 @@ export default function AccountMappingPage() {
             >
               {formatPence(unmappedBalancePence)}
             </div>
-            <div className="text-[10px] mt-1 font-semibold text-[#102654]">
+            <div className="text-[10px] mt-1 font-semibold text-[#122654]">
               {isFullyMapped ? '✓ Working papers unlocked' : 'Must be £0.00 to balance'}
             </div>
           </div>
-          <div className="text-[9px] text-[#5B6478] mt-2">
+          <div className="text-[9px] text-[#4A5878] mt-2">
             Auto-accept: <strong>OFF</strong> (DAT-08)
           </div>
         </div>
@@ -658,7 +658,7 @@ export default function AccountMappingPage() {
           </div>
           <Link
             href={`/engagements/${engagementId}/workpapers`}
-            className="px-5 py-2.5 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-[0.98] shrink-0"
+            className="px-5 py-2.5 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-[0.98] shrink-0"
           >
             <span>Go to working paper</span>
             <ArrowRight className="w-4 h-4" />
@@ -685,14 +685,14 @@ export default function AccountMappingPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`min-h-[38px] px-3.5 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
                   activeTab === tab.id
-                    ? 'bg-[#102654] text-white shadow-xs'
-                    : 'text-[#5B6478] hover:bg-[#F6F7FB] hover:text-[#102654]'
+                    ? 'bg-[#122654] text-white shadow-xs'
+                    : 'text-[#4A5878] hover:bg-[#F5F8FD] hover:text-[#122654]'
                 }`}
               >
                 <span>{tab.label}</span>
                 <span
                   className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[#F4F5F7] text-[#5B6478]'
+                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[#F4F5F7] text-[#4A5878]'
                   }`}
                 >
                   {tab.count}
@@ -704,28 +704,28 @@ export default function AccountMappingPage() {
           {/* Search & Actions */}
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-[#5B6478] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 id="mapping-search"
                 type="text"
                 placeholder="Search code, name, schedule..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="min-h-[38px] pl-8 pr-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-xl text-[#102654] outline-none focus:border-[#FF7D6B] w-52"
+                className="min-h-[38px] pl-8 pr-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-xl text-[#122654] outline-none focus:border-[#FF7A66] w-52"
               />
             </div>
 
             {/* Batch Remap Toolbar (DAT-04 step 4) */}
             {selectedIds.length > 0 && (
               <div className="flex items-center gap-2 bg-[#EAF5FC] border border-[#B3D7F5] px-3 py-1.5 rounded-xl">
-                <span className="text-xs font-bold text-[#102654]">
+                <span className="text-xs font-bold text-[#122654]">
                   Map selected ({selectedIds.length}) to:
                 </span>
                 <select
                   aria-label="Map selected accounts"
                   value={batchTargetCode}
                   onChange={(e) => setBatchTargetCode(e.target.value)}
-                  className="text-xs font-semibold py-1 px-2 border border-[#D5DBE7] rounded-lg bg-white text-[#102654] max-w-[200px]"
+                  className="text-xs font-semibold py-1 px-2 border border-[#D3DCEE] rounded-lg bg-white text-[#122654] max-w-[200px]"
                 >
                   <option value="">Select target COA…</option>
                   <optgroup label="Cash &amp; Banking (REC-02)">
@@ -767,7 +767,7 @@ export default function AccountMappingPage() {
                   type="button"
                   disabled={!batchTargetCode}
                   onClick={handleApplyBatchRemap}
-                  className="px-2.5 py-1 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-lg disabled:opacity-40"
+                  className="px-2.5 py-1 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-lg disabled:opacity-40"
                 >
                   Apply
                 </button>
@@ -779,7 +779,7 @@ export default function AccountMappingPage() {
               type="button"
               disabled={selectedIds.length === 0}
               onClick={handleConfirmSelected}
-              className="min-h-[38px] px-4 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-xl flex items-center gap-1.5 disabled:opacity-40 cursor-pointer shadow-xs transition-transform active:scale-[0.98]"
+              className="min-h-[38px] px-4 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl flex items-center gap-1.5 disabled:opacity-40 cursor-pointer shadow-xs transition-transform active:scale-[0.98]"
             >
               <Check className="w-4 h-4 stroke-[2.5]" />
               <span>Confirm selected ({selectedIds.length})</span>
@@ -789,15 +789,15 @@ export default function AccountMappingPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#102654]">
-            <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
+          <table className="w-full text-left text-xs text-[#122654]">
+            <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
               <tr>
                 <th scope="col" className="p-3 pl-4 w-10">
                   <input
                     type="checkbox"
                     checked={selectedIds.length > 0 && selectedIds.length === filteredMappings.length}
                     onChange={handleSelectAllVisible}
-                    className="w-4 h-4 rounded border-[#D5DBE7] text-[#102654] focus:ring-[#FF7D6B]"
+                    className="w-4 h-4 rounded border-[#D3DCEE] text-[#122654] focus:ring-[#FF7A66]"
                   />
                 </th>
                 <th scope="col" className="p-3">Ledger Code &amp; Name</th>
@@ -829,7 +829,7 @@ export default function AccountMappingPage() {
                 return (
                   <tr
                     key={row.id}
-                    className={`hover:bg-[#F6F7FB] transition-colors cursor-pointer ${
+                    className={`hover:bg-[#F5F8FD] transition-colors cursor-pointer ${
                       activeDetailId === row.id ? 'bg-[#EAF5FC]/50' : ''
                     } ${isSignMismatch ? 'bg-amber-50/20' : ''}`}
                     onClick={() => setActiveDetailId(row.id)}
@@ -839,19 +839,19 @@ export default function AccountMappingPage() {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleToggleSelect(row.id)}
-                        className="w-4 h-4 rounded border-[#D5DBE7] text-[#102654] focus:ring-[#FF7D6B]"
+                        className="w-4 h-4 rounded border-[#D3DCEE] text-[#122654] focus:ring-[#FF7A66]"
                       />
                     </td>
 
                     {/* Code & Name */}
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-[#102654] bg-[#F4F5F7] px-2 py-0.5 rounded text-[11px]">
+                        <span className="font-mono font-bold text-[#122654] bg-[#F4F5F7] px-2 py-0.5 rounded text-[11px]">
                           {row.source_code}
                         </span>
                         <div>
-                          <div className="font-bold text-[#102654]">{row.source_name}</div>
-                          <div className="text-[10px] text-[#5B6478]">{row.source_type}</div>
+                          <div className="font-bold text-[#122654]">{row.source_name}</div>
+                          <div className="text-[10px] text-[#4A5878]">{row.source_type}</div>
                         </div>
                       </div>
                     </td>
@@ -877,7 +877,7 @@ export default function AccountMappingPage() {
                         <span className="font-mono font-bold text-[10px] bg-[#EAF5FC] text-[#1D4E89] px-1.5 py-0.5 rounded">
                           {row.schedule_ref || stat.schedule_ref}
                         </span>
-                        <span className="text-[11px] font-medium text-[#102654] truncate max-w-[200px]" title={row.statutory_line || stat.statutory_line}>
+                        <span className="text-[11px] font-medium text-[#122654] truncate max-w-[200px]" title={row.statutory_line || stat.statutory_line}>
                           {row.statutory_line || stat.statutory_line}
                         </span>
                       </div>
@@ -914,10 +914,10 @@ export default function AccountMappingPage() {
                     {/* AI Reason & Evidence (hoverable) */}
                     <td className="p-3">
                       <div
-                        className="text-[11px] text-[#5B6478] line-clamp-1 group relative cursor-help"
+                        className="text-[11px] text-[#4A5878] line-clamp-1 group relative cursor-help"
                         title={`Evidence chain: ${row.evidence_used || 'Client rules > Practice rules > Prior-year mapping > Pattern'}`}
                       >
-                        <span className="font-medium text-[#102654]">
+                        <span className="font-medium text-[#122654]">
                           {row.ai_reason || `Matched nominal name pattern "${row.source_name.split(' ')[0]}"`}
                         </span>
                         <div className="text-[10px] text-[#7E8DA6]">
@@ -932,7 +932,7 @@ export default function AccountMappingPage() {
                         aria-label={`Select mapping for ${row.source_name}`}
                         value={row.blynt_code || ''}
                         onChange={(e) => handleInitiateChangeMapping(row.id, e.target.value)}
-                        className="text-xs font-semibold py-1.5 px-2 border border-[#D5DBE7] hover:border-[#102654] focus:border-[#102654] rounded-lg bg-white text-[#102654] shadow-2xs transition-all cursor-pointer w-full max-w-[240px]"
+                        className="text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] hover:border-[#122654] focus:border-[#122654] rounded-lg bg-white text-[#122654] shadow-2xs transition-all cursor-pointer w-full max-w-[240px]"
                       >
                         <option value="">Select Blynt COA Account…</option>
                         <optgroup label="Cash &amp; Banking (REC-02)">
@@ -994,10 +994,10 @@ export default function AccountMappingPage() {
                         <button
                           type="button"
                           onClick={() => setActiveDetailId(row.id)}
-                          className="px-2 py-1 text-[11px] font-semibold text-[#102654] hover:bg-[#EAF5FC] border border-[#D5DBE7] hover:border-[#102654] rounded-lg flex items-center gap-1 transition-colors"
+                          className="px-2 py-1 text-[11px] font-semibold text-[#122654] hover:bg-[#EAF5FC] border border-[#D3DCEE] hover:border-[#122654] rounded-lg flex items-center gap-1 transition-colors"
                           title="Open account facts, evidence and rules"
                         >
-                          <Pencil className="w-3 h-3 text-[#5B6478]" />
+                          <Pencil className="w-3 h-3 text-[#4A5878]" />
                           <span>Rule</span>
                         </button>
                       </div>
@@ -1015,17 +1015,17 @@ export default function AccountMappingPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white border border-[#E3E7EF] rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-in zoom-in-95 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#EAF5FC] text-[#1D4E89] flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-[#FF7D6B]" />
+                  <Sparkles className="w-5 h-5 text-[#FF7A66]" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#102654]">Learn Rule from Correction (DAT-09)</h3>
-                  <p className="text-[11px] text-[#5B6478]">Save this correction so the same mistake is never repeated</p>
+                  <h3 className="text-sm font-bold text-[#122654]">Learn Rule from Correction (DAT-09)</h3>
+                  <p className="text-[11px] text-[#4A5878]">Save this correction so the same mistake is never repeated</p>
                 </div>
               </div>
               <button
@@ -1037,15 +1037,15 @@ export default function AccountMappingPage() {
               </button>
             </div>
 
-            <div className="p-3 bg-[#F6F7FB] rounded-xl text-xs space-y-1.5 border border-[#E3E7EF]">
+            <div className="p-3 bg-[#F5F8FD] rounded-xl text-xs space-y-1.5 border border-[#E3E7EF]">
               <div className="flex items-center justify-between">
-                <span className="text-[#5B6478]">Nominal account:</span>
-                <span className="font-mono font-bold text-[#102654]">
+                <span className="text-[#4A5878]">Nominal account:</span>
+                <span className="font-mono font-bold text-[#122654]">
                   {pendingCorrection.sourceCode} {pendingCorrection.sourceName}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#5B6478]">Remapped to:</span>
+                <span className="text-[#4A5878]">Remapped to:</span>
                 <span className="font-mono font-bold text-[#0B6B52]">
                   {pendingCorrection.targetCode} ({db.blynt_accounts.find((b) => b.code === pendingCorrection.targetCode)?.name})
                 </span>
@@ -1054,7 +1054,7 @@ export default function AccountMappingPage() {
 
             {/* Scope Selection (DAT-09 UI step 1) */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-[#102654]">
+              <label className="block text-xs font-bold text-[#122654]">
                 Choose Rule Scope:
               </label>
               <div className="space-y-2 text-xs">
@@ -1064,11 +1064,11 @@ export default function AccountMappingPage() {
                     name="ruleScope"
                     checked={ruleScope === 'item'}
                     onChange={() => setRuleScope('item')}
-                    className="mt-0.5 text-[#102654]"
+                    className="mt-0.5 text-[#122654]"
                   />
                   <div>
-                    <div className="font-bold text-[#102654]">This item only</div>
-                    <div className="text-[11px] text-[#5B6478]">Do not create a reusable rule; apply only to this nominal.</div>
+                    <div className="font-bold text-[#122654]">This item only</div>
+                    <div className="text-[11px] text-[#4A5878]">Do not create a reusable rule; apply only to this nominal.</div>
                   </div>
                 </label>
 
@@ -1078,11 +1078,11 @@ export default function AccountMappingPage() {
                     name="ruleScope"
                     checked={ruleScope === 'supplier'}
                     onChange={() => setRuleScope('supplier')}
-                    className="mt-0.5 text-[#102654]"
+                    className="mt-0.5 text-[#122654]"
                   />
                   <div>
-                    <div className="font-bold text-[#102654]">This supplier / name pattern ({pendingCorrection.pattern})</div>
-                    <div className="text-[11px] text-[#5B6478]">Apply to all nominals matching this pattern across future uploads.</div>
+                    <div className="font-bold text-[#122654]">This supplier / name pattern ({pendingCorrection.pattern})</div>
+                    <div className="text-[11px] text-[#4A5878]">Apply to all nominals matching this pattern across future uploads.</div>
                   </div>
                 </label>
 
@@ -1096,7 +1096,7 @@ export default function AccountMappingPage() {
                   />
                   <div>
                     <div className="font-bold text-[#0B6B52]">This client only (Harlow Food Group)</div>
-                    <div className="text-[11px] text-[#5B6478]">Remembered for all future engagements and roll-forward periods for this client.</div>
+                    <div className="text-[11px] text-[#4A5878]">Remembered for all future engagements and roll-forward periods for this client.</div>
                   </div>
                 </label>
 
@@ -1106,11 +1106,11 @@ export default function AccountMappingPage() {
                     name="ruleScope"
                     checked={ruleScope === 'practice'}
                     onChange={() => setRuleScope('practice')}
-                    className="mt-0.5 text-[#102654]"
+                    className="mt-0.5 text-[#122654]"
                   />
                   <div>
-                    <div className="font-bold text-[#102654]">Whole practice (requires manager approval)</div>
-                    <div className="text-[11px] text-[#5B6478]">Sent to Manager Approval Queue in Practice Settings &gt; Rules.</div>
+                    <div className="font-bold text-[#122654]">Whole practice (requires manager approval)</div>
+                    <div className="text-[11px] text-[#4A5878]">Sent to Manager Approval Queue in Practice Settings &gt; Rules.</div>
                   </div>
                 </label>
               </div>
@@ -1120,14 +1120,14 @@ export default function AccountMappingPage() {
               <button
                 type="button"
                 onClick={() => setRuleModalOpen(false)}
-                className="px-4 py-2 text-xs font-semibold text-[#5B6478] hover:text-[#102654]"
+                className="px-4 py-2 text-xs font-semibold text-[#4A5878] hover:text-[#122654]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveCorrectionWithRule}
-                className="px-5 py-2.5 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-xl shadow-xs transition-transform active:scale-[0.98]"
+                className="px-5 py-2.5 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-xl shadow-xs transition-transform active:scale-[0.98]"
               >
                 Save &amp; Apply Rule
               </button>
@@ -1141,12 +1141,12 @@ export default function AccountMappingPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-end animate-in fade-in"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-end animate-in fade-in"
         >
           <div className="w-full max-w-md h-full bg-white shadow-2xl flex flex-col border-l border-[#E3E7EF] animate-in slide-in-from-right">
-            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#102654] text-white">
+            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#122654] text-white">
               <div>
-                <span className="text-[10px] uppercase font-bold text-[#FF7D6B] tracking-wider">
+                <span className="text-[10px] uppercase font-bold text-[#FF7A66] tracking-wider">
                   Mapping Facts &amp; Evidence
                 </span>
                 <h3 className="text-sm font-bold mt-0.5">
@@ -1162,41 +1162,41 @@ export default function AccountMappingPage() {
               </button>
             </div>
 
-            <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-5 text-xs text-[#102654]">
+            <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-5 text-xs text-[#122654]">
               {/* Account Facts */}
-              <div className="p-3.5 bg-[#F6F7FB] border border-[#E3E7EF] rounded-xl flex flex-col gap-2">
+              <div className="p-3.5 bg-[#F5F8FD] border border-[#E3E7EF] rounded-xl flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#5B6478]">Source balance:</span>
+                  <span className="text-[#4A5878]">Source balance:</span>
                   <span className="font-mono font-bold text-sm">
                     {formatPence(detailMapping.balance_p)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#5B6478]">Source category:</span>
+                  <span className="text-[#4A5878]">Source category:</span>
                   <span className="font-semibold">{detailMapping.source_type}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#5B6478]">Evidence hierarchy:</span>
+                  <span className="text-[#4A5878]">Evidence hierarchy:</span>
                   <span className="text-[11px] font-mono font-medium text-[#1D4E89]">
                     {detailMapping.evidence_used || 'Client rule > Prior year > Name match'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#5B6478]">Confidence:</span>
+                  <span className="text-[#4A5878]">Confidence:</span>
                   <span className="font-bold text-emerald-700">{detailMapping.confidence}%</span>
                 </div>
               </div>
 
               {/* Select target */}
               <div>
-                <label className="block text-xs font-bold text-[#102654] mb-1.5">
+                <label className="block text-xs font-bold text-[#122654] mb-1.5">
                   Assigned Blynt COA Account:
                 </label>
                 <select
                   aria-label="Assigned Blynt COA"
                   value={pickCode}
                   onChange={(e) => setPickCode(e.target.value)}
-                  className="w-full text-xs font-semibold p-2.5 border border-[#D5DBE7] rounded-xl bg-white text-[#102654] outline-none focus:ring-1 focus:ring-[#1D4E89]"
+                  className="w-full text-xs font-semibold p-2.5 border border-[#D3DCEE] rounded-xl bg-white text-[#122654] outline-none focus:ring-1 focus:ring-[#1D4E89]"
                 >
                   <option value="">Select Blynt COA Account…</option>
                   {db.blynt_accounts.map((a) => (
@@ -1224,17 +1224,17 @@ export default function AccountMappingPage() {
                       onClick={() => setPickCode(alt.blynt_code)}
                       className={`w-full text-left p-3 rounded-xl border transition-all ${
                         pickCode === alt.blynt_code
-                          ? 'border-[#102654] bg-[#F6F7FB]'
+                          ? 'border-[#122654] bg-[#F5F8FD]'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-mono font-bold text-[#102654]">{alt.blynt_code} {alt.name}</span>
+                        <span className="font-mono font-bold text-[#122654]">{alt.blynt_code} {alt.name}</span>
                         <span className="text-[10px] font-mono text-[#A23A27] bg-[#FFF1EE] px-1.5 py-0.5 rounded">
                           {alt.confidence}%
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#5B6478] mt-1">{alt.reason}</p>
+                      <p className="text-[11px] text-[#4A5878] mt-1">{alt.reason}</p>
                     </button>
                   ))}
                 </div>
@@ -1245,7 +1245,7 @@ export default function AccountMappingPage() {
               <button
                 type="button"
                 onClick={() => setActiveDetailId(null)}
-                className="px-4 py-2 border border-[#D5DBE7] rounded-xl text-xs font-semibold text-[#5B6478]"
+                className="px-4 py-2 border border-[#D3DCEE] rounded-xl text-xs font-semibold text-[#4A5878]"
               >
                 Close
               </button>
@@ -1256,7 +1256,7 @@ export default function AccountMappingPage() {
                   handleInitiateChangeMapping(detailMapping.id, pickCode);
                   setActiveDetailId(null);
                 }}
-                className="px-5 py-2.5 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-xl shadow-xs disabled:opacity-40"
+                className="px-5 py-2.5 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-xl shadow-xs disabled:opacity-40"
               >
                 Save &amp; Create Rule…
               </button>
@@ -1267,14 +1267,14 @@ export default function AccountMappingPage() {
 
       {/* Floating Correction Toast (DAT-05 UI step 1) */}
       {correctionToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#102654] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-3 border border-white/10">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#122654] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-3 border border-white/10">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{correctionToast.message}</span>
           {correctionToast.undoAction && (
             <button
               type="button"
               onClick={correctionToast.undoAction}
-              className="ml-2 text-[#FF7D6B] hover:underline font-bold"
+              className="ml-2 text-[#FF7A66] hover:underline font-bold"
             >
               Undo
             </button>

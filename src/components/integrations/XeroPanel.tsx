@@ -110,8 +110,8 @@ export function LedgerPanel({ provider, clientId, engagementId, reconnectNeeded 
             {P.badge}
           </div>
           <div>
-            <h2 className="text-sm font-bold text-[#102654]">{P.name}</h2>
-            <p className="text-[11px] text-[#5B6478]">Pull the trial balance straight from the client&apos;s {P.name}.</p>
+            <h2 className="text-sm font-bold text-[#122654]">{P.name}</h2>
+            <p className="text-[11px] text-[#4A5878]">Pull the trial balance straight from the client&apos;s {P.name}.</p>
           </div>
         </div>
         {status?.connected && !needsReconnect && (
@@ -122,7 +122,7 @@ export function LedgerPanel({ provider, clientId, engagementId, reconnectNeeded 
       </div>
 
       {!status ? (
-        <p className="text-xs text-[#5B6478] flex items-center gap-2">
+        <p className="text-xs text-[#4A5878] flex items-center gap-2">
           <Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking connection…
         </p>
       ) : !status.configured ? (
@@ -142,26 +142,26 @@ export function LedgerPanel({ provider, clientId, engagementId, reconnectNeeded 
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>The {P.name} connection has expired or was revoked. Reconnect to keep pulling data.</span>
           </div>
-          <a href={connectHref} className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[10px]">
+          <a href={connectHref} className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[10px]">
             <RefreshCw className="w-3.5 h-3.5" /> Reconnect {P.name}
           </a>
         </div>
       ) : !status.connected ? (
         <div className="space-y-3">
-          <p className="text-xs text-[#5B6478] leading-relaxed">
+          <p className="text-xs text-[#4A5878] leading-relaxed">
             {P.signIn}
           </p>
-          <a href={connectHref} className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[10px]">
+          <a href={connectHref} className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[10px]">
             <Link2 className="w-3.5 h-3.5" /> Connect {P.name}
           </a>
         </div>
       ) : (
         <div className="space-y-3">
           <dl className="grid grid-cols-[110px_minmax(0,1fr)] gap-y-1 text-xs">
-            <dt className="text-[#5B6478]">{P.org}</dt>
-            <dd className="font-semibold text-[#102654] truncate">{status.tenant_name ?? status.company_name}</dd>
-            <dt className="text-[#5B6478]">Last pulled</dt>
-            <dd className="text-[#102654]">{when(status.last_synced_at)}</dd>
+            <dt className="text-[#4A5878]">{P.org}</dt>
+            <dd className="font-semibold text-[#122654] truncate">{status.tenant_name ?? status.company_name}</dd>
+            <dt className="text-[#4A5878]">Last pulled</dt>
+            <dd className="text-[#122654]">{when(status.last_synced_at)}</dd>
           </dl>
           <div className="flex flex-wrap items-center gap-2">
             {engagementId ? (
@@ -169,19 +169,19 @@ export function LedgerPanel({ provider, clientId, engagementId, reconnectNeeded 
                 type="button"
                 onClick={pull}
                 disabled={busy !== null}
-                className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[10px] cursor-pointer disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[10px] cursor-pointer disabled:opacity-60"
               >
                 {busy === 'pull' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                 {busy === 'pull' ? `Pulling from ${P.name}…` : 'Pull trial balance'}
               </button>
             ) : (
-              <span className="text-[11px] text-[#5B6478]">Open an engagement to pull its trial balance.</span>
+              <span className="text-[11px] text-[#4A5878]">Open an engagement to pull its trial balance.</span>
             )}
             <button
               type="button"
               onClick={disconnect}
               disabled={busy !== null}
-              className="inline-flex items-center gap-1.5 min-h-[38px] px-3 text-xs font-semibold text-[#5B6478] hover:text-[#B42318] rounded-[10px] cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 min-h-[38px] px-3 text-xs font-semibold text-[#4A5878] hover:text-[#B42318] rounded-[10px] cursor-pointer disabled:opacity-60"
             >
               <Unplug className="w-3.5 h-3.5" /> Disconnect
             </button>
@@ -196,7 +196,7 @@ export function LedgerPanel({ provider, clientId, engagementId, reconnectNeeded 
       )}
 
       {result && (
-        <div className="p-3.5 rounded-[10px] bg-[#E6F4EF] border border-[#0B6B52]/20 text-xs text-[#102654] space-y-2" role="status">
+        <div className="p-3.5 rounded-[10px] bg-[#E6F4EF] border border-[#0B6B52]/20 text-xs text-[#122654] space-y-2" role="status">
           <p className="font-semibold text-[#0B6B52]">
             {result.lineCount} accounts pulled from {P.name}. {result.mapping.by_rule} mapped by your rules, {result.mapping.ready} ready to confirm,{' '}
             {result.mapping.check} to check, {result.mapping.exception} to map by hand.

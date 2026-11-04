@@ -19,9 +19,9 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  // Brand tokens: Min control height 44px, 10px radius, 3px coral focus ring (#FF7D6B).
+  // Brand tokens: Min control height 44px, 10px radius, 3px coral focus ring (#FF7A66).
   const baseStyles =
-    'inline-flex items-center justify-center font-medium transition-colors cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-3 focus-visible:outline-[#FF7D6B] focus-visible:outline-offset-2';
+    'inline-flex items-center justify-center font-medium transition-colors cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-3 focus-visible:outline-[#FF7A66] focus-visible:outline-offset-2';
 
   const sizeStyles = {
     sm: 'min-h-[38px] px-3.5 py-1.5 text-xs rounded-[10px] gap-1.5',
@@ -31,17 +31,17 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles = {
     primary:
-      'bg-[#102654] text-white hover:bg-[#0B1B3D] border border-[#102654] active:bg-[#08152e]',
+      'bg-[#122654] text-white hover:bg-[#0B1A3B] border border-[#122654] active:bg-[#08152e]',
     secondary:
-      'bg-[#EAF5FC] text-[#102654] hover:bg-[#d8e8f6] border border-transparent font-semibold',
+      'bg-[#EAF5FC] text-[#122654] hover:bg-[#d8e8f6] border border-transparent font-semibold',
     outline:
-      'bg-white text-[#102654] border border-[#D5DBE7] hover:bg-[#F6F7FB]',
+      'bg-white text-[#122654] border border-[#D3DCEE] hover:bg-[#F5F8FD]',
     ghost:
-      'bg-transparent text-[#5B6478] hover:text-[#102654] hover:bg-[#F6F7FB] border border-transparent',
+      'bg-transparent text-[#4A5878] hover:text-[#122654] hover:bg-[#F5F8FD] border border-transparent',
     danger:
       'bg-[#FDECEA] text-[#B42318] border border-[#B42318]/20 hover:bg-[#fbdad7]',
     ai:
-      'bg-[#FFF1EE] text-[#A23A27] border border-[#FF7D6B]/30 hover:bg-[#FFE3DE] font-semibold',
+      'bg-[#FFF1EE] text-[#A23A27] border border-[#FF7A66]/30 hover:bg-[#FFE3DE] font-semibold',
   };
 
   return (

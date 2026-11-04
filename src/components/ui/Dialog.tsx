@@ -69,7 +69,7 @@ export const Dialog: React.FC<DialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B1B3D]/70 backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B1A3B]/70 backdrop-blur-xs animate-in fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -82,15 +82,15 @@ export const Dialog: React.FC<DialogProps> = ({
         className={`w-full ${maxWidthClasses[maxWidth]} bg-white rounded-[16px] border border-[#E3E7EF] shadow-xl overflow-hidden flex flex-col animate-in zoom-in-95`}
       >
         {/* Dialog Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E3E7EF] bg-[#F6F7FB]">
-          <h2 id={titleId} className="text-base font-semibold text-[#102654]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E3E7EF] bg-[#F5F8FD]">
+          <h2 id={titleId} className="text-base font-semibold text-[#122654]">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#5B6478] hover:text-[#102654] hover:bg-[#E3E7EF] transition-colors cursor-pointer focus-visible:outline-3 focus-visible:outline-[#FF7D6B]"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[#4A5878] hover:text-[#122654] hover:bg-[#E3E7EF] transition-colors cursor-pointer focus-visible:outline-3 focus-visible:outline-[#FF7A66]"
           >
             <X className="w-4 h-4" />
           </button>

@@ -4,15 +4,15 @@
 
 :root {
   /* Brand Tokens (Blynt) */
-  --nav: #0B1B3D;
-  --navy: #102654;
-  --coral: #FF7D6B;
+  --nav: #0B1A3B;
+  --navy: #122654;
+  --coral: #FF7A66;
   --coral-text: #B8432F;
-  --page: #F6F7FB;
+  --page: #F5F8FD;
   --card: #FFFFFF;
   --border: #E3E7EF;
-  --input-border: #D5DBE7;
-  --muted: #5B6478;
+  --input-border: #D3DCEE;
+  --muted: #4A5878;
   --muted-strong: #3A4560;
 
   --ok-bg: #E6F4EF;
@@ -27,7 +27,7 @@
   --ai: #A23A27;
 
   /* Focus & Radii */
-  --focus-ring: #FF7D6B;
+  --focus-ring: #FF7A66;
   --radius-card: 16px;
   --radius-control: 10px;
   --radius-pill: 99px;
@@ -36,7 +36,9 @@
 body {
   background-color: var(--page);
   color: var(--navy);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans), Inter, system-ui, sans-serif;
+  /* Brand kit: figures line up in tables and amounts */
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -67,10 +69,10 @@ body {
 
 /* AG Grid styling with Blynt tokens */
 .ag-theme-quartz {
-  --ag-font-family: 'Inter', sans-serif;
+  --ag-font-family: var(--font-sans), Inter, system-ui, sans-serif;
   --ag-font-size: 13px;
   --ag-background-color: #ffffff;
-  --ag-header-background-color: #f6f7fb;
+  --ag-header-background-color: #F5F8FD;
   --ag-border-color: #e3e7ef;
   --ag-row-border-color: #e3e7ef;
   --ag-selected-row-background-color: #eaf5fc;

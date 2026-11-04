@@ -124,7 +124,7 @@ export default function MfaVerificationPage() {
                 Workpapers
               </span>
               <span className="text-[10px] uppercase font-bold tracking-wider text-[#5B6676]">
-                Audit Platform
+                Working Papers
               </span>
             </div>
           </Link>
@@ -228,7 +228,7 @@ export default function MfaVerificationPage() {
         <div className="max-w-[540px]">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[#1E4FD8] text-xs font-semibold mb-6 border border-[#E3E6EB]">
             <Lock className="w-3.5 h-3.5 text-[#1E4FD8]" />
-            <span>Bank-Grade Audit Security & Access Controls</span>
+            <span>Bank-grade security and access controls</span>
           </div>
 
           <h2 className="text-3xl xl:text-4xl font-semibold text-[#1B2430] tracking-tight leading-tight mb-4">
@@ -236,7 +236,7 @@ export default function MfaVerificationPage() {
           </h2>
 
           <p className="text-sm text-[#5B6676] leading-relaxed mb-8">
-            Workpapers enforces mandatory hardware or TOTP multi-factor authentication for all engagement teams to safeguard working papers and client audit evidence under ISA 230 standards.
+            Workpapers enforces mandatory hardware or TOTP multi-factor authentication for all engagement teams to safeguard working papers and client evidence.
           </p>
 
           <div className="flex flex-col gap-3.5">
@@ -247,7 +247,7 @@ export default function MfaVerificationPage() {
               },
               {
                 title: 'Role-Based Access Control (RBAC)',
-                desc: 'Audit staff are restricted to permitted engagements with granular preparer, manager, and partner sign-off tiers.',
+                desc: 'Staff are restricted to permitted engagements with granular preparer, manager, and partner sign-off tiers.',
               },
               {
                 title: 'Zero Permanent Storage for AI',

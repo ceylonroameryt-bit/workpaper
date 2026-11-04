@@ -54,6 +54,12 @@ describe('practice onboarding', () => {
     expect(cookie).not.toContain(`${SESSION_COOKIE}=`);
   });
 
+  it('a new practice starts with no clients or engagements (no demo client)', async () => {
+    const { actor } = await newFirm();
+    expect(db.clients.filter((c) => c.firm_id === actor.firmId)).toHaveLength(0);
+    expect(db.engagements.filter((e) => e.firm_id === actor.firmId)).toHaveLength(0);
+  });
+
   it('a new firm goes straight into the app: there is no set-up wizard to finish', async () => {
     const { actor } = await newFirm();
     expect(getOnboarding(actor).onboarding.completed_at).not.toBeNull();

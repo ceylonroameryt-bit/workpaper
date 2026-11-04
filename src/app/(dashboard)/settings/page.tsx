@@ -94,7 +94,7 @@ export default function PracticeSettingsPage() {
         scope: 'practice',
         target_value: '1500 Plant & Equipment Cost',
         created_by: 'usr_test_reviewer',
-        created_by_name: 'Audit Manager',
+        created_by_name: 'Manager',
         created_at: '2026-09-01T10:00:00Z',
         times_used: 412,
         active: true,
@@ -108,7 +108,7 @@ export default function PracticeSettingsPage() {
         scope: 'practice',
         target_value: "835b Director's Loan Account",
         created_by: 'usr_test_reviewer',
-        created_by_name: 'Audit Manager',
+        created_by_name: 'Manager',
         created_at: '2026-09-01T10:00:00Z',
         times_used: 285,
         active: true,
@@ -153,7 +153,7 @@ export default function PracticeSettingsPage() {
         scope: 'supplier',
         target_value: 'REC-03: Fixed Assets Addition (Computer equipment)',
         created_by: 'usr_test_reviewer',
-        created_by_name: 'Audit Manager',
+        created_by_name: 'Manager',
         created_at: '2026-10-01T09:00:00Z',
         times_used: 18,
         active: true,
@@ -184,8 +184,8 @@ export default function PracticeSettingsPage() {
   const [newRuleType, setNewRuleType] = useState<'mapping' | 'extraction' | 'proposal' | 'finding'>('mapping');
 
   // QTR-02 Branding
-  const [brandPrimary, setBrandPrimary] = useState('#102654');
-  const [brandAccent, setBrandAccent] = useState('#FF7D6B');
+  const [brandPrimary, setBrandPrimary] = useState('#122654');
+  const [brandAccent, setBrandAccent] = useState('#FF7A66');
   const [brandFont, setBrandFont] = useState('Inter');
   const [footerDisclaimer, setFooterDisclaimer] = useState('Prepared by Blynt Practice & Co LLP under FRS 102 Section 1A. Registered in England & Wales.');
   const [logoUploaded, setLogoUploaded] = useState(true);
@@ -313,7 +313,7 @@ export default function PracticeSettingsPage() {
       target_value: newRuleTarget,
       scope: newRuleScope,
       created_by: 'usr_test_reviewer',
-      created_by_name: 'Audit Manager',
+      created_by_name: 'Manager',
       created_at: new Date().toISOString(),
       times_used: 1,
       active: true,
@@ -332,22 +332,22 @@ export default function PracticeSettingsPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[20px] p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-extrabold text-[#102654] tracking-tight">Practice Settings &amp; Defaults</h1>
+            <h1 className="text-2xl font-extrabold text-[#122654] tracking-tight">Practice Settings &amp; Defaults</h1>
             <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] border border-[#1D4E89]/20 px-2.5 py-1 rounded-full font-mono font-bold">
               Blynt Practice &amp; Co LLP
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1.5 leading-relaxed">
-            Configure firm-wide audit methodology, 3-level sign-off rules, AI confidence thresholds, white-label branding, and UK GDPR governance.
+          <p className="text-xs text-[#4A5878] mt-1.5 leading-relaxed">
+            Configure firm-wide working paper methodology, 3-level sign-off rules, AI confidence thresholds, white-label branding, and UK GDPR governance.
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setShowSaveConfirmModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0 active:scale-[0.98]"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0 active:scale-[0.98]"
         >
-          <Save className="w-4 h-4 text-[#FF7D6B]" />
+          <Save className="w-4 h-4 text-[#FF7A66]" />
           <span>Save Changes</span>
         </button>
       </div>
@@ -372,8 +372,8 @@ export default function PracticeSettingsPage() {
           onClick={() => setActiveTab('defaults')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
             activeTab === 'defaults'
-              ? 'border-[#FF7D6B] text-[#102654] bg-[#F6F7FB]/50 rounded-t-lg'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654] bg-[#F5F8FD]/50 rounded-t-lg'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Sliders className="w-4 h-4 text-[#1D4E89]" />
@@ -386,8 +386,8 @@ export default function PracticeSettingsPage() {
           onClick={() => setActiveTab('roles')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
             activeTab === 'roles'
-              ? 'border-[#FF7D6B] text-[#102654] bg-[#F6F7FB]/50 rounded-t-lg'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654] bg-[#F5F8FD]/50 rounded-t-lg'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Users className="w-4 h-4 text-[#1D4E89]" />
@@ -400,11 +400,11 @@ export default function PracticeSettingsPage() {
           onClick={() => setActiveTab('rules')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
             activeTab === 'rules'
-              ? 'border-[#FF7D6B] text-[#102654] bg-[#F6F7FB]/50 rounded-t-lg'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654] bg-[#F5F8FD]/50 rounded-t-lg'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
-          <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
+          <Sparkles className="w-4 h-4 text-[#FF7A66]" />
           <span>AI Rules &amp; Accuracy (DAT-05)</span>
         </button>
 
@@ -414,8 +414,8 @@ export default function PracticeSettingsPage() {
           onClick={() => setActiveTab('branding')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
             activeTab === 'branding'
-              ? 'border-[#FF7D6B] text-[#102654] bg-[#F6F7FB]/50 rounded-t-lg'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654] bg-[#F5F8FD]/50 rounded-t-lg'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Palette className="w-4 h-4 text-[#1D4E89]" />
@@ -428,8 +428,8 @@ export default function PracticeSettingsPage() {
           onClick={() => setActiveTab('security')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
             activeTab === 'security'
-              ? 'border-[#FF7D6B] text-[#102654] bg-[#F6F7FB]/50 rounded-t-lg'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654] bg-[#F5F8FD]/50 rounded-t-lg'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Shield className="w-4 h-4 text-emerald-600" />
@@ -441,8 +441,8 @@ export default function PracticeSettingsPage() {
       {activeTab === 'defaults' && (
         <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-xs p-6 sm:p-8 space-y-8 max-w-4xl">
           <div className="border-b border-[#E3E7EF] pb-4">
-            <h2 className="text-base font-bold text-[#102654]">Practice Engagement Defaults (ADM-02)</h2>
-            <p className="text-xs text-[#5B6478] mt-0.5">
+            <h2 className="text-base font-bold text-[#122654]">Practice Engagement Defaults (ADM-02)</h2>
+            <p className="text-xs text-[#4A5878] mt-0.5">
               Parameters enforced automatically on schedules, lead sheets, variance calculations, and statutory reviews.
               Each client can override the sign-off levels on its client page.
             </p>
@@ -453,14 +453,14 @@ export default function PracticeSettingsPage() {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-[#102654] mb-2">
+              <label className="block text-xs font-bold text-[#122654] mb-2">
                 Default Sign-off Levels (REV-01)
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <label
                   className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                     signOffLevels === '3'
-                      ? 'border-[#102654] bg-[#F6F7FB] shadow-xs'
+                      ? 'border-[#122654] bg-[#F5F8FD] shadow-xs'
                       : 'border-[#E3E7EF] hover:border-gray-300'
                   }`}
                 >
@@ -472,8 +472,8 @@ export default function PracticeSettingsPage() {
                     className="mt-0.5"
                   />
                   <div>
-                    <div className="font-bold text-[#102654]">3 Levels: Preparer &gt; Manager &gt; Partner</div>
-                    <div className="text-[11px] text-[#5B6478] mt-0.5">
+                    <div className="font-bold text-[#122654]">3 Levels: Preparer &gt; Manager &gt; Partner</div>
+                    <div className="text-[11px] text-[#4A5878] mt-0.5">
                       Standard UK practice segregation of duties with required manager clearance before partner sign-off.
                     </div>
                   </div>
@@ -482,7 +482,7 @@ export default function PracticeSettingsPage() {
                 <label
                   className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                     signOffLevels === '2'
-                      ? 'border-[#102654] bg-[#F6F7FB] shadow-xs'
+                      ? 'border-[#122654] bg-[#F5F8FD] shadow-xs'
                       : 'border-[#E3E7EF] hover:border-gray-300'
                   }`}
                 >
@@ -494,8 +494,8 @@ export default function PracticeSettingsPage() {
                     className="mt-0.5"
                   />
                   <div>
-                    <div className="font-bold text-[#102654]">2 Levels: Preparer &gt; Partner</div>
-                    <div className="text-[11px] text-[#5B6478] mt-0.5">
+                    <div className="font-bold text-[#122654]">2 Levels: Preparer &gt; Partner</div>
+                    <div className="text-[11px] text-[#4A5878] mt-0.5">
                       Streamlined workflow suitable for sole practitioners and smaller practice setups.
                     </div>
                   </div>
@@ -504,23 +504,23 @@ export default function PracticeSettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
-              <div className="p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
-                <label className="block text-xs font-bold text-[#102654] mb-1">
+              <div className="p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
+                <label className="block text-xs font-bold text-[#122654] mb-1">
                   Reconciliation Tolerance (£)
                 </label>
                 <input
                   type="text"
                   value={reconciliationTolerance}
                   onChange={(e) => setReconciliationTolerance(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
+                  className="w-full text-xs p-2.5 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold text-[#122654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
                 />
                 <span className="text-[11px] text-[#7E8DA6] mt-1 block">
                   Default £1.00. Differences within tolerance are treated as Reconciled automatically.
                 </span>
               </div>
 
-              <div className="p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
-                <label htmlFor="review-threshold" className="block text-xs font-bold text-[#102654] mb-1">
+              <div className="p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
+                <label htmlFor="review-threshold" className="block text-xs font-bold text-[#122654] mb-1">
                   Review Threshold (£)
                 </label>
                 <input
@@ -528,52 +528,52 @@ export default function PracticeSettingsPage() {
                   type="text"
                   value={reviewThreshold}
                   onChange={(e) => setReviewThreshold(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
+                  className="w-full text-xs p-2.5 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold text-[#122654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
                 />
                 <span className="text-[11px] text-[#7E8DA6] mt-1 block">
                   Movements above this are flagged for review.
                 </span>
               </div>
 
-              <div className="p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
-                <label className="block text-xs font-bold text-[#102654] mb-1">
+              <div className="p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
+                <label className="block text-xs font-bold text-[#122654] mb-1">
                   Capitalisation Threshold (£)
                 </label>
                 <input
                   type="text"
                   value={capitalisationThreshold}
                   onChange={(e) => setCapitalisationThreshold(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
+                  className="w-full text-xs p-2.5 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold text-[#122654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
                 />
                 <span className="text-[11px] text-[#7E8DA6] mt-1 block">
                   Expense transactions above this trigger the Capital vs Revenue detector (AIX-02).
                 </span>
               </div>
 
-              <div className="p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
-                <label className="block text-xs font-bold text-[#102654] mb-1">
+              <div className="p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
+                <label className="block text-xs font-bold text-[#122654] mb-1">
                   AI &apos;Ready&apos; Confidence Threshold (%)
                 </label>
                 <input
                   type="number"
                   value={aiReadyThreshold}
                   onChange={(e) => setAiReadyThreshold(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
+                  className="w-full text-xs p-2.5 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold text-[#122654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
                 />
                 <span className="text-[11px] text-[#7E8DA6] mt-1 block">
                   Suggestions at or above {aiReadyThreshold}% display as &apos;Ready&apos; for 1-click bulk confirmation (DAT-03).
                 </span>
               </div>
 
-              <div className="p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
-                <label className="block text-xs font-bold text-[#102654] mb-1">
+              <div className="p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
+                <label className="block text-xs font-bold text-[#122654] mb-1">
                   Deadline Alert Days
                 </label>
                 <input
                   type="number"
                   value={deadlineAlertDays}
                   onChange={(e) => setDeadlineAlertDays(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
+                  className="w-full text-xs p-2.5 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold text-[#122654] focus:ring-1 focus:ring-[#1D4E89] outline-none"
                 />
                 <span className="text-[11px] text-[#7E8DA6] mt-1 block">
                   Highlight statutory filing deadlines within {deadlineAlertDays} days in amber/red on dashboard (ENG-05).
@@ -589,17 +589,17 @@ export default function PracticeSettingsPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-xs p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Team Roles &amp; Permissions (ADM-01)</h2>
-              <p className="text-xs text-[#5B6478] mt-0.5">
+              <h2 className="text-base font-bold text-[#122654]">Team Roles &amp; Permissions (ADM-01)</h2>
+              <p className="text-xs text-[#4A5878] mt-0.5">
                 Practice users with role-based permissions: Preparer, Reviewer/Manager, Partner, and Admin.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowInviteModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
             >
-              <Plus className="w-3.5 h-3.5 text-[#FF7D6B]" />
+              <Plus className="w-3.5 h-3.5 text-[#FF7A66]" />
               <span>Invite Team Member</span>
             </button>
           </div>
@@ -615,12 +615,12 @@ export default function PracticeSettingsPage() {
           <div className="border-b border-[#E3E7EF] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="text-base font-bold text-[#102654]">Shared Rules Library (DAT-09)</h2>
+                <h2 className="text-base font-bold text-[#122654]">Shared Rules Library (DAT-09)</h2>
                 <span className="text-[10px] font-mono font-bold bg-[#EAF5FC] text-[#1D4E89] px-2 py-0.5 rounded-full border border-[#1D4E89]/20">
                   Rules run before AI
                 </span>
               </div>
-              <p className="text-xs text-[#5B6478] mt-0.5">
+              <p className="text-xs text-[#4A5878] mt-0.5">
                 Every correction is learned and becomes a rule at supplier, client or practice scope. Target accuracy: &gt;90%.
               </p>
             </div>
@@ -628,23 +628,23 @@ export default function PracticeSettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowRuleModal(true)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5 text-[#FF7D6B]" />
+                <Plus className="w-3.5 h-3.5 text-[#FF7A66]" />
                 <span>Add Rule</span>
               </button>
             </div>
           </div>
 
           {/* AI Performance & Confidence Gate Card (DAT-08, DAT-05, RPT-03) */}
-          <div className="bg-[#F6F7FB] border border-[#E3E7EF] rounded-2xl p-5 space-y-4">
+          <div className="bg-[#F5F8FD] border border-[#E3E7EF] rounded-2xl p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
+                <span className="text-xs font-bold text-[#122654] flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-[#FF7A66]" />
                   AI Accuracy Performance &amp; Auto-Accept Controls (DAT-08)
                 </span>
-                <p className="text-[11px] text-[#5B6478] mt-0.5">
+                <p className="text-[11px] text-[#4A5878] mt-0.5">
                   Auto-accept is OFF at launch. Requires 3 consecutive months ≥90% accepted without change.
                 </p>
               </div>
@@ -697,7 +697,7 @@ export default function PracticeSettingsPage() {
                     >
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono font-bold text-[#102654] bg-[#F6F7FB] px-2 py-0.5 rounded">
+                          <span className="font-mono font-bold text-[#122654] bg-[#F5F8FD] px-2 py-0.5 rounded">
                             {rule.pattern}
                           </span>
                           <span>&rarr;</span>
@@ -732,7 +732,7 @@ export default function PracticeSettingsPage() {
           {/* Filter Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#5B6478] font-semibold text-[11px]">Scope:</span>
+              <span className="text-[#4A5878] font-semibold text-[11px]">Scope:</span>
               {(['all', 'practice', 'client', 'supplier'] as const).map((sc) => (
                 <button
                   key={sc}
@@ -740,8 +740,8 @@ export default function PracticeSettingsPage() {
                   onClick={() => setRuleScopeFilter(sc)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition-all ${
                     ruleScopeFilter === sc
-                      ? 'bg-[#102654] text-white'
-                      : 'bg-[#F6F7FB] text-[#5B6478] hover:text-[#102654]'
+                      ? 'bg-[#122654] text-white'
+                      : 'bg-[#F5F8FD] text-[#4A5878] hover:text-[#122654]'
                   }`}
                 >
                   {sc}
@@ -750,7 +750,7 @@ export default function PracticeSettingsPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#5B6478] font-semibold text-[11px]">Type:</span>
+              <span className="text-[#4A5878] font-semibold text-[11px]">Type:</span>
               {(['all', 'mapping', 'extraction', 'proposal', 'finding'] as const).map((tp) => (
                 <button
                   key={tp}
@@ -759,7 +759,7 @@ export default function PracticeSettingsPage() {
                   className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition-all ${
                     ruleTypeFilter === tp
                       ? 'bg-[#1D4E89] text-white'
-                      : 'bg-[#F6F7FB] text-[#5B6478] hover:text-[#102654]'
+                      : 'bg-[#F5F8FD] text-[#4A5878] hover:text-[#122654]'
                   }`}
                 >
                   {tp}
@@ -777,28 +777,28 @@ export default function PracticeSettingsPage() {
                 <div
                   key={r.id}
                   className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
-                    r.active ? 'border-[#E3E7EF] bg-[#F6F7FB]/70' : 'border-gray-200 bg-gray-50 opacity-60'
+                    r.active ? 'border-[#E3E7EF] bg-[#F5F8FD]/70' : 'border-gray-200 bg-gray-50 opacity-60'
                   }`}
                 >
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono font-bold text-[#102654] bg-white px-2.5 py-1 rounded-lg border border-gray-200 shadow-2xs">
+                      <span className="font-mono font-bold text-[#122654] bg-white px-2.5 py-1 rounded-lg border border-gray-200 shadow-2xs">
                         {r.pattern}
                       </span>
                       <span className="text-[#7E8DA6]">&rarr;</span>
                       <span className="font-bold text-[#1D4E89]">{r.target_value}</span>
                     </div>
-                    <div className="text-[11px] text-[#5B6478] mt-1.5 flex items-center gap-3 flex-wrap">
+                    <div className="text-[11px] text-[#4A5878] mt-1.5 flex items-center gap-3 flex-wrap">
                       <span className="capitalize">
-                        Scope: <strong className="text-[#102654]">{r.scope}</strong>
+                        Scope: <strong className="text-[#122654]">{r.scope}</strong>
                       </span>
                       <span>•</span>
                       <span className="capitalize">
-                        Type: <strong className="text-[#102654]">{r.type}</strong>
+                        Type: <strong className="text-[#122654]">{r.type}</strong>
                       </span>
                       <span>•</span>
                       <span>
-                        Used: <strong className="text-[#102654]">{r.times_used || 1} times</strong>
+                        Used: <strong className="text-[#122654]">{r.times_used || 1} times</strong>
                       </span>
                       <span>•</span>
                       <span>Created by: {r.created_by_name || 'Staff'}</span>
@@ -837,25 +837,25 @@ export default function PracticeSettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7 bg-white border border-[#E3E7EF] rounded-[20px] shadow-xs p-6 sm:p-8 space-y-6">
             <div className="border-b border-[#E3E7EF] pb-4">
-              <h2 className="text-base font-bold text-[#102654]">Practice Logo &amp; Branding (QTR-02)</h2>
-              <p className="text-xs text-[#5B6478] mt-0.5">
+              <h2 className="text-base font-bold text-[#122654]">Practice Logo &amp; Branding (QTR-02)</h2>
+              <p className="text-xs text-[#4A5878] mt-0.5">
                 Applied across all quarterly insight packs, management accounts, and statutory accounts PDFs.
               </p>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-[#102654] mb-2">Practice Logo</label>
-                <div className="border-2 border-dashed border-[#D5DBE7] hover:border-[#102654] rounded-2xl p-6 text-center bg-[#F6F7FB] transition-colors cursor-pointer">
+                <label className="block text-xs font-bold text-[#122654] mb-2">Practice Logo</label>
+                <div className="border-2 border-dashed border-[#D3DCEE] hover:border-[#122654] rounded-2xl p-6 text-center bg-[#F5F8FD] transition-colors cursor-pointer">
                   <Upload className="w-8 h-8 text-[#7E8DA6] mx-auto mb-2" />
-                  <span className="text-xs font-bold text-[#102654] block">Click to upload brand logo</span>
+                  <span className="text-xs font-bold text-[#122654] block">Click to upload brand logo</span>
                   <span className="text-[11px] text-[#7E8DA6]">PNG, JPG, or SVG (up to 5MB)</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#102654] mb-1.5">Brand Navy Primary</label>
+                  <label className="block text-xs font-bold text-[#122654] mb-1.5">Brand Navy Primary</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
@@ -867,13 +867,13 @@ export default function PracticeSettingsPage() {
                       type="text"
                       value={brandPrimary}
                       onChange={(e) => setBrandPrimary(e.target.value)}
-                      className="flex-1 text-xs p-2 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654]"
+                      className="flex-1 text-xs p-2 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg font-mono font-bold text-[#122654]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#102654] mb-1.5">Brand Coral Accent</label>
+                  <label className="block text-xs font-bold text-[#122654] mb-1.5">Brand Coral Accent</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
@@ -885,18 +885,18 @@ export default function PracticeSettingsPage() {
                       type="text"
                       value={brandAccent}
                       onChange={(e) => setBrandAccent(e.target.value)}
-                      className="flex-1 text-xs p-2 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg font-mono font-bold text-[#102654]"
+                      className="flex-1 text-xs p-2 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg font-mono font-bold text-[#122654]"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#102654] mb-1.5">Typography Family</label>
+                <label className="block text-xs font-bold text-[#122654] mb-1.5">Typography Family</label>
                 <select
                   value={brandFont}
                   onChange={(e) => setBrandFont(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
+                  className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
                 >
                   <option value="Inter">Inter (Clean modern sans-serif)</option>
                   <option value="Roboto">Roboto (Technical precision)</option>
@@ -905,12 +905,12 @@ export default function PracticeSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#102654] mb-1.5">Report Footer Disclaimer</label>
+                <label className="block text-xs font-bold text-[#122654] mb-1.5">Report Footer Disclaimer</label>
                 <textarea
                   rows={3}
                   value={footerDisclaimer}
                   onChange={(e) => setFooterDisclaimer(e.target.value)}
-                  className="w-full text-xs p-3 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] leading-relaxed outline-none focus:ring-1 focus:ring-[#1D4E89]"
+                  className="w-full text-xs p-3 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] leading-relaxed outline-none focus:ring-1 focus:ring-[#1D4E89]"
                 />
               </div>
             </div>
@@ -919,8 +919,8 @@ export default function PracticeSettingsPage() {
           {/* Live Report Preview (QTR-02) */}
           <div className="lg:col-span-5 bg-white border border-[#E3E7EF] rounded-[20px] shadow-xs p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
-              <span className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-[#FF7D6B]" />
+              <span className="text-xs font-bold text-[#122654] flex items-center gap-1.5">
+                <FileText className="w-4 h-4 text-[#FF7A66]" />
                 Live PDF Report Preview
               </span>
               <span className="text-[10px] text-[#0B6B52] bg-emerald-50 font-bold px-2 py-0.5 rounded-full">
@@ -940,7 +940,7 @@ export default function PracticeSettingsPage() {
                     </div>
                     <div>
                       <div className="text-xs font-bold" style={{ color: brandPrimary }}>Blynt Practice &amp; Co LLP</div>
-                      <div className="text-[10px] text-gray-500">Chartered Accountants &amp; Statutory Auditors</div>
+                      <div className="text-[10px] text-gray-500">Chartered Accountants</div>
                     </div>
                   </div>
                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: brandAccent }} />
@@ -978,47 +978,47 @@ export default function PracticeSettingsPage() {
       {activeTab === 'security' && (
         <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-xs p-6 sm:p-8 space-y-6 max-w-3xl">
           <div className="border-b border-[#E3E7EF] pb-4">
-            <h2 className="text-base font-bold text-[#102654]">Security &amp; Data Protection (ADM-03)</h2>
-            <p className="text-xs text-[#5B6478] mt-0.5">
+            <h2 className="text-base font-bold text-[#122654]">Security &amp; Data Protection (ADM-03)</h2>
+            <p className="text-xs text-[#4A5878] mt-0.5">
               Compliance with UK GDPR, AES-256 encryption at rest and in transit, and firm tenant isolation.
             </p>
           </div>
 
-          <div className="space-y-4 text-xs text-[#102654]">
-            <div className="flex items-center justify-between p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
+          <div className="space-y-4 text-xs text-[#122654]">
+            <div className="flex items-center justify-between p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
               <div>
-                <div className="font-bold text-[#102654]">Hosting Region</div>
-                <div className="text-[11px] text-[#5B6478] mt-0.5">Auditor and client data stored exclusively in UK/EU sovereign cloud</div>
+                <div className="font-bold text-[#122654]">Hosting Region</div>
+                <div className="text-[11px] text-[#4A5878] mt-0.5">Practice and client data stored exclusively in UK/EU sovereign cloud</div>
               </div>
               <span className="font-mono font-bold text-[#0B6B52] bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
                 {hostingRegion}
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
+            <div className="flex items-center justify-between p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
               <div>
-                <div className="font-bold text-[#102654]">Multi-Factor Authentication (MFA)</div>
-                <div className="text-[11px] text-[#5B6478] mt-0.5">Enforced on all staff sign-ins across the practice</div>
+                <div className="font-bold text-[#122654]">Multi-Factor Authentication (MFA)</div>
+                <div className="text-[11px] text-[#4A5878] mt-0.5">Enforced on all staff sign-ins across the practice</div>
               </div>
               <span className="font-mono font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">
                 Enforced ✓
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
+            <div className="flex items-center justify-between p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
               <div>
-                <div className="font-bold text-[#102654]">Statutory Audit Retention Period</div>
-                <div className="text-[11px] text-[#5B6478] mt-0.5">Archive retention before automatic purging (ICAEW / Companies Act compliance)</div>
+                <div className="font-bold text-[#122654]">Record retention period</div>
+                <div className="text-[11px] text-[#4A5878] mt-0.5">Archive retention before automatic purging (ICAEW / Companies Act compliance)</div>
               </div>
-              <span className="font-mono font-bold text-[#102654] bg-white border border-gray-200 px-3 py-1 rounded-lg">
+              <span className="font-mono font-bold text-[#122654] bg-white border border-gray-200 px-3 py-1 rounded-lg">
                 {retentionYears} Years
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-[#F6F7FB] rounded-xl border border-[#E3E7EF]">
+            <div className="flex items-center justify-between p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
               <div>
-                <div className="font-bold text-[#102654]">AI Model Training Opt-In</div>
-                <div className="text-[11px] text-[#5B6478] mt-0.5">
+                <div className="font-bold text-[#122654]">AI Model Training Opt-In</div>
+                <div className="text-[11px] text-[#4A5878] mt-0.5">
                   Client financial numbers and vouchers are NEVER used to train shared foundation models
                 </div>
               </div>
@@ -1035,20 +1035,20 @@ export default function PracticeSettingsPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white border border-[#E3E7EF] rounded-[24px] shadow-2xl max-w-lg w-full p-6 sm:p-8 animate-in zoom-in-95">
-            <div className="flex items-center gap-3 text-[#102654] mb-3">
+            <div className="flex items-center gap-3 text-[#122654] mb-3">
               <div className="w-10 h-10 rounded-2xl bg-[#EAF5FC] text-[#1D4E89] flex items-center justify-center shrink-0">
                 <Sliders className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#102654]">Apply Practice Defaults (ADM-02)</h3>
-                <p className="text-xs text-[#5B6478]">Confirm how changes should propagate to client files</p>
+                <h3 className="text-base font-bold text-[#122654]">Apply Practice Defaults (ADM-02)</h3>
+                <p className="text-xs text-[#4A5878]">Confirm how changes should propagate to client files</p>
               </div>
             </div>
 
-            <p className="text-xs text-[#5B6478] leading-relaxed mb-6">
+            <p className="text-xs text-[#4A5878] leading-relaxed mb-6">
               You are updating practice-wide defaults and thresholds. Would you like to apply these new parameters to 
               <strong> new engagements only</strong>, or <strong>also update existing active engagements</strong> across the practice?
             </p>
@@ -1057,21 +1057,21 @@ export default function PracticeSettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowSaveConfirmModal(false)}
-                className="w-full sm:w-auto px-4 py-2.5 text-xs text-[#5B6478] hover:text-[#102654] font-medium cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 text-xs text-[#4A5878] hover:text-[#122654] font-medium cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleConfirmSave('new_only')}
-                className="w-full sm:w-auto px-4 py-2.5 bg-white border border-[#102654] text-[#102654] hover:bg-[#F6F7FB] text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 bg-white border border-[#122654] text-[#122654] hover:bg-[#F5F8FD] text-xs font-bold rounded-xl transition-colors cursor-pointer"
               >
                 Apply to new engagements only
               </button>
               <button
                 type="button"
                 onClick={() => handleConfirmSave('all')}
-                className="w-full sm:w-auto px-4 py-2.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
               >
                 Also update existing engagements
               </button>
@@ -1085,19 +1085,19 @@ export default function PracticeSettingsPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white border border-[#E3E7EF] rounded-[24px] shadow-2xl max-w-md w-full p-6 sm:p-8 animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF] mb-4">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-[#1D4E89]" />
-                <h3 className="text-base font-bold text-[#102654]">Invite Team Member (ADM-01)</h3>
+                <h3 className="text-base font-bold text-[#122654]">Invite Team Member (ADM-01)</h3>
               </div>
               <button
                 type="button"
                 onClick={closeInviteModal}
                 aria-label="Close"
-                className="text-[#5B6478] hover:text-[#102654]"
+                className="text-[#4A5878] hover:text-[#122654]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1105,7 +1105,7 @@ export default function PracticeSettingsPage() {
 
             <form onSubmit={handleSendInvite} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -1113,12 +1113,12 @@ export default function PracticeSettingsPage() {
                   placeholder="e.g. Alex Montgomery"
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
-                  className="w-full text-xs p-2.5 border border-[#D5DBE7] rounded-lg focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#102654]"
+                  className="w-full text-xs p-2.5 border border-[#D3DCEE] rounded-lg focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#122654]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -1126,18 +1126,18 @@ export default function PracticeSettingsPage() {
                   placeholder="e.g. alex.montgomery@blynt.co.uk"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full text-xs p-2.5 border border-[#D5DBE7] rounded-lg focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#102654]"
+                  className="w-full text-xs p-2.5 border border-[#D3DCEE] rounded-lg focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#122654]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Role &amp; Signing Authority
                 </label>
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as any)}
-                  className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
+                  className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
                 >
                   <option value="readonly">Read only (View assigned files, no changes)</option>
                   <option value="preparer">Preparer (Reconcile &amp; prepare schedules)</option>
@@ -1148,7 +1148,7 @@ export default function PracticeSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Client Access
                 </label>
                 <div className="flex items-center gap-4 text-xs pt-1">
@@ -1172,12 +1172,12 @@ export default function PracticeSettingsPage() {
                   </label>
                 </div>
                 {inviteScope === 'assigned' && (inviteRole === 'partner' || inviteRole === 'admin') && (
-                  <p className="text-[11px] text-[#5B6478] mt-2">Partners and admins always see every client.</p>
+                  <p className="text-[11px] text-[#4A5878] mt-2">Partners and admins always see every client.</p>
                 )}
                 {inviteScope === 'assigned' && inviteRole !== 'partner' && inviteRole !== 'admin' && (
-                  <div className="mt-2 max-h-36 overflow-y-auto border border-[#D5DBE7] rounded-lg p-2 space-y-1.5">
+                  <div className="mt-2 max-h-36 overflow-y-auto border border-[#D3DCEE] rounded-lg p-2 space-y-1.5">
                     {db.clients.map((c) => (
-                      <label key={c.id} className="flex items-center gap-2 text-xs cursor-pointer text-[#102654]">
+                      <label key={c.id} className="flex items-center gap-2 text-xs cursor-pointer text-[#122654]">
                         <input
                           type="checkbox"
                           checked={inviteClientIds.includes(c.id)}
@@ -1188,7 +1188,7 @@ export default function PracticeSettingsPage() {
                         <span>{c.name}</span>
                       </label>
                     ))}
-                    {db.clients.length === 0 && <p className="text-[11px] text-[#5B6478]">No clients yet.</p>}
+                    {db.clients.length === 0 && <p className="text-[11px] text-[#4A5878]">No clients yet.</p>}
                   </div>
                 )}
               </div>
@@ -1196,9 +1196,9 @@ export default function PracticeSettingsPage() {
               {inviteError && <p className="text-red-600 text-[11px] font-semibold">{inviteError}</p>}
 
               {inviteLink && (
-                <div className="p-3 rounded-lg bg-[#EAF6F0] border border-[#0B6B4D]/20 text-xs text-[#102654] space-y-2">
+                <div className="p-3 rounded-lg bg-[#EAF6F0] border border-[#0B6B4D]/20 text-xs text-[#122654] space-y-2">
                   <p className="font-semibold">Invitation created. Send this link to {inviteEmail.trim()} (valid for 7 days):</p>
-                  <input readOnly value={inviteLink} onFocus={(e) => e.target.select()} className="w-full font-mono text-[11px] p-2 border border-[#D5DBE7] rounded bg-white" />
+                  <input readOnly value={inviteLink} onFocus={(e) => e.target.select()} className="w-full font-mono text-[11px] p-2 border border-[#D3DCEE] rounded bg-white" />
                   <button type="button" onClick={() => navigator.clipboard?.writeText(inviteLink)} className="text-[#1D4E89] font-semibold hover:underline">
                     Copy link
                   </button>
@@ -1209,7 +1209,7 @@ export default function PracticeSettingsPage() {
                 <button
                   type="button"
                   onClick={closeInviteModal}
-                  className="px-3.5 py-2 text-xs text-[#5B6478] hover:text-[#102654] font-medium"
+                  className="px-3.5 py-2 text-xs text-[#4A5878] hover:text-[#122654] font-medium"
                 >
                   {inviteLink ? 'Done' : 'Cancel'}
                 </button>
@@ -1217,7 +1217,7 @@ export default function PracticeSettingsPage() {
                   <button
                     type="submit"
                     disabled={inviteSending}
-                    className="px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                    className="px-4 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {inviteSending ? 'Creating...' : 'Create Invitation'}
                   </button>
@@ -1233,18 +1233,18 @@ export default function PracticeSettingsPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white border border-[#E3E7EF] rounded-[24px] shadow-2xl max-w-md w-full p-6 sm:p-8 animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF] mb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#FF7D6B]" />
-                <h3 className="text-base font-bold text-[#102654]">Add Learned Mapping Rule</h3>
+                <Sparkles className="w-5 h-5 text-[#FF7A66]" />
+                <h3 className="text-base font-bold text-[#122654]">Add Learned Mapping Rule</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowRuleModal(false)}
-                className="text-[#5B6478] hover:text-[#102654]"
+                className="text-[#4A5878] hover:text-[#122654]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1252,13 +1252,13 @@ export default function PracticeSettingsPage() {
 
             <form onSubmit={handleAddRule} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Rule Type (DAT-09)
                 </label>
                 <select
                   value={newRuleType}
                   onChange={(e) => setNewRuleType(e.target.value as any)}
-                  className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
+                  className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
                 >
                   <option value="mapping">Account Mapping Rule</option>
                   <option value="extraction">Document Extraction Rule</option>
@@ -1268,7 +1268,7 @@ export default function PracticeSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Matching Pattern (Wildcard matching)
                 </label>
                 <input
@@ -1276,18 +1276,18 @@ export default function PracticeSettingsPage() {
                   placeholder="e.g. *Software*Subscription* or *Dell*PowerEdge*"
                   value={newRulePattern}
                   onChange={(e) => setNewRulePattern(e.target.value)}
-                  className="w-full text-xs p-2.5 border border-[#D5DBE7] rounded-lg font-mono focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#102654]"
+                  className="w-full text-xs p-2.5 border border-[#D3DCEE] rounded-lg font-mono focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#122654]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Target Value / Classification
                 </label>
                 <select
                   value={newRuleTarget}
                   onChange={(e) => setNewRuleTarget(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
+                  className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
                 >
                   <option value="1500 Plant & Equipment Cost">1500 Plant &amp; Equipment Cost (REC-03)</option>
                   <option value="1510 Computer Equipment Cost">1510 Computer Equipment Cost (REC-03)</option>
@@ -1302,13 +1302,13 @@ export default function PracticeSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#102654] mb-1">
+                <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Rule Scope (DAT-09)
                 </label>
                 <select
                   value={newRuleScope}
                   onChange={(e) => setNewRuleScope(e.target.value as any)}
-                  className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] font-medium"
+                  className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
                 >
                   <option value="practice">Whole Practice (Requires Manager Approval)</option>
                   <option value="client">Client Only (Harlow &amp; Finch Fine Goods Ltd)</option>
@@ -1320,13 +1320,13 @@ export default function PracticeSettingsPage() {
                 <button
                   type="button"
                   onClick={() => setShowRuleModal(false)}
-                  className="px-3.5 py-2 text-xs text-[#5B6478] hover:text-[#102654] font-medium"
+                  className="px-3.5 py-2 text-xs text-[#4A5878] hover:text-[#122654] font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
                 >
                   Create Rule
                 </button>

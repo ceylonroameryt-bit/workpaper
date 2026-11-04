@@ -150,7 +150,7 @@ export async function getWorkpaperById(
     ).map((proc: string, idx: number) => ({
       id: `proc_${idx + 1}`,
       title: proc,
-      description: `Statutory audit procedure conducted under ${template.standardRef || 'ISA (UK)'}.`,
+      description: `Working paper procedure under ${template.standardRef || 'the applicable UK standard'}.`,
       status: idx === 0 || idx === 1 ? 'Done' : 'Pending',
       completedBy: idx === 0 || idx === 1 ? CURRENT_USER.name : undefined,
       completedAt: idx === 0 || idx === 1 ? 'Today at 09:30' : undefined,
@@ -202,7 +202,7 @@ export async function getWorkpaperById(
       ties: true,
       procedures,
       scheduleRows,
-      conclusionText: `Substantive audit testing of ${template.name} performed in accordance with ${template.standardRef || 'applicable UK standards'}. All balances tie to general ledger nominals with zero unadjusted differences. No material misstatements noted.`,
+      conclusionText: `Testing of ${template.name} performed in accordance with ${template.standardRef || 'applicable UK standards'}. All balances tie to general ledger nominals with zero unadjusted differences. No material misstatements noted.`,
       aiSuggestedConclusion: `Based on automated recalculation, supporting document vouching, and nominal tie-out to ${template.tbBindings?.join(', ') || 'trial balance'}, ${template.name} reflects true and fair value under ${template.framework || 'UK GAAP'}.`,
       evidence: {
         documentName: `${(template.leadRef || 'WP').replace(/[^a-zA-Z0-9]/g, '_')}_Statutory_Audit_Evidence_FY26.pdf`,
@@ -216,7 +216,7 @@ export async function getWorkpaperById(
         pageNumber: 1,
         locationDescription: `Primary Schedule Tie-Out (${template.leadRef || 'General'})`,
         promptVersion: 'v3.5-uk-standard',
-        acceptedBy: 'Test Reviewer (Test - Audit Manager)',
+        acceptedBy: 'Reviewer',
         acceptedAt: 'Today at 09:42',
         confidence: 0.99,
       },
@@ -242,7 +242,7 @@ export async function getWorkpaperById(
     id: workpaperId,
     ref: 'WP-GEN',
     title: `Workpaper ${workpaperId}`,
-    area: 'General Audit Workpaper',
+    area: 'General workpaper',
     standardRef: 'UK Standard',
   };
 }

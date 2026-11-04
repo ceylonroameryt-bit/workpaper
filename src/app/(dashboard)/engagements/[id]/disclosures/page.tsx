@@ -160,12 +160,12 @@ export default function DisclosuresPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">Disclosures, Notes &amp; Statutory Accounts (STD)</h1>
-            <span className="text-xs bg-[#102654] text-white px-2.5 py-1 rounded-full font-mono font-semibold">
+            <h1 className="text-xl font-bold text-[#122654]">Disclosures, Notes &amp; Statutory Accounts (STD)</h1>
+            <span className="text-xs bg-[#122654] text-white px-2.5 py-1 rounded-full font-mono font-semibold">
               {standardName}
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Standard-tailored disclosure checklist (STD-03), AI-drafted notes (STD-04), and statutory accounts preview (STD-05).
           </p>
         </div>
@@ -174,9 +174,9 @@ export default function DisclosuresPage() {
           <button
             type="button"
             onClick={() => setConsistencyChecked(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#FFF1EE] hover:bg-[#ffe3dd] border border-[#FF7D6B] text-[#A23A27] font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#FFF1EE] hover:bg-[#ffe3dd] border border-[#FF7A66] text-[#A23A27] font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
           >
-            <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
+            <Sparkles className="w-4 h-4 text-[#FF7A66]" />
             <span>{consistencyChecked ? '✓ Consistency Passed (AIX-09)' : 'Run Consistency Check (AIX-09)'}</span>
           </button>
         </div>
@@ -189,8 +189,8 @@ export default function DisclosuresPage() {
           onClick={() => setActiveTab('checklist')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'checklist'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <ShieldCheck className="w-4 h-4 text-[#1D4E89]" />
@@ -205,8 +205,8 @@ export default function DisclosuresPage() {
           onClick={() => setActiveTab('notes')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'notes'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <FileText className="w-4 h-4 text-[#1D4E89]" />
@@ -221,8 +221,8 @@ export default function DisclosuresPage() {
           onClick={() => setActiveTab('accounts')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'accounts'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Eye className="w-4 h-4 text-[#1D4E89]" />
@@ -234,8 +234,8 @@ export default function DisclosuresPage() {
           onClick={() => setActiveTab('post_balance')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'post_balance'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Sparkles className="w-4 h-4 text-amber-600" />
@@ -246,8 +246,8 @@ export default function DisclosuresPage() {
       {/* TAB 1: Disclosure Checklist (STD-03) */}
       {activeTab === 'checklist' && (
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
-          <div className="p-4 bg-[#F6F7FB] border-b border-[#E3E7EF] flex items-center justify-between">
-            <span className="text-xs font-bold text-[#102654]">
+          <div className="p-4 bg-[#F5F8FD] border-b border-[#E3E7EF] flex items-center justify-between">
+            <span className="text-xs font-bold text-[#122654]">
               Mandatory Disclosures under {standardName}
             </span>
             <span className="text-[11px] text-[#0B6B52] font-semibold bg-[#E6F4EF] px-2.5 py-0.5 rounded-full">
@@ -263,7 +263,7 @@ export default function DisclosuresPage() {
                     <span className="text-[10px] font-mono font-bold text-[#1D4E89] bg-[#EAF5FC] px-1.5 py-0.5 rounded">
                       {item.reference}
                     </span>
-                    <span className="text-xs font-bold text-[#102654]">{item.question}</span>
+                    <span className="text-xs font-bold text-[#122654]">{item.question}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -279,8 +279,8 @@ export default function DisclosuresPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-[#5B6478] bg-[#F6F7FB] p-2 rounded-lg">
-                  <Sparkles className="w-3.5 h-3.5 text-[#FF7D6B] shrink-0" />
+                <div className="flex items-center gap-2 text-xs text-[#4A5878] bg-[#F5F8FD] p-2 rounded-lg">
+                  <Sparkles className="w-3.5 h-3.5 text-[#FF7A66] shrink-0" />
                   <span>
                     <strong>AI Evidence:</strong> {item.evidence}
                   </span>
@@ -301,7 +301,7 @@ export default function DisclosuresPage() {
             >
               <div className="flex items-center justify-between border-b border-[#E3E7EF] pb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-[#102654]">{note.title}</span>
+                  <span className="text-sm font-bold text-[#122654]">{note.title}</span>
                   <span className="text-[10px] font-mono text-[#7E8DA6] bg-gray-100 px-1.5 py-0.5 rounded">
                     {note.reference}
                   </span>
@@ -310,7 +310,7 @@ export default function DisclosuresPage() {
                   Live linked to schedules
                 </span>
               </div>
-              <p className="text-xs text-[#102654] leading-relaxed">{note.narrative}</p>
+              <p className="text-xs text-[#122654] leading-relaxed">{note.narrative}</p>
             </div>
           ))}
         </div>
@@ -321,14 +321,14 @@ export default function DisclosuresPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-[#102654]">Output Format:</span>
+              <span className="text-xs font-bold text-[#122654]">Output Format:</span>
               <button
                 type="button"
                 onClick={() => setAccountsMode('full')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                   accountsMode === 'full'
-                    ? 'bg-[#102654] text-white shadow-2xs'
-                    : 'bg-gray-100 text-[#5B6478]'
+                    ? 'bg-[#122654] text-white shadow-2xs'
+                    : 'bg-gray-100 text-[#4A5878]'
                 }`}
               >
                 Full Accounts (Shareholders)
@@ -338,8 +338,8 @@ export default function DisclosuresPage() {
                 onClick={() => setAccountsMode('companies_house')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                   accountsMode === 'companies_house'
-                    ? 'bg-[#102654] text-white shadow-2xs'
-                    : 'bg-gray-100 text-[#5B6478]'
+                    ? 'bg-[#122654] text-white shadow-2xs'
+                    : 'bg-gray-100 text-[#4A5878]'
                 }`}
               >
                 Companies House Filing Version
@@ -348,7 +348,7 @@ export default function DisclosuresPage() {
 
             <button
               type="button"
-              className="flex items-center gap-2 px-3.5 py-1.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+              className="flex items-center gap-2 px-3.5 py-1.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download Branded PDF (STD-05)</span>
@@ -365,15 +365,15 @@ export default function DisclosuresPage() {
           </div>
 
           {/* Formatted Accounts Document View */}
-          <div className="border border-gray-200 rounded-xl p-8 bg-gray-50/50 max-w-3xl mx-auto shadow-inner space-y-6 text-[#102654]">
+          <div className="border border-gray-200 rounded-xl p-8 bg-gray-50/50 max-w-3xl mx-auto shadow-inner space-y-6 text-[#122654]">
             <div className="text-center space-y-1">
               <h2 className="text-lg font-bold tracking-tight">
                 {activeCompany?.name || 'Harlow & Finch Fine Goods Ltd'}
               </h2>
-              <p className="text-xs text-[#5B6478]">
+              <p className="text-xs text-[#4A5878]">
                 Company Registration No. {activeCompany?.company_no || '09876543'} (England &amp; Wales)
               </p>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#102654] pt-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#122654] pt-2">
                 Balance Sheet as at 30 September 2026
               </p>
             </div>
@@ -436,7 +436,7 @@ export default function DisclosuresPage() {
               </tbody>
             </table>
 
-            <div className="pt-4 border-t border-gray-300 text-[11px] text-[#5B6478] leading-relaxed">
+            <div className="pt-4 border-t border-gray-300 text-[11px] text-[#4A5878] leading-relaxed">
               For the financial year ended 30 September 2026 the company was entitled to exemption from audit under section 477 of the Companies Act 2006 relating to small companies. The members have not required the company to obtain an audit of its financial statements.
             </div>
           </div>
@@ -447,8 +447,8 @@ export default function DisclosuresPage() {
       {activeTab === 'post_balance' && (
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-[#102654]">Post Balance Sheet Events Scan (AIX-07)</h3>
-            <p className="text-xs text-[#5B6478]">
+            <h3 className="text-sm font-bold text-[#122654]">Post Balance Sheet Events Scan (AIX-07)</h3>
+            <p className="text-xs text-[#4A5878]">
               Automated scan of bank receipts, payments, and board resolutions occurring between period end and approval date.
             </p>
           </div>
@@ -457,17 +457,17 @@ export default function DisclosuresPage() {
             {postBalanceEvents.map((evt, idx) => (
               <div
                 key={idx}
-                className="p-4 rounded-xl border border-[#E3E7EF] bg-[#F6F7FB]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-4 rounded-xl border border-[#E3E7EF] bg-[#F5F8FD]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs font-bold text-[#1D4E89]">{evt.date}</span>
-                    <span className="text-xs font-bold text-[#102654]">{evt.description}</span>
+                    <span className="text-xs font-bold text-[#122654]">{evt.description}</span>
                     <span className="font-mono text-xs font-bold bg-white px-2 py-0.5 rounded border border-gray-200">
                       {evt.amount}
                     </span>
                   </div>
-                  <p className="text-xs text-[#5B6478] mt-1">
+                  <p className="text-xs text-[#4A5878] mt-1">
                     <strong>Suggested Classification:</strong> {evt.suggestedClass}
                   </p>
                 </div>
@@ -481,7 +481,7 @@ export default function DisclosuresPage() {
                   </button>
                   <button
                     type="button"
-                    className="px-3 py-1.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-2xs"
+                    className="px-3 py-1.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-2xs"
                   >
                     Disclose in Note
                   </button>

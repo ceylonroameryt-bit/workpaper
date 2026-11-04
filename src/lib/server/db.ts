@@ -89,7 +89,8 @@ class Database {
   credentials: { user_id: string; password_hash: string; mfa_secret?: string; mfa_pending_secret?: string; mfa_last_step?: number }[] = [];
 
   constructor() {
-    this.seed(true);
+    // Demo practice and clients for development and tests only; a live workspace starts empty
+    this.seed(process.env.NODE_ENV !== 'production');
   }
 
   // Collections that hold workspace data (persisted to Postgres)
@@ -325,6 +326,10 @@ class Database {
 
     // Clean slate: if demo data is not requested, keep workspace clean and empty
     if (!withDemo) {
+      // No demo practice either: the chart of accounts and templates only
+      this.firms = [];
+      this.users = [];
+      this.memberships = [];
       return;
     }
 

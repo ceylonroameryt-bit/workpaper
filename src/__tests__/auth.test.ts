@@ -192,3 +192,21 @@ describe('seeded demo passwords on a live server', () => {
     }
   });
 });
+
+describe('a live workspace starts empty', () => {
+  it('production has the chart of accounts but no demo practice, users or clients', async () => {
+    const { db } = await import('../lib/server/db');
+    const env = process.env as Record<string, string | undefined>;
+    const node = env.NODE_ENV;
+    try {
+      env.NODE_ENV = 'production';
+      const fresh = new (db.constructor as new () => typeof db)();
+      expect(fresh.firms).toHaveLength(0);
+      expect(fresh.users).toHaveLength(0);
+      expect(fresh.clients).toHaveLength(0);
+      expect(fresh.blynt_accounts.length).toBeGreaterThan(0);
+    } finally {
+      env.NODE_ENV = node;
+    }
+  });
+});

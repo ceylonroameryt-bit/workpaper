@@ -33,7 +33,7 @@ export async function POST(
         'Working Papers (F-10, B-10, C-01, etc.)',
         'Verified Evidence Attachments',
         'Threaded Review Notes and Resolutions',
-        'Append-Only Cryptographic Audit Log',
+        'Append-only activity log',
       ],
       pdfUrl: `/exports/bundle_${params.id}.pdf`,
     };

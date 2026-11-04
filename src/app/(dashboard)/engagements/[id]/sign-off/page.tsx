@@ -225,23 +225,23 @@ export default function SignOffAndLockPage() {
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-16">
       {/* Breadcrumb matching Page 14 */}
-      <div className="flex items-center gap-2 text-xs text-[#5B6478]">
+      <div className="flex items-center gap-2 text-xs text-[#4A5878]">
         <Link href={`/clients`} className="hover:text-[#B8432F] font-medium">
           {client ? client.name : 'Client'}
         </Link>
-        <span className="text-[#5B6478]/50">›</span>
+        <span className="text-[#4A5878]/50">›</span>
         <span>Year end {yearEndStr}</span>
-        <span className="text-[#5B6478]/50">›</span>
-        <span className="text-[#102654] font-semibold">Sign-off</span>
+        <span className="text-[#4A5878]/50">›</span>
+        <span className="text-[#122654] font-semibold">Sign-off</span>
       </div>
 
       {/* Page Title & Subtitle matching Page 14 */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
             Sign-off and lock
           </h1>
-          <p className="text-xs sm:text-sm text-[#5B6478] mt-1 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#4A5878] mt-1 max-w-2xl leading-relaxed">
             Each paper is signed by the preparer, then the reviewer, then the partner. If anyone
             changes a paper after it was signed, that sign-off goes stale and must be redone.
           </p>
@@ -255,7 +255,7 @@ export default function SignOffAndLockPage() {
             <button
               type="button"
               onClick={() => setUnlockDialogOpen(true)}
-              className="px-3 py-1.5 rounded-xl border border-[#D5DBE7] hover:border-[#FF7D6B] text-xs font-bold text-[#B8432F] hover:bg-[#FFF1EE] transition-colors"
+              className="px-3 py-1.5 rounded-xl border border-[#D3DCEE] hover:border-[#FF7A66] text-xs font-bold text-[#B8432F] hover:bg-[#FFF1EE] transition-colors"
             >
               Unlock file (Partner only)
             </button>
@@ -282,8 +282,8 @@ export default function SignOffAndLockPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Papers */}
         <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col justify-between">
-          <span className="text-xs font-semibold text-[#5B6478]">Papers</span>
-          <span className="text-2xl sm:text-3xl font-extrabold text-[#102654] font-mono mt-2">
+          <span className="text-xs font-semibold text-[#4A5878]">Papers</span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-[#122654] font-mono mt-2">
             {matrix.length}
           </span>
         </div>
@@ -293,7 +293,7 @@ export default function SignOffAndLockPage() {
           <span className="text-xs font-semibold text-[#0B6B52] flex items-center gap-1">
             ✓ Prepared
           </span>
-          <span className="text-2xl sm:text-3xl font-extrabold text-[#102654] font-mono mt-2">
+          <span className="text-2xl sm:text-3xl font-extrabold text-[#122654] font-mono mt-2">
             {preparedCount}
           </span>
         </div>
@@ -303,7 +303,7 @@ export default function SignOffAndLockPage() {
           <span className="text-xs font-semibold text-[#0B6B52] flex items-center gap-1">
             ✓ Reviewed
           </span>
-          <span className="text-2xl sm:text-3xl font-extrabold text-[#102654] font-mono mt-2">
+          <span className="text-2xl sm:text-3xl font-extrabold text-[#122654] font-mono mt-2">
             {reviewedCount}
           </span>
         </div>
@@ -315,7 +315,7 @@ export default function SignOffAndLockPage() {
           </span>
           <span
             className={`text-2xl sm:text-3xl font-extrabold font-mono mt-2 ${
-              staleCount > 0 ? 'text-[#6B4700]' : 'text-[#102654]'
+              staleCount > 0 ? 'text-[#6B4700]' : 'text-[#122654]'
             }`}
           >
             {staleCount}
@@ -327,26 +327,26 @@ export default function SignOffAndLockPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Sign-off by paper */}
         <div className="lg:col-span-8 blynt-card p-6 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col gap-4 shadow-2xs">
-          <h2 className="text-sm font-bold text-[#102654]">Sign-off by paper</h2>
+          <h2 className="text-sm font-bold text-[#122654]">Sign-off by paper</h2>
 
           <div className="overflow-x-auto -mx-6 px-6">
             <table className="w-full text-left text-xs border-collapse min-w-[600px]">
               <caption className="sr-only">Sign-off matrix by paper</caption>
-              <thead className="border-b border-[#E3E7EF] text-[#5B6478] text-[11px] font-semibold">
+              <thead className="border-b border-[#E3E7EF] text-[#4A5878] text-[11px] font-semibold">
                 <tr>
-                  <th scope="col" className="pb-3 font-semibold text-[#5B6478]">
+                  <th scope="col" className="pb-3 font-semibold text-[#4A5878]">
                     Working paper
                   </th>
-                  <th scope="col" className="pb-3 text-center font-semibold text-[#5B6478]">
+                  <th scope="col" className="pb-3 text-center font-semibold text-[#4A5878]">
                     Preparer
                   </th>
-                  <th scope="col" className="pb-3 text-center font-semibold text-[#5B6478]">
+                  <th scope="col" className="pb-3 text-center font-semibold text-[#4A5878]">
                     Reviewer
                   </th>
-                  <th scope="col" className="pb-3 text-center font-semibold text-[#5B6478]">
+                  <th scope="col" className="pb-3 text-center font-semibold text-[#4A5878]">
                     Partner
                   </th>
-                  <th scope="col" className="pb-3 text-right font-semibold text-[#5B6478]">
+                  <th scope="col" className="pb-3 text-right font-semibold text-[#4A5878]">
                     Action
                   </th>
                 </tr>
@@ -354,21 +354,21 @@ export default function SignOffAndLockPage() {
               <tbody className="divide-y divide-[#E3E7EF]">
                 {matrix.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-xs text-[#5B6478]">
+                    <td colSpan={5} className="py-8 text-center text-xs text-[#4A5878]">
                       No working papers initialized yet.
                     </td>
                   </tr>
                 ) : (
                   matrix.map((row) => (
-                    <tr key={row.workpaperId} className="hover:bg-[#F6F7FB]/60 transition-colors">
+                    <tr key={row.workpaperId} className="hover:bg-[#F5F8FD]/60 transition-colors">
                       {/* Working paper title & ref */}
                       <td className="py-3.5 pr-3">
                         <div className="flex flex-col">
                           <Link
                             href={`/engagements/${engagementId}/workpapers/${row.workpaperId}`}
-                            className="font-semibold text-[#102654] hover:text-[#B8432F] flex items-center gap-1.5"
+                            className="font-semibold text-[#122654] hover:text-[#B8432F] flex items-center gap-1.5"
                           >
-                            <span className="font-mono text-xs font-bold text-[#102654]">
+                            <span className="font-mono text-xs font-bold text-[#122654]">
                               {row.ref}
                             </span>
                             <span>{row.title}</span>
@@ -388,7 +388,7 @@ export default function SignOffAndLockPage() {
                             ✓ {row.preparer.initials} · {row.preparer.signed_at.split(',')[0]}
                           </span>
                         ) : (
-                          <span className="text-xs text-[#5B6478]">○ Not signed</span>
+                          <span className="text-xs text-[#4A5878]">○ Not signed</span>
                         )}
                       </td>
 
@@ -405,7 +405,7 @@ export default function SignOffAndLockPage() {
                             </span>
                           )
                         ) : (
-                          <span className="text-xs text-[#5B6478]">○ Waiting</span>
+                          <span className="text-xs text-[#4A5878]">○ Waiting</span>
                         )}
                       </td>
 
@@ -416,7 +416,7 @@ export default function SignOffAndLockPage() {
                             ✓ {row.partner.initials}
                           </span>
                         ) : (
-                          <span className="text-xs text-[#5B6478]">○ Waiting</span>
+                          <span className="text-xs text-[#4A5878]">○ Waiting</span>
                         )}
                       </td>
 
@@ -426,14 +426,14 @@ export default function SignOffAndLockPage() {
                           <button
                             type="button"
                             onClick={() => setStaleModalPaper(row)}
-                            className="px-2.5 py-1 text-xs font-semibold text-[#102654] hover:bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg transition-colors cursor-pointer"
+                            className="px-2.5 py-1 text-xs font-semibold text-[#122654] hover:bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg transition-colors cursor-pointer"
                           >
                             See what changed
                           </button>
                         ) : (
                           <Link
                             href={`/engagements/${engagementId}/workpapers/${row.workpaperId}`}
-                            className="px-3 py-1 text-xs font-semibold text-[#102654] hover:bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg transition-colors inline-block"
+                            className="px-3 py-1 text-xs font-semibold text-[#122654] hover:bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg transition-colors inline-block"
                           >
                             Open
                           </Link>
@@ -446,7 +446,7 @@ export default function SignOffAndLockPage() {
             </table>
           </div>
 
-          <div className="pt-3 border-t border-[#E3E7EF] text-[11px] text-[#5B6478]">
+          <div className="pt-3 border-t border-[#E3E7EF] text-[11px] text-[#4A5878]">
             Showing {matrix.length} of {matrix.length} · ✓ signed · ⚠ stale, changed after signing ·
             ○ not signed
           </div>
@@ -456,7 +456,7 @@ export default function SignOffAndLockPage() {
         <div className="lg:col-span-4 flex flex-col gap-6">
           {/* Card 1: Before you can lock */}
           <div className="blynt-card p-6 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col gap-4 shadow-2xs">
-            <h2 className="text-sm font-bold text-[#102654]">Before you can lock</h2>
+            <h2 className="text-sm font-bold text-[#122654]">Before you can lock</h2>
 
             <div className="flex flex-col divide-y divide-[#E3E7EF]/80 text-xs">
               {/* Review notes checklist item */}
@@ -505,7 +505,7 @@ export default function SignOffAndLockPage() {
                       <AlertTriangle className="w-3.5 h-3.5 text-[#6B4700]" /> {staleCount} stale
                       sign-off{staleCount === 1 ? '' : 's'}
                     </span>
-                    <span className="text-[10px] text-[#5B6478] mt-0.5">
+                    <span className="text-[10px] text-[#4A5878] mt-0.5">
                       Re-review modified papers
                     </span>
                   </div>
@@ -540,8 +540,8 @@ export default function SignOffAndLockPage() {
                   isEngagementLocked
                     ? 'bg-[#E6F4EF] text-[#0B6B52] border border-[#0B6B52]/30 cursor-not-allowed'
                     : isLockDisabled
-                    ? 'bg-[#F6F7FB] text-[#7E8DA6] border border-[#D5DBE7] cursor-not-allowed'
-                    : 'bg-[#102654] hover:bg-[#16336e] text-white shadow-sm cursor-pointer'
+                    ? 'bg-[#F5F8FD] text-[#7E8DA6] border border-[#D3DCEE] cursor-not-allowed'
+                    : 'bg-[#122654] hover:bg-[#16336e] text-white shadow-sm cursor-pointer'
                 }`}
               >
                 <Lock className="w-4 h-4" />
@@ -549,7 +549,7 @@ export default function SignOffAndLockPage() {
               </button>
             </div>
 
-            <p className="text-[11px] text-[#5B6478] leading-relaxed pt-1 border-t border-[#E3E7EF]/80">
+            <p className="text-[11px] text-[#4A5878] leading-relaxed pt-1 border-t border-[#E3E7EF]/80">
               Lock is available to the partner once every item above is ✓. Locked files are read-only;
               reopening needs a partner and a reason, and is logged.
             </p>
@@ -557,18 +557,18 @@ export default function SignOffAndLockPage() {
 
           {/* Card 2: Export the file */}
           <div className="blynt-card p-6 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col gap-3 shadow-2xs">
-            <h2 className="text-sm font-bold text-[#102654]">Export the file</h2>
-            <p className="text-xs text-[#5B6478] leading-relaxed">
-              PDF bundle with index, every paper, evidence, comments and the audit log.
+            <h2 className="text-sm font-bold text-[#122654]">Export the file</h2>
+            <p className="text-xs text-[#4A5878] leading-relaxed">
+              PDF bundle with index, every paper, evidence, comments and the activity log.
             </p>
 
             <button
               type="button"
               onClick={handleExportBundle}
               disabled={isExporting}
-              className="w-full min-h-[42px] px-4 py-2 bg-white hover:bg-[#F6F7FB] border border-[#D5DBE7] hover:border-[#102654]/40 rounded-xl text-xs font-bold text-[#102654] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
+              className="w-full min-h-[42px] px-4 py-2 bg-white hover:bg-[#F5F8FD] border border-[#D3DCEE] hover:border-[#122654]/40 rounded-xl text-xs font-bold text-[#122654] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
             >
-              <Download className="w-4 h-4 text-[#5B6478]" />
+              <Download className="w-4 h-4 text-[#4A5878]" />
               <span>{isExporting ? 'Building PDF...' : 'Build PDF bundle'}</span>
             </button>
 
@@ -578,7 +578,7 @@ export default function SignOffAndLockPage() {
                   <CheckCircle2 className="w-4 h-4" />
                   <span>PDF bundle built successfully!</span>
                 </div>
-                <div className="font-mono text-[10px] break-all text-[#102654]">
+                <div className="font-mono text-[10px] break-all text-[#122654]">
                   Checksum: {exportResult.checksum}
                 </div>
               </div>
@@ -605,7 +605,7 @@ export default function SignOffAndLockPage() {
             <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E3E7EF]">
               <Link
                 href={`/engagements/${engagementId}/workpapers/${staleModalPaper.workpaperId}`}
-                className="px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-xl"
+                className="px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl"
               >
                 Review & re-sign paper
               </Link>
@@ -623,16 +623,16 @@ export default function SignOffAndLockPage() {
         >
           <div className="flex flex-col gap-4 text-xs">
             <div className="p-3 rounded-[10px] bg-[#FDECEA] border border-[#B42318]/20 text-[#B42318]">
-              <strong>Caution: Unlocking an assembled audit file is an audited event.</strong>
+              <strong>Caution: unlocking an assembled file is recorded in the activity log.</strong>
               <p className="mt-1">
                 Under ISA 230, reopening an engagement after assembly requires documented partner
                 justification. The reason and timestamp are permanently written to the immutable
-                audit trail.
+                activity log.
               </p>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="unlock-reason" className="font-semibold text-[#102654]">
+              <label htmlFor="unlock-reason" className="font-semibold text-[#122654]">
                 Mandatory Documentation Reason:
               </label>
               <textarea
@@ -641,7 +641,7 @@ export default function SignOffAndLockPage() {
                 value={unlockReason}
                 onChange={(e) => setUnlockReason(e.target.value)}
                 placeholder="State the technical rationale (e.g. Subsequent discovery of post-balance sheet adjusting event)..."
-                className="w-full p-3 border border-[#D5DBE7] rounded-xl text-xs focus-visible:outline-2 focus-visible:outline-[#FF7D6B]"
+                className="w-full p-3 border border-[#D3DCEE] rounded-xl text-xs focus-visible:outline-2 focus-visible:outline-[#FF7A66]"
               />
             </div>
 
@@ -649,7 +649,7 @@ export default function SignOffAndLockPage() {
               <button
                 type="button"
                 onClick={() => setUnlockDialogOpen(false)}
-                className="px-3 py-1.5 text-xs font-semibold text-[#102654] border border-[#D5DBE7] rounded-xl"
+                className="px-3 py-1.5 text-xs font-semibold text-[#122654] border border-[#D3DCEE] rounded-xl"
               >
                 Cancel
               </button>
@@ -658,7 +658,7 @@ export default function SignOffAndLockPage() {
                 onClick={handleUnlockEngagement}
                 className="px-3 py-1.5 text-xs font-bold text-white bg-[#B42318] hover:bg-[#911c13] rounded-xl"
               >
-                Confirm unlock & log to audit
+                Confirm unlock
               </button>
             </div>
           </div>

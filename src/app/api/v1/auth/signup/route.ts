@@ -2,7 +2,7 @@ import { syncIn, syncOut } from '@/lib/server/store';
 import { jsonResponse, errorResponse } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 import { hashPassword, createSessionToken, sessionCookie, createChallengeToken, challengeCookie, mfaRequired } from '@/lib/server/auth';
-import { Firm, User, Membership, Client, Engagement, UserRole } from '@/lib/types/models';
+import { Firm, User, Membership, UserRole } from '@/lib/types/models';
 import { emailError, passwordError } from '@/lib/validation';
 
 export async function POST(req: Request) {
@@ -62,8 +62,8 @@ export async function POST(req: Request) {
 
     const titleMap: Record<UserRole, string> = {
       partner: 'Engagement Partner',
-      manager: 'Audit Manager',
-      reviewer: 'Audit Reviewer',
+      manager: 'Manager',
+      reviewer: 'Reviewer',
       preparer: 'Senior Associate / Preparer',
       admin: 'Firm Administrator',
       readonly: 'Read only',
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       email: workEmail,
       name: fullName,
       initials,
-      title: titleMap[role] || 'Audit Professional',
+      title: titleMap[role] || 'Team member',
       mfa_enabled: false,
     };
     db.users.push(newUser);
@@ -93,38 +93,7 @@ export async function POST(req: Request) {
       password_hash: hashPassword(password),
     });
 
-    // 5. Create a starter client & engagement for this firm so workpapers are immediately ready
-    const clientId = `cli_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
-    const starterClient: Client = {
-      id: clientId,
-      firm_id: firmId,
-      name: `${firmName} - Primary Client Ltd`,
-      company_no: '14829104',
-      company_type: 'Small company (FRS 102 1A)',
-      year_end: '2026-09-30',
-      data_source: 'xero',
-      reconnect_needed: false,
-    };
-    db.clients.push(starterClient);
-
-    const engId = `eng_${clientId.replace('cli_', '')}_fy26`;
-    const starterEng: Engagement = {
-      id: engId,
-      client_id: clientId,
-      firm_id: firmId,
-      period_start: '2025-10-01',
-      period_end: '2026-09-30',
-      framework: 'FRS 102 1A',
-      template_pack_id: 'pack_small_co',
-      status: 'planning',
-      locked_at: null,
-      locked_by: null,
-      prior_engagement_id: null,
-    };
-    db.engagements.push(starterEng);
-
-    // Generate standard working papers from pack
-    db.createEngagementWorkpapers(engId, starterClient.company_type);
+    // A new practice starts with no clients; the first one is added from Clients (no demo data)
 
     // 6. Audit log
     db.logAudit(
@@ -143,7 +112,7 @@ export async function POST(req: Request) {
     await syncOut();
 
     // 7. ADM-01: MFA is set up before the first session; the wizard follows
-    const result = { success: true, user: newUser, firm: newFirm, role: membership.role, clientId: starterClient.id, engagementId: starterEng.id };
+    const result = { success: true, user: newUser, firm: newFirm, role: membership.role };
     if (mfaRequired()) {
       return jsonResponse({ ...result, mfa: 'setup' }, 201, { 'Set-Cookie': challengeCookie(createChallengeToken(userId)) });
     }

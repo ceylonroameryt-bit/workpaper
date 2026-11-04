@@ -21,9 +21,9 @@ export interface ScheduleProps {
 }
 
 const newId = (prefix: string) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-const th = 'p-2 text-[10px] font-bold uppercase tracking-wider text-[#5B6478] whitespace-nowrap';
+const th = 'p-2 text-[10px] font-bold uppercase tracking-wider text-[#4A5878] whitespace-nowrap';
 const addBtn =
-  'inline-flex items-center gap-1 min-h-[32px] px-3 text-xs font-bold text-[#102654] bg-white border border-[#D5DBE7] hover:border-[#102654] rounded-[8px] disabled:opacity-40';
+  'inline-flex items-center gap-1 min-h-[32px] px-3 text-xs font-bold text-[#122654] bg-white border border-[#D3DCEE] hover:border-[#122654] rounded-[8px] disabled:opacity-40';
 
 function RemoveButton({ onClick, label, disabled }: { onClick: () => void; label: string; disabled: boolean }) {
   if (disabled) return null;
@@ -56,7 +56,7 @@ export function ReconciliationSchedule({ data, result, locked, save, filesFor, a
   return (
     <div className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-xs max-w-md">
-        <span className="font-semibold text-[#102654]">Bank and account</span>
+        <span className="font-semibold text-[#122654]">Bank and account</span>
         <TextInput
           label="Bank and account"
           value={data.bank_name}
@@ -66,8 +66,8 @@ export function ReconciliationSchedule({ data, result, locked, save, filesFor, a
         />
       </label>
       <div className="overflow-x-auto">
-        <table className="w-full text-xs text-[#102654]">
-          <thead className="bg-[#F6F7FB]">
+        <table className="w-full text-xs text-[#122654]">
+          <thead className="bg-[#F5F8FD]">
             <tr>
               <th className={`${th} text-left`}>Line</th>
               <th className={`${th} text-right w-[150px]`}>This year</th>
@@ -79,10 +79,10 @@ export function ReconciliationSchedule({ data, result, locked, save, filesFor, a
             <tr>
               <td className="p-2">
                 <div className="font-semibold">Balance per ledger</div>
-                <div className="text-[10px] text-[#5B6478]">Locked to the trial balance</div>
+                <div className="text-[10px] text-[#4A5878]">Locked to the trial balance</div>
               </td>
               <td className="p-2 text-right font-mono font-bold">{formatPence(result.totals.ledger ?? 0n)}</td>
-              <td className="p-2 text-[10px] text-[#5B6478]">TB</td>
+              <td className="p-2 text-[10px] text-[#4A5878]">TB</td>
               <td />
             </tr>
             <tr>
@@ -97,8 +97,8 @@ export function ReconciliationSchedule({ data, result, locked, save, filesFor, a
             </tr>
             {sections.map((s) => (
               <React.Fragment key={s.id}>
-                <tr className="bg-[#F6F7FB]/60">
-                  <td colSpan={4} className="p-2 text-[10px] font-bold uppercase tracking-wider text-[#5B6478]">
+                <tr className="bg-[#F5F8FD]/60">
+                  <td colSpan={4} className="p-2 text-[10px] font-bold uppercase tracking-wider text-[#4A5878]">
                     {s.label}
                   </td>
                 </tr>
@@ -140,7 +140,7 @@ export function ReconciliationSchedule({ data, result, locked, save, filesFor, a
               </React.Fragment>
             ))}
           </tbody>
-          <tfoot className="border-t-2 border-[#102654]/20 font-bold">
+          <tfoot className="border-t-2 border-[#122654]/20 font-bold">
             <tr>
               <td className="p-2">Adjusted bank balance</td>
               <td className="p-2 text-right font-mono">{formatPence(result.totals.adjusted ?? 0n)}</td>
@@ -152,7 +152,7 @@ export function ReconciliationSchedule({ data, result, locked, save, filesFor, a
         </table>
       </div>
       <label className="grid grid-cols-1 sm:grid-cols-[1fr_150px] items-center gap-2 text-xs max-w-md">
-        <span className="font-semibold text-[#102654]">Balance per bank confirmation (optional)</span>
+        <span className="font-semibold text-[#122654]">Balance per bank confirmation (optional)</span>
         <MoneyInput label="Balance per bank confirmation" value={data.confirmation_p} disabled={locked} onCommit={(p) => save({ confirmation_p: p })} />
       </label>
     </div>
@@ -179,8 +179,8 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
   return (
     <div className="flex flex-col gap-5">
       <div className="overflow-x-auto">
-        <table className="w-full text-xs text-[#102654]">
-          <thead className="bg-[#F6F7FB]">
+        <table className="w-full text-xs text-[#122654]">
+          <thead className="bg-[#F5F8FD]">
             <tr>
               <th className={`${th} text-left`} rowSpan={2}>
                 Class
@@ -212,7 +212,7 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
               <tr key={c.id}>
                 <td className="p-1.5 min-w-[150px]">
                   <TextInput label="Class name" value={c.name} disabled={locked} onCommit={(v) => setClass(c.id, { name: v })} />
-                  <div className="flex items-center gap-1 mt-1 text-[10px] text-[#5B6478]">
+                  <div className="flex items-center gap-1 mt-1 text-[10px] text-[#4A5878]">
                     <input
                       aria-label={`${c.name} depreciation rate`}
                       type="number"
@@ -222,7 +222,7 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
                       disabled={locked}
                       defaultValue={c.rate}
                       onBlur={(e) => e.target.value !== String(c.rate) && setClass(c.id, { rate: e.target.value })}
-                      className="w-14 px-1 py-0.5 border border-[#D5DBE7] rounded text-right font-mono"
+                      className="w-14 px-1 py-0.5 border border-[#D3DCEE] rounded text-right font-mono"
                     />
                     % straight line
                   </div>
@@ -260,7 +260,7 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
               </tr>
             ))}
           </tbody>
-          <tfoot className="border-t-2 border-[#102654]/20 font-bold">
+          <tfoot className="border-t-2 border-[#122654]/20 font-bold">
             <tr>
               <td className="p-2">Total</td>
               <td colSpan={3} />
@@ -290,25 +290,25 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-        <label className="p-3 rounded-[10px] bg-[#F6F7FB] border border-[#E3E7EF] flex flex-col gap-1">
-          <span className="font-bold text-[#102654]">Depreciation policy</span>
+        <label className="p-3 rounded-[10px] bg-[#F5F8FD] border border-[#E3E7EF] flex flex-col gap-1">
+          <span className="font-bold text-[#122654]">Depreciation policy</span>
           <TextInput label="Depreciation policy" value={data.policy} disabled={locked} onCommit={(v) => save({ policy: v })} />
         </label>
-        <div className="p-3 rounded-[10px] bg-[#F6F7FB] border border-[#E3E7EF]">
-          <div className="font-bold text-[#102654]">Proof in total</div>
-          <div className="mt-1 text-[#5B6478]">
+        <div className="p-3 rounded-[10px] bg-[#F5F8FD] border border-[#E3E7EF]">
+          <div className="font-bold text-[#122654]">Proof in total</div>
+          <div className="mt-1 text-[#4A5878]">
             {classes.map((c) => `${formatPence(t[`${c.id}_cost`] ?? 0n, { symbol: '' })} × ${c.rate}%`).join(' + ')} ={' '}
-            <strong className="font-mono text-[#102654]">{formatPence(t.expected ?? 0n)}</strong>
+            <strong className="font-mono text-[#122654]">{formatPence(t.expected ?? 0n)}</strong>
             {(t.expected ?? 0n) === (t.charge ?? 0n) ? ' · matches the charge ✓' : ` · charge is ${formatPence(t.charge ?? 0n)}`}
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-xs font-bold text-[#102654] mb-2">Additions and disposals in the year</h3>
+        <h3 className="text-xs font-bold text-[#122654] mb-2">Additions and disposals in the year</h3>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-[#102654]">
-            <thead className="bg-[#F6F7FB]">
+          <table className="w-full text-xs text-[#122654]">
+            <thead className="bg-[#F5F8FD]">
               <tr>
                 {['Type', 'Date', 'Item', 'Class', 'Cost', 'Depreciation out', 'Proceeds', 'Profit / (loss)', 'Evidence', ''].map((h, i) => (
                   <th key={i} className={`${th} ${i >= 4 && i <= 7 ? 'text-right' : 'text-left'}`}>
@@ -338,7 +338,7 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
                         disabled={locked}
                         defaultValue={m.date}
                         onBlur={(e) => e.target.value !== m.date && setMove(m.id, { date: e.target.value })}
-                        className="px-1.5 py-1 border border-[#D5DBE7] rounded-[8px] text-xs"
+                        className="px-1.5 py-1 border border-[#D3DCEE] rounded-[8px] text-xs"
                       />
                     </td>
                     <td className="p-1.5 min-w-[160px]">
@@ -350,7 +350,7 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
                         disabled={locked}
                         value={m.class_id}
                         onChange={(e) => setMove(m.id, { class_id: e.target.value })}
-                        className="px-1.5 py-1 border border-[#D5DBE7] rounded-[8px] text-xs bg-white"
+                        className="px-1.5 py-1 border border-[#D3DCEE] rounded-[8px] text-xs bg-white"
                       >
                         {classes.map((c) => (
                           <option key={c.id} value={c.id}>
@@ -437,19 +437,19 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
     <div className="flex flex-col gap-4">
       {/* S-10 Suspense / Clearing must-be-zero alert (REC-16) */}
       {isSuspense && (
-        <div className={`p-4 rounded-[12px] border ${result.totals.total === 0n ? 'bg-[#E6F4EF] border-[#0B6B52]/30' : 'bg-[#FFF1EE] border-[#FF7D6B]'}`}>
-          <div className="flex items-center gap-2 font-bold text-xs text-[#102654]">
+        <div className={`p-4 rounded-[12px] border ${result.totals.total === 0n ? 'bg-[#E6F4EF] border-[#0B6B52]/30' : 'bg-[#FFF1EE] border-[#FF7A66]'}`}>
+          <div className="flex items-center gap-2 font-bold text-xs text-[#122654]">
             <ShieldAlert className={`w-4 h-4 ${result.totals.total === 0n ? 'text-[#0B6B52]' : 'text-[#B42318]'}`} />
             REC-16: Suspense, clearing and control accounts must be zero (£0.00 zero tolerance)
           </div>
-          <p className="text-[11px] text-[#5B6478] mt-1">
+          <p className="text-[11px] text-[#4A5878] mt-1">
             Current balance: <strong>{formatPence(result.totals.total ?? 0n)}</strong>. Any non-nil balance blocks partner approval until cleared by journal or explained with a manager-approved comment.
           </p>
           {result.totals.total !== 0n && !locked && (
             <div className="mt-2.5 flex items-center gap-2">
               <button
                 type="button"
-                className="px-3 py-1.5 text-xs font-bold bg-[#102654] text-white rounded-[6px] hover:bg-[#0B1B3D]"
+                className="px-3 py-1.5 text-xs font-bold bg-[#122654] text-white rounded-[6px] hover:bg-[#0B1A3B]"
                 onClick={() => {
                   alert('Clearing journal proposed to clear suspense balance to nominal adjustments.');
                 }}
@@ -463,26 +463,26 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
 
       {/* C-10 Aged Debtors & Recoverability Review (REC-07) */}
       {isDebtors && (
-        <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#D5DBE7] text-xs flex flex-col gap-2">
+        <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#D3DCEE] text-xs flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-[#102654] flex items-center gap-1.5">
+            <span className="font-bold text-[#122654] flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#B8432F]" />
               REC-07: Aged Debtors & Post-Period Receipts Analysis
             </span>
-            <span className="text-[10px] text-[#5B6478]">AI checked bank receipts in the 90 days after period end</span>
+            <span className="text-[10px] text-[#4A5878]">AI checked bank receipts in the 90 days after period end</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
             <div className="p-2 bg-white rounded-[8px] border border-[#E3E7EF]">
-              <div className="text-[10px] text-[#5B6478]">Current</div>
-              <div className="font-mono font-bold text-[#102654]">{formatPence((result.totals.total ?? 0n) * 60n / 100n)}</div>
+              <div className="text-[10px] text-[#4A5878]">Current</div>
+              <div className="font-mono font-bold text-[#122654]">{formatPence((result.totals.total ?? 0n) * 60n / 100n)}</div>
             </div>
             <div className="p-2 bg-white rounded-[8px] border border-[#E3E7EF]">
-              <div className="text-[10px] text-[#5B6478]">30–60 Days</div>
-              <div className="font-mono font-bold text-[#102654]">{formatPence((result.totals.total ?? 0n) * 25n / 100n)}</div>
+              <div className="text-[10px] text-[#4A5878]">30–60 Days</div>
+              <div className="font-mono font-bold text-[#122654]">{formatPence((result.totals.total ?? 0n) * 25n / 100n)}</div>
             </div>
             <div className="p-2 bg-white rounded-[8px] border border-[#E3E7EF]">
-              <div className="text-[10px] text-[#5B6478]">60–90 Days</div>
-              <div className="font-mono font-bold text-[#102654]">{formatPence((result.totals.total ?? 0n) * 10n / 100n)}</div>
+              <div className="text-[10px] text-[#4A5878]">60–90 Days</div>
+              <div className="font-mono font-bold text-[#122654]">{formatPence((result.totals.total ?? 0n) * 10n / 100n)}</div>
             </div>
             <div className="p-2 bg-[#FFF4DB] rounded-[8px] border border-[#C58B00]/40">
               <div className="text-[10px] text-[#805B00] font-bold">90+ Days (Review)</div>
@@ -490,7 +490,7 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
             </div>
           </div>
           <div className="flex items-center gap-2 pt-1">
-            <span className="text-[10px] font-semibold text-[#5B6478]">AI suggestion:</span>
+            <span className="text-[10px] font-semibold text-[#4A5878]">AI suggestion:</span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E6F4EF] text-[#0B6B52]">
               ✓ All 90+ day balances have matching post-year-end receipts in bank feed
             </span>
@@ -500,15 +500,15 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
 
       {/* K-10 Trade Creditors & Unrecorded Liabilities (REC-08) */}
       {isCreditors && (
-        <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#D5DBE7] text-xs flex flex-col gap-2">
+        <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#D3DCEE] text-xs flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-[#102654] flex items-center gap-1.5">
+            <span className="font-bold text-[#122654] flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#B8432F]" />
               REC-08: Unrecorded Liabilities Search
             </span>
-            <span className="text-[10px] text-[#5B6478]">Scanned post-year-end payments for period services</span>
+            <span className="text-[10px] text-[#4A5878]">Scanned post-year-end payments for period services</span>
           </div>
-          <p className="text-[11px] text-[#5B6478]">
+          <p className="text-[11px] text-[#4A5878]">
             AI checked payments in the 60 days after year-end. No unrecorded liabilities found in the post-period bank feed or invoice platform queue.
           </p>
         </div>
@@ -540,15 +540,15 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
 
       {/* E-10 Share Capital & Distributable Reserves Check (REC-12) */}
       {isShareCapital && (
-        <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#D5DBE7] text-xs flex flex-col gap-2">
-          <div className="flex items-center justify-between font-bold text-[#102654]">
+        <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#D3DCEE] text-xs flex flex-col gap-2">
+          <div className="flex items-center justify-between font-bold text-[#122654]">
             <span className="flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-[#102654]" />
+              <Building2 className="w-3.5 h-3.5 text-[#122654]" />
               REC-12: Distributable Reserves & Dividend Legality Check
             </span>
             <span className="text-[10px] text-[#0B6B52] bg-[#E6F4EF] px-2 py-0.5 rounded-full">✓ Dividends Lawful</span>
           </div>
-          <div className="text-[11px] text-[#5B6478]">
+          <div className="text-[11px] text-[#4A5878]">
             Accumulated profit and loss reserve is sufficient to cover all interim dividends declared during the period.
           </div>
         </div>
@@ -556,15 +556,15 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
 
       {/* D-10 Stock & WIP Margin Check (REC-14) */}
       {isStock && (
-        <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#D5DBE7] text-xs flex flex-col gap-2">
-          <div className="flex items-center justify-between font-bold text-[#102654]">
+        <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#D3DCEE] text-xs flex flex-col gap-2">
+          <div className="flex items-center justify-between font-bold text-[#122654]">
             <span className="flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-[#102654]" />
+              <FileText className="w-3.5 h-3.5 text-[#122654]" />
               REC-14: Stock Count & Gross Margin Test
             </span>
             <span className="text-[10px] text-[#0B6B52] bg-[#E6F4EF] px-2 py-0.5 rounded-full">✓ Margin Consistent</span>
           </div>
-          <div className="text-[11px] text-[#5B6478]">
+          <div className="text-[11px] text-[#4A5878]">
             Gross margin of 38.4% is within 1.2% of the prior-year benchmark (37.2%). No unusual inventory write-downs detected.
           </div>
         </div>
@@ -572,16 +572,16 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
 
       {/* T-10 Corporation Tax Provision (REC-13) */}
       {isCorpTax && (
-        <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#D5DBE7] text-xs flex flex-col gap-2">
-          <div className="flex items-center justify-between font-bold text-[#102654]">
+        <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#D3DCEE] text-xs flex flex-col gap-2">
+          <div className="flex items-center justify-between font-bold text-[#122654]">
             <span>REC-13: Corporation Tax Charge Source</span>
             <div className="flex items-center gap-1 text-[11px]">
-              <span className="px-2 py-0.5 rounded bg-[#102654] text-white font-bold">Estimate</span>
-              <span className="px-2 py-0.5 rounded bg-white text-[#5B6478] border border-[#D5DBE7]">Tax Software</span>
-              <span className="px-2 py-0.5 rounded bg-white text-[#5B6478] border border-[#D5DBE7]">Manual</span>
+              <span className="px-2 py-0.5 rounded bg-[#122654] text-white font-bold">Estimate</span>
+              <span className="px-2 py-0.5 rounded bg-white text-[#4A5878] border border-[#D3DCEE]">Tax Software</span>
+              <span className="px-2 py-0.5 rounded bg-white text-[#4A5878] border border-[#D3DCEE]">Manual</span>
             </div>
           </div>
-          <div className="text-[11px] text-[#5B6478]">
+          <div className="text-[11px] text-[#4A5878]">
             Standard UK small profits rate 19% / main rate 25% applied to adjusted profit before tax.
           </div>
         </div>
@@ -589,20 +589,20 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
 
       {/* R-10 Related Parties (REC-15) */}
       {isRelatedParties && (
-        <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#D5DBE7] text-xs flex flex-col gap-2">
-          <div className="flex items-center justify-between font-bold text-[#102654]">
+        <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#D3DCEE] text-xs flex flex-col gap-2">
+          <div className="flex items-center justify-between font-bold text-[#122654]">
             <span>REC-15: Related Party Transactions Register</span>
-            <span className="text-[10px] text-[#5B6478]">FRS 102 Section 1A Disclosures</span>
+            <span className="text-[10px] text-[#4A5878]">FRS 102 Section 1A Disclosures</span>
           </div>
-          <div className="text-[11px] text-[#5B6478]">
+          <div className="text-[11px] text-[#4A5878]">
             All transactions with directors and connected entities identified. Controlled entities and intercompany balances agree across the register.
           </div>
         </div>
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full text-xs text-[#102654]">
-          <thead className="bg-[#F6F7FB]">
+        <table className="w-full text-xs text-[#122654]">
+          <thead className="bg-[#F5F8FD]">
             <tr>
               <th className={`${th} text-left`}>Description</th>
               <th className={`${th} text-left`}>Reference</th>
@@ -660,7 +660,7 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
               </tr>
             ))}
           </tbody>
-          <tfoot className="border-t-2 border-[#102654]/20 font-bold">
+          <tfoot className="border-t-2 border-[#122654]/20 font-bold">
             <tr>
               <td className="p-2" colSpan={2}>
                 Total
@@ -687,7 +687,7 @@ export function LinesSchedule({ data, result, locked, save, filesFor, attachTo, 
         </div>
       )}
       {cols.some((c) => c.inTotal === false && c.money !== false) && (
-        <p className="text-[10px] text-[#5B6478]">
+        <p className="text-[10px] text-[#4A5878]">
           {cols
             .filter((c) => c.inTotal === false && c.money !== false)
             .map((c) => c.label)
@@ -714,26 +714,26 @@ export function VatSchedule({ data, result, locked, save, filesFor, attachTo, pr
   return (
     <div className="flex flex-col gap-4 text-xs">
       {/* VAT Scheme & Stagger Header */}
-      <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#E3E7EF] flex flex-wrap items-center justify-between gap-3">
+      <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#E3E7EF] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           <div>
-            <span className="text-[10px] uppercase font-bold text-[#5B6478] block">VAT Scheme</span>
-            <span className="font-bold text-[#102654] capitalize">{data.scheme || 'Standard (Accruals)'}</span>
+            <span className="text-[10px] uppercase font-bold text-[#4A5878] block">VAT Scheme</span>
+            <span className="font-bold text-[#122654] capitalize">{data.scheme || 'Standard (Accruals)'}</span>
           </div>
           <div>
-            <span className="text-[10px] uppercase font-bold text-[#5B6478] block">Quarter Stagger</span>
-            <span className="font-bold text-[#102654] capitalize">{data.stagger || 'Quarterly (Dec–Feb, Mar–May, etc.)'}</span>
+            <span className="text-[10px] uppercase font-bold text-[#4A5878] block">Quarter Stagger</span>
+            <span className="font-bold text-[#122654] capitalize">{data.stagger || 'Quarterly (Dec–Feb, Mar–May, etc.)'}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-[#5B6478]">Source: HMRC MTD API & Ledger</span>
+          <span className="text-[11px] text-[#4A5878]">Source: HMRC MTD API & Ledger</span>
         </div>
       </div>
 
       {/* Returns Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-xs text-[#102654]">
-          <thead className="bg-[#F6F7FB]">
+        <table className="w-full text-xs text-[#122654]">
+          <thead className="bg-[#F5F8FD]">
             <tr>
               <th className={`${th} text-left`}>Return Period</th>
               <th className={`${th} text-right`}>Box 1 (VAT on Sales)</th>
@@ -758,7 +758,7 @@ export function VatSchedule({ data, result, locked, save, filesFor, attachTo, pr
                 <td className="p-1.5">
                   <MoneyInput label={`Box 5 for ${r.period_label}`} value={r.box5_net_vat} disabled={locked} onCommit={(v) => updateReturn(r.id, { box5_net_vat: v })} />
                 </td>
-                <td className="p-2 text-[11px] font-mono text-[#5B6478]">{r.paid_date || 'Pending'}</td>
+                <td className="p-2 text-[11px] font-mono text-[#4A5878]">{r.paid_date || 'Pending'}</td>
                 <td className="p-1.5">
                   <MoneyInput label={`Paid amount for ${r.period_label}`} value={r.paid_amount_p} disabled={locked} onCommit={(v) => updateReturn(r.id, { paid_amount_p: v })} />
                 </td>
@@ -780,32 +780,32 @@ export function VatSchedule({ data, result, locked, save, filesFor, attachTo, pr
                 </td>
               </tr>
             ))}
-            <tr className="bg-[#F6F7FB]/70 font-semibold">
+            <tr className="bg-[#F5F8FD]/70 font-semibold">
               <td className="p-2">Open Period Accrued VAT (Not yet filed)</td>
               <td colSpan={2} />
               <td className="p-1.5">
                 <MoneyInput label="Open period accrued VAT" value={data.open_period_p} disabled={locked} onCommit={(v) => save({ open_period_p: v })} />
               </td>
-              <td colSpan={4} className="p-2 text-[11px] text-[#5B6478]">Estimated from post-quarter ledger sales & purchases</td>
+              <td colSpan={4} className="p-2 text-[11px] text-[#4A5878]">Estimated from post-quarter ledger sales & purchases</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       {/* Liability Reconciliation Bridge */}
-      <div className="p-4 rounded-[12px] bg-[#F6F7FB] border border-[#D5DBE7] grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="p-4 rounded-[12px] bg-[#F5F8FD] border border-[#D3DCEE] grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="p-3 bg-white rounded-[8px] border border-[#E3E7EF]">
-          <div className="text-[10px] font-bold uppercase text-[#5B6478]">Calculated VAT Liability</div>
-          <div className="text-base font-bold font-mono text-[#102654] mt-1">{formatPence(calcLiability)}</div>
-          <div className="text-[10px] text-[#5B6478] mt-0.5">Unpaid returns ({formatPence((result.totals.net_vat_due ?? 0n) - (result.totals.paid_amount ?? 0n))}) + Open period ({formatPence(result.totals.open_period ?? 0n)})</div>
+          <div className="text-[10px] font-bold uppercase text-[#4A5878]">Calculated VAT Liability</div>
+          <div className="text-base font-bold font-mono text-[#122654] mt-1">{formatPence(calcLiability)}</div>
+          <div className="text-[10px] text-[#4A5878] mt-0.5">Unpaid returns ({formatPence((result.totals.net_vat_due ?? 0n) - (result.totals.paid_amount ?? 0n))}) + Open period ({formatPence(result.totals.open_period ?? 0n)})</div>
         </div>
         <div className="p-3 bg-white rounded-[8px] border border-[#E3E7EF]">
-          <div className="text-[10px] font-bold uppercase text-[#5B6478]">Trial Balance VAT Control (TB 2200)</div>
-          <div className="text-base font-bold font-mono text-[#102654] mt-1">{formatPence(tbLiability)}</div>
-          <div className="text-[10px] text-[#5B6478] mt-0.5">General ledger closing balance</div>
+          <div className="text-[10px] font-bold uppercase text-[#4A5878]">Trial Balance VAT Control (TB 2200)</div>
+          <div className="text-base font-bold font-mono text-[#122654] mt-1">{formatPence(tbLiability)}</div>
+          <div className="text-[10px] text-[#4A5878] mt-0.5">General ledger closing balance</div>
         </div>
-        <div className={`p-3 rounded-[8px] border ${diff === 0n ? 'bg-[#E6F4EF] border-[#0B6B52]/30' : 'bg-[#FFF1EE] border-[#FF7D6B]'}`}>
-          <div className="text-[10px] font-bold uppercase text-[#5B6478]">Reconciliation Difference</div>
+        <div className={`p-3 rounded-[8px] border ${diff === 0n ? 'bg-[#E6F4EF] border-[#0B6B52]/30' : 'bg-[#FFF1EE] border-[#FF7A66]'}`}>
+          <div className="text-[10px] font-bold uppercase text-[#4A5878]">Reconciliation Difference</div>
           <div className={`text-base font-bold font-mono mt-1 ${diff === 0n ? 'text-[#0B6B52]' : 'text-[#B42318]'}`}>{formatPence(diff)}</div>
           <div className="text-[10px] font-bold mt-0.5">{diff === 0n ? '✓ VAT control fully reconciled' : '! Difference outside tolerance'}</div>
         </div>
@@ -830,25 +830,25 @@ export function PayrollSchedule({ data, result, locked, save, filesFor, attachTo
           <button
             type="button"
             onClick={() => setTab('months')}
-            className={`px-3 py-1.5 rounded-[8px] font-bold ${tab === 'months' ? 'bg-[#102654] text-white' : 'bg-[#F6F7FB] text-[#5B6478]'}`}
+            className={`px-3 py-1.5 rounded-[8px] font-bold ${tab === 'months' ? 'bg-[#122654] text-white' : 'bg-[#F5F8FD] text-[#4A5878]'}`}
           >
             12 Months Breakdown
           </button>
           <button
             type="button"
             onClick={() => setTab('summary')}
-            className={`px-3 py-1.5 rounded-[8px] font-bold ${tab === 'summary' ? 'bg-[#102654] text-white' : 'bg-[#F6F7FB] text-[#5B6478]'}`}
+            className={`px-3 py-1.5 rounded-[8px] font-bold ${tab === 'summary' ? 'bg-[#122654] text-white' : 'bg-[#F5F8FD] text-[#4A5878]'}`}
           >
             3 Reconciliations & Notes
           </button>
         </div>
-        <span className="text-[11px] text-[#5B6478]">BrightPay / Xero Payroll / Sage Compatible</span>
+        <span className="text-[11px] text-[#4A5878]">BrightPay / Xero Payroll / Sage Compatible</span>
       </div>
 
       {tab === 'months' && (
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-[#102654]">
-            <thead className="bg-[#F6F7FB]">
+          <table className="w-full text-xs text-[#122654]">
+            <thead className="bg-[#F5F8FD]">
               <tr>
                 <th className={`${th} text-left`}>Month</th>
                 <th className={`${th} text-right`}>Gross Pay</th>
@@ -883,29 +883,29 @@ export function PayrollSchedule({ data, result, locked, save, filesFor, attachTo
       {tab === 'summary' && (
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="p-3 bg-white rounded-[10px] border border-[#D5DBE7]">
-              <div className="text-[10px] uppercase font-bold text-[#5B6478]">1. Wages Expense vs P&L</div>
-              <div className="font-mono font-bold text-base text-[#102654] mt-1">{formatPence(result.totals.wages_cost ?? 0n)}</div>
+            <div className="p-3 bg-white rounded-[10px] border border-[#D3DCEE]">
+              <div className="text-[10px] uppercase font-bold text-[#4A5878]">1. Wages Expense vs P&L</div>
+              <div className="font-mono font-bold text-base text-[#122654] mt-1">{formatPence(result.totals.wages_cost ?? 0n)}</div>
               <div className="text-[10px] text-[#0B6B52] mt-1">✓ Agreed to Wages Accounts (TB 7000)</div>
             </div>
-            <div className="p-3 bg-white rounded-[10px] border border-[#D5DBE7]">
-              <div className="text-[10px] uppercase font-bold text-[#5B6478]">2. PAYE/NIC Liability</div>
-              <div className="font-mono font-bold text-base text-[#102654] mt-1">{formatPence(result.totals.paye_nic_liability ?? 0n)}</div>
+            <div className="p-3 bg-white rounded-[10px] border border-[#D3DCEE]">
+              <div className="text-[10px] uppercase font-bold text-[#4A5878]">2. PAYE/NIC Liability</div>
+              <div className="font-mono font-bold text-base text-[#122654] mt-1">{formatPence(result.totals.paye_nic_liability ?? 0n)}</div>
               <div className="text-[10px] text-[#0B6B52] mt-1">✓ Reconciled to P32 & bank payments</div>
             </div>
-            <div className="p-3 bg-white rounded-[10px] border border-[#D5DBE7]">
-              <div className="text-[10px] uppercase font-bold text-[#5B6478]">3. Pension Liability</div>
-              <div className="font-mono font-bold text-base text-[#102654] mt-1">{formatPence(result.totals.pension_liability ?? 0n)}</div>
+            <div className="p-3 bg-white rounded-[10px] border border-[#D3DCEE]">
+              <div className="text-[10px] uppercase font-bold text-[#4A5878]">3. Pension Liability</div>
+              <div className="font-mono font-bold text-base text-[#122654] mt-1">{formatPence(result.totals.pension_liability ?? 0n)}</div>
               <div className="text-[10px] text-[#0B6B52] mt-1">✓ Reconciled to pension summary</div>
             </div>
           </div>
-          <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex flex-wrap gap-4">
+          <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] flex flex-wrap gap-4">
             <label className="flex flex-col gap-1">
-              <span className="font-semibold text-[#102654]">Directors' Remuneration (for Notes)</span>
+              <span className="font-semibold text-[#122654]">Directors' Remuneration (for Notes)</span>
               <MoneyInput label="Directors' remuneration" value={data.director_remuneration_p} disabled={locked} onCommit={(v) => save({ director_remuneration_p: v })} />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="font-semibold text-[#102654]">Average Monthly Employee Count</span>
+              <span className="font-semibold text-[#122654]">Average Monthly Employee Count</span>
               <input
                 type="number"
                 min={1}
@@ -913,7 +913,7 @@ export function PayrollSchedule({ data, result, locked, save, filesFor, attachTo
                 disabled={locked}
                 defaultValue={data.average_employees || 2}
                 onBlur={(e) => save({ average_employees: Number(e.target.value) })}
-                className="px-2 py-1.5 border border-[#D5DBE7] rounded-[8px] bg-white text-right font-mono"
+                className="px-2 py-1.5 border border-[#D3DCEE] rounded-[8px] bg-white text-right font-mono"
               />
             </label>
           </div>
@@ -950,15 +950,15 @@ export function LeasesSchedule({ data, result, locked, save, filesFor, attachTo,
 
   return (
     <div className="flex flex-col gap-4 text-xs">
-      <div className="p-3.5 rounded-[12px] bg-[#F6F7FB] border border-[#E3E7EF] flex flex-wrap items-center justify-between gap-3">
+      <div className="p-3.5 rounded-[12px] bg-[#F5F8FD] border border-[#E3E7EF] flex flex-wrap items-center justify-between gap-3">
         <div>
-          <span className="text-[10px] uppercase font-bold text-[#5B6478] block">Accounting Standard Model</span>
-          <span className="font-bold text-[#102654]">
+          <span className="text-[10px] uppercase font-bold text-[#4A5878] block">Accounting Standard Model</span>
+          <span className="font-bold text-[#122654]">
             {data.model === 'right_of_use' ? 'FRS 102 Right-of-use Asset & Liability Model' : 'FRS 105 Operating Lease Commitments'}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-[#5B6478]">Discount Rate %:</span>
+          <span className="font-semibold text-[#4A5878]">Discount Rate %:</span>
           <input
             type="number"
             step="0.1"
@@ -966,14 +966,14 @@ export function LeasesSchedule({ data, result, locked, save, filesFor, attachTo,
             disabled={locked}
             defaultValue={data.discount_rate_pct || 5.5}
             onBlur={(e) => save({ discount_rate_pct: Number(e.target.value) })}
-            className="w-16 px-2 py-1 border border-[#D5DBE7] rounded-[6px] bg-white font-mono text-right"
+            className="w-16 px-2 py-1 border border-[#D3DCEE] rounded-[6px] bg-white font-mono text-right"
           />
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-xs text-[#102654]">
-          <thead className="bg-[#F6F7FB]">
+        <table className="w-full text-xs text-[#122654]">
+          <thead className="bg-[#F5F8FD]">
             <tr>
               <th className={`${th} text-left`}>Property / Asset</th>
               <th className={`${th} text-left`}>Lessor</th>
@@ -994,10 +994,10 @@ export function LeasesSchedule({ data, result, locked, save, filesFor, attachTo,
             {leases.map((l) => (
               <tr key={l.id}>
                 <td className="p-2 font-semibold">{l.property}</td>
-                <td className="p-2 text-[#5B6478]">{l.lessor}</td>
-                <td className="p-2 text-[11px] font-mono text-[#5B6478]">{l.start_date} to {l.end_date}</td>
+                <td className="p-2 text-[#4A5878]">{l.lessor}</td>
+                <td className="p-2 text-[11px] font-mono text-[#4A5878]">{l.start_date} to {l.end_date}</td>
                 <td className="p-2 text-right font-mono font-bold">{formatPence(asPence(l.rou_cost_p) - asPence(l.rou_dep_p))}</td>
-                <td className="p-2 text-right font-mono font-bold text-[#102654]">{formatPence(asPence(l.liability_cf_p))}</td>
+                <td className="p-2 text-right font-mono font-bold text-[#122654]">{formatPence(asPence(l.liability_cf_p))}</td>
                 <td className="p-2 text-right font-mono">{formatPence(asPence(l.comm_1y_p))}</td>
                 <td className="p-2 text-right font-mono">{formatPence(asPence(l.comm_1to5y_p))}</td>
                 <td className="p-2">
@@ -1045,38 +1045,38 @@ export function DlaSchedule({ data, result, locked, save, filesFor, attachTo, pr
               key={d.id}
               type="button"
               onClick={() => setActiveDirId(d.id)}
-              className={`px-3 py-1.5 rounded-[8px] font-bold ${activeDirId === d.id ? 'bg-[#102654] text-white' : 'bg-[#F6F7FB] text-[#5B6478]'}`}
+              className={`px-3 py-1.5 rounded-[8px] font-bold ${activeDirId === d.id ? 'bg-[#122654] text-white' : 'bg-[#F5F8FD] text-[#4A5878]'}`}
             >
               <User className="w-3 h-3 inline mr-1" />
               {d.name || 'Director'}
             </button>
           ))}
         </div>
-        <span className="text-[10px] text-[#5B6478]">s455 Rate: 33.75% · BIK Threshold: £10,000</span>
+        <span className="text-[10px] text-[#4A5878]">s455 Rate: 33.75% · BIK Threshold: £10,000</span>
       </div>
 
       {activeDir && (
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="p-3 bg-white rounded-[10px] border border-[#D5DBE7]">
-              <div className="text-[10px] font-bold uppercase text-[#5B6478]">Opening Balance b/f</div>
-              <div className="mt-1 font-mono font-bold text-[#102654]">{formatPence(asPence(activeDir.opening_p))}</div>
+            <div className="p-3 bg-white rounded-[10px] border border-[#D3DCEE]">
+              <div className="text-[10px] font-bold uppercase text-[#4A5878]">Opening Balance b/f</div>
+              <div className="mt-1 font-mono font-bold text-[#122654]">{formatPence(asPence(activeDir.opening_p))}</div>
             </div>
-            <div className="p-3 bg-white rounded-[10px] border border-[#D5DBE7]">
-              <div className="text-[10px] font-bold uppercase text-[#5B6478]">Add: Drawings / Advances</div>
+            <div className="p-3 bg-white rounded-[10px] border border-[#D3DCEE]">
+              <div className="text-[10px] font-bold uppercase text-[#4A5878]">Add: Drawings / Advances</div>
               <div className="mt-1">
                 <MoneyInput label="Drawings" value={activeDir.drawings_p} disabled={locked} onCommit={(v) => updateActiveDir({ drawings_p: v })} />
               </div>
             </div>
-            <div className="p-3 bg-white rounded-[10px] border border-[#D5DBE7]">
-              <div className="text-[10px] font-bold uppercase text-[#5B6478]">Less: Salary & Dividends</div>
+            <div className="p-3 bg-white rounded-[10px] border border-[#D3DCEE]">
+              <div className="text-[10px] font-bold uppercase text-[#4A5878]">Less: Salary & Dividends</div>
               <div className="mt-1 flex gap-1">
                 <MoneyInput label="Salary" value={activeDir.salary_credited_p} disabled={locked} onCommit={(v) => updateActiveDir({ salary_credited_p: v })} />
                 <MoneyInput label="Dividends" value={activeDir.dividends_credited_p} disabled={locked} onCommit={(v) => updateActiveDir({ dividends_credited_p: v })} />
               </div>
             </div>
-            <div className={`p-3 rounded-[10px] border ${isOverdrawn ? 'bg-[#FFF1EE] border-[#FF7D6B]' : 'bg-[#E6F4EF] border-[#0B6B52]/30'}`}>
-              <div className="text-[10px] font-bold uppercase text-[#5B6478]">Closing Balance c/f</div>
+            <div className={`p-3 rounded-[10px] border ${isOverdrawn ? 'bg-[#FFF1EE] border-[#FF7A66]' : 'bg-[#E6F4EF] border-[#0B6B52]/30'}`}>
+              <div className="text-[10px] font-bold uppercase text-[#4A5878]">Closing Balance c/f</div>
               <div className={`mt-1 font-mono font-bold text-base ${isOverdrawn ? 'text-[#B42318]' : 'text-[#0B6B52]'}`}>
                 {formatPence(asPence(activeDir.opening_p) + asPence(activeDir.drawings_p) - asPence(activeDir.salary_credited_p) - asPence(activeDir.dividends_credited_p))}
               </div>
@@ -1086,16 +1086,16 @@ export function DlaSchedule({ data, result, locked, save, filesFor, attachTo, pr
 
           {/* s455 Tax Warning if Overdrawn */}
           {isOverdrawn && (
-            <div className="p-4 rounded-[12px] bg-[#FFF1EE] border border-[#FF7D6B] flex flex-col gap-2">
+            <div className="p-4 rounded-[12px] bg-[#FFF1EE] border border-[#FF7A66] flex flex-col gap-2">
               <div className="flex items-center gap-2 font-bold text-[#B42318]">
                 <AlertTriangle className="w-4 h-4" />
                 s455 Tax Liability Alert (Corporation Tax Act 2010 s455)
               </div>
-              <p className="text-[11px] text-[#5B6478]">
+              <p className="text-[11px] text-[#4A5878]">
                 The director's loan account is overdrawn at the period end. Unless repaid within 9 months and 1 day of the accounting period end, a 33.75% s455 tax charge of <strong>{formatPence(result.totals.s455_tax ?? 0n)}</strong> will become payable with the CT600.
               </p>
               <div className="flex items-center gap-3 pt-1">
-                <span className="font-semibold text-[#102654]">Repaid within 9 months:</span>
+                <span className="font-semibold text-[#122654]">Repaid within 9 months:</span>
                 <div className="w-40">
                   <MoneyInput label="Repaid in 9m" value={activeDir.repaid_in_9m_p} disabled={locked} onCommit={(v) => updateActiveDir({ repaid_in_9m_p: v })} />
                 </div>
@@ -1115,17 +1115,17 @@ export function LoansSchedule({ data, result, locked, save, filesFor, attachTo, 
 
   return (
     <div className="flex flex-col gap-4 text-xs">
-      <div className="p-4 rounded-[12px] bg-[#F6F7FB] border border-[#E3E7EF] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="p-4 rounded-[12px] bg-[#F5F8FD] border border-[#E3E7EF] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <label className="flex flex-col gap-1">
-          <span className="font-semibold text-[#102654]">Lender / Institution</span>
+          <span className="font-semibold text-[#122654]">Lender / Institution</span>
           <TextInput label="Lender" value={data.lender} disabled={locked} onCommit={(v) => save({ lender: v })} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="font-semibold text-[#102654]">Total Principal Outstanding</span>
+          <span className="font-semibold text-[#122654]">Total Principal Outstanding</span>
           <MoneyInput label="Principal" value={data.principal_p} disabled={locked} onCommit={(v) => save({ principal_p: v })} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="font-semibold text-[#102654]">Interest Rate %</span>
+          <span className="font-semibold text-[#122654]">Interest Rate %</span>
           <input
             type="number"
             step="0.1"
@@ -1133,7 +1133,7 @@ export function LoansSchedule({ data, result, locked, save, filesFor, attachTo, 
             disabled={locked}
             defaultValue={data.interest_rate_pct || 5.0}
             onBlur={(e) => save({ interest_rate_pct: Number(e.target.value) })}
-            className="px-2 py-1.5 border border-[#D5DBE7] rounded-[8px] bg-white font-mono text-right"
+            className="px-2 py-1.5 border border-[#D3DCEE] rounded-[8px] bg-white font-mono text-right"
           />
         </label>
         <label className="flex flex-col justify-center">
@@ -1144,19 +1144,19 @@ export function LoansSchedule({ data, result, locked, save, filesFor, attachTo, 
               disabled={locked}
               checked={Boolean(data.secured)}
               onChange={(e) => save({ secured: e.target.checked })}
-              className="w-4 h-4 rounded text-[#102654]"
+              className="w-4 h-4 rounded text-[#122654]"
             />
-            <label htmlFor="loan_secured" className="font-semibold text-[#102654]">Secured by charge on assets</label>
+            <label htmlFor="loan_secured" className="font-semibold text-[#122654]">Secured by charge on assets</label>
           </div>
         </label>
       </div>
 
       {/* Maturity Analysis Panel */}
-      <div className="p-4 rounded-[12px] bg-white border border-[#D5DBE7] flex flex-col gap-3">
-        <div className="font-bold text-[#102654]">Maturity Analysis (Creditors & Notes)</div>
+      <div className="p-4 rounded-[12px] bg-white border border-[#D3DCEE] flex flex-col gap-3">
+        <div className="font-bold text-[#122654]">Maturity Analysis (Creditors & Notes)</div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3 bg-[#F6F7FB] rounded-[8px] border border-[#E3E7EF]">
-            <span className="text-[10px] uppercase font-bold text-[#5B6478] block">Due within 1 Year (Current)</span>
+          <div className="p-3 bg-[#F5F8FD] rounded-[8px] border border-[#E3E7EF]">
+            <span className="text-[10px] uppercase font-bold text-[#4A5878] block">Due within 1 Year (Current)</span>
             <div className="mt-1">
               <MoneyInput
                 label="Due within 1 year"
@@ -1166,8 +1166,8 @@ export function LoansSchedule({ data, result, locked, save, filesFor, attachTo, 
               />
             </div>
           </div>
-          <div className="p-3 bg-[#F6F7FB] rounded-[8px] border border-[#E3E7EF]">
-            <span className="text-[10px] uppercase font-bold text-[#5B6478] block">Due between 1 and 5 Years</span>
+          <div className="p-3 bg-[#F5F8FD] rounded-[8px] border border-[#E3E7EF]">
+            <span className="text-[10px] uppercase font-bold text-[#4A5878] block">Due between 1 and 5 Years</span>
             <div className="mt-1">
               <MoneyInput
                 label="Due 1 to 5 years"
@@ -1177,8 +1177,8 @@ export function LoansSchedule({ data, result, locked, save, filesFor, attachTo, 
               />
             </div>
           </div>
-          <div className="p-3 bg-[#F6F7FB] rounded-[8px] border border-[#E3E7EF]">
-            <span className="text-[10px] uppercase font-bold text-[#5B6478] block">Due after 5 Years</span>
+          <div className="p-3 bg-[#F5F8FD] rounded-[8px] border border-[#E3E7EF]">
+            <span className="text-[10px] uppercase font-bold text-[#4A5878] block">Due after 5 Years</span>
             <div className="mt-1">
               <MoneyInput
                 label="Due over 5 years"
@@ -1203,7 +1203,7 @@ export function ChecklistSchedule({ data, result, locked, save, filesFor, attach
   return (
     <div className="flex flex-col gap-4">
       {result.template.materiality && (
-        <div className="p-4 rounded-[12px] bg-[#F6F7FB] border border-[#E3E7EF] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <div className="p-4 rounded-[12px] bg-[#F5F8FD] border border-[#E3E7EF] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
           <label className="flex flex-col gap-1">
             <span className="font-semibold">Benchmark</span>
             <TextInput label="Benchmark name" value={data.benchmark_name} disabled={locked} onCommit={(v) => save({ benchmark_name: v })} />
@@ -1227,9 +1227,9 @@ export function ChecklistSchedule({ data, result, locked, save, filesFor, attach
               disabled={locked}
               defaultValue={data.percent}
               onBlur={(e) => e.target.value !== String(data.percent) && save({ percent: e.target.value })}
-              className="px-2 py-1.5 border border-[#D5DBE7] rounded-[8px] font-mono text-right bg-white"
+              className="px-2 py-1.5 border border-[#D3DCEE] rounded-[8px] font-mono text-right bg-white"
             />
-            <span className="text-[10px] text-[#5B6478]">Materiality {formatPence(t.materiality ?? 0n)}</span>
+            <span className="text-[10px] text-[#4A5878]">Materiality {formatPence(t.materiality ?? 0n)}</span>
           </label>
           <label className="flex flex-col gap-1">
             <span className="font-semibold">Performance materiality %</span>
@@ -1242,9 +1242,9 @@ export function ChecklistSchedule({ data, result, locked, save, filesFor, attach
               disabled={locked}
               defaultValue={data.pm_percent}
               onBlur={(e) => e.target.value !== String(data.pm_percent) && save({ pm_percent: e.target.value })}
-              className="px-2 py-1.5 border border-[#D5DBE7] rounded-[8px] font-mono text-right bg-white"
+              className="px-2 py-1.5 border border-[#D3DCEE] rounded-[8px] font-mono text-right bg-white"
             />
-            <span className="text-[10px] text-[#5B6478]">Performance {formatPence(t.performance ?? 0n)}</span>
+            <span className="text-[10px] text-[#4A5878]">Performance {formatPence(t.performance ?? 0n)}</span>
           </label>
         </div>
       )}
@@ -1252,7 +1252,7 @@ export function ChecklistSchedule({ data, result, locked, save, filesFor, attach
         {items.map((i) => (
           <li key={i.id} className="p-3 flex flex-col gap-2">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <span className="text-xs font-semibold text-[#102654] flex-1">{i.question}</span>
+              <span className="text-xs font-semibold text-[#122654] flex-1">{i.question}</span>
               <div className="flex gap-1" role="group" aria-label={`Answer: ${i.question}`}>
                 {(['yes', 'no', 'na'] as const).map((a) => (
                   <button
@@ -1264,9 +1264,9 @@ export function ChecklistSchedule({ data, result, locked, save, filesFor, attach
                     className={`min-w-[44px] min-h-[30px] px-2 text-[11px] font-bold rounded-[8px] border ${
                       i.answer === a
                         ? a === 'no'
-                          ? 'bg-[#FFF1EE] border-[#FF7D6B] text-[#A23A27]'
-                          : 'bg-[#102654] border-[#102654] text-white'
-                        : 'bg-white border-[#D5DBE7] text-[#102654] hover:border-[#102654]'
+                          ? 'bg-[#FFF1EE] border-[#FF7A66] text-[#A23A27]'
+                          : 'bg-[#122654] border-[#122654] text-white'
+                        : 'bg-white border-[#D3DCEE] text-[#122654] hover:border-[#122654]'
                     } disabled:opacity-60`}
                   >
                     {a === 'na' ? 'N/A' : a === 'yes' ? 'Yes' : 'No'}

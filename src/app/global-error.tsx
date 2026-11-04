@@ -6,7 +6,7 @@ import ErrorPage from './error';
 export default function GlobalError(props: { error: Error & { digest?: string }; retry: () => void }) {
   return (
     <html lang="en">
-      <body style={{ fontFamily: 'system-ui, sans-serif', background: '#F6F7FB', margin: 0 }}>
+      <body style={{ fontFamily: 'system-ui, sans-serif', background: '#F5F8FD', margin: 0 }}>
         <ErrorPage {...props} />
       </body>
     </html>
