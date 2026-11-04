@@ -16,8 +16,17 @@ export function secret(): string {
   // never public. Stable across restarts; changing the database password signs everyone out.
   const dbUrl = process.env.DATABASE_URL;
   if (dbUrl) return crypto.createHash('sha256').update(`blynt-session-key:${dbUrl}`).digest('base64url');
-  // A fallback in the code would let anyone forge sessions on a live site
-  if (process.env.NODE_ENV === 'production') throw new Error('Set AUTH_SECRET (32+ random characters) or DATABASE_URL before running in production.');
+  // A fallback in the code would let anyone forge sessions on a live site, so a production server
+  // with nothing configured makes its own random key (everyone is signed out when it restarts)
+  if (process.env.NODE_ENV === 'production') {
+    // On globalThis so the proxy and the API routes (bundled separately) share one key
+    const g = globalThis as { __blyntSessionKey?: string };
+    if (!g.__blyntSessionKey) {
+      g.__blyntSessionKey = crypto.randomBytes(32).toString('base64url');
+      console.error(JSON.stringify({ blynt_error: true, where: 'auth', message: 'No AUTH_SECRET or DATABASE_URL: using a random session key until the server restarts.' }));
+    }
+    return g.__blyntSessionKey;
+  }
   return DEV_SECRET;
 }
 
