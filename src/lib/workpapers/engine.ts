@@ -526,3 +526,11 @@ export function registerTotals(engagementId: string) {
   }
   return { profit_p: profit, net_assets_p: netAssets };
 }
+
+/** Sign-off levels for this paper: the client's own setting, else the practice's, else 3. */
+export function levelsFor(wp: Workpaper): number {
+  const eng = db.engagements.find((e) => e.id === wp.engagement_id);
+  const client = db.clients.find((c) => c.id === eng?.client_id);
+  const firm = db.firms.find((f) => f.id === eng?.firm_id);
+  return client?.signoff_levels ?? firm?.settings?.defaults?.signoff_levels ?? 3;
+}

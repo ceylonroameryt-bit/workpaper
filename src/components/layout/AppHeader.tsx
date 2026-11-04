@@ -48,7 +48,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
     () => db.users.find((u) => u.id === getCurrentUserId()) ?? db.users[0]
   );
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const openNotesCount = db.comments.filter((c) => c.status === 'open' && c.type !== 'comment').length;
+  // REV-04: the bell counts what is waiting on you (assigned papers, mentions, review points, approvals)
+  const [openNotesCount, setWaiting] = React.useState(0);
+  React.useEffect(() => {
+    fetch('/api/v1/my-work')
+      .then((r) => (r.ok ? r.json() : { items: [] }))
+      .then((d) => setWaiting(d.items?.length ?? 0))
+      .catch(() => {});
+  }, [pathname]);
 
   // Close menus on outside click
   useEffect(() => {
@@ -207,10 +214,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
             <span className="hidden sm:inline font-semibold">Blynt Bot</span>
           </button>
 
-          {/* Notifications: open review notes and client queries */}
+          {/* Notifications: My work (REV-04) */}
           <Link
-            href="/review"
-            aria-label={`${openNotesCount} open review notes`}
+            href="/my-work"
+            aria-label={`My work: ${openNotesCount} waiting`}
             className="relative p-2 rounded-full text-[#5B6478] hover:text-[#102654] hover:bg-[#F6F7FB] transition-colors"
           >
             <Bell className="w-4 h-4" />

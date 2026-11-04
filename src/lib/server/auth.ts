@@ -12,8 +12,12 @@ const DEV_SECRET = 'blynt-dev-only-secret-change-me';
 export function secret(): string {
   const s = process.env.AUTH_SECRET;
   if (s && s.length >= 32) return s;
+  // No AUTH_SECRET: derive one from the database URL, which holds the database password and is
+  // never public. Stable across restarts; changing the database password signs everyone out.
+  const dbUrl = process.env.DATABASE_URL;
+  if (dbUrl) return crypto.createHash('sha256').update(`blynt-session-key:${dbUrl}`).digest('base64url');
   // A fallback in the code would let anyone forge sessions on a live site
-  if (process.env.NODE_ENV === 'production') throw new Error('Set AUTH_SECRET (32+ random characters) before running in production.');
+  if (process.env.NODE_ENV === 'production') throw new Error('Set AUTH_SECRET (32+ random characters) or DATABASE_URL before running in production.');
   return DEV_SECRET;
 }
 

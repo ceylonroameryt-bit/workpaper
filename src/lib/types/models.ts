@@ -370,6 +370,9 @@ export interface Workpaper {
   // WPS-03: unticked papers move to the N/A list with the reason; absent = applicable
   applicable?: boolean;
   na_reason?: string | null;
+  // REV-04: who the schedule is assigned to, and when it is due
+  assignee_id?: string | null;
+  due_date?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -404,6 +407,7 @@ export interface Comment {
   resolved_by_name?: string | null;
   resolved_at?: string | null;
   body: string;
+  mentions?: string[]; // users tagged with @name (REV-03)
   replies?: CommentReply[];
 }
 
