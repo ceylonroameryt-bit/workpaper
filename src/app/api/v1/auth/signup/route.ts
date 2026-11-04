@@ -17,6 +17,9 @@ export async function POST(req: Request) {
     if (!(['preparer', 'reviewer', 'manager', 'partner', 'admin'] as UserRole[]).includes(role)) {
       return jsonResponse({ error: 'Choose a valid role.' }, 400);
     }
+    if (fullName.length > 100 || firmName.length > 200) {
+      return jsonResponse({ error: 'Your name can be up to 100 characters and the practice name up to 200.' }, 400);
+    }
     if (!fullName) {
       return jsonResponse({ error: 'Please enter your full name.' }, 400);
     }

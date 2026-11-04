@@ -8,7 +8,7 @@ import { db } from '@/lib/server/db';
 import { Client, CompanyType } from '@/lib/types/models';
 import { packForClient } from '@/lib/workpapers/templates';
 import { useCompany } from '@/context/CompanyContext';
-import { companyNumberError, structureFields, structureForCompanyType } from '@/lib/practice-structure';
+import { companyNumberError, structureFields, structureForCompanyType, UK_POSTCODE, UK_VAT } from '@/lib/practice-structure';
 import { Frequency, FREQUENCY_MONTHS, periodStart as startOf } from '@/lib/periods';
 
 /**
@@ -123,6 +123,8 @@ export default function NewEngagementWizard() {
   const structure = structureForCompanyType(type);
   const sf = structureFields(structure);
   const crnError = sf.companyNumber && details.company_no.trim() ? companyNumberError(structure, details.company_no, details.jurisdiction) : '';
+  const postcodeError = details.postcode.trim() && !UK_POSTCODE.test(details.postcode.trim().toUpperCase()) ? 'Enter a valid UK postcode.' : '';
+  const vatError = vat && details.vat_number.trim() && !UK_VAT.test(details.vat_number.replace(/\s/g, '').toUpperCase()) ? 'Enter a valid UK VAT number.' : '';
   const setD = (k: keyof typeof BLANK) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setDetails({ ...details, [k]: e.target.value });
 
   const pickClient = (id: string) => {
@@ -172,7 +174,13 @@ export default function NewEngagementWizard() {
     let id = clientId;
     if (isNew) id = (await api('/api/v1/clients', 'POST', { name: clientName, company_no: '', company_type: type, year_end: yearEnd, data_source: 'csv' })).id;
     // The profile saves the details and decides the papers; the engagement is then created from it
-    await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll, team_user_ids: team });
+    try {
+      await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll, team_user_ids: team });
+    } catch (e) {
+      // Don't leave a half-made client behind when its details are refused
+      if (isNew) await api(`/api/v1/clients/${encodeURIComponent(id)}/archive`, 'POST', { archived: true, reason: 'Set-up cancelled' }).catch(() => {});
+      throw e;
+    }
     const eng = await api('/api/v1/engagements', 'POST', {
       client_id: id,
       period_start: periodStart,
@@ -192,7 +200,7 @@ export default function NewEngagementWizard() {
   const next = async () => {
     setError('');
     if (step === 0 && !clientName) return setError('Enter the client’s name.');
-    if (step === 0 && crnError) return setError(crnError);
+    if (step === 0 && (crnError || postcodeError || vatError)) return setError(crnError || postcodeError || vatError);
     if (step === 1 && (!periodStart || !yearEnd || periodStart >= yearEnd)) return setError(`Set a period start before the ${END_LABEL[frequency].toLowerCase()}.`);
     if (step < STEPS.length - 1) return go(step + 1);
     setSaving(true);
@@ -285,9 +293,10 @@ export default function NewEngagementWizard() {
                   </div>
                 )}
                 <Q>{sf.addressLabel}</Q>
+                {postcodeError && <p className="text-xs text-[#B8432F] -mt-1 mb-2">{postcodeError}</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-3">
                   <input aria-label="Address" className={inputCls} value={details.address_line} onChange={setD('address_line')} placeholder="12 High Street, Leeds" />
-                  <input aria-label="Postcode" className={inputCls} value={details.postcode} onChange={setD('postcode')} placeholder="LS1 4AB" />
+                  <input aria-label="Postcode" className={inputCls} value={details.postcode} onChange={setD('postcode')} placeholder="LS1 4AB" aria-invalid={Boolean(postcodeError)} />
                   <select aria-label="Country" className={inputCls} value={details.jurisdiction} onChange={setD('jurisdiction')}>
                     <option value="england_wales">England and Wales</option>
                     <option value="scotland">Scotland</option>
@@ -299,7 +308,8 @@ export default function NewEngagementWizard() {
                 {vat && (
                   <div className="sm:w-1/2">
                     <Q htmlFor="vat">VAT number</Q>
-                    <input id="vat" className={inputCls} value={details.vat_number} onChange={setD('vat_number')} placeholder="GB123456789" />
+                    <input id="vat" className={inputCls} value={details.vat_number} onChange={setD('vat_number')} placeholder="GB123456789" aria-invalid={Boolean(vatError)} />
+                    {vatError && <p className="text-xs text-[#B8432F] mt-1">{vatError}</p>}
                   </div>
                 )}
                 <Q>Does it run payroll?</Q>

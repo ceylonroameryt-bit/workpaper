@@ -107,13 +107,11 @@ export function saveFirmDefaults(actor: Actor, d: any): PracticeDefaults {
   if (!canManage(actor)) throw new ServiceError('Only a manager, partner or admin can change practice settings.', 403, 'FORBIDDEN');
   const firm = db.firms.find((f) => f.id === actor.firmId);
   if (!firm) throw new ServiceError('Practice not found', 404, 'NOT_FOUND');
-  let tolerance: bigint, review: bigint;
-  try {
-    tolerance = toPence(String(d?.tolerance ?? ''));
-    review = toPence(String(d?.review_threshold ?? ''));
-  } catch {
-    throw new ServiceError('Enter the tolerance and review threshold as amounts.');
-  }
+  // Whole pounds and pence only: toPence would turn text like "abc" into £0 without complaint
+  const isAmount = (v: unknown) => /^\s*£?\d{1,9}(\.\d{1,2})?\s*$/.test(String(v ?? ''));
+  if (!isAmount(d?.tolerance) || !isAmount(d?.review_threshold)) throw new ServiceError('Enter the tolerance and review threshold as amounts, such as 1.00.');
+  const tolerance = toPence(String(d.tolerance));
+  const review = toPence(String(d.review_threshold));
   if (tolerance < 0n || tolerance > 100_000n) throw new ServiceError('Set a tolerance between £0 and £1,000.');
   if (review <= 0n) throw new ServiceError('Set a review threshold above £0.');
   const levels = Number(d?.signoff_levels);

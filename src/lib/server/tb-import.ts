@@ -35,6 +35,9 @@ function isAmount(v: unknown): boolean {
   return /^\(?-?\s*[£$€]?\s*-?\d{1,3}(,?\d{3})*(\.\d{1,2})?\)?$/.test(s);
 }
 
+// £1 billion per line, in pence: far beyond any real client and keeps every total safe
+const MAX_LINE = 100_000_000_000n;
+
 export function importTrialBalance(
   actor: { id: string; name: string; role: UserRole; firmId: string },
   engagementId: string,
@@ -56,6 +59,7 @@ export function importTrialBalance(
     lines.forEach((l: any, idx: number) => {
       const row = idx + 1;
       const name = typeof l?.name === 'string' ? l.name.trim() : '';
+      if (name.length > 200) problems.push(`Line ${row}: the account name is over 200 characters.`);
       if (!name) problems.push(`Line ${row} has no account name.`);
       for (const side of ['debit', 'credit'] as const) {
         if (!isAmount(l?.[side])) problems.push(`Line ${row} ${side} "${String(l[side])}" is not an amount.`);
@@ -77,12 +81,18 @@ export function importTrialBalance(
       return result({ error: problems.slice(0, 5).join(' '), problems }, 400);
     }
 
+    let tooBig = false;
     let totalDebit = 0n;
     let totalCredit = 0n;
     lines.forEach((l: any) => {
-      totalDebit += toPence(l.debit);
-      totalCredit += toPence(l.credit);
+      const d = toPence(l.debit);
+      const c = toPence(l.credit);
+      if (d > MAX_LINE || c > MAX_LINE) tooBig = true;
+      totalDebit += d;
+      totalCredit += c;
     });
+
+    if (tooBig) return result({ error: 'An amount is too large: each line must be under £1 billion.' }, 400);
 
     const difference = totalDebit - totalCredit;
     if (difference !== 0n) {

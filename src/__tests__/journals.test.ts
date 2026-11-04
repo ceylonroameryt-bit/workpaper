@@ -37,6 +37,19 @@ describe('manual journals (JNL-01)', () => {
     expect(() => createJournal(preparer, ENG, accrual({ lines: [{ blynt_code: '9999', debit_p: '1', credit_p: '0' }, { blynt_code: '2100', debit_p: '0', credit_p: '1' }] }))).toThrow(/account/);
   });
 
+  it('rejects part-pence amounts and absurdly large ones instead of rounding or accepting them', () => {
+    const l = (d: string, c: string) => [{ blynt_code: '6000', debit_p: d, credit_p: '0' }, { blynt_code: '2100', debit_p: '0', credit_p: c }];
+    expect(() => createJournal(preparer, ENG, accrual({ lines: l('10.005', '10.005') }))).toThrow(/pence/);
+    expect(() => createJournal(preparer, ENG, accrual({ lines: l('99999999999.99', '99999999999.99') }))).toThrow(/too large/);
+    expect(() => createJournal(preparer, ENG, accrual({ lines: l('10.50', '10.50') }))).not.toThrow();
+  });
+
+  it('an archived client’s journals are read-only', () => {
+    const eng = db.engagements.find((e) => e.id === ENG)!;
+    db.clients.find((c) => c.id === eng.client_id)!.archived_at = '2026-10-01T00:00:00Z';
+    expect(() => createJournal(preparer, ENG, accrual())).toThrow(/archived/);
+  });
+
   it('saving a journal changes the adjusted TB straight away', () => {
     const before = creditors();
     const j = createJournal(preparer, ENG, accrual());
