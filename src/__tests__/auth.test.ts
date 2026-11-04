@@ -146,10 +146,45 @@ describe('session secret', () => {
       expect(() => secret()).toThrow(/AUTH_SECRET/);
       env.AUTH_SECRET = 'x'.repeat(40);
       expect(secret()).toBe('x'.repeat(40));
+      // No usable AUTH_SECRET (missing or too short) but a database URL: a stable key derived from it
+      env.AUTH_SECRET = 'short';
+      const dbUrl = env.DATABASE_URL;
+      env.DATABASE_URL = 'postgres://app:s3cret-pw@db.internal:5432/blynt';
+      const k = secret();
+      expect(k.length).toBeGreaterThanOrEqual(32);
+      expect(k).not.toContain('s3cret-pw');
+      expect(secret()).toBe(k);
+      env.DATABASE_URL = 'postgres://app:other-pw@db.internal:5432/blynt';
+      expect(secret()).not.toBe(k);
+      if (dbUrl === undefined) delete env.DATABASE_URL;
+      else env.DATABASE_URL = dbUrl;
     } finally {
       env.NODE_ENV = node;
       env.AUTH_SECRET = auth;
       if (auth === undefined) delete env.AUTH_SECRET;
+    }
+  });
+});
+
+describe('seeded demo passwords on a live server', () => {
+  it('a production server gives no default passwords and removes any admin123 left from the demo seed', async () => {
+    const { db } = await import('../lib/server/db');
+    const { ensureCredentials } = await import('../lib/server/credentials');
+    const { hashPassword, verifyPassword } = await import('../lib/server/auth');
+    const env = process.env as Record<string, string | undefined>;
+    const node = env.NODE_ENV;
+    try {
+      env.NODE_ENV = 'production';
+      db.seed(true);
+      db.credentials = [
+        { user_id: 'usr_admin', password_hash: hashPassword('admin123') },
+        { user_id: 'usr_test_preparer', password_hash: hashPassword('A-Real-Password-2026!') },
+      ];
+      ensureCredentials();
+      expect(db.credentials.map((c) => c.user_id)).toEqual(['usr_test_preparer']); // demo password gone, real one kept
+      expect(verifyPassword('A-Real-Password-2026!', db.credentials[0].password_hash)).toBe(true);
+    } finally {
+      env.NODE_ENV = node;
     }
   });
 });

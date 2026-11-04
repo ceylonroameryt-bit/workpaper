@@ -14,9 +14,12 @@ import {
 } from 'lucide-react';
 import { BlyntLogo } from '@/components/ui/BlyntLogo';
 
+// The demo admin hint is for local development only; a live site never shows or pre-fills it
+const DEV = process.env.NODE_ENV !== 'production';
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@blynt.co.uk');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState(DEV ? 'admin@blynt.co.uk' : '');
+  const [password, setPassword] = useState(DEV ? 'admin123' : '');
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [, setFailedAttempts] = useState(0);
@@ -161,6 +164,7 @@ export default function LoginPage() {
           )}
 
           {/* Development Admin Credentials */}
+          {DEV && (
           <div className="mb-6 p-3 bg-[#F6F7FB] border border-[#E3E7EF] rounded-[12px] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -184,6 +188,7 @@ export default function LoginPage() {
               Fill
             </button>
           </div>
+          )}
 
           {errorMessage && (
             <div
