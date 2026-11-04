@@ -94,11 +94,9 @@ describe('role rules on save', () => {
 
   it('sign-offs', () => {
     const so = (role: string, user_id: string) => (v: State) => v.signoffs.push({ id: 's1', workpaper_id: 'w1', role, user_id });
-    allow(so('preparer', 'prep'), actor('prep', 'preparer'));
-    reject(so('reviewer', 'prep'), actor('prep', 'preparer'));
-    reject(so('partner', 'rev'), actor('rev', 'reviewer'));
-    reject(so('preparer', 'rev'), actor('prep', 'preparer'));
-    allow(so('partner', 'part'), actor('part', 'partner'));
+    // Every sign-off goes through the server's sign-off bar now (order, levels, review points)
+    reject(so('preparer', 'prep'), actor('prep', 'preparer'));
+    reject(so('partner', 'part'), actor('part', 'partner'));
   });
 
   it('journals cannot be approved from the browser; the server keeps its copy', () => {

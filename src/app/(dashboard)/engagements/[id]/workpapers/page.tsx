@@ -104,6 +104,26 @@ export default function WorkingPaperIndexPage() {
 
   // Rows come from this engagement's papers (created from the client's standard and profile)
   const [rev, setRev] = useState(0);
+  const [reviewing, setReviewing] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState('');
+  const reviewSelected = async () => {
+    setReviewing(true);
+    const failed: string[] = [];
+    let done = 0;
+    for (const id of selectedScheduleIds) {
+      const res = await fetch(`/api/v1/workpapers/${encodeURIComponent(id)}/signoffs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'review' }),
+      });
+      if (res.ok) done++;
+      else failed.push(`${db.workpapers.find((w) => w.id === id)?.ref}: ${(await res.json().catch(() => ({}))).error || 'not reviewed'}`);
+    }
+    setBulkMessage(`${done} reviewed.${failed.length ? ` Not reviewed: ${failed.join(' · ')}` : ''}`);
+    setSelectedScheduleIds(new Set());
+    setReviewing(false);
+    setRev((r) => r + 1);
+  };
   const schedules = useMemo(() => buildSchedules(engagementId), [engagementId, rev]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [sectionFilter, setSectionFilter] = useState<'all' | 'leads' | 'balance_sheet' | 'pnl' | 'tax' | 'disclosures' | 'completion'>('all');
@@ -329,7 +349,20 @@ export default function WorkingPaperIndexPage() {
           </select>
         </div>
 
+        {/* REV-01: bulk review, one server sign-off per schedule, each checked and logged */}
+        {selectedScheduleIds.size > 0 && ['reviewer', 'manager', 'partner', 'admin'].includes(getActor().role) && (
+          <button
+            type="button"
+            disabled={reviewing}
+            onClick={reviewSelected}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-semibold rounded-lg disabled:opacity-60"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>{reviewing ? 'Reviewing…' : `Review selected (${selectedScheduleIds.size})`}</span>
+          </button>
+        )}
       </div>
+      {bulkMessage && <p role="status" className="text-xs text-[#102654] bg-[#F6F7FB] border border-[#E3E7EF] rounded-lg px-3 py-2">{bulkMessage}</p>}
 
       {/* Main Working Paper Index Table */}
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">

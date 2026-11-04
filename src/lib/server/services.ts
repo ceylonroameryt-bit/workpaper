@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { mentionsIn } from '../mentions';
 import { db } from './db';
 import { TbSnapshotDiff, UserRole, AccountMapping, Adjustment, Workpaper, Comment, Attachment, Signoff, BlyntAccount } from '../types/models';
 import { toPence, asPence, sumPence } from '../money';
@@ -518,6 +519,7 @@ export const services = {
       created_at: new Date().toISOString(),
       resolved_by: null,
       body: data.body,
+      mentions: mentionsIn(data.body, firmId), // REV-03: tagged colleagues see it in My work
       replies: [],
     };
     db.comments.push(newComment);

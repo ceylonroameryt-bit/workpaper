@@ -34,7 +34,8 @@ import { services } from '@/lib/server/services';
 import { formatPence } from '@/lib/money';
 import { getActor } from '@/lib/session';
 import { StatusBadge } from '@/components/ui/StatusPill';
-import { evaluatePaper, linkedFiles, paperStatus } from '@/lib/workpapers/engine';
+import { evaluatePaper, levelsFor, linkedFiles, paperStatus } from '@/lib/workpapers/engine';
+import { diffData } from '@/lib/workpapers/diff';
 import { TEMPLATES, templateFor } from '@/lib/workpapers/templates';
 import type { Attachment, AttachmentCategory, AiReviewFinding } from '@/lib/types/models';
 import {
@@ -454,9 +455,11 @@ export default function WorkpaperPage() {
 
   const canSign = (role: SignRole): string | null => {
     if (isLocked) return 'Engagement is locked';
-    const allowed = actor.role === role || actor.role === 'admin' || (role === 'reviewer' && actor.role === 'manager');
-    if (!allowed) return `Switch to a ${ROLE_LABEL[role].toLowerCase()} in the user menu to sign`;
+    const may = { preparer: ['preparer', 'reviewer', 'manager', 'partner', 'admin'], reviewer: ['reviewer', 'manager', 'partner', 'admin'], partner: ['partner', 'admin'] }[role];
+    if (!may.includes(actor.role)) return `A ${ROLE_LABEL[role].toLowerCase()} signs this level`;
+    if (signoffs.some((s) => !s.stale_at && s.user_id === actor.id)) return 'You have already signed another level on this schedule';
     if (role === 'preparer') {
+      if (result.totals.difference !== undefined && workpaper.applicable !== false && paperStatus({ ...workpaper, status: 'in_progress' }) !== 'reconciled') return 'The schedule must be Reconciled first';
       if (unconfirmedAiCount > 0) return `${unconfirmedAiCount} unconfirmed AI value(s) must be confirmed first (DAT-08)`;
       if (openChecks.length > 0) return `${openChecks.length} open check(s) remaining`;
       if (prepLeft.length) return `Left: ${prepLeft.join(', ')}`;
@@ -468,44 +471,35 @@ export default function WorkpaperPage() {
     return null;
   };
 
-  const handleUnreview = () => {
-    if (unreviewReason.trim().length < 10) {
-      alert('Unreview reason must be at least 10 characters.');
+  const handleUnreview = async () => {
+    const res = await fetch(`/api/v1/workpapers/${encodeURIComponent(workpaper.id)}/unreview`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: unreviewReason.trim() }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setMessage({ kind: 'error', text: body.error || 'Could not unreview.' });
       return;
     }
-    const keepSignoffs = db.signoffs.filter(
-      (s) => s.workpaper_id === workpaper.id && s.role === 'preparer'
-    );
-    db.signoffs = db.signoffs.filter((s) => s.workpaper_id !== workpaper.id).concat(keepSignoffs);
-
-    db.schedule_versions.push({
-      id: `ver_${Date.now()}`,
-      workpaper_id: workpaper.id,
-      version_number: db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id).length + 1,
-      snapshot_data_json: { ...workpaper.data_json },
-      status: 'in_progress',
-      created_by_user_id: actor.id,
-      created_by_name: actor.name,
-      reason: unreviewReason.trim(),
-      created_at: new Date().toISOString(),
-    });
-
-    workpaper.status = 'in_progress';
-    workpaper.status = paperStatus(workpaper);
-    saveData({
-      changed_after_review: true,
-      last_unreview_reason: unreviewReason.trim(),
-      last_unreviewed_at: new Date().toISOString(),
-      last_unreviewed_by: actor.name,
-    });
-
-    db.logAudit(engagement.firm_id, actor, 'UNREVIEW', 'workpapers', workpaper.id, null, {
-      reason: unreviewReason.trim(),
-    });
-
     setUnreviewOpen(false);
     setUnreviewReason('');
-    setMessage({ kind: 'ok', text: 'Schedule unreviewed. Returned to In Progress status.' });
+    setMessage({ kind: 'ok', text: 'Schedule unreviewed. It can be changed now, and shows Changed after review until it is reviewed again.' });
+    refresh();
+  };
+
+  // REV-02: reviewed and approved schedules are read-only; the change view compares with the last review
+  const reviewedBy = signoffs.filter((s) => !s.stale_at && s.role !== 'preparer').pop();
+  const readOnly = Boolean(reviewedBy) || isLocked;
+  const lastReviewVersion = db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id && v.role && v.role !== 'preparer').pop();
+  const changesSinceReview = data.changed_after_review && lastReviewVersion ? diffData(lastReviewVersion.snapshot_data_json, data) : [];
+  const versions = db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id);
+  const team = db.users.filter((u) => db.memberships.some((m) => m.user_id === u.id && m.firm_id === engagement.firm_id));
+  const assign = (patch: { assignee_id?: string | null; due_date?: string | null }) => {
+    const current = db.workpapers.find((w) => w.id === workpaper.id);
+    if (!current) return;
+    db.logAudit(engagement.firm_id, actor, 'ASSIGN_WORKPAPER', 'workpapers', current.id, { assignee_id: current.assignee_id ?? null, due_date: current.due_date ?? null }, patch);
+    Object.assign(current, patch);
     refresh();
   };
 
@@ -719,7 +713,7 @@ export default function WorkpaperPage() {
                 {t.title}
                 {data.bank_name ? ` · ${data.bank_name}` : ''}
               </h1>
-              <StatusBadge status={workpaper.status} />
+              <StatusBadge status={paperStatus(workpaper)} />
               {data.changed_after_review && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#FFF4DB] text-[#805B00] border border-[#C58B00]/40 text-[10px] font-bold">
                   ⚠ Changed after review
@@ -826,7 +820,7 @@ export default function WorkpaperPage() {
             </Link>
 
             {/* Unreview Button (REV-02) */}
-            {latestSignoff('reviewer') && !isLocked && (
+            {reviewedBy && !isLocked && (
               <button
                 type="button"
                 onClick={() => setUnreviewOpen(true)}
@@ -1024,6 +1018,56 @@ export default function WorkpaperPage() {
 
         {/* Main column */}
         <div className="flex flex-col gap-5 min-w-0">
+          {reviewedBy && (
+            <div role="status" className="p-3 rounded-[10px] bg-[#EAF5FC] border border-[#1D4E89]/20 text-xs text-[#102654]">
+              {reviewedBy.role === 'partner' ? 'Approved' : 'Reviewed'} by <strong>{reviewedBy.user_name}</strong> on {fmtDateTime(reviewedBy.signed_at)}: read only. Use <strong>Unreview to edit</strong> to change it. Comments can still be added.
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#102654]">
+            <label className="inline-flex items-center gap-1.5">
+              Assigned to
+              <select
+                aria-label="Assigned to"
+                disabled={isLocked}
+                value={workpaper.assignee_id ?? ''}
+                onChange={(e) => assign({ assignee_id: e.target.value || null })}
+                className="min-h-[32px] px-2 border border-[#D5DBE7] rounded-[8px] bg-white"
+              >
+                <option value="">No one</option>
+                {team.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="inline-flex items-center gap-1.5">
+              Due
+              <input
+                type="date"
+                aria-label="Due date"
+                disabled={isLocked}
+                value={workpaper.due_date ?? ''}
+                onChange={(e) => assign({ due_date: e.target.value || null })}
+                className={`min-h-[32px] px-2 border rounded-[8px] bg-white ${workpaper.due_date && workpaper.due_date < new Date().toISOString().slice(0, 10) ? 'border-[#B8432F] text-[#B8432F]' : 'border-[#D5DBE7]'}`}
+              />
+            </label>
+          </div>
+          {changesSinceReview.length > 0 && (
+            <div className="p-3 rounded-[10px] bg-[#FFF4DB] border border-[#C58B00]/40 text-xs text-[#102654]">
+              <p className="font-bold mb-1.5">Changes since the last review ({changesSinceReview.length})</p>
+              <p className="text-[11px] text-[#805B00] mb-2">Unreviewed by {data.last_unreviewed_by} on {data.last_unreviewed_at ? fmtDateTime(data.last_unreviewed_at) : ''}: “{data.last_unreview_reason}”</p>
+              <table className="w-full text-[11px]">
+                <thead className="text-[#5B6478]">
+                  <tr><th className="text-left">Field</th><th className="text-left">Was</th><th className="text-left">Now</th></tr>
+                </thead>
+                <tbody>
+                  {changesSinceReview.slice(0, 20).map((c) => (
+                    <tr key={c.field}><td className="pr-3 font-mono">{c.field}</td><td className="pr-3">{c.before || '—'}</td><td>{c.after || '—'}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <fieldset disabled={readOnly} className="flex flex-col gap-5 min-w-0 border-0 p-0 m-0">
           <Section id="objective" num={1} title="Objective" state={stateOf('objective')}>
             <textarea
               aria-label="Objective"
@@ -1528,12 +1572,14 @@ export default function WorkpaperPage() {
             </div>
           </Section>
 
+          </fieldset>
+
           <Section id="signoff" num={8} title="Sign-off" state={stateOf('signoff')}>
             <p className="text-[11px] text-[#5B6478] mb-3">
-              Signing as <strong>{actor.name}</strong> ({actor.role}). Preparer, then reviewer, then partner. Changing the paper after signing makes sign-offs stale.
+              Signing as <strong>{actor.name}</strong> ({actor.role}). {levelsFor(workpaper)} sign-off level{levelsFor(workpaper) === 1 ? '' : 's'} for this file, in order; one person signs one level. A reviewed schedule is read-only until it is unreviewed.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {ROLE_ORDER.map((role) => {
+              {ROLE_ORDER.slice(0, levelsFor(workpaper)).map((role) => {
                 const so = latestSignoff(role);
                 const blocked = canSign(role);
                 return (
@@ -1824,7 +1870,7 @@ export default function WorkpaperPage() {
                       rows={3}
                       value={noteBody}
                       onChange={(e) => setNoteBody(e.target.value)}
-                      placeholder="Write a comment…"
+                      placeholder="Write a comment… type @name to tag a colleague"
                       className="p-2 border border-[#D5DBE7] rounded-[8px]"
                     />
                     <button type="button" onClick={addNote} disabled={!noteBody.trim()} className="min-h-[34px] bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] font-bold rounded-[8px] disabled:opacity-40">
@@ -1858,6 +1904,8 @@ export default function WorkpaperPage() {
                   </div>
                 )}
 
+                {versions.length >= 2 && <VersionCompare versions={versions} current={data} />}
+
                 <ol className="flex flex-col gap-2 text-xs">
                   {history.length === 0 && <li className="text-[#5B6478]">No changes yet.</li>}
                   {history.map((h) => (
@@ -1881,6 +1929,40 @@ export default function WorkpaperPage() {
           </aside>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Pick two saved versions (or the current paper) and list every field that differs (AUD-02). */
+function VersionCompare({ versions, current }: { versions: { id: string; version_number?: number; reason?: string; snapshot_data_json?: Record<string, any> }[]; current: Record<string, any> }) {
+  const [a, setA] = useState(versions[versions.length - 2]?.id ?? '');
+  const [b, setB] = useState('current');
+  const pick = (id: string) => (id === 'current' ? current : versions.find((v) => v.id === id)?.snapshot_data_json ?? {});
+  const changes = diffData(pick(a), pick(b));
+  const options = (
+    <>
+      {versions.map((v) => (
+        <option key={v.id} value={v.id}>Version {v.version_number}{v.reason ? ` (${v.reason.slice(0, 30)})` : ''}</option>
+      ))}
+      <option value="current">Current</option>
+    </>
+  );
+  return (
+    <div className="p-3 bg-white rounded-[10px] border border-[#E3E7EF] flex flex-col gap-2">
+      <span className="font-bold text-[#102654]">Compare versions</span>
+      <div className="flex gap-2">
+        <select aria-label="Compare from" value={a} onChange={(e) => setA(e.target.value)} className="flex-1 min-h-[30px] px-1.5 border border-[#D5DBE7] rounded text-[11px]">{options}</select>
+        <select aria-label="Compare to" value={b} onChange={(e) => setB(e.target.value)} className="flex-1 min-h-[30px] px-1.5 border border-[#D5DBE7] rounded text-[11px]">{options}</select>
+      </div>
+      {changes.length === 0 ? (
+        <span className="text-[11px] text-[#5B6478]">No differences.</span>
+      ) : (
+        <ul className="text-[11px] flex flex-col gap-1">
+          {changes.slice(0, 30).map((c) => (
+            <li key={c.field}><span className="font-mono text-[#5B6478]">{c.field}</span>: {c.before || '—'} → <strong>{c.after || '—'}</strong></li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

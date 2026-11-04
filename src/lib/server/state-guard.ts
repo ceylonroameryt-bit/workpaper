@@ -117,9 +117,6 @@ function deny(msg: string): never {
   throw new GuardError(msg);
 }
 
-const signoffRolesFor = (role: UserRole): string[] =>
-  PARTNER_UP.includes(role) ? ['preparer', 'reviewer', 'partner'] : REVIEWER_UP.includes(role) ? ['preparer', 'reviewer'] : ['preparer'];
-
 /** Checks role rules between the firm's current slice and the browser's proposed slice. */
 export function checkRules(before: State, after: State, actor: Actor) {
   // Audit log is append-only and new entries must be written as the signed-in user
@@ -165,18 +162,20 @@ export function checkRules(before: State, after: State, actor: Actor) {
 
   // Sign-offs: only as yourself, only at a level your role allows
   const so = changed(rows(before, 'signoffs'), rows(after, 'signoffs'), 'signoffs');
-  for (const s of so.added) {
-    if (s.user_id !== actor.id) deny('You can only sign off as yourself.');
-    if (!signoffRolesFor(actor.role).includes(s.role)) deny(`Your role (${actor.role}) cannot give a ${s.role} sign-off.`);
-  }
+  // Sign-offs are given and removed through the server (signoff.ts), which checks order, levels and review points
+  if (so.added.length) deny('Sign off from the schedule’s sign-off bar.');
   for (const { before: b, after: a } of so.updated) {
     // Marking a sign-off stale (because the paper changed) is allowed for anyone editing
     const { stale_at: _a, stale_reason: _b, ...restBefore } = b;
     const { stale_at: _c, stale_reason: _d, ...restAfter } = a;
     if (!same(restBefore, restAfter)) deny('A sign-off cannot be altered.');
   }
-  for (const s of so.removed) {
-    if (s.user_id !== actor.id && !PARTNER_UP.includes(actor.role)) deny('Only the signer or a partner can remove a sign-off.');
+  if (so.removed.length) deny('Use Unreview to remove a review sign-off.');
+
+  // REV-02: a reviewed or approved paper is read-only until it is unreviewed
+  const reviewed = new Set(rows(before, 'signoffs').filter((s) => s.role !== 'preparer' && !s.stale_at).map((s) => s.workpaper_id));
+  for (const { before: b, after: a } of changed(rows(before, 'workpapers'), rows(after, 'workpapers'), 'workpapers').updated) {
+    if (reviewed.has(b.id) && JSON.stringify(b.data_json) !== JSON.stringify(a.data_json)) deny('This schedule has been reviewed. Unreview it before changing it.');
   }
 
   // Journals are server-managed (journals.ts checks balancing, roles and approval)
