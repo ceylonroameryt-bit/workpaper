@@ -19,8 +19,8 @@ const accrual = (over: Record<string, unknown> = {}) => ({
   date: '2026-09-30',
   narrative: 'Accrue September rent',
   lines: [
-    { blynt_code: '6000', debit_p: '500.00', credit_p: '0', narrative: 'Rent' },
-    { blynt_code: '2100', debit_p: '0', credit_p: '500.00', narrative: 'Accrual' },
+    { blynt_code: '400', debit_p: '500.00', credit_p: '0', narrative: 'Rent' },
+    { blynt_code: '760', debit_p: '0', credit_p: '500.00', narrative: 'Accrual' },
   ],
   ...over,
 });
@@ -30,15 +30,15 @@ beforeEach(() => db.seed(true));
 
 describe('manual journals (JNL-01)', () => {
   it('a journal must balance, have a type, a narrative and a date inside the period', () => {
-    expect(() => createJournal(preparer, ENG, accrual({ lines: [{ blynt_code: '6000', debit_p: '500', credit_p: '0' }, { blynt_code: '2100', debit_p: '0', credit_p: '499' }] }))).toThrow(/balance/);
+    expect(() => createJournal(preparer, ENG, accrual({ lines: [{ blynt_code: '400', debit_p: '500', credit_p: '0' }, { blynt_code: '760', debit_p: '0', credit_p: '499' }] }))).toThrow(/balance/);
     expect(() => createJournal(preparer, ENG, accrual({ type: 'whatever' }))).toThrow(/type/);
     expect(() => createJournal(preparer, ENG, accrual({ narrative: ' ' }))).toThrow(/narrative/);
     expect(() => createJournal(preparer, ENG, accrual({ date: '2027-01-01' }))).toThrow(/inside the period/);
-    expect(() => createJournal(preparer, ENG, accrual({ lines: [{ blynt_code: '9999', debit_p: '1', credit_p: '0' }, { blynt_code: '2100', debit_p: '0', credit_p: '1' }] }))).toThrow(/account/);
+    expect(() => createJournal(preparer, ENG, accrual({ lines: [{ blynt_code: '9999', debit_p: '1', credit_p: '0' }, { blynt_code: '760', debit_p: '0', credit_p: '1' }] }))).toThrow(/account/);
   });
 
   it('rejects part-pence amounts and absurdly large ones instead of rounding or accepting them', () => {
-    const l = (d: string, c: string) => [{ blynt_code: '6000', debit_p: d, credit_p: '0' }, { blynt_code: '2100', debit_p: '0', credit_p: c }];
+    const l = (d: string, c: string) => [{ blynt_code: '400', debit_p: d, credit_p: '0' }, { blynt_code: '760', debit_p: '0', credit_p: c }];
     expect(() => createJournal(preparer, ENG, accrual({ lines: l('10.005', '10.005') }))).toThrow(/pence/);
     expect(() => createJournal(preparer, ENG, accrual({ lines: l('99999999999.99', '99999999999.99') }))).toThrow(/too large/);
     expect(() => createJournal(preparer, ENG, accrual({ lines: l('10.50', '10.50') }))).not.toThrow();
@@ -71,7 +71,7 @@ describe('manual journals (JNL-01)', () => {
     const k = createJournal(preparer, ENG, accrual());
     deleteJournal(preparer, k.id);
     expect(db.adjustments.some((a) => a.id === k.id)).toBe(false);
-    expect(db.audit_logs.find((a) => a.entity_id === k.id && a.action === 'DELETE_JOURNAL')!.before_json).toContain('2100');
+    expect(db.audit_logs.find((a) => a.entity_id === k.id && a.action === 'DELETE_JOURNAL')!.before_json).toContain('760');
   });
 });
 
@@ -102,7 +102,7 @@ describe('journal register (JNL-04)', () => {
   it('totals the effect on profit and on net assets', () => {
     createJournal(preparer, ENG, accrual());
     // A reclass between two assets moves neither figure
-    createJournal(preparer, ENG, accrual({ type: 'reclassification', narrative: 'Reclass petty cash', lines: [{ blynt_code: '1010', debit_p: '20', credit_p: '0' }, { blynt_code: '1000', debit_p: '0', credit_p: '20' }] }));
+    createJournal(preparer, ENG, accrual({ type: 'reclassification', narrative: 'Reclass petty cash', lines: [{ blynt_code: '600', debit_p: '20', credit_p: '0' }, { blynt_code: '620', debit_p: '0', credit_p: '20' }] }));
     const t = registerTotals(ENG);
     expect(t.profit_p).toBe(-50000n);
     expect(t.net_assets_p).toBe(-50000n);
@@ -117,7 +117,7 @@ describe('journal register (JNL-04)', () => {
     const made = autoReverseInto(next.id);
     expect(made).toHaveLength(1);
     expect(made[0]).toMatchObject({ engagement_id: next.id, date: '2026-10-01', reverses_id: j.id, status: 'accepted' });
-    expect(made[0].lines.find((l) => l.blynt_code === '2100')!.debit_p).toBe('50000');
+    expect(made[0].lines.find((l) => l.blynt_code === '760')!.debit_p).toBe('50000');
     expect(autoReverseInto(next.id)).toHaveLength(0); // never twice
   });
 

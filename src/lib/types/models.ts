@@ -234,11 +234,14 @@ export interface Engagement {
 export interface BlyntAccount {
   code: string;
   name: string;
-  type: 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Cost of Sales' | 'Overhead';
-  normal_balance: 'Debit' | 'Credit';
+  type: 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Cost of Sales' | 'Overhead' | 'System';
+  normal_balance: 'Debit' | 'Credit' | 'Mixed';
   lead_letter: string; // e.g. "A", "B", "C", "D", "E", "F", "K", "Q", "Z"
   is_control: boolean;
   is_system: boolean;
+  statutory_line?: string;
+  schedule_ref?: string;
+  cash_flow_category?: 'Operating activities' | 'Investing activities' | 'Financing activities' | 'Cash and cash equivalents';
   used_by_count?: number;
 }
 

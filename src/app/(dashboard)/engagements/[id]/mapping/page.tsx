@@ -33,6 +33,18 @@ import { matchBlyntAccount, getStatutoryDetails } from '@/lib/mapping/auto-mappe
 import { getActor, getCurrentUserId } from '@/lib/session';
 import { engagementSummary } from '@/lib/api';
 
+function ChartOptions() {
+  return (
+    <>
+      {db.blynt_accounts.map((a) => (
+        <option key={a.code} value={a.code}>
+          {a.code} {a.name}
+        </option>
+      ))}
+    </>
+  );
+}
+
 export default function AccountMappingPage() {
   const params = useParams();
   const router = useRouter();
@@ -728,40 +740,7 @@ export default function AccountMappingPage() {
                   className="text-xs font-semibold py-1 px-2 border border-[#D3DCEE] rounded-lg bg-white text-[#122654] max-w-[200px]"
                 >
                   <option value="">Select target COA…</option>
-                  <optgroup label="Cash &amp; Banking (REC-02)">
-                    <option value="1000">1000 Petty Cash</option>
-                    <option value="1010">1010 Barclays Operating Account</option>
-                    <option value="1020">1020 Barclays High Yield Reserve</option>
-                  </optgroup>
-                  <optgroup label="Fixed Assets (REC-03)">
-                    <option value="1500">1500 Plant &amp; Equipment at Cost</option>
-                    <option value="1510">1510 Computer Equipment Cost</option>
-                    <option value="1520">1520 Fixtures and Fittings Cost</option>
-                    <option value="1700">1700 Plant Accumulated Depreciation</option>
-                    <option value="1710">1710 Computer Equip Accum Deprec</option>
-                  </optgroup>
-                  <optgroup label="Working Capital (REC-07, REC-08, REC-09)">
-                    <option value="1200">1200 Trade Debtors Control</option>
-                    <option value="1210">1210 Allowance for Doubtful Debts</option>
-                    <option value="1400">1400 Prepayments &amp; Accrued Income</option>
-                    <option value="1300">1300 Finished Goods Stock (REC-14)</option>
-                    <option value="2000">2000 Trade Creditors Control</option>
-                    <option value="2100">2100 Accrued Expenses</option>
-                  </optgroup>
-                  <optgroup label="Taxation &amp; Payroll (REC-05, REC-06, REC-13)">
-                    <option value="2200">2200 VAT Liability Control</option>
-                    <option value="2300">2300 PAYE &amp; NIC Control</option>
-                    <option value="835b">835b Director&apos;s Loan Account (REC-11)</option>
-                  </optgroup>
-                  <optgroup label="Equity &amp; P&amp;L (REC-01, REC-12)">
-                    <option value="3000">3000 Ordinary Share Capital</option>
-                    <option value="3100">3100 Retained Reserves</option>
-                    <option value="4000">4000 Wholesale Commercial Sales</option>
-                    <option value="5000">5000 Direct Materials &amp; Costs</option>
-                    <option value="6000">6000 Office Rent &amp; Administration</option>
-                    <option value="6100">6100 Utilities Light Heat Power</option>
-                    <option value="6900">6900 Depreciation Charge</option>
-                  </optgroup>
+                  <ChartOptions />
                 </select>
                 <button
                   type="button"
@@ -935,40 +914,7 @@ export default function AccountMappingPage() {
                         className="text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] hover:border-[#122654] focus:border-[#122654] rounded-lg bg-white text-[#122654] shadow-2xs transition-all cursor-pointer w-full max-w-[240px]"
                       >
                         <option value="">Select Blynt COA Account…</option>
-                        <optgroup label="Cash &amp; Banking (REC-02)">
-                          <option value="1000">1000 Petty Cash</option>
-                          <option value="1010">1010 Barclays Operating Account</option>
-                          <option value="1020">1020 Barclays High Yield Reserve</option>
-                        </optgroup>
-                        <optgroup label="Fixed Assets (REC-03)">
-                          <option value="1500">1500 Plant &amp; Equipment Cost</option>
-                          <option value="1510">1510 Computer Equipment Cost</option>
-                          <option value="1520">1520 Fixtures and Fittings Cost</option>
-                          <option value="1700">1700 Plant Accumulated Depreciation</option>
-                          <option value="1710">1710 Computer Equip Accum Deprec</option>
-                        </optgroup>
-                        <optgroup label="Working Capital (REC-07, REC-08, REC-09)">
-                          <option value="1200">1200 Trade Debtors Control</option>
-                          <option value="1210">1210 Allowance for Doubtful Debts</option>
-                          <option value="1400">1400 Prepayments</option>
-                          <option value="1300">1300 Finished Goods Stock (REC-14)</option>
-                          <option value="2000">2000 Trade Creditors Control</option>
-                          <option value="2100">2100 Accrued Expenses</option>
-                        </optgroup>
-                        <optgroup label="Taxation &amp; Payroll (REC-05, REC-06, REC-13)">
-                          <option value="2200">2200 VAT Liability Control</option>
-                          <option value="2300">2300 PAYE &amp; NIC Control</option>
-                          <option value="835b">835b Director&apos;s Loan Account (REC-11)</option>
-                        </optgroup>
-                        <optgroup label="Equity &amp; P&amp;L (REC-01, REC-12)">
-                          <option value="3000">3000 Ordinary Share Capital</option>
-                          <option value="3100">3100 Retained Reserves</option>
-                          <option value="4000">4000 Wholesale Commercial Sales</option>
-                          <option value="5000">5000 Direct Materials &amp; Costs</option>
-                          <option value="6000">6000 Office Rent &amp; Administration</option>
-                          <option value="6100">6100 Utilities Light Heat Power</option>
-                          <option value="6900">6900 Depreciation Charge</option>
-                        </optgroup>
+                  <ChartOptions />
                       </select>
                     </td>
 

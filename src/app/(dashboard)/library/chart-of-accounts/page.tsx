@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
+import type { BlyntAccount } from '@/lib/types/models';
 
 export default function ChartOfAccountsPage() {
   const [search, setSearch] = useState('');
@@ -18,19 +19,20 @@ export default function ChartOfAccountsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCode, setNewCode] = useState('');
   const [newName, setNewName] = useState('');
-  const [newType, setNewType] = useState<'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Cost of Sales' | 'Overhead'>('Overhead');
+  const [newType, setNewType] = useState<BlyntAccount['type']>('Overhead');
   const [newLead, setNewLead] = useState('E');
 
   const accounts = db.blynt_accounts;
 
   const groups = [
-    { id: 'all', label: 'All Accounts', range: '1000–6999' },
-    { id: 'Asset', label: 'Assets (1000–1999)', range: '1000–1999' },
-    { id: 'Liability', label: 'Liabilities (2000–2999)', range: '2000–2999' },
-    { id: 'Equity', label: 'Equity & Reserves (3000–3999)', range: '3000–3999' },
-    { id: 'Revenue', label: 'Revenue (4000–4999)', range: '4000–4999' },
-    { id: 'Cost of Sales', label: 'Cost of Sales (5000–5999)', range: '5000–5999' },
-    { id: 'Overhead', label: 'Overheads (6000–6999)', range: '6000–6999' },
+    { id: 'all', label: 'All Accounts', range: '100–999' },
+    { id: 'Asset', label: 'Assets (600–749)', range: '600–749' },
+    { id: 'Liability', label: 'Liabilities (750–849)', range: '750–849' },
+    { id: 'Equity', label: 'Equity & Reserves (850–899)', range: '850–899' },
+    { id: 'Revenue', label: 'Revenue (100–199)', range: '100–199' },
+    { id: 'Cost of Sales', label: 'Cost of Sales (200–299)', range: '200–299' },
+    { id: 'Overhead', label: 'Payroll, Admin, Finance & Tax (300–599)', range: '300–599' },
+    { id: 'System', label: 'System & Clearing (900–999)', range: '900–999' },
   ];
 
   const filteredAccounts = accounts.filter((acc) => {

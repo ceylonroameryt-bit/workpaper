@@ -32,7 +32,7 @@ export default function AnalysisPage() {
   // P&L Lines with AI explanations (ANL-01)
   const pnlLines = [
     {
-      code: '4000',
+      code: '100',
       name: 'Wholesale Commercial UK Sales',
       currentPence: 620000000n, // £6,200,000.00
       priorPence: 540000000n, // £5,400,000.00
@@ -44,7 +44,7 @@ export default function AnalysisPage() {
       visibility: 'client_facing' as const,
     },
     {
-      code: '5000',
+      code: '210',
       name: 'Direct Component Materials',
       currentPence: 380000000n, // £3,800,000.00
       priorPence: 320000000n, // £3,200,000.00
@@ -56,7 +56,7 @@ export default function AnalysisPage() {
       visibility: 'client_facing' as const,
     },
     {
-      code: '6000',
+      code: '400',
       name: 'London Office Rent & Rates',
       currentPence: 30000000n, // £300,000.00
       priorPence: 23200000n, // £232,000.00
@@ -68,7 +68,7 @@ export default function AnalysisPage() {
       visibility: 'internal' as const,
     },
     {
-      code: '6100',
+      code: '410',
       name: 'Gas and Electricity Utilities',
       currentPence: 4120000n,
       priorPence: 4050000n,
@@ -79,7 +79,7 @@ export default function AnalysisPage() {
       visibility: 'internal' as const,
     },
     {
-      code: '6900',
+      code: '492',
       name: 'Depreciation Charge on Tangibles',
       currentPence: 2700000n,
       priorPence: 2450000n,

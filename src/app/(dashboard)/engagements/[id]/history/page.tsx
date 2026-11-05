@@ -67,7 +67,7 @@ export default function HistoryPage() {
           entity: 'account_mappings',
           entity_id: 'map_1500',
           before_json: JSON.stringify({ status: 'suggested', confidence: 94 }),
-          after_json: JSON.stringify({ status: 'confirmed', blynt_code: '1500' }),
+          after_json: JSON.stringify({ status: 'confirmed', blynt_code: '660' }),
           at: '2026-10-24T16:15:00Z',
         },
         {
@@ -121,7 +121,7 @@ export default function HistoryPage() {
     {
       id: 'ail_01',
       outputType: 'Account Mapping',
-      inputs: 'Nominal 1500 "Plant Machinery Cost" + prior year mapping',
+      inputs: 'Nominal 660 "Plant and equipment at cost" + prior year mapping',
       confidence: '98%',
       modelVersion: 'Blynt-ChartMap-v2.6',
       decidedBy: 'Marcus Vance',
