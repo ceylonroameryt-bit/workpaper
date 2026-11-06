@@ -368,11 +368,13 @@ export default function DisclosuresPage() {
           <div className="border border-gray-200 rounded-xl p-8 bg-gray-50/50 max-w-3xl mx-auto shadow-inner space-y-6 text-[#122654]">
             <div className="text-center space-y-1">
               <h2 className="text-lg font-bold tracking-tight">
-                {activeCompany?.name || 'Harlow & Finch Fine Goods Ltd'}
+                {activeCompany?.name}
               </h2>
-              <p className="text-xs text-[#4A5878]">
-                Company Registration No. {activeCompany?.company_no || '09876543'} (England &amp; Wales)
-              </p>
+              {activeCompany?.company_no && (
+                <p className="text-xs text-[#4A5878]">
+                  Company Registration No. {activeCompany.company_no} (England &amp; Wales)
+                </p>
+              )}
               <p className="text-xs font-bold uppercase tracking-wider text-[#122654] pt-2">
                 Balance Sheet as at 30 September 2026
               </p>

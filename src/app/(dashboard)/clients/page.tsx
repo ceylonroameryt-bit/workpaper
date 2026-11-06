@@ -224,7 +224,7 @@ export default function ClientsPage() {
                         {client.name}
                       </Link>
                       <div className="text-[11px] text-[#4A5878] font-mono">
-                        Co #{client.company_no || '09876543'}
+                        {client.company_no ? `Co #${client.company_no}` : client.company_type || ''}
                       </div>
                       {client.archived_at && (
                         <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#F5F8FD] border border-[#D3DCEE] text-[#4A5878]" title={client.archive_reason || undefined}>

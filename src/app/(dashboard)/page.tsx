@@ -311,9 +311,13 @@ export default function PracticeHomePage() {
                   </span>
                 </div>
                 <div className="text-xs text-[#4A5878] mt-1 flex flex-wrap items-center gap-3 font-mono-numbers">
-                  <span>Companies House #{activeCompany.company_no}</span>
-                  <span>•</span>
-                  <span>Year End: {new Date(activeCompany.year_end || (activeCompany as any).yearEnd || '2026-09-30').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  {activeCompany.company_no && (
+                    <>
+                      <span>Companies House #{activeCompany.company_no}</span>
+                      <span>•</span>
+                    </>
+                  )}
+                  <span>Year End: {activeCompany.year_end ? new Date(activeCompany.year_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not set'}</span>
                   <span>•</span>
                   <span>Source: {activeCompany.data_source === 'csv' ? 'CSV/Excel' : activeCompany.data_source}</span>
                 </div>
