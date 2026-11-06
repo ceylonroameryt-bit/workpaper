@@ -31,8 +31,8 @@ import { CompanySelector } from './CompanySelector';
 const LocaleFooterBadge: React.FC = () => {
   const { jurisdiction } = useLocale();
   return (
-    <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-[#102654]/60 border border-white/10 mb-1">
-      <Globe className="w-3 h-3 text-[#FF7D6B] shrink-0" />
+    <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-[#122654]/60 border border-white/10 mb-1">
+      <Globe className="w-3 h-3 text-[#FF7A66] shrink-0" />
       <div className="flex flex-col min-w-0">
         <span className="text-[10px] text-[#A6B4D0] leading-tight truncate">
           {jurisdiction.label}
@@ -122,7 +122,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   return (
     <aside
       aria-label="Sidebar navigation"
-      className="w-full lg:w-[264px] lg:min-h-screen bg-[#0B1B3D] text-white flex flex-col justify-between shrink-0 select-none pb-4"
+      className="w-full lg:w-[264px] lg:min-h-screen bg-[#0B1A3B] text-white flex flex-col justify-between shrink-0 select-none pb-4"
     >
       <div className="flex flex-col">
         {/* Blynt Brand Logo */}
@@ -130,7 +130,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           <Link
             href="/"
             onClick={onMobileClose}
-            className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7D6B] rounded-lg p-1"
+            className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7A66] rounded-lg p-1"
           >
             <BlyntLogo variant="full" theme="dark" size="md" />
           </Link>
@@ -141,13 +141,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           <Link
             href="/engagements/new"
             onClick={onMobileClose}
-            className="w-full min-h-[44px] bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] font-bold text-sm px-4 rounded-[10px] flex items-center justify-between shadow-sm transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-3 focus-visible:ring-white"
+            className="w-full min-h-[44px] bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] font-bold text-sm px-4 rounded-[10px] flex items-center justify-between shadow-sm transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-3 focus-visible:ring-white"
           >
             <span className="flex items-center gap-2">
               <Plus className="w-4 h-4 stroke-[2.5]" />
               New engagement
             </span>
-            <kbd className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#0B1B3D]/15 text-[#0B1B3D]">
+            <kbd className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#0B1A3B]/15 text-[#0B1A3B]">
               N
             </kbd>
           </Link>
@@ -157,9 +157,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         <div className="px-4 py-2.5 flex flex-col gap-2">
           <CompanySelector variant="sidebar" onAddNewCompany={() => router.push('/engagements/new')} />
           {showEngagementOptions && activeEngagement && (
-            <div className="px-2 py-1.5 bg-[#102654]/60 rounded-[10px] text-[10px] text-[#A6B4D0] flex items-center justify-between border border-white/5">
+            <div className="px-2 py-1.5 bg-[#122654]/60 rounded-[10px] text-[10px] text-[#A6B4D0] flex items-center justify-between border border-white/5">
               <span>{openReviewNotesCount} review notes open</span>
-              <span className="text-[#FF7D6B] font-semibold">{activeStage}</span>
+              <span className="text-[#FF7A66] font-semibold">{activeStage}</span>
             </div>
           )}
         </div>
@@ -176,14 +176,14 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               aria-current={isLinkActive('/', true) ? 'page' : undefined}
               className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                 isLinkActive('/', true)
-                  ? 'text-white bg-[#102654] font-semibold'
-                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                  ? 'text-white bg-[#122654] font-semibold'
+                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
               {isLinkActive('/', true) && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
               )}
-              <Home className="w-4 h-4 shrink-0 text-[#FF7D6B]" />
+              <Home className="w-4 h-4 shrink-0 text-[#FF7A66]" />
               <span>Practice dashboard</span>
             </Link>
 
@@ -193,12 +193,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               aria-current={isLinkActive('/clients') ? 'page' : undefined}
               className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                 isLinkActive('/clients')
-                  ? 'text-white bg-[#102654] font-semibold'
-                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                  ? 'text-white bg-[#122654] font-semibold'
+                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
               {isLinkActive('/clients') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
               )}
               <Building2 className="w-4 h-4 shrink-0" />
               <span>Clients</span>
@@ -210,12 +210,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               aria-current={isLinkActive('/settings') ? 'page' : undefined}
               className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                 isLinkActive('/settings')
-                  ? 'text-white bg-[#102654] font-semibold'
-                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                  ? 'text-white bg-[#122654] font-semibold'
+                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
               {isLinkActive('/settings') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
               )}
               <Sliders className="w-4 h-4 shrink-0" />
               <span>Practice settings</span>
@@ -228,7 +228,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           <div className="mt-4 flex flex-col animate-in fade-in duration-200">
             <div className="px-5 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#7E8DA6] flex items-center justify-between">
               <span className="truncate">{activeClient ? activeClient.name : 'Engagement'}</span>
-              <span className="text-[9px] text-[#FF7D6B] font-mono lowercase shrink-0">active</span>
+              <span className="text-[9px] text-[#FF7A66] font-mono lowercase shrink-0">active</span>
             </div>
             <nav className="flex flex-col">
               {/* 1. Overview */}
@@ -238,12 +238,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(engagementBase, true) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(engagementBase, true)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(engagementBase, true) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <Home className="w-4 h-4 shrink-0" />
                 <span>Overview</span>
@@ -256,12 +256,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/trial-balance`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/trial-balance`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/trial-balance`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <Scale className="w-4 h-4 shrink-0" />
                 <span>Trial balance</span>
@@ -274,13 +274,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/mapping`) ? 'page' : undefined}
                 className={`relative flex items-center justify-between px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/mapping`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   {isLinkActive(`${engagementBase}/mapping`) && (
-                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                   )}
                   <TableProperties className="w-4 h-4 shrink-0" />
                   <span>Mapping</span>
@@ -299,12 +299,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/workpapers`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/workpapers`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/workpapers`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <FileCheck2 className="w-4 h-4 shrink-0" />
                 <span>Working paper</span>
@@ -317,12 +317,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/journals`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/journals`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/journals`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <BookOpen className="w-4 h-4 shrink-0" />
                 <span>Journals</span>
@@ -335,12 +335,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/documents`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/documents`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/documents`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <FileSpreadsheet className="w-4 h-4 shrink-0" />
                 <span>Documents</span>
@@ -353,12 +353,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/analysis`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/analysis`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/analysis`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <ArrowUpRight className="w-4 h-4 shrink-0" />
                 <span>Analysis</span>
@@ -371,12 +371,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/disclosures`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/disclosures`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/disclosures`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <FileCheck2 className="w-4 h-4 shrink-0" />
                 <span>Disclosures & notes</span>
@@ -389,12 +389,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/reports`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/reports`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/reports`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <FileDown className="w-4 h-4 shrink-0" />
                 <span>Reports</span>
@@ -407,19 +407,19 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/review`) ? 'page' : undefined}
                 className={`relative flex items-center justify-between px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/review`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   {isLinkActive(`${engagementBase}/review`) && (
-                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                   )}
                   <MessageSquare className="w-4 h-4 shrink-0" />
                   <span>Review</span>
                 </div>
                 {openReviewNotesCount > 0 && (
-                  <span className="text-[11px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#FF7D6B] text-[#0B1B3D]">
+                  <span className="text-[11px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#FF7A66] text-[#0B1A3B]">
                     {openReviewNotesCount}
                   </span>
                 )}
@@ -432,12 +432,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 aria-current={isLinkActive(`${engagementBase}/history`) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/history`)
-                    ? 'text-white bg-[#102654] font-semibold'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                    ? 'text-white bg-[#122654] font-semibold'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 {isLinkActive(`${engagementBase}/history`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
                 )}
                 <Lock className="w-4 h-4 shrink-0" />
                 <span>History</span>
@@ -458,12 +458,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               aria-current={isLinkActive('/library/templates') ? 'page' : undefined}
               className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                 isLinkActive('/library/templates')
-                  ? 'text-white bg-[#102654] font-semibold'
-                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                  ? 'text-white bg-[#122654] font-semibold'
+                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
               {isLinkActive('/library/templates') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
               )}
               <FileSpreadsheet className="w-4 h-4 shrink-0" />
               <span>Templates</span>
@@ -475,12 +475,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               aria-current={isLinkActive('/library/standards') ? 'page' : undefined}
               className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
                 isLinkActive('/library/standards')
-                  ? 'text-white bg-[#102654] font-semibold'
-                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#102654]/50'
+                  ? 'text-white bg-[#122654] font-semibold'
+                  : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
               {isLinkActive('/library/standards') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7D6B] rounded-r-full" />
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
               )}
               <BookOpen className="w-4 h-4 shrink-0" />
               <span>Standards library</span>
@@ -490,7 +490,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </div>
 
       {/* Bottom links */}
-      <div className="mt-6 pt-4 border-t border-[#102654] px-4 pb-8 flex flex-col gap-1.5">
+      <div className="mt-6 pt-4 border-t border-[#122654] px-4 pb-8 flex flex-col gap-1.5">
         {/* Locale indicator */}
         <LocaleFooterBadge />
 
@@ -498,7 +498,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           href="https://blynt.co.uk"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between px-2 py-2 text-xs text-[#A6B4D0] hover:text-[#FF7D6B] transition-colors rounded-lg hover:bg-[#102654]"
+          className="flex items-center justify-between px-2 py-2 text-xs text-[#A6B4D0] hover:text-[#FF7A66] transition-colors rounded-lg hover:bg-[#122654]"
         >
           <span>Back to Blynt accounting</span>
           <ArrowUpRight className="w-3.5 h-3.5" />

@@ -88,10 +88,10 @@ export default function ClientsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
             Client portfolio
           </h1>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Manage company types, accounting data connections, and current working paper stages.
           </p>
         </div>
@@ -99,7 +99,7 @@ export default function ClientsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/engagements/new"
-            className="min-h-[44px] px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
+            className="min-h-[44px] px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-sm transition-transform active:scale-[0.98]"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             New engagement
@@ -110,7 +110,7 @@ export default function ClientsPage() {
       {/* Search and Filters */}
       <div className="blynt-card p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
-        <div role="tablist" aria-label="Client status" className="inline-flex p-1 rounded-[10px] bg-[#F6F7FB] border border-[#D5DBE7] shrink-0">
+        <div role="tablist" aria-label="Client status" className="inline-flex p-1 rounded-[10px] bg-[#F5F8FD] border border-[#D3DCEE] shrink-0">
           {(
             [
               ['active', 'Active', activeCount],
@@ -124,22 +124,22 @@ export default function ClientsPage() {
               aria-selected={view === key}
               onClick={() => setView(key)}
               className={`min-h-[36px] px-3.5 rounded-[8px] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
-                view === key ? 'bg-white text-[#102654] shadow-2xs border border-[#E3E7EF]' : 'text-[#5B6478] hover:text-[#102654]'
+                view === key ? 'bg-white text-[#122654] shadow-2xs border border-[#E3E7EF]' : 'text-[#4A5878] hover:text-[#122654]'
               }`}
             >
               {text}
-              <span className={`text-[10px] font-bold px-1.5 rounded-full ${view === key ? 'bg-[#EAF5FC] text-[#1D4E89]' : 'bg-[#E3E7EF] text-[#5B6478]'}`}>{count}</span>
+              <span className={`text-[10px] font-bold px-1.5 rounded-full ${view === key ? 'bg-[#EAF5FC] text-[#1D4E89]' : 'bg-[#E3E7EF] text-[#4A5878]'}`}>{count}</span>
             </button>
           ))}
         </div>
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-[#5B6478] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-[#4A5878] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder="Search by client name or company number..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full min-h-[44px] pl-10 pr-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+            className="w-full min-h-[44px] pl-10 pr-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66]"
           />
         </div>
         </div>
@@ -149,7 +149,7 @@ export default function ClientsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="min-h-[44px] px-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+            className="min-h-[44px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66]"
           >
             <option value="all">All company types</option>
             <option value="Small company (FRS 102 1A)">Small company (FRS 102 1A)</option>
@@ -163,7 +163,7 @@ export default function ClientsPage() {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="min-h-[44px] px-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+            className="min-h-[44px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66]"
           >
             <option value="all">All data sources</option>
             <option value="blynt">Blynt Accounting</option>
@@ -183,9 +183,9 @@ export default function ClientsPage() {
       {/* Clients Table */}
       <div className="blynt-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#102654]">
+          <table className="w-full text-left text-xs text-[#122654]">
             <caption className="sr-only">List of accounting clients and engagements</caption>
-            <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
+            <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
               <tr>
                 <th scope="col" className="p-4 pl-6">Client</th>
                 <th scope="col" className="p-4">Company Type</th>
@@ -207,7 +207,7 @@ export default function ClientsPage() {
                 return (
                   <tr
                     key={client.id}
-                    className={`hover:bg-[#F6F7FB] transition-colors cursor-pointer group ${client.archived_at ? 'text-[#5B6478]' : ''}`}
+                    className={`hover:bg-[#F5F8FD] transition-colors cursor-pointer group ${client.archived_at ? 'text-[#4A5878]' : ''}`}
                     onClick={() => {
                       if (eng) router.push(`/engagements/${eng.id}/trial-balance`);
                     }}
@@ -219,15 +219,15 @@ export default function ClientsPage() {
                           e.stopPropagation();
                           setActiveCompanyId(client.id);
                         }}
-                        className="font-bold text-[#102654] text-sm hover:text-[#FF7D6B] transition-colors block"
+                        className="font-bold text-[#122654] text-sm hover:text-[#FF7A66] transition-colors block"
                       >
                         {client.name}
                       </Link>
-                      <div className="text-[11px] text-[#5B6478] font-mono">
+                      <div className="text-[11px] text-[#4A5878] font-mono">
                         Co #{client.company_no || '09876543'}
                       </div>
                       {client.archived_at && (
-                        <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#F4F5F7] border border-[#D5DBE7] text-[#5B6478]" title={client.archive_reason || undefined}>
+                        <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#F4F5F7] border border-[#D3DCEE] text-[#4A5878]" title={client.archive_reason || undefined}>
                           <Archive className="w-3 h-3" />
                           Archived {new Date(client.archived_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                           {client.archive_reason ? ` · ${client.archive_reason}` : ''}
@@ -236,7 +236,7 @@ export default function ClientsPage() {
                     </td>
 
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded bg-[#F4F5F7] border border-[#D5DBE7] text-[11px] font-medium">
+                      <span className="px-2 py-0.5 rounded bg-[#F4F5F7] border border-[#D3DCEE] text-[11px] font-medium">
                         {client.company_type}
                       </span>
                     </td>
@@ -251,7 +251,7 @@ export default function ClientsPage() {
 
                     <td className="p-4">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-semibold capitalize text-[#102654]">
+                        <span className="font-semibold capitalize text-[#122654]">
                           {client.data_source === 'csv' ? 'CSV / Excel' : client.data_source}
                         </span>
                         {client.reconnect_needed ? (
@@ -266,7 +266,7 @@ export default function ClientsPage() {
 
                     <td className="p-4">
                       {mappings.length === 0 ? (
-                        <span className="text-[#5B6478] text-[11px]">○ No trial balance</span>
+                        <span className="text-[#4A5878] text-[11px]">○ No trial balance</span>
                       ) : unconfirmedCount === 0 ? (
                         <span className="text-[#0B6B52] bg-[#E6F4EF] px-2 py-0.5 rounded-full text-[10px] font-bold">
                           ✓ All mapped
@@ -284,7 +284,7 @@ export default function ClientsPage() {
                           {eng.status}
                         </span>
                       ) : (
-                        <span className="text-[#5B6478]">None</span>
+                        <span className="text-[#4A5878]">None</span>
                       )}
                     </td>
 
@@ -303,7 +303,7 @@ export default function ClientsPage() {
                             <ArrowUpRight className="w-3.5 h-3.5" />
                           </Link>
                         ) : client.archived_at ? (
-                          <span className="text-xs text-[#5B6478]">No engagement</span>
+                          <span className="text-xs text-[#4A5878]">No engagement</span>
                         ) : (
                           <Link
                             href={`/engagements/new?client_id=${client.id}`}
@@ -311,7 +311,7 @@ export default function ClientsPage() {
                               e.stopPropagation();
                               setActiveCompanyId(client.id);
                             }}
-                            className="text-xs text-[#102654] font-semibold hover:underline"
+                            className="text-xs text-[#122654] font-semibold hover:underline"
                           >
                             Start engagement
                           </Link>
@@ -341,7 +341,7 @@ export default function ClientsPage() {
                               setArchiveError('');
                               setArchiveTarget(client);
                             }}
-                            className="p-1.5 rounded-lg text-[#5B6478] hover:text-[#102654] hover:bg-[#EAF5FC] transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-[#4A5878] hover:text-[#122654] hover:bg-[#EAF5FC] transition-colors cursor-pointer"
                             title={`Archive ${client.name}`}
                             aria-label={`Archive ${client.name}`}
                           >
@@ -355,7 +355,7 @@ export default function ClientsPage() {
                             e.stopPropagation();
                             setDeleteTarget(client);
                           }}
-                          className="p-1.5 rounded-lg text-[#5B6478] hover:text-[#B42318] hover:bg-[#FDECEA] transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-[#4A5878] hover:text-[#B42318] hover:bg-[#FDECEA] transition-colors cursor-pointer"
                           title={`Delete ${client.name}`}
                           aria-label={`Delete ${client.name}`}
                         >
@@ -371,11 +371,11 @@ export default function ClientsPage() {
 
           {filteredClients.length === 0 && view === 'archived' && (
             <div className="p-12 text-center flex flex-col items-center justify-center">
-              <div className="w-12 h-12 rounded-2xl bg-[#F6F7FB] border border-[#E3E7EF] flex items-center justify-center text-[#5B6478] mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
                 <Archive className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-[#102654]">No archived clients</h3>
-              <p className="text-xs text-[#5B6478] max-w-sm mt-1">
+              <h3 className="text-sm font-bold text-[#122654]">No archived clients</h3>
+              <p className="text-xs text-[#4A5878] max-w-sm mt-1">
                 Archive clients you no longer act for. Their files are kept, read-only, and you can restore them any time.
               </p>
             </div>
@@ -383,16 +383,16 @@ export default function ClientsPage() {
 
           {filteredClients.length === 0 && view === 'active' && (
             <div className="p-12 text-center flex flex-col items-center justify-center">
-              <div className="w-12 h-12 rounded-2xl bg-[#F6F7FB] border border-[#E3E7EF] flex items-center justify-center text-[#5B6478] mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
                 <Building2 className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-[#102654]">No clients found</h3>
-              <p className="text-xs text-[#5B6478] max-w-sm mt-1 mb-4">
+              <h3 className="text-sm font-bold text-[#122654]">No clients found</h3>
+              <p className="text-xs text-[#4A5878] max-w-sm mt-1 mb-4">
                 There are no clients in the system yet. Add your first client to start preparing statutory workpapers.
               </p>
               <Link
                 href="/engagements/new"
-                className="px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
+                className="px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>Add First Client</span>
@@ -404,45 +404,45 @@ export default function ClientsPage() {
 
       {/* Archive confirmation */}
       {archiveTarget && (
-        <div role="dialog" aria-modal="true" aria-labelledby="archive-title" className="fixed inset-0 z-50 bg-[#0B1B3D]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+        <div role="dialog" aria-modal="true" aria-labelledby="archive-title" className="fixed inset-0 z-50 bg-[#0B1A3B]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
           <div className="blynt-card p-6 bg-white max-w-md w-full rounded-2xl shadow-xl flex flex-col gap-4 border border-[#E3E7EF]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#EAF5FC] flex items-center justify-center">
                   <Archive className="w-5 h-5 text-[#1D4E89]" />
                 </div>
-                <h3 id="archive-title" className="text-base font-bold text-[#102654]">Archive client</h3>
+                <h3 id="archive-title" className="text-base font-bold text-[#122654]">Archive client</h3>
               </div>
-              <button type="button" aria-label="Close" onClick={() => setArchiveTarget(null)} className="p-1 rounded-lg text-[#5B6478] hover:bg-[#F6F7FB]">
+              <button type="button" aria-label="Close" onClick={() => setArchiveTarget(null)} className="p-1 rounded-lg text-[#4A5878] hover:bg-[#F5F8FD]">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-[#5B6478] leading-relaxed">
-              Archive <strong className="text-[#102654]">{archiveTarget.name}</strong>? Nothing is deleted.
+            <p className="text-xs text-[#4A5878] leading-relaxed">
+              Archive <strong className="text-[#122654]">{archiveTarget.name}</strong>? Nothing is deleted.
             </p>
-            <ul className="text-xs text-[#102654] space-y-1.5 pl-1">
+            <ul className="text-xs text-[#122654] space-y-1.5 pl-1">
               <li className="flex gap-2"><span className="text-[#1D4E89]">&bull;</span>It moves to the Archived list and out of the client switcher.</li>
-              <li className="flex gap-2"><span className="text-[#1D4E89]">&bull;</span>Its working papers, trial balances and audit trail are kept, read-only.</li>
+              <li className="flex gap-2"><span className="text-[#1D4E89]">&bull;</span>Its working papers, trial balances and activity log are kept, read-only.</li>
               <li className="flex gap-2"><span className="text-[#1D4E89]">&bull;</span>No new engagements or imports until you restore it.</li>
             </ul>
 
             <div>
-              <label htmlFor="archive-reason" className="block text-xs font-semibold text-[#102654] mb-1.5">Reason (optional)</label>
+              <label htmlFor="archive-reason" className="block text-xs font-semibold text-[#122654] mb-1.5">Reason (optional)</label>
               <input
                 id="archive-reason"
                 value={archiveReason}
                 maxLength={300}
                 onChange={(e) => setArchiveReason(e.target.value)}
                 placeholder="Disengaged, company dissolved, moved to another practice"
-                className="w-full min-h-[40px] px-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+                className="w-full min-h-[40px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66]"
               />
             </div>
 
             {archiveError && <p role="alert" className="text-[11px] font-medium text-[#B42318]">{archiveError}</p>}
 
             <div className="flex items-center justify-end gap-2.5 pt-2">
-              <button type="button" onClick={() => setArchiveTarget(null)} className="min-h-[38px] px-4 text-xs font-semibold text-[#102654] hover:bg-[#F6F7FB] border border-[#D5DBE7] rounded-xl transition-colors cursor-pointer">
+              <button type="button" onClick={() => setArchiveTarget(null)} className="min-h-[38px] px-4 text-xs font-semibold text-[#122654] hover:bg-[#F5F8FD] border border-[#D3DCEE] rounded-xl transition-colors cursor-pointer">
                 Cancel
               </button>
               <button
@@ -451,7 +451,7 @@ export default function ClientsPage() {
                 onClick={async () => {
                   if (await setArchived(archiveTarget, true, archiveReason)) setArchiveTarget(null);
                 }}
-                className="min-h-[38px] px-4 text-xs font-bold text-white bg-[#102654] hover:bg-[#0B1B3D] rounded-xl transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                className="min-h-[38px] px-4 text-xs font-bold text-white bg-[#122654] hover:bg-[#0B1A3B] rounded-xl transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
               >
                 <Archive className="w-3.5 h-3.5" />
                 <span>{archiveBusy ? 'Archiving…' : 'Archive client'}</span>
@@ -463,36 +463,36 @@ export default function ClientsPage() {
 
       {/* Confirmation Modal to Delete Company */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-[#0B1B3D]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-50 bg-[#0B1A3B]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
           <div className="blynt-card p-6 bg-white max-w-md w-full rounded-2xl shadow-xl flex flex-col gap-4 border border-[#E3E7EF]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5 text-[#B42318]">
                 <div className="w-9 h-9 rounded-xl bg-[#FDECEA] flex items-center justify-center">
                   <Trash2 className="w-5 h-5 text-[#B42318]" />
                 </div>
-                <h3 className="text-base font-bold text-[#102654]">Delete Company</h3>
+                <h3 className="text-base font-bold text-[#122654]">Delete Company</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="p-1 rounded-lg text-[#5B6478] hover:bg-[#F6F7FB]"
+                className="p-1 rounded-lg text-[#4A5878] hover:bg-[#F5F8FD]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-[#5B6478] leading-relaxed">
-              Are you sure you want to delete <strong className="text-[#102654]">{deleteTarget.name}</strong>?
+            <p className="text-xs text-[#4A5878] leading-relaxed">
+              Are you sure you want to delete <strong className="text-[#122654]">{deleteTarget.name}</strong>?
               This will permanently remove the company, its financial years, trial balance snapshots, account mappings, and working papers.
             </p>
 
-            <div className="p-3 bg-[#FFF1EE] border border-[#FF7D6B]/30 rounded-xl text-[11px] text-[#A23A27] flex items-start gap-2">
+            <div className="p-3 bg-[#FFF1EE] border border-[#FF7A66]/30 rounded-xl text-[11px] text-[#A23A27] flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>This action cannot be undone. All audit trails and working papers for this entity will be removed.</span>
+              <span>This action cannot be undone. All activity logs and working papers for this entity will be removed.</span>
             </div>
 
             {!deleteTarget.archived_at && (
-              <p className="text-[11px] text-[#5B6478]">
+              <p className="text-[11px] text-[#4A5878]">
                 No longer acting for this client?{' '}
                 <button
                   type="button"
@@ -514,7 +514,7 @@ export default function ClientsPage() {
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="min-h-[38px] px-4 text-xs font-semibold text-[#102654] hover:bg-[#F6F7FB] border border-[#D5DBE7] rounded-xl transition-colors cursor-pointer"
+                className="min-h-[38px] px-4 text-xs font-semibold text-[#122654] hover:bg-[#F5F8FD] border border-[#D3DCEE] rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>

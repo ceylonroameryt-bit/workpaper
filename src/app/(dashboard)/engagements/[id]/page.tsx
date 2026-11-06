@@ -174,7 +174,7 @@ export default function EngagementOverviewPage() {
       {flaggedWorkpapers.length > 0 && (
       <AiCard
         title="AI Anomaly & Variance Monitor"
-        badge="Continuous Audit AI"
+        badge="Continuous AI review"
         action={
           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#DDD6FA] text-[#3F2A9E]">
             {flaggedWorkpapers.length} exceptions flagged
@@ -251,7 +251,7 @@ export default function EngagementOverviewPage() {
                 Workpaper Name
               </th>
               <th scope="col" className="px-5 py-3.5">
-                Audit Area
+                Area
               </th>
               <th scope="col" className="px-5 py-3.5">
                 Preparer

@@ -63,6 +63,15 @@ describe('Step 7 · the bank schedule end to end (REV-01, REV-02, AUD-02)', () =
   });
 });
 
+describe('archived clients', () => {
+  it('cannot be signed off or unreviewed', () => {
+    const wp = reconciledBank();
+    const eng = db.engagements.find((e) => e.id === wp.engagement_id)!;
+    db.clients.find((c) => c.id === eng.client_id)!.archived_at = '2026-10-01T00:00:00Z';
+    expect(() => signOff(prep, wp.id, 'prepare')).toThrow(/archived/);
+  });
+});
+
 describe('sign-off rules (REV-01)', () => {
   it('follows the order, checks the role and stops one person ticking two levels', () => {
     const wp = reconciledBank();

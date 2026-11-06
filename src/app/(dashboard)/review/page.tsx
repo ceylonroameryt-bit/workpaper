@@ -233,17 +233,17 @@ export default function PracticeReviewNotesPage() {
       {/* Breadcrumb & Top Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[#5B6478] mb-1">
-            <Link href="/" className="hover:text-[#102654] transition-colors">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[#4A5878] mb-1">
+            <Link href="/" className="hover:text-[#122654] transition-colors">
               Practice
             </Link>
             <ChevronRight className="w-3 h-3 text-[#7E8DA6]" />
-            <span className="text-[#102654] font-semibold">Review notes</span>
+            <span className="text-[#122654] font-semibold">Review notes</span>
           </nav>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
             Review notes and comments
           </h1>
-          <p className="text-xs text-[#5B6478] mt-1 max-w-2xl leading-relaxed">
+          <p className="text-xs text-[#4A5878] mt-1 max-w-2xl leading-relaxed">
             Everything people have said about the work, in one list. Review notes block sign-off until the reviewer resolves them. Client queries go to the client portal and wait for a reply.
           </p>
         </div>
@@ -252,15 +252,15 @@ export default function PracticeReviewNotesPage() {
           <button
             type="button"
             onClick={handleExportLog}
-            className="min-h-[42px] px-3.5 py-2 bg-white hover:bg-[#F6F7FB] border border-[#D5DBE7] hover:border-[#102654] text-[#102654] text-xs font-semibold rounded-[10px] flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
+            className="min-h-[42px] px-3.5 py-2 bg-white hover:bg-[#F5F8FD] border border-[#D3DCEE] hover:border-[#122654] text-[#122654] text-xs font-semibold rounded-[10px] flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-[#5B6478]" />
+            <Download className="w-3.5 h-3.5 text-[#4A5878]" />
             <span>Export review log</span>
           </button>
           <button
             type="button"
             onClick={() => setShowNewModal(true)}
-            className="min-h-[42px] px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-sm transition-transform active:scale-[0.98] cursor-pointer"
+            className="min-h-[42px] px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-sm transition-transform active:scale-[0.98] cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Add note or query</span>
@@ -286,16 +286,16 @@ export default function PracticeReviewNotesPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all cursor-pointer border-b-2 ${
                   activeTab === tab.id
-                    ? 'border-[#FF7D6B] text-[#102654]'
-                    : 'border-transparent text-[#5B6478] hover:text-[#102654] hover:border-[#D5DBE7]'
+                    ? 'border-[#FF7A66] text-[#122654]'
+                    : 'border-transparent text-[#4A5878] hover:text-[#122654] hover:border-[#D3DCEE]'
                 }`}
               >
                 <span>{tab.label}</span>
                 <span
                   className={`px-1.5 py-0.2 rounded-full font-mono text-[10px] ${
                     activeTab === tab.id
-                      ? 'bg-[#102654] text-white'
-                      : 'bg-[#F6F7FB] border border-[#D5DBE7] text-[#5B6478]'
+                      ? 'bg-[#122654] text-white'
+                      : 'bg-[#F5F8FD] border border-[#D3DCEE] text-[#4A5878]'
                   }`}
                 >
                   {tab.count}
@@ -307,13 +307,13 @@ export default function PracticeReviewNotesPage() {
           {/* Filters Bar: Search + Type Dropdown + Clients Dropdown */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-white p-3 rounded-[12px] border border-[#E3E7EF] shadow-2xs">
             <div className="relative flex-1">
-              <Search className="w-3.5 h-3.5 text-[#5B6478] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search comments and replies"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full min-h-[38px] pl-9 pr-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+                className="w-full min-h-[38px] pl-9 pr-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66]"
               />
             </div>
 
@@ -321,7 +321,7 @@ export default function PracticeReviewNotesPage() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="min-h-[38px] px-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] font-semibold outline-none focus:border-[#FF7D6B] cursor-pointer"
+                className="min-h-[38px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
               >
                 <option value="all">All types</option>
                 <option value="review_note">Review notes</option>
@@ -332,7 +332,7 @@ export default function PracticeReviewNotesPage() {
               <select
                 value={clientFilter}
                 onChange={(e) => setClientFilter(e.target.value)}
-                className="min-h-[38px] px-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] font-semibold outline-none focus:border-[#FF7D6B] cursor-pointer"
+                className="min-h-[38px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
               >
                 <option value="all">All clients</option>
                 {clients.map((cli) => (
@@ -347,11 +347,11 @@ export default function PracticeReviewNotesPage() {
           {/* Comment Threads grouped by Client */}
           {groupedByClient.length === 0 ? (
             <div className="blynt-card p-12 text-center flex flex-col items-center justify-center bg-white">
-              <div className="w-12 h-12 rounded-2xl bg-[#F6F7FB] border border-[#E3E7EF] flex items-center justify-center text-[#5B6478] mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-[#102654]">No review notes or comments found</h3>
-              <p className="text-xs text-[#5B6478] max-w-sm mt-1 mb-4">
+              <h3 className="text-sm font-bold text-[#122654]">No review notes or comments found</h3>
+              <p className="text-xs text-[#4A5878] max-w-sm mt-1 mb-4">
                 {activeTab === 'open'
                   ? 'There are no open review notes blocking sign-off. Everything is clear!'
                   : 'No items match the active filters or tab selection.'}
@@ -359,7 +359,7 @@ export default function PracticeReviewNotesPage() {
               <button
                 type="button"
                 onClick={() => setShowNewModal(true)}
-                className="px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                className="px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>Create first note</span>
@@ -371,10 +371,10 @@ export default function PracticeReviewNotesPage() {
                 <div key={client.id} className="blynt-card p-5 bg-white border-[#E3E7EF]">
                   <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E3E7EF]">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-extrabold text-[#102654] tracking-tight">
+                      <h2 className="text-sm font-extrabold text-[#122654] tracking-tight">
                         {client.name}
                       </h2>
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#F6F7FB] border border-[#D5DBE7] text-[#5B6478]">
+                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#F5F8FD] border border-[#D3DCEE] text-[#4A5878]">
                         {comments.length}
                       </span>
                     </div>
@@ -410,7 +410,7 @@ export default function PracticeReviewNotesPage() {
                                 </span>
                               )}
                               {c.type === 'comment' && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7]">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F5F8FD] text-[#122654] border border-[#D3DCEE]">
                                   <span>●</span> Comment
                                 </span>
                               )}
@@ -435,14 +435,14 @@ export default function PracticeReviewNotesPage() {
                             </div>
 
                             {/* Author info */}
-                            <div className="text-[11px] text-[#5B6478]">
-                              <span className="font-semibold text-[#102654]">{c.created_by_name}</span> · {timeStr}
+                            <div className="text-[11px] text-[#4A5878]">
+                              <span className="font-semibold text-[#122654]">{c.created_by_name}</span> · {timeStr}
                               {replyCount > 0 && <span> · {replyCount} {replyCount === 1 ? 'reply' : 'replies'}</span>}
                             </div>
                           </div>
 
                           {/* Message Body */}
-                          <p className="text-xs text-[#102654] leading-relaxed font-medium">
+                          <p className="text-xs text-[#122654] leading-relaxed font-medium">
                             {c.body}
                           </p>
 
@@ -452,7 +452,7 @@ export default function PracticeReviewNotesPage() {
                               <button
                                 type="button"
                                 onClick={() => setExpandedCommentId(isExpanded ? null : c.id)}
-                                className="px-3 py-1.5 rounded-[8px] bg-[#F6F7FB] hover:bg-[#EAF5FC] text-[#102654] text-xs font-bold border border-[#D5DBE7] hover:border-[#102654] transition-colors cursor-pointer"
+                                className="px-3 py-1.5 rounded-[8px] bg-[#F5F8FD] hover:bg-[#EAF5FC] text-[#122654] text-xs font-bold border border-[#D3DCEE] hover:border-[#122654] transition-colors cursor-pointer"
                               >
                                 {isExpanded ? 'Close replies' : replyCount > 0 ? `Open and reply (${replyCount})` : 'Open and reply'}
                               </button>
@@ -463,7 +463,7 @@ export default function PracticeReviewNotesPage() {
                                 className={`px-3 py-1.5 rounded-[8px] text-xs font-bold transition-colors cursor-pointer border ${
                                   c.status === 'resolved'
                                     ? 'bg-[#E6F4EF] border-[#0B6B52]/30 text-[#0B6B52] hover:bg-white'
-                                    : 'bg-white border-[#D5DBE7] hover:border-[#0B6B52] text-[#0B6B52]'
+                                    : 'bg-white border-[#D3DCEE] hover:border-[#0B6B52] text-[#0B6B52]'
                                 }`}
                               >
                                 {c.status === 'resolved' ? '✓ Resolved' : 'Resolve'}
@@ -474,7 +474,7 @@ export default function PracticeReviewNotesPage() {
                               <button
                                 type="button"
                                 onClick={() => handleSendReminder(c.id)}
-                                className="px-3 py-1.5 rounded-[8px] bg-white border border-[#D5DBE7] hover:border-[#FF7D6B] text-[#B8432F] text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-[8px] bg-white border border-[#D3DCEE] hover:border-[#FF7A66] text-[#B8432F] text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
                               >
                                 <Clock className="w-3.5 h-3.5" />
                                 <span>{reminderSent === c.id ? 'Reminder sent!' : 'Send reminder'}</span>
@@ -484,14 +484,14 @@ export default function PracticeReviewNotesPage() {
 
                           {/* Expanded Thread & In-line Reply */}
                           {isExpanded && (
-                            <div className="mt-3 pt-3 border-t border-[#E3E7EF] flex flex-col gap-3 pl-4 border-l-2 border-l-[#FF7D6B] animate-in fade-in">
+                            <div className="mt-3 pt-3 border-t border-[#E3E7EF] flex flex-col gap-3 pl-4 border-l-2 border-l-[#FF7A66] animate-in fade-in">
                               {(c.replies || []).map((rep) => (
-                                <div key={rep.id} className="p-3 rounded-[10px] bg-[#F6F7FB] border border-[#E3E7EF] text-xs flex flex-col gap-1">
-                                  <div className="flex items-center justify-between text-[11px] text-[#5B6478]">
-                                    <span className="font-bold text-[#102654]">{rep.created_by_name}</span>
+                                <div key={rep.id} className="p-3 rounded-[10px] bg-[#F5F8FD] border border-[#E3E7EF] text-xs flex flex-col gap-1">
+                                  <div className="flex items-center justify-between text-[11px] text-[#4A5878]">
+                                    <span className="font-bold text-[#122654]">{rep.created_by_name}</span>
                                     <span>{new Date(rep.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                   </div>
-                                  <p className="text-[#102654] leading-relaxed">{rep.body}</p>
+                                  <p className="text-[#122654] leading-relaxed">{rep.body}</p>
                                 </div>
                               ))}
 
@@ -508,12 +508,12 @@ export default function PracticeReviewNotesPage() {
                                       handleReplySubmit(c.id);
                                     }
                                   }}
-                                  className="flex-1 min-h-[38px] px-3 text-xs bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+                                  className="flex-1 min-h-[38px] px-3 text-xs bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66]"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => handleReplySubmit(c.id)}
-                                  className="px-3.5 py-1.5 bg-[#102654] hover:bg-[#16336e] text-white text-xs font-bold rounded-[8px] flex items-center gap-1 transition-colors cursor-pointer"
+                                  className="px-3.5 py-1.5 bg-[#122654] hover:bg-[#16336e] text-white text-xs font-bold rounded-[8px] flex items-center gap-1 transition-colors cursor-pointer"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Reply</span>
@@ -536,27 +536,27 @@ export default function PracticeReviewNotesPage() {
           {/* Blocking Sign-off Card (Page 10 Spec) */}
           <div className="blynt-card p-5 bg-white border-[#E3E7EF] shadow-2xs">
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E3E7EF]">
-              <h3 className="text-sm font-extrabold text-[#102654]">
+              <h3 className="text-sm font-extrabold text-[#122654]">
                 Blocking sign-off
               </h3>
-              <span className="text-[10px] font-mono font-bold text-[#5B6478]">Status</span>
+              <span className="text-[10px] font-mono font-bold text-[#4A5878]">Status</span>
             </div>
 
             <div className="flex flex-col gap-3 text-xs">
               {blockingClients.length === 0 ? (
-                <p className="text-xs text-[#5B6478]">No active clients in portfolio.</p>
+                <p className="text-xs text-[#4A5878]">No active clients in portfolio.</p>
               ) : (
                 blockingClients.map((bc) => (
                   <div key={bc.id} className="flex items-center justify-between pb-2 border-b border-[#E3E7EF]/60 last:border-0 last:pb-0">
                     <div className="flex flex-col min-w-0 pr-2">
-                      <span className="font-bold text-[#102654] truncate">{bc.name}</span>
-                      <span className="text-[11px] text-[#5B6478]">
+                      <span className="font-bold text-[#122654] truncate">{bc.name}</span>
+                      <span className="text-[11px] text-[#4A5878]">
                         {bc.openNotes > 0 ? `${bc.openNotes} review notes open` : 'No open notes'}
                       </span>
                     </div>
 
                     {bc.isBlocked ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFF1EE] text-[#A23A27] border border-[#FF7D6B]/30 flex items-center gap-1 shrink-0">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFF1EE] text-[#A23A27] border border-[#FF7A66]/30 flex items-center gap-1 shrink-0">
                         <AlertCircle className="w-3 h-3" /> ! Blocked
                       </span>
                     ) : (
@@ -572,17 +572,17 @@ export default function PracticeReviewNotesPage() {
 
           {/* Three Kinds of Comment Card (Page 10 Spec) */}
           <div className="blynt-card p-5 bg-white border-[#E3E7EF] shadow-2xs">
-            <h3 className="text-sm font-extrabold text-[#102654] mb-3 pb-2 border-b border-[#E3E7EF]">
+            <h3 className="text-sm font-extrabold text-[#122654] mb-3 pb-2 border-b border-[#E3E7EF]">
               Three kinds of comment
             </h3>
 
             <div className="flex flex-col gap-3.5 text-xs">
               <div className="flex items-start gap-2.5">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7] shrink-0 mt-0.5">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5F8FD] text-[#122654] border border-[#D3DCEE] shrink-0 mt-0.5">
                   Comment
                 </span>
-                <span className="text-[#5B6478] leading-relaxed">
-                  <strong className="text-[#102654] block">Discussion</strong>
+                <span className="text-[#4A5878] leading-relaxed">
+                  <strong className="text-[#122654] block">Discussion</strong>
                   Never blocks sign-off.
                 </span>
               </div>
@@ -591,8 +591,8 @@ export default function PracticeReviewNotesPage() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFF4DB] text-[#6B4700] border border-[#6B4700]/20 shrink-0 mt-0.5">
                   ◐ Review note
                 </span>
-                <span className="text-[#5B6478] leading-relaxed">
-                  <strong className="text-[#102654] block">Reviewer&apos;s point</strong>
+                <span className="text-[#4A5878] leading-relaxed">
+                  <strong className="text-[#122654] block">Reviewer&apos;s point</strong>
                   Blocks sign-off until resolved by the reviewer.
                 </span>
               </div>
@@ -601,8 +601,8 @@ export default function PracticeReviewNotesPage() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAF5FC] text-[#1D4E89] border border-[#1D4E89]/20 shrink-0 mt-0.5">
                   ◷ Client query
                 </span>
-                <span className="text-[#5B6478] leading-relaxed">
-                  <strong className="text-[#102654] block">Sent to the client</strong>
+                <span className="text-[#4A5878] leading-relaxed">
+                  <strong className="text-[#122654] block">Sent to the client</strong>
                   Tracks the wait for client documents.
                 </span>
               </div>
@@ -616,17 +616,17 @@ export default function PracticeReviewNotesPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/60 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/60 backdrop-blur-xs flex items-center justify-center p-4"
         >
           <div className="bg-white rounded-[16px] shadow-2xl border border-[#E3E7EF] max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF] mb-4">
-              <h2 className="text-base font-bold text-[#102654]">
+              <h2 className="text-base font-bold text-[#122654]">
                 Create new review note or comment
               </h2>
               <button
                 type="button"
                 onClick={() => setShowNewModal(false)}
-                className="text-[#5B6478] hover:text-[#102654] text-lg font-bold cursor-pointer"
+                className="text-[#4A5878] hover:text-[#122654] text-lg font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -634,7 +634,7 @@ export default function PracticeReviewNotesPage() {
 
             <form onSubmit={handleCreateNew} className="flex flex-col gap-4 text-xs">
               <div>
-                <label className="block font-bold text-[#102654] mb-1.5">Note Type</label>
+                <label className="block font-bold text-[#122654] mb-1.5">Note Type</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { id: 'review_note', label: 'Review note', desc: 'Blocks sign-off' },
@@ -647,24 +647,24 @@ export default function PracticeReviewNotesPage() {
                       onClick={() => setNewType(t.id as any)}
                       className={`p-2.5 rounded-[10px] border text-left cursor-pointer transition-colors ${
                         newType === t.id
-                          ? 'border-[#FF7D6B] bg-[#FFF1EE]/50 font-bold text-[#102654]'
-                          : 'border-[#D5DBE7] bg-white text-[#5B6478] hover:bg-[#F6F7FB]'
+                          ? 'border-[#FF7A66] bg-[#FFF1EE]/50 font-bold text-[#122654]'
+                          : 'border-[#D3DCEE] bg-white text-[#4A5878] hover:bg-[#F5F8FD]'
                       }`}
                     >
                       <div className="text-xs">{t.label}</div>
-                      <div className="text-[10px] font-normal text-[#5B6478]">{t.desc}</div>
+                      <div className="text-[10px] font-normal text-[#4A5878]">{t.desc}</div>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="modal-client" className="block font-bold text-[#102654] mb-1.5">Client</label>
+                <label htmlFor="modal-client" className="block font-bold text-[#122654] mb-1.5">Client</label>
                 <select
                   id="modal-client"
                   value={newClientId}
                   onChange={(e) => setNewClientId(e.target.value)}
-                  className="w-full min-h-[40px] px-3 bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+                  className="w-full min-h-[40px] px-3 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66]"
                 >
                   {clients.map((cli) => (
                     <option key={cli.id} value={cli.id}>
@@ -675,19 +675,19 @@ export default function PracticeReviewNotesPage() {
               </div>
 
               <div>
-                <label htmlFor="modal-target" className="block font-bold text-[#102654] mb-1.5">Target Workpaper or Area</label>
+                <label htmlFor="modal-target" className="block font-bold text-[#122654] mb-1.5">Target Workpaper or Area</label>
                 <input
                   id="modal-target"
                   type="text"
                   placeholder="e.g. B-10 Bank reconciliation, F-10 Fixed Assets, Lead E"
                   value={newTarget}
                   onChange={(e) => setNewTarget(e.target.value)}
-                  className="w-full min-h-[40px] px-3 bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+                  className="w-full min-h-[40px] px-3 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66]"
                 />
               </div>
 
               <div>
-                <label htmlFor="modal-body" className="block font-bold text-[#102654] mb-1.5">Message / Observation</label>
+                <label htmlFor="modal-body" className="block font-bold text-[#122654] mb-1.5">Message / Observation</label>
                 <textarea
                   id="modal-body"
                   rows={3}
@@ -695,7 +695,7 @@ export default function PracticeReviewNotesPage() {
                   placeholder="Explain the finding, query, or required explanation..."
                   value={newBody}
                   onChange={(e) => setNewBody(e.target.value)}
-                  className="w-full p-3 bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B]"
+                  className="w-full p-3 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66]"
                 />
               </div>
 
@@ -703,13 +703,13 @@ export default function PracticeReviewNotesPage() {
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-4 py-2 border border-[#D5DBE7] hover:border-[#102654] rounded-[8px] text-[#102654] font-semibold cursor-pointer"
+                  className="px-4 py-2 border border-[#D3DCEE] hover:border-[#122654] rounded-[8px] text-[#122654] font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] font-bold rounded-[8px] shadow-sm cursor-pointer"
+                  className="px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] font-bold rounded-[8px] shadow-sm cursor-pointer"
                 >
                   Post Note
                 </button>

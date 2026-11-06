@@ -32,7 +32,7 @@ export default function AnalysisPage() {
   // P&L Lines with AI explanations (ANL-01)
   const pnlLines = [
     {
-      code: '4000',
+      code: '100',
       name: 'Wholesale Commercial UK Sales',
       currentPence: 620000000n, // £6,200,000.00
       priorPence: 540000000n, // £5,400,000.00
@@ -44,7 +44,7 @@ export default function AnalysisPage() {
       visibility: 'client_facing' as const,
     },
     {
-      code: '5000',
+      code: '210',
       name: 'Direct Component Materials',
       currentPence: 380000000n, // £3,800,000.00
       priorPence: 320000000n, // £3,200,000.00
@@ -56,7 +56,7 @@ export default function AnalysisPage() {
       visibility: 'client_facing' as const,
     },
     {
-      code: '6000',
+      code: '400',
       name: 'London Office Rent & Rates',
       currentPence: 30000000n, // £300,000.00
       priorPence: 23200000n, // £232,000.00
@@ -68,7 +68,7 @@ export default function AnalysisPage() {
       visibility: 'internal' as const,
     },
     {
-      code: '6100',
+      code: '410',
       name: 'Gas and Electricity Utilities',
       currentPence: 4120000n,
       priorPence: 4050000n,
@@ -79,7 +79,7 @@ export default function AnalysisPage() {
       visibility: 'internal' as const,
     },
     {
-      code: '6900',
+      code: '492',
       name: 'Depreciation Charge on Tangibles',
       currentPence: 2700000n,
       priorPence: 2450000n,
@@ -136,12 +136,12 @@ export default function AnalysisPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">AI Financial Analysis &amp; Schedule Review (ANL)</h1>
+            <h1 className="text-xl font-bold text-[#122654]">AI Financial Analysis &amp; Schedule Review (ANL)</h1>
             <span className="text-xs bg-[#FFF1EE] text-[#A23A27] px-2.5 py-1 rounded-full font-mono font-bold flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#FF7D6B]" /> AI Explanations Active
+              <Sparkles className="w-3 h-3 text-[#FF7A66]" /> AI Explanations Active
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Automated transaction-level variance explanations, liquidity ratios, and going concern checks.
           </p>
         </div>
@@ -150,7 +150,7 @@ export default function AnalysisPage() {
           <select
             value={comparisonMode}
             onChange={(e) => setComparisonMode(e.target.value as any)}
-            className="text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg px-3 py-1.5 text-[#102654] font-medium outline-none"
+            className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-3 py-1.5 text-[#122654] font-medium outline-none"
           >
             <option value="py">Compare: Prior Year (FY25)</option>
             <option value="budget">Compare: Budget (FY26)</option>
@@ -166,8 +166,8 @@ export default function AnalysisPage() {
           onClick={() => setActiveTab('pnl')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'pnl'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <TrendingUp className="w-4 h-4 text-[#1D4E89]" />
@@ -179,8 +179,8 @@ export default function AnalysisPage() {
           onClick={() => setActiveTab('balance_sheet')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'balance_sheet'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Scale className="w-4 h-4 text-[#1D4E89]" />
@@ -192,8 +192,8 @@ export default function AnalysisPage() {
           onClick={() => setActiveTab('unusual')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'unusual'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <ShieldAlert className="w-4 h-4 text-amber-600" />
@@ -212,32 +212,32 @@ export default function AnalysisPage() {
             <div className="bg-white p-4 rounded-xl border border-[#E3E7EF] shadow-2xs">
               <span className="text-[10px] font-bold uppercase text-[#7E8DA6]">Gross Margin</span>
               <div className="text-xl font-bold font-mono text-[#0B6B52] mt-1">38.7%</div>
-              <span className="text-[10px] text-[#5B6478] font-medium">-2.1% vs FY25 (40.8%)</span>
+              <span className="text-[10px] text-[#4A5878] font-medium">-2.1% vs FY25 (40.8%)</span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-[#E3E7EF] shadow-2xs">
               <span className="text-[10px] font-bold uppercase text-[#7E8DA6]">Operating Margin</span>
-              <div className="text-xl font-bold font-mono text-[#102654] mt-1">18.4%</div>
+              <div className="text-xl font-bold font-mono text-[#122654] mt-1">18.4%</div>
               <span className="text-[10px] text-emerald-700 font-medium">+1.3% vs FY25 (17.1%)</span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-[#E3E7EF] shadow-2xs">
               <span className="text-[10px] font-bold uppercase text-[#7E8DA6]">Net Margin</span>
-              <div className="text-xl font-bold font-mono text-[#102654] mt-1">15.1%</div>
+              <div className="text-xl font-bold font-mono text-[#122654] mt-1">15.1%</div>
               <span className="text-[10px] text-emerald-700 font-medium">+0.8% vs FY25</span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-[#E3E7EF] shadow-2xs">
               <span className="text-[10px] font-bold uppercase text-[#7E8DA6]">Staff Cost to Turnover</span>
-              <div className="text-xl font-bold font-mono text-[#102654] mt-1">22.4%</div>
-              <span className="text-[10px] text-[#5B6478] font-medium">Stable vs 22.1% prior</span>
+              <div className="text-xl font-bold font-mono text-[#122654] mt-1">22.4%</div>
+              <span className="text-[10px] text-[#4A5878] font-medium">Stable vs 22.1% prior</span>
             </div>
           </div>
 
           {/* Variance Grid with AI Explanation and Manual Commentary */}
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
-            <div className="p-4 bg-[#F6F7FB] border-b border-[#E3E7EF] flex items-center justify-between">
-              <span className="text-xs font-bold text-[#102654]">
+            <div className="p-4 bg-[#F5F8FD] border-b border-[#E3E7EF] flex items-center justify-between">
+              <span className="text-xs font-bold text-[#122654]">
                 Lines Flagged for Review (Movement &gt; 10% and &gt; £1,000)
               </span>
-              <span className="text-[11px] text-[#5B6478]">
+              <span className="text-[11px] text-[#4A5878]">
                 Threshold: ±10% / £1,000 per ADM-02
               </span>
             </div>
@@ -250,17 +250,17 @@ export default function AnalysisPage() {
                       <span className="font-mono font-bold text-xs text-[#1D4E89] bg-[#EAF5FC] px-1.5 py-0.5 rounded">
                         {line.code}
                       </span>
-                      <span className="font-bold text-xs text-[#102654]">{line.name}</span>
+                      <span className="font-bold text-xs text-[#122654]">{line.name}</span>
                     </div>
 
                     <div className="flex items-center gap-4 text-xs font-mono">
                       <div>
                         <span className="text-[10px] text-[#7E8DA6] block">Current FY26</span>
-                        <span className="font-bold text-[#102654]">{formatPence(line.currentPence)}</span>
+                        <span className="font-bold text-[#122654]">{formatPence(line.currentPence)}</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-[#7E8DA6] block">Prior FY25</span>
-                        <span className="text-[#5B6478]">{formatPence(line.priorPence)}</span>
+                        <span className="text-[#4A5878]">{formatPence(line.priorPence)}</span>
                       </div>
                       <div className="text-right">
                         <span className="text-[10px] text-[#7E8DA6] block">Variance</span>
@@ -277,8 +277,8 @@ export default function AnalysisPage() {
 
                   {/* AI Explanation Strip (ANL-01) */}
                   {line.aiExplanation && (
-                    <div className="mt-3 bg-[#FFF1EE]/70 border border-[#FF7D6B]/30 rounded-xl p-3 flex items-start gap-2.5">
-                      <Sparkles className="w-4 h-4 text-[#FF7D6B] shrink-0 mt-0.5" />
+                    <div className="mt-3 bg-[#FFF1EE]/70 border border-[#FF7A66]/30 rounded-xl p-3 flex items-start gap-2.5">
+                      <Sparkles className="w-4 h-4 text-[#FF7A66] shrink-0 mt-0.5" />
                       <div className="flex-1 text-xs text-[#A23A27] leading-relaxed">
                         <strong>AI Commentary:</strong> {line.aiExplanation}
                       </div>
@@ -291,7 +291,7 @@ export default function AnalysisPage() {
                       type="text"
                       defaultValue={line.comment}
                       placeholder="Add preparer explanation or variance note..."
-                      className="flex-1 text-xs px-3 py-1.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] outline-none"
+                      className="flex-1 text-xs px-3 py-1.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] outline-none"
                     />
                     <span className="text-[10px] font-bold uppercase text-[#7E8DA6] bg-gray-100 px-2 py-1 rounded">
                       {line.visibility === 'client_facing' ? 'Client Report Facing' : 'Internal WP Only'}
@@ -311,8 +311,8 @@ export default function AnalysisPage() {
           <div className="bg-white border-2 border-emerald-500/40 rounded-[16px] p-5 shadow-xs flex items-start gap-3.5">
             <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-bold text-[#102654]">Going Concern Health Check (ANL-02)</h3>
-              <p className="text-xs text-[#5B6478] mt-1 leading-relaxed">
+              <h3 className="text-sm font-bold text-[#122654]">Going Concern Health Check (ANL-02)</h3>
+              <p className="text-xs text-[#4A5878] mt-1 leading-relaxed">
                 Zero triggers detected: Positive net current assets (£3,809,350), profitable in FY25 &amp; FY26, HMRC payments up to date, and cash exceeds short-term obligations.
               </p>
             </div>
@@ -332,17 +332,17 @@ export default function AnalysisPage() {
             </div>
             <div className="bg-white p-3.5 rounded-xl border border-[#E3E7EF] text-center">
               <span className="text-[10px] font-bold uppercase text-[#7E8DA6]">Debtor Days</span>
-              <div className="text-lg font-bold font-mono text-[#102654] mt-1">46 days</div>
+              <div className="text-lg font-bold font-mono text-[#122654] mt-1">46 days</div>
               <span className="text-[9px] text-amber-600">+4 days vs FY25</span>
             </div>
             <div className="bg-white p-3.5 rounded-xl border border-[#E3E7EF] text-center">
               <span className="text-[10px] font-bold uppercase text-[#7E8DA6]">Creditor Days</span>
-              <div className="text-lg font-bold font-mono text-[#102654] mt-1">45 days</div>
+              <div className="text-lg font-bold font-mono text-[#122654] mt-1">45 days</div>
               <span className="text-[9px] text-[#7E8DA6]">Stable</span>
             </div>
             <div className="bg-white p-3.5 rounded-xl border border-[#E3E7EF] text-center">
               <span className="text-[10px] font-bold uppercase text-[#7E8DA6]">Stock Days</span>
-              <div className="text-lg font-bold font-mono text-[#102654] mt-1">54 days</div>
+              <div className="text-lg font-bold font-mono text-[#122654] mt-1">54 days</div>
               <span className="text-[9px] text-[#7E8DA6]">Healthy turn</span>
             </div>
             <div className="bg-white p-3.5 rounded-xl border border-[#E3E7EF] text-center">
@@ -355,7 +355,7 @@ export default function AnalysisPage() {
           {/* Balance Sheet Movement Grid */}
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0B1B3D] text-white text-[11px] font-bold uppercase tracking-wider">
+              <thead className="bg-[#0B1A3B] text-white text-[11px] font-bold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Balance Sheet Heading</th>
                   <th className="py-3 px-3">FY26 Final</th>
@@ -367,11 +367,11 @@ export default function AnalysisPage() {
               <tbody className="divide-y divide-[#E3E7EF]">
                 {bsLines.map((line, idx) => (
                   <tr key={idx} className="hover:bg-gray-50/50">
-                    <td className="py-3 px-4 font-bold text-[#102654]">{line.name}</td>
+                    <td className="py-3 px-4 font-bold text-[#122654]">{line.name}</td>
                     <td className="py-3 px-3 font-mono font-medium">{line.current}</td>
-                    <td className="py-3 px-3 font-mono text-[#5B6478]">{line.prior}</td>
+                    <td className="py-3 px-3 font-mono text-[#4A5878]">{line.prior}</td>
                     <td className="py-3 px-3 font-mono font-bold text-emerald-700">{line.movement}</td>
-                    <td className="py-3 px-4 text-[#5B6478]">{line.explanation}</td>
+                    <td className="py-3 px-4 text-[#4A5878]">{line.explanation}</td>
                   </tr>
                 ))}
               </tbody>
@@ -385,8 +385,8 @@ export default function AnalysisPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#E3E7EF] pb-3">
             <div>
-              <h3 className="text-sm font-bold text-[#102654]">Unusual Transactions Detector (AIX-04)</h3>
-              <p className="text-xs text-[#5B6478]">
+              <h3 className="text-sm font-bold text-[#122654]">Unusual Transactions Detector (AIX-04)</h3>
+              <p className="text-xs text-[#4A5878]">
                 Scans all ledger journal lines for round sums, weekend transactions, potential duplicates, and suspense postings.
               </p>
             </div>
@@ -406,13 +406,13 @@ export default function AnalysisPage() {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-[#102654]">{tx.date}</span>
-                    <span className="text-xs font-bold text-[#102654]">{tx.contact}</span>
+                    <span className="font-mono text-xs font-bold text-[#122654]">{tx.date}</span>
+                    <span className="text-xs font-bold text-[#122654]">{tx.contact}</span>
                     <span className="font-mono text-xs font-bold bg-white px-2 py-0.5 rounded border border-gray-200">
                       {tx.amount}
                     </span>
                   </div>
-                  <p className="text-xs text-[#5B6478] mt-1.5">{tx.reason}</p>
+                  <p className="text-xs text-[#4A5878] mt-1.5">{tx.reason}</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -424,7 +424,7 @@ export default function AnalysisPage() {
                   </button>
                   <button
                     type="button"
-                    className="px-3 py-1.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-2xs"
+                    className="px-3 py-1.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-2xs"
                   >
                     Raise client query
                   </button>

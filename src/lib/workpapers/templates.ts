@@ -21,7 +21,7 @@ export type ScheduleKind =
   | 'tax';
 
 export interface LeadDef {
-  code: string; // Blynt chart code, matched by prefix (e.g. "15" covers 1500-1599)
+  code: string; // Blynt chart code, matched by prefix (e.g. "4" covers 400-499)
   label: string;
 }
 
@@ -111,9 +111,13 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm bank balances exist, are complete, and are correctly cut off at the period end.',
     assertions: ['Existence', 'Completeness', 'Accuracy', 'Cut-off'],
     leads: [
-      { code: '1000', label: 'Petty cash' },
-      { code: '1010', label: 'Bank current account' },
-      { code: '1020', label: 'Bank deposit account' },
+      { code: '620', label: 'Petty cash' },
+      { code: '600', label: 'Main bank account' },
+      { code: '610', label: 'Savings account' },
+      { code: '630', label: 'Credit card' },
+      { code: '640', label: 'Payment processor account' },
+      { code: '645', label: 'Cash in transit' },
+      { code: '649', label: 'Other bank account' },
     ],
     kind: 'reconciliation',
     rollsForward: false,
@@ -141,8 +145,8 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm trade debtors exist, are recoverable, and are stated net of any required bad debt provision.',
     assertions: ['Existence', 'Valuation', 'Rights'],
     leads: [
-      { code: '1200', label: 'Trade debtors control' },
-      { code: '1210', label: 'Allowance for bad debts' },
+      { code: '710', label: 'Trade receivables control' },
+      { code: '711', label: 'Bad debt provision' },
     ],
     kind: 'lines',
     rollsForward: false,
@@ -176,7 +180,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm prepayments represent goods or services paid for in advance of the period end.',
     assertions: ['Cut-off', 'Valuation', 'Accuracy'],
     leads: [
-      { code: '1400', label: 'Prepayments and accrued income' },
+      { code: '730', label: 'Prepayments' },
     ],
     kind: 'lines',
     rollsForward: false,
@@ -209,7 +213,8 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm other debtors are genuine, recoverable, and properly classified.',
     assertions: ['Existence', 'Classification'],
     leads: [
-      { code: '1410', label: 'Other debtors and deposits' },
+      { code: '720', label: 'Other receivables' },
+      { code: '749', label: 'Other current assets' },
     ],
     kind: 'lines',
     rollsForward: false,
@@ -235,7 +240,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm stock exists and is valued at the lower of cost and net realisable value.',
     assertions: ['Existence', 'Valuation', 'Completeness'],
     leads: [
-      { code: '1300', label: 'Stock and work in progress' },
+      { code: '700', label: 'Inventory' },
     ],
     kind: 'lines',
     rollsForward: false,
@@ -266,8 +271,8 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm director loan balances, track movements, and assess s455 and BIK tax implications.',
     assertions: ['Existence', 'Valuation', 'Disclosure'],
     leads: [
-      { code: '1220', label: 'Director’s loan account (debtors)' },
-      { code: '2150', label: 'Director’s loan account (creditors)' },
+      { code: '740', label: 'Director’s loan account (debtors)' },
+      { code: '798', label: 'Director’s loan account (creditors)' },
     ],
     kind: 'dla',
     rollsForward: true,
@@ -294,8 +299,9 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm share capital matches Companies House and dividends are supported by distributable profits.',
     assertions: ['Accuracy', 'Presentation', 'Legality'],
     leads: [
-      { code: '3000', label: 'Called up share capital' },
-      { code: '3010', label: 'Share premium account' },
+      { code: '850', label: 'Ordinary share capital' },
+      { code: '860', label: 'Other share capital' },
+      { code: '870', label: 'Share premium account' },
     ],
     creditArea: true,
     kind: 'lines',
@@ -325,8 +331,9 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Reconcile movements in reserves to comprehensive income and distributions.',
     assertions: ['Completeness', 'Accuracy'],
     leads: [
-      { code: '3100', label: 'Profit and loss reserve' },
-      { code: '3200', label: 'Revaluation reserve' },
+      { code: '890', label: 'Retained earnings' },
+      { code: '899', label: 'Current-year earnings' },
+      { code: '880', label: 'Other reserves' },
     ],
     creditArea: true,
     kind: 'lines',
@@ -356,11 +363,19 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm fixed assets exist, are owned, are depreciated in accordance with policies, and NBV agrees to ledger.',
     assertions: ['Existence', 'Rights', 'Valuation', 'Completeness'],
     leads: [
-      { code: '1500', label: 'Plant and machinery (cost)' },
-      { code: '1510', label: 'Fixtures, fittings and equipment (cost)' },
-      { code: '1700', label: 'Accumulated depreciation' },
-      { code: '6900', label: 'Depreciation charge' },
-      { code: '6950', label: 'Profit or loss on disposal' },
+      { code: '650', label: 'Property (cost)' },
+      { code: '660', label: 'Plant and equipment (cost)' },
+      { code: '670', label: 'Motor vehicles (cost)' },
+      { code: '680', label: 'Computer equipment (cost)' },
+      { code: '690', label: 'Fixtures and fittings (cost)' },
+      { code: '651', label: 'Property accumulated depreciation' },
+      { code: '661', label: 'Plant accumulated depreciation' },
+      { code: '671', label: 'Motor vehicles accumulated depreciation' },
+      { code: '681', label: 'Computer accumulated depreciation' },
+      { code: '691', label: 'Fixtures accumulated depreciation' },
+      { code: '696', label: 'Accumulated impairment' },
+      { code: '492', label: 'Depreciation charge' },
+      { code: '493', label: 'Profit or loss on disposal' },
     ],
     kind: 'assets',
     rollsForward: true,
@@ -388,8 +403,6 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm investments exist and are valued in accordance with FRS 102/105.',
     assertions: ['Existence', 'Valuation'],
     leads: [
-      { code: '1600', label: 'Investments in subsidiaries and associates' },
-      { code: '1650', label: 'Investment property' },
     ],
     kind: 'lines',
     rollsForward: true,
@@ -420,8 +433,11 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm revenue is complete, accurate, and recorded in the correct accounting period.',
     assertions: ['Occurrence', 'Completeness', 'Cut-off'],
     leads: [
-      { code: '4000', label: 'UK sales' },
-      { code: '4100', label: 'Export / other income' },
+      { code: '100', label: 'UK sales' },
+      { code: '110', label: 'Service income' },
+      { code: '120', label: 'Export sales' },
+      { code: '140', label: 'Other operating income' },
+      { code: '190', label: 'Sales returns and discounts' },
     ],
     creditArea: true,
     kind: 'lines',
@@ -450,7 +466,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm trade creditors are complete and liabilities at year end are fully recorded.',
     assertions: ['Completeness', 'Accuracy', 'Cut-off'],
     leads: [
-      { code: '2000', label: 'Trade creditors control' },
+      { code: '750', label: 'Trade payables control' },
     ],
     creditArea: true,
     kind: 'lines',
@@ -484,7 +500,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm accruals represent genuine liabilities incurred before the period end.',
     assertions: ['Completeness', 'Cut-off'],
     leads: [
-      { code: '2100', label: 'Accruals and deferred income' },
+      { code: '760', label: 'Accruals and deferred income' },
     ],
     creditArea: true,
     kind: 'lines',
@@ -516,8 +532,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm leases are accounted for under the applicable standard (operating / finance vs right-of-use).',
     assertions: ['Classification', 'Completeness', 'Accuracy'],
     leads: [
-      { code: '2400', label: 'Lease liabilities (due < 1 year)' },
-      { code: '2410', label: 'Lease liabilities (due > 1 year)' },
+      { code: '820', label: 'Lease liabilities' },
     ],
     creditArea: true,
     kind: 'leases',
@@ -544,8 +559,9 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm loans exist, balances agree to statements, and repayment splits are accurate.',
     assertions: ['Existence', 'Accuracy', 'Classification'],
     leads: [
-      { code: '2500', label: 'Bank loans due within one year' },
-      { code: '2510', label: 'Bank loans due after one year' },
+      { code: '799', label: 'Current portion of loans' },
+      { code: '800', label: 'Bank loans' },
+      { code: '830', label: 'Other long-term borrowings' },
     ],
     creditArea: true,
     kind: 'loans',
@@ -573,7 +589,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm HP obligations are correctly stated net of future finance charges.',
     assertions: ['Completeness', 'Accuracy'],
     leads: [
-      { code: '2520', label: 'Hire purchase liabilities' },
+      { code: '810', label: 'Hire purchase liabilities' },
     ],
     creditArea: true,
     kind: 'loans',
@@ -595,9 +611,8 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm expenses are complete, accurate, and relate to business trading.',
     assertions: ['Occurrence', 'Accuracy', 'Classification'],
     leads: [
-      { code: '5000', label: 'Cost of sales' },
-      { code: '6000', label: 'Administrative overheads' },
-      { code: '6100', label: 'Utilities and facilities' },
+      { code: '2', label: 'Cost of sales' },
+      { code: '4', label: 'Administrative expenses' },
     ],
     kind: 'lines',
     rollsForward: false,
@@ -624,9 +639,10 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm payroll costs agree to payroll reports, and period-end liabilities are correct.',
     assertions: ['Completeness', 'Accuracy', 'Cut-off'],
     leads: [
-      { code: '6200', label: 'Staff wages and salaries' },
-      { code: '2300', label: 'PAYE and NIC control' },
-      { code: '2350', label: 'Pensions payable' },
+      { code: '3', label: 'Payroll costs' },
+      { code: '789', label: 'Wages payable control' },
+      { code: '790', label: 'PAYE and NIC payable' },
+      { code: '791', label: 'Pensions payable' },
     ],
     kind: 'payroll',
     rollsForward: false,
@@ -653,7 +669,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm provisions comply with FRS 102/105 recognition criteria.',
     assertions: ['Valuation', 'Obligation'],
     leads: [
-      { code: '2600', label: 'Provisions for liabilities' },
+      { code: '840', label: 'Provisions for liabilities' },
     ],
     creditArea: true,
     kind: 'lines',
@@ -683,7 +699,6 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm grants are recognised in income systematically over the useful life of the asset.',
     assertions: ['Accuracy', 'Cut-off'],
     leads: [
-      { code: '2650', label: 'Deferred capital grants' },
     ],
     creditArea: true,
     kind: 'lines',
@@ -710,8 +725,8 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Ensure all related party transactions and period-end balances are fully identified and disclosed.',
     assertions: ['Completeness', 'Disclosure'],
     leads: [
-      { code: '1250', label: 'Amounts owed by group undertakings' },
-      { code: '2160', label: 'Amounts owed to group undertakings' },
+      { code: '721', label: 'Intercompany receivable' },
+      { code: '771', label: 'Intercompany payable' },
     ],
     kind: 'lines',
     rollsForward: true,
@@ -739,7 +754,11 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Ensure suspense and clearing accounts are cleared to zero at period end.',
     assertions: ['Completeness', 'Accuracy'],
     leads: [
-      { code: '9999', label: 'Suspense and clearing accounts' },
+      { code: '900', label: 'Suspense' },
+      { code: '910', label: 'Opening balance control' },
+      { code: '920', label: 'Payroll clearing' },
+      { code: '930', label: 'Payment clearing' },
+      { code: '999', label: 'System balancing account' },
     ],
     kind: 'lines',
     rollsForward: false,
@@ -765,7 +784,8 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm corporation tax liability agrees to the tax computation.',
     assertions: ['Completeness', 'Accuracy'],
     leads: [
-      { code: '2250', label: 'Corporation tax liability' },
+      { code: '795', label: 'Corporation tax payable' },
+      { code: '745', label: 'Corporation tax recoverable' },
       { code: '500', label: 'Corporation tax charge' },
     ],
     creditArea: true,
@@ -793,7 +813,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm VAT control account agrees to returns filed and open period liability.',
     assertions: ['Completeness', 'Accuracy', 'Cut-off'],
     leads: [
-      { code: '2200', label: 'VAT control liability' },
+      { code: '780', label: 'VAT control liability' },
     ],
     creditArea: true,
     kind: 'vat',
@@ -821,7 +841,7 @@ export const TEMPLATES: TemplateDef[] = [
     objective: 'Confirm deferred tax asset/liability under FRS 102.',
     assertions: ['Valuation', 'Completeness'],
     leads: [
-      { code: '2280', label: 'Deferred tax provision' },
+      { code: '840', label: 'Deferred tax provision' },
     ],
     creditArea: true,
     kind: 'tax',

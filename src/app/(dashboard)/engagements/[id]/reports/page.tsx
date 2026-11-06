@@ -50,13 +50,13 @@ export default function ReportsPage() {
     {
       id: 'rep_leads',
       title: 'Lead Schedules Summary (A to Z)',
-      category: 'Audit & Workpapers',
+      category: 'Workpapers',
       description: 'All balance sheet and profit & loss lead schedules tied to supporting control account papers.',
       format: 'PDF / Excel',
     },
     {
       id: 'rep_jnl',
-      title: 'Complete Journal Register & Adjustments Audit',
+      title: 'Complete journal register and adjustments',
       category: 'Adjustments',
       description: 'Every manual and AI proposed journal with approvals, nominal lines, and effect on profit.',
       format: 'PDF / Excel',
@@ -90,22 +90,22 @@ export default function ReportsPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">Financial Reports &amp; Exports (RPT / MGT / QTR)</h1>
+            <h1 className="text-xl font-bold text-[#122654]">Financial Reports &amp; Exports (RPT / MGT / QTR)</h1>
             <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] px-2.5 py-1 rounded-full font-mono font-semibold">
               Period: FY26 Final
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
-            Pull any report for any period (RPT-01), generate client management packs (MGT-01), or export complete indexed audit bundles (RPT-02).
+          <p className="text-xs text-[#4A5878] mt-1">
+            Pull any report for any period (RPT-01), generate client management packs (MGT-01), or export complete indexed working paper bundles (RPT-02).
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setActiveTab('bundle')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
         >
-          <FileDown className="w-4 h-4 text-[#FF7D6B]" />
+          <FileDown className="w-4 h-4 text-[#FF7A66]" />
           <span>Full File Export Bundle (RPT-02)</span>
         </button>
       </div>
@@ -117,8 +117,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('library')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 ${
             activeTab === 'library'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <FileSpreadsheet className="w-4 h-4 text-[#1D4E89]" />
@@ -130,8 +130,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('mgt_pack')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 ${
             activeTab === 'mgt_pack'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <BarChart3 className="w-4 h-4 text-[#1D4E89]" />
@@ -143,8 +143,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('cash_flow')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 ${
             activeTab === 'cash_flow'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <TrendingUp className="w-4 h-4 text-[#0B6B52]" />
@@ -156,8 +156,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('forecast_12m')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 ${
             activeTab === 'forecast_12m'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
           <Calendar className="w-4 h-4 text-purple-700" />
@@ -169,11 +169,11 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('quarterly')}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 ${
             activeTab === 'quarterly'
-              ? 'border-[#FF7D6B] text-[#102654]'
-              : 'border-transparent text-[#5B6478] hover:text-[#102654]'
+              ? 'border-[#FF7A66] text-[#122654]'
+              : 'border-transparent text-[#4A5878] hover:text-[#122654]'
           }`}
         >
-          <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
+          <Sparkles className="w-4 h-4 text-[#FF7A66]" />
           <span>Quarterly Insight Pack (QTR-01)</span>
         </button>
       </div>
@@ -184,7 +184,7 @@ export default function ReportsPage() {
           {reportLibrary.map((rep) => (
             <div
               key={rep.id}
-              className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col justify-between hover:border-[#102654]/30 transition-all"
+              className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col justify-between hover:border-[#122654]/30 transition-all"
             >
               <div>
                 <div className="flex items-center justify-between">
@@ -193,8 +193,8 @@ export default function ReportsPage() {
                   </span>
                   <span className="text-[10px] font-mono text-[#1D4E89]">{rep.format}</span>
                 </div>
-                <h3 className="text-sm font-bold text-[#102654] mt-2.5">{rep.title}</h3>
-                <p className="text-xs text-[#5B6478] mt-1 leading-relaxed">{rep.description}</p>
+                <h3 className="text-sm font-bold text-[#122654] mt-2.5">{rep.title}</h3>
+                <p className="text-xs text-[#4A5878] mt-1 leading-relaxed">{rep.description}</p>
               </div>
 
               <div className="pt-4 border-t border-[#E3E7EF] flex items-center justify-between mt-4">
@@ -221,14 +221,14 @@ export default function ReportsPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Client Management Accounts Pack (MGT-01)</h2>
-              <p className="text-xs text-[#5B6478]">
+              <h2 className="text-base font-bold text-[#122654]">Client Management Accounts Pack (MGT-01)</h2>
+              <p className="text-xs text-[#4A5878]">
                 Professional management pack with KPI graphs, P&amp;L variance, and aged debtors summary.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 text-xs font-semibold text-[#102654] cursor-pointer bg-[#F6F7FB] px-3 py-1.5 rounded-lg border border-[#D5DBE7]">
+              <label className="flex items-center gap-2 text-xs font-semibold text-[#122654] cursor-pointer bg-[#F5F8FD] px-3 py-1.5 rounded-lg border border-[#D3DCEE]">
                 <input
                   type="checkbox"
                   checked={plainEnglish}
@@ -240,7 +240,7 @@ export default function ReportsPage() {
 
               <button
                 type="button"
-                className="flex items-center gap-2 px-3.5 py-1.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+                className="flex items-center gap-2 px-3.5 py-1.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export Pack (PDF)</span>
@@ -252,13 +252,13 @@ export default function ReportsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200">
               <span className="text-[10px] font-bold uppercase text-[#1D4E89]">Total Turnover</span>
-              <div className="text-xl font-bold font-mono text-[#102654] mt-1">£6,200,000</div>
+              <div className="text-xl font-bold font-mono text-[#122654] mt-1">£6,200,000</div>
               <span className="text-[10px] text-emerald-700 font-semibold">+14.8% vs last year</span>
             </div>
             <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-200">
               <span className="text-[10px] font-bold uppercase text-[#0B6B52]">Gross Profit</span>
               <div className="text-xl font-bold font-mono text-[#0B6B52] mt-1">£2,400,000</div>
-              <span className="text-[10px] text-[#5B6478]">Margin: 38.7%</span>
+              <span className="text-[10px] text-[#4A5878]">Margin: 38.7%</span>
             </div>
             <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-200">
               <span className="text-[10px] font-bold uppercase text-purple-800">Net Profit Before Tax</span>
@@ -275,7 +275,7 @@ export default function ReportsPage() {
           {/* Section preview table */}
           <div className="border border-[#E3E7EF] rounded-xl overflow-hidden text-xs">
             <table className="w-full text-left">
-              <thead className="bg-[#F6F7FB] text-[#7E8DA6] text-[10px] font-bold uppercase">
+              <thead className="bg-[#F5F8FD] text-[#7E8DA6] text-[10px] font-bold uppercase">
                 <tr>
                   <th className="py-2.5 px-4">{plainEnglish ? 'What you earned & spent' : 'Account Category'}</th>
                   <th className="py-2.5 px-4 text-right">This Year (FY26)</th>
@@ -285,43 +285,43 @@ export default function ReportsPage() {
               </thead>
               <tbody className="divide-y divide-[#E3E7EF] font-mono">
                 <tr>
-                  <td className="py-2.5 px-4 font-sans font-bold text-[#102654]">
+                  <td className="py-2.5 px-4 font-sans font-bold text-[#122654]">
                     {plainEnglish ? 'Total Sales Invoiced' : 'Revenue / Turnover'}
                   </td>
-                  <td className="py-2.5 px-4 text-right font-bold text-[#102654]">£6,200,000.00</td>
-                  <td className="py-2.5 px-4 text-right text-[#5B6478]">£5,400,000.00</td>
+                  <td className="py-2.5 px-4 text-right font-bold text-[#122654]">£6,200,000.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#4A5878]">£5,400,000.00</td>
                   <td className="py-2.5 px-4 text-right text-emerald-700 font-bold">+14.8%</td>
                 </tr>
                 <tr>
-                  <td className="py-2.5 px-4 font-sans text-[#102654]">
+                  <td className="py-2.5 px-4 font-sans text-[#122654]">
                     {plainEnglish ? 'Cost of Goods Bought & Made' : 'Cost of Sales'}
                   </td>
-                  <td className="py-2.5 px-4 text-right text-[#102654]">£3,800,000.00</td>
-                  <td className="py-2.5 px-4 text-right text-[#5B6478]">£3,200,000.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#122654]">£3,800,000.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#4A5878]">£3,200,000.00</td>
                   <td className="py-2.5 px-4 text-right text-red-600">+18.8%</td>
                 </tr>
                 <tr>
-                  <td className="py-2.5 px-4 font-sans text-[#102654]">
+                  <td className="py-2.5 px-4 font-sans text-[#122654]">
                     {plainEnglish ? 'Staff Costs & Wages' : 'Employee Salaries & Remuneration'}
                   </td>
-                  <td className="py-2.5 px-4 text-right text-[#102654]">£1,388,400.00</td>
-                  <td className="py-2.5 px-4 text-right text-[#5B6478]">£1,195,000.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#122654]">£1,388,400.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#4A5878]">£1,195,000.00</td>
                   <td className="py-2.5 px-4 text-right text-red-600">+16.2%</td>
                 </tr>
                 <tr>
-                  <td className="py-2.5 px-4 font-sans text-[#102654]">
+                  <td className="py-2.5 px-4 font-sans text-[#122654]">
                     {plainEnglish ? 'Office, Rent & Business Overheads' : 'Administrative Overheads'}
                   </td>
-                  <td className="py-2.5 px-4 text-right text-[#102654]">£344,250.00</td>
-                  <td className="py-2.5 px-4 text-right text-[#5B6478]">£298,000.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#122654]">£344,250.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#4A5878]">£298,000.00</td>
                   <td className="py-2.5 px-4 text-right text-red-600">+15.5%</td>
                 </tr>
-                <tr className="bg-[#F6F7FB] font-bold">
+                <tr className="bg-[#F5F8FD] font-bold">
                   <td className="py-2.5 px-4 font-sans text-[#0B6B52]">
                     {plainEnglish ? 'Net Profit Retained' : 'Profit on Ordinary Activities Before Tax'}
                   </td>
                   <td className="py-2.5 px-4 text-right text-[#0B6B52]">£939,350.00</td>
-                  <td className="py-2.5 px-4 text-right text-[#5B6478]">£835,000.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#4A5878]">£835,000.00</td>
                   <td className="py-2.5 px-4 text-right text-emerald-700">+12.5%</td>
                 </tr>
               </tbody>
@@ -335,8 +335,8 @@ export default function ReportsPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Cash Flow Statement - Indirect Method (MGT-04)</h2>
-              <p className="text-xs text-[#5B6478]">
+              <h2 className="text-base font-bold text-[#122654]">Cash Flow Statement - Indirect Method (MGT-04)</h2>
+              <p className="text-xs text-[#4A5878]">
                 Reconciles operating profit to closing bank balances using balance sheet movements (DAT-03).
               </p>
             </div>
@@ -346,7 +346,7 @@ export default function ReportsPage() {
                 type="button"
                 onClick={() => setCashFlowView('client')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg ${
-                  cashFlowView === 'client' ? 'bg-[#102654] text-white' : 'bg-gray-100 text-[#5B6478]'
+                  cashFlowView === 'client' ? 'bg-[#122654] text-white' : 'bg-gray-100 text-[#4A5878]'
                 }`}
               >
                 Client View (Bridge)
@@ -355,7 +355,7 @@ export default function ReportsPage() {
                 type="button"
                 onClick={() => setCashFlowView('statutory')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg ${
-                  cashFlowView === 'statutory' ? 'bg-[#102654] text-white' : 'bg-gray-100 text-[#5B6478]'
+                  cashFlowView === 'statutory' ? 'bg-[#122654] text-white' : 'bg-gray-100 text-[#4A5878]'
                 }`}
               >
                 Statutory View (FRS 102)
@@ -363,8 +363,8 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          <div className="border border-[#E3E7EF] rounded-xl p-5 bg-[#F6F7FB]/50 space-y-3 font-mono text-xs max-w-2xl mx-auto">
-            <div className="flex justify-between font-bold text-sm text-[#102654] pb-2 border-b border-gray-300">
+          <div className="border border-[#E3E7EF] rounded-xl p-5 bg-[#F5F8FD]/50 space-y-3 font-mono text-xs max-w-2xl mx-auto">
+            <div className="flex justify-between font-bold text-sm text-[#122654] pb-2 border-b border-gray-300">
               <span className="font-sans">Operating Profit Before Tax</span>
               <span>£939,350.00</span>
             </div>
@@ -399,17 +399,17 @@ export default function ReportsPage() {
               <span>(£277,000.00)</span>
             </div>
 
-            <div className="flex justify-between font-bold text-sm text-[#102654] pt-2 border-t-2 border-gray-900 bg-white p-2 rounded">
+            <div className="flex justify-between font-bold text-sm text-[#122654] pt-2 border-t-2 border-gray-900 bg-white p-2 rounded">
               <span className="font-sans">Net Increase in Cash &amp; Equivalents</span>
               <span className="text-[#0B6B52]">+£365,350.00</span>
             </div>
 
-            <div className="flex justify-between text-[#5B6478] pt-1 text-[11px]">
+            <div className="flex justify-between text-[#4A5878] pt-1 text-[11px]">
               <span className="font-sans">Cash at beginning of financial year</span>
               <span>£940,000.00</span>
             </div>
 
-            <div className="flex justify-between font-bold text-[#102654] text-xs">
+            <div className="flex justify-between font-bold text-[#122654] text-xs">
               <span className="font-sans">Cash at end of financial year (Agrees to REC-02)</span>
               <span>£1,305,350.00</span>
             </div>
@@ -421,56 +421,56 @@ export default function ReportsPage() {
       {activeTab === 'forecast_12m' && (
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
           <div className="border-b border-[#E3E7EF] pb-4">
-            <h2 className="text-base font-bold text-[#102654]">12-Month Cash Flow Forecast (MGT-05)</h2>
-            <p className="text-xs text-[#5B6478]">
+            <h2 className="text-base font-bold text-[#122654]">12-Month Cash Flow Forecast (MGT-05)</h2>
+            <p className="text-xs text-[#4A5878]">
               Dynamic cash model driven by debtor/creditor day assumptions and scheduled tax payment dates.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Left Assumptions Panel */}
-            <div className="bg-[#F6F7FB] p-4 rounded-xl border border-[#E3E7EF] space-y-3.5">
+            <div className="bg-[#F5F8FD] p-4 rounded-xl border border-[#E3E7EF] space-y-3.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#7E8DA6] block">
                 Forecast Assumptions
               </span>
 
               <div>
-                <label className="block text-[11px] font-semibold text-[#102654] mb-1">Debtor Days</label>
+                <label className="block text-[11px] font-semibold text-[#122654] mb-1">Debtor Days</label>
                 <input
                   type="number"
                   value={debtorDays}
                   onChange={(e) => setDebtorDays(Number(e.target.value))}
-                  className="w-full text-xs p-2 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold"
+                  className="w-full text-xs p-2 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-[#102654] mb-1">Creditor Days</label>
+                <label className="block text-[11px] font-semibold text-[#122654] mb-1">Creditor Days</label>
                 <input
                   type="number"
                   value={creditorDays}
                   onChange={(e) => setCreditorDays(Number(e.target.value))}
-                  className="w-full text-xs p-2 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold"
+                  className="w-full text-xs p-2 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-[#102654] mb-1">Minimum Cash Buffer (£)</label>
+                <label className="block text-[11px] font-semibold text-[#122654] mb-1">Minimum Cash Buffer (£)</label>
                 <input
                   type="text"
                   value={minimumCash}
                   onChange={(e) => setMinimumCash(e.target.value)}
-                  className="w-full text-xs p-2 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold"
+                  className="w-full text-xs p-2 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-[#102654] mb-1">Planned Q2 Capex (£)</label>
+                <label className="block text-[11px] font-semibold text-[#122654] mb-1">Planned Q2 Capex (£)</label>
                 <input
                   type="text"
                   value={capexSpend}
                   onChange={(e) => setCapexSpend(e.target.value)}
-                  className="w-full text-xs p-2 bg-white border border-[#D5DBE7] rounded-lg font-mono font-bold"
+                  className="w-full text-xs p-2 bg-white border border-[#D3DCEE] rounded-lg font-mono font-bold"
                 />
               </div>
 
@@ -483,7 +483,7 @@ export default function ReportsPage() {
             {/* Monthly Forecast Table */}
             <div className="lg:col-span-3 border border-[#E3E7EF] rounded-xl overflow-hidden text-xs">
               <table className="w-full text-left">
-                <thead className="bg-[#0B1B3D] text-white text-[10px] font-bold uppercase">
+                <thead className="bg-[#0B1A3B] text-white text-[10px] font-bold uppercase">
                   <tr>
                     <th className="py-2.5 px-3">Month</th>
                     <th className="py-2.5 px-3 text-right">Opening Cash</th>
@@ -502,11 +502,11 @@ export default function ReportsPage() {
                     { m: 'Mar 2027', op: '£1,575,350', in: '£550,000', out: '£510,000', cl: '£1,615,350' },
                   ].map((row, idx) => (
                     <tr key={idx} className="hover:bg-gray-50/50">
-                      <td className="py-2.5 px-3 font-sans font-bold text-[#102654]">{row.m}</td>
+                      <td className="py-2.5 px-3 font-sans font-bold text-[#122654]">{row.m}</td>
                       <td className="py-2.5 px-3 text-right">{row.op}</td>
                       <td className="py-2.5 px-3 text-right text-emerald-700">{row.in}</td>
                       <td className="py-2.5 px-3 text-right text-red-600">{row.out}</td>
-                      <td className="py-2.5 px-3 text-right font-bold text-[#102654]">{row.cl}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-[#122654]">{row.cl}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -521,36 +521,36 @@ export default function ReportsPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Quarterly Insight Schedule (QTR-01)</h2>
-              <p className="text-xs text-[#5B6478]">
+              <h2 className="text-base font-bold text-[#122654]">Quarterly Insight Schedule (QTR-01)</h2>
+              <p className="text-xs text-[#4A5878]">
                 2-page executive summary with AI insights, trend charts, and statutory filing timeline.
               </p>
             </div>
             <button
               type="button"
-              className="flex items-center gap-2 px-3.5 py-1.5 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-lg shadow-xs transition-colors"
+              className="flex items-center gap-2 px-3.5 py-1.5 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-lg shadow-xs transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Generate Q4 Pack</span>
             </button>
           </div>
 
-          <div className="bg-[#FFF1EE]/50 border border-[#FF7D6B]/30 rounded-xl p-4 space-y-2">
+          <div className="bg-[#FFF1EE]/50 border border-[#FF7A66]/30 rounded-xl p-4 space-y-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[#A23A27]">
-              <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
+              <Sparkles className="w-4 h-4 text-[#FF7A66]" />
               <span>3 AI Executive Insights (QTR-01 Plain English)</span>
             </div>
-            <ul className="space-y-1.5 text-xs text-[#102654]">
+            <ul className="space-y-1.5 text-xs text-[#122654]">
               <li className="flex items-start gap-2">
-                <span className="text-[#FF7D6B] font-bold">•</span>
+                <span className="text-[#FF7A66] font-bold">•</span>
                 <span>Revenue expanded by 14.8% over the year, driven by strong customer demand in Q2.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#FF7D6B] font-bold">•</span>
+                <span className="text-[#FF7A66] font-bold">•</span>
                 <span>Cash collection remains disciplined with debtor days at 46 days against industry norm of 52 days.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#FF7D6B] font-bold">•</span>
+                <span className="text-[#FF7A66] font-bold">•</span>
                 <span>Corporation tax liability of £22,505.33 is scheduled for payment 9 months post year-end.</span>
               </li>
             </ul>
@@ -561,16 +561,16 @@ export default function ReportsPage() {
       {/* TAB 6: Full File Export Bundle (RPT-02) */}
       {activeTab === 'bundle' && (
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-5 max-w-2xl mx-auto">
-          <div className="flex items-center gap-3 text-[#102654] border-b border-[#E3E7EF] pb-3">
-            <FileDown className="w-6 h-6 text-[#FF7D6B]" />
+          <div className="flex items-center gap-3 text-[#122654] border-b border-[#E3E7EF] pb-3">
+            <FileDown className="w-6 h-6 text-[#FF7A66]" />
             <h2 className="text-base font-bold">Full Working Paper File Export (RPT-02)</h2>
           </div>
 
-          <p className="text-xs text-[#5B6478] leading-relaxed">
+          <p className="text-xs text-[#4A5878] leading-relaxed">
             Exports the complete engagement as an indexed regulatory PDF bundle. Includes:
           </p>
 
-          <ul className="space-y-2 text-xs text-[#102654] bg-[#F6F7FB] p-4 rounded-xl border border-[#E3E7EF]">
+          <ul className="space-y-2 text-xs text-[#122654] bg-[#F5F8FD] p-4 rounded-xl border border-[#E3E7EF]">
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Working paper index with sign-off initials (P / M / Pt)</span>
@@ -596,9 +596,9 @@ export default function ReportsPage() {
           <div className="pt-2 flex items-center justify-end gap-3">
             <button
               type="button"
-              className="px-5 py-2.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-2"
+              className="px-5 py-2.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-2"
             >
-              <Download className="w-4 h-4 text-[#FF7D6B]" />
+              <Download className="w-4 h-4 text-[#FF7A66]" />
               <span>Build &amp; Download Indexed PDF Bundle (RPT-02)</span>
             </button>
           </div>

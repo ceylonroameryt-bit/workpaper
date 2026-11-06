@@ -232,8 +232,8 @@ export default function WorkingPaperIndexPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">Working Paper Index (WPS)</h1>
-            <span className="text-xs bg-[#102654] text-white px-2.5 py-1 rounded-full font-mono font-semibold">
+            <h1 className="text-xl font-bold text-[#122654]">Working Paper Index (WPS)</h1>
+            <span className="text-xs bg-[#122654] text-white px-2.5 py-1 rounded-full font-mono font-semibold">
               {standardLabel}
             </span>
             {activeEngagement?.status === 'locked' && (
@@ -242,13 +242,13 @@ export default function WorkingPaperIndexPage() {
               </span>
             )}
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Standard-driven working papers with automated reconciliation, AI checks, and 3-level sign-off.
           </p>
         </div>
 
         {/* Progress Stats */}
-        <div className="flex items-center gap-4 bg-[#F6F7FB] px-4 py-3 rounded-xl border border-[#E3E7EF]">
+        <div className="flex items-center gap-4 bg-[#F5F8FD] px-4 py-3 rounded-xl border border-[#E3E7EF]">
           <div>
             <div className="text-[10px] uppercase font-bold text-[#7E8DA6]">Reconciled</div>
             <div className="flex items-center gap-2 mt-0.5">
@@ -300,8 +300,8 @@ export default function WorkingPaperIndexPage() {
             onClick={() => setSectionFilter(sec.id as any)}
             className={`px-3.5 py-2 text-xs font-semibold rounded-xl transition-all shrink-0 cursor-pointer ${
               sectionFilter === sec.id
-                ? 'bg-[#102654] text-white shadow-xs'
-                : 'text-[#5B6478] hover:bg-[#F6F7FB] hover:text-[#102654]'
+                ? 'bg-[#122654] text-white shadow-xs'
+                : 'text-[#4A5878] hover:bg-[#F5F8FD] hover:text-[#122654]'
             }`}
           >
             {sec.label}
@@ -319,14 +319,14 @@ export default function WorkingPaperIndexPage() {
               placeholder="Search schedules or codes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs pl-8 pr-3 py-1.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] outline-none focus:ring-1 focus:ring-[#1D4E89]"
+              className="w-full text-xs pl-8 pr-3 py-1.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] outline-none focus:ring-1 focus:ring-[#1D4E89]"
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg px-2.5 py-1.5 text-[#102654] font-medium outline-none"
+            className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"
           >
             <option value="all">All statuses</option>
             <option value="unreconciled">Unreconciled</option>
@@ -340,7 +340,7 @@ export default function WorkingPaperIndexPage() {
           <select
             value={flagFilter}
             onChange={(e) => setFlagFilter(e.target.value)}
-            className="text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg px-2.5 py-1.5 text-[#102654] font-medium outline-none"
+            className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"
           >
             <option value="all">All flags</option>
             <option value="ai_warning">AI warning open</option>
@@ -355,21 +355,21 @@ export default function WorkingPaperIndexPage() {
             type="button"
             disabled={reviewing}
             onClick={reviewSelected}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-semibold rounded-lg disabled:opacity-60"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-semibold rounded-lg disabled:opacity-60"
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>{reviewing ? 'Reviewing…' : `Review selected (${selectedScheduleIds.size})`}</span>
           </button>
         )}
       </div>
-      {bulkMessage && <p role="status" className="text-xs text-[#102654] bg-[#F6F7FB] border border-[#E3E7EF] rounded-lg px-3 py-2">{bulkMessage}</p>}
+      {bulkMessage && <p role="status" className="text-xs text-[#122654] bg-[#F5F8FD] border border-[#E3E7EF] rounded-lg px-3 py-2">{bulkMessage}</p>}
 
       {/* Main Working Paper Index Table */}
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#0B1B3D] text-white text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-[#0B1A3B] text-white text-[11px] font-bold uppercase tracking-wider">
                 <th className="py-3 px-3 w-10 text-center">
                   <input
                     type="checkbox"
@@ -403,7 +403,7 @@ export default function WorkingPaperIndexPage() {
                 <th className="py-3 px-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E3E7EF] text-xs text-[#102654]">
+            <tbody className="divide-y divide-[#E3E7EF] text-xs text-[#122654]">
               {filteredApplicable.map((schedule) => {
                 const isSelected = selectedScheduleIds.has(schedule.id);
                 const hasDiff = schedule.differencePence !== 0n;
@@ -411,7 +411,7 @@ export default function WorkingPaperIndexPage() {
                 return (
                   <tr
                     key={schedule.id}
-                    className={`hover:bg-[#F6F7FB]/80 transition-colors ${
+                    className={`hover:bg-[#F5F8FD]/80 transition-colors ${
                       isSelected ? 'bg-purple-50/40' : ''
                     }`}
                   >
@@ -437,7 +437,7 @@ export default function WorkingPaperIndexPage() {
                         checked={schedule.applicable}
                         onChange={() => handleToggleApplicable(schedule.id)}
                         title="Tick/untick applicable schedule"
-                        className="rounded border-gray-400 cursor-pointer text-[#102654]"
+                        className="rounded border-gray-400 cursor-pointer text-[#122654]"
                       />
                     </td>
 
@@ -449,7 +449,7 @@ export default function WorkingPaperIndexPage() {
                         </span>
                         <Link
                           href={`/engagements/${engagementId}/workpapers/wp_${schedule.ref.toLowerCase().replace('-', '')}`}
-                          className="font-bold text-[#102654] hover:text-[#FF7D6B] transition-colors truncate"
+                          className="font-bold text-[#122654] hover:text-[#FF7A66] transition-colors truncate"
                         >
                           {schedule.title}
                         </Link>
@@ -457,7 +457,7 @@ export default function WorkingPaperIndexPage() {
                     </td>
 
                     {/* Template name */}
-                    <td className="py-3 px-3 text-[#5B6478] text-[11px] truncate max-w-xs">
+                    <td className="py-3 px-3 text-[#4A5878] text-[11px] truncate max-w-xs">
                       {schedule.templateName}
                     </td>
 
@@ -554,7 +554,7 @@ export default function WorkingPaperIndexPage() {
                     <td className="py-3 px-3 text-right">
                       <Link
                         href={`/engagements/${engagementId}/workpapers/wp_${schedule.ref.toLowerCase().replace('-', '')}`}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D4E89] hover:text-[#FF7D6B] transition-colors"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D4E89] hover:text-[#FF7A66] transition-colors"
                       >
                         Open <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
@@ -568,11 +568,11 @@ export default function WorkingPaperIndexPage() {
 
         {/* Collapsed Not Applicable Section (WPS-03) */}
         {naSchedules.length > 0 && (
-          <div className="border-t border-[#E3E7EF] bg-[#F6F7FB]">
+          <div className="border-t border-[#E3E7EF] bg-[#F5F8FD]">
             <button
               type="button"
               onClick={() => setCollapsedNa(!collapsedNa)}
-              className="w-full px-5 py-3 flex items-center justify-between text-xs font-bold text-[#5B6478] hover:text-[#102654] transition-colors"
+              className="w-full px-5 py-3 flex items-center justify-between text-xs font-bold text-[#4A5878] hover:text-[#122654] transition-colors"
             >
               <div className="flex items-center gap-2">
                 <ChevronDown
@@ -593,7 +593,7 @@ export default function WorkingPaperIndexPage() {
                 {naSchedules.map((schedule) => (
                   <div
                     key={schedule.id}
-                    className="py-2.5 flex items-center justify-between text-xs text-[#5B6478]"
+                    className="py-2.5 flex items-center justify-between text-xs text-[#4A5878]"
                   >
                     <div className="flex items-center gap-3">
                       <input
@@ -633,11 +633,11 @@ export default function WorkingPaperIndexPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white border border-[#E3E7EF] rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
-              <div className="flex items-center gap-2 text-[#102654]">
+              <div className="flex items-center gap-2 text-[#122654]">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />
                 <h3 className="text-sm font-bold">Untick Applicable Schedule (WPS-03)</h3>
               </div>
@@ -650,7 +650,7 @@ export default function WorkingPaperIndexPage() {
               </button>
             </div>
 
-            <p className="text-xs text-[#5B6478] leading-relaxed">
+            <p className="text-xs text-[#4A5878] leading-relaxed">
               You are removing <strong>{pendingUntick.ref} {pendingUntick.title}</strong> from the applicable working papers.
             </p>
 
@@ -661,7 +661,7 @@ export default function WorkingPaperIndexPage() {
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-[#102654] mb-1">
+              <label className="block text-xs font-semibold text-[#122654] mb-1">
                 Reason for marking Not Applicable:
               </label>
               <textarea
@@ -669,7 +669,7 @@ export default function WorkingPaperIndexPage() {
                 placeholder="e.g. No transactions or commitments in this financial year..."
                 value={untickReason}
                 onChange={(e) => setUntickReason(e.target.value)}
-                className="w-full text-xs p-2.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg outline-none focus:ring-1 focus:ring-[#102654]"
+                className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg outline-none focus:ring-1 focus:ring-[#122654]"
               />
             </div>
 
@@ -677,14 +677,14 @@ export default function WorkingPaperIndexPage() {
               <button
                 type="button"
                 onClick={() => setPendingUntick(null)}
-                className="px-3.5 py-2 text-xs font-semibold text-[#5B6478] hover:text-[#102654]"
+                className="px-3.5 py-2 text-xs font-semibold text-[#4A5878] hover:text-[#122654]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmUntick}
-                className="px-4 py-2 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-lg shadow-xs"
+                className="px-4 py-2 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-lg shadow-xs"
               >
                 Confirm Untick
               </button>

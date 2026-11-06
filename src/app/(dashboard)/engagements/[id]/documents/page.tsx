@@ -181,27 +181,27 @@ export default function DocumentsPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">Documents &amp; Permanent File (DOC)</h1>
+            <h1 className="text-xl font-bold text-[#122654]">Documents &amp; Permanent File (DOC)</h1>
             <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] px-2.5 py-1 rounded-full font-mono font-semibold">
               {documents.length} Files
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Permanent agreements roll forward automatically (DOC-02). AI extracts key clauses and auto-fills schedules.
           </p>
         </div>
 
         {/* Unique Inbound Email Address (DOC-01) */}
-        <div className="flex items-center gap-2 bg-[#F6F7FB] px-3.5 py-2 rounded-xl border border-[#D5DBE7]">
+        <div className="flex items-center gap-2 bg-[#F5F8FD] px-3.5 py-2 rounded-xl border border-[#D3DCEE]">
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-bold text-[#7E8DA6]">Engagement Inbound Email</span>
-            <span className="text-xs font-mono font-semibold text-[#102654]">{engagementEmail}</span>
+            <span className="text-xs font-mono font-semibold text-[#122654]">{engagementEmail}</span>
           </div>
           <button
             type="button"
             onClick={handleCopyEmail}
             title="Copy email to clipboard"
-            className="p-1.5 text-[#5B6478] hover:text-[#102654] hover:bg-white rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-[#4A5878] hover:text-[#122654] hover:bg-white rounded-lg transition-colors cursor-pointer"
           >
             {copiedEmail ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
           </button>
@@ -220,11 +220,11 @@ export default function DocumentsPage() {
                 onClick={() => setActiveFolder('current')}
                 className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl transition-all ${
                   activeFolder === 'current'
-                    ? 'bg-[#102654] text-white shadow-xs'
-                    : 'text-[#5B6478] hover:bg-[#F6F7FB] hover:text-[#102654]'
+                    ? 'bg-[#122654] text-white shadow-xs'
+                    : 'text-[#4A5878] hover:bg-[#F5F8FD] hover:text-[#122654]'
                 }`}
               >
-                <FolderOpen className="w-4 h-4 text-[#FF7D6B]" />
+                <FolderOpen className="w-4 h-4 text-[#FF7A66]" />
                 <span>Current Period ({currentFolderCount})</span>
               </button>
 
@@ -233,8 +233,8 @@ export default function DocumentsPage() {
                 onClick={() => setActiveFolder('permanent')}
                 className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl transition-all ${
                   activeFolder === 'permanent'
-                    ? 'bg-[#102654] text-white shadow-xs'
-                    : 'text-[#5B6478] hover:bg-[#F6F7FB] hover:text-[#102654]'
+                    ? 'bg-[#122654] text-white shadow-xs'
+                    : 'text-[#4A5878] hover:bg-[#F5F8FD] hover:text-[#122654]'
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -252,18 +252,18 @@ export default function DocumentsPage() {
                 placeholder="Search files..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full text-xs pl-8 pr-3 py-1.5 bg-[#F6F7FB] border border-[#D5DBE7] rounded-lg text-[#102654] outline-none"
+                className="w-full text-xs pl-8 pr-3 py-1.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] outline-none"
               />
             </div>
           </div>
 
           {/* Upload Drag & Drop Area */}
-          <div className="border-2 border-dashed border-[#D5DBE7] hover:border-[#FF7D6B] rounded-[16px] p-6 text-center bg-white transition-colors cursor-pointer group">
-            <Upload className="w-7 h-7 mx-auto text-[#7E8DA6] group-hover:text-[#FF7D6B] transition-colors mb-2" />
-            <div className="text-xs font-bold text-[#102654]">
+          <div className="border-2 border-dashed border-[#D3DCEE] hover:border-[#FF7A66] rounded-[16px] p-6 text-center bg-white transition-colors cursor-pointer group">
+            <Upload className="w-7 h-7 mx-auto text-[#7E8DA6] group-hover:text-[#FF7A66] transition-colors mb-2" />
+            <div className="text-xs font-bold text-[#122654]">
               Drag and drop invoices, statements, or contracts here, or click to browse
             </div>
-            <p className="text-[11px] text-[#5B6478] mt-1">
+            <p className="text-[11px] text-[#4A5878] mt-1">
               Supports PDF, Word, Excel, CSV up to 50MB. AI automatically classifies document type and extracts terms.
             </p>
           </div>
@@ -272,7 +272,7 @@ export default function DocumentsPage() {
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-[#0B1B3D] text-white text-[11px] font-bold uppercase tracking-wider">
+                <tr className="bg-[#0B1A3B] text-white text-[11px] font-bold uppercase tracking-wider">
                   <th className="py-3 px-4">Document Name</th>
                   <th className="py-3 px-3">AI Tag / Category</th>
                   <th className="py-3 px-3">Linked Schedule</th>
@@ -288,7 +288,7 @@ export default function DocumentsPage() {
                     <tr
                       key={doc.id}
                       onClick={() => setSelectedDoc(doc)}
-                      className={`hover:bg-[#F6F7FB] cursor-pointer transition-colors ${
+                      className={`hover:bg-[#F5F8FD] cursor-pointer transition-colors ${
                         isSelected ? 'bg-[#EAF5FC]/60' : ''
                       }`}
                     >
@@ -296,7 +296,7 @@ export default function DocumentsPage() {
                         <div className="flex items-center gap-2.5">
                           <FileText className="w-4 h-4 text-[#1D4E89] shrink-0" />
                           <div>
-                            <div className="font-bold text-[#102654] hover:text-[#FF7D6B] truncate max-w-xs">
+                            <div className="font-bold text-[#122654] hover:text-[#FF7A66] truncate max-w-xs">
                               {doc.filename}
                             </div>
                             <div className="text-[10px] text-[#7E8DA6] font-mono">
@@ -323,7 +323,7 @@ export default function DocumentsPage() {
                         )}
                       </td>
 
-                      <td className="py-3 px-3 text-[#5B6478] font-mono text-[11px]">
+                      <td className="py-3 px-3 text-[#4A5878] font-mono text-[11px]">
                         {formatDate(doc.uploadedAt, { day: 'numeric', month: 'short' })}
                       </td>
 
@@ -353,8 +353,8 @@ export default function DocumentsPage() {
             <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 flex flex-col gap-4">
               <div className="flex items-start justify-between border-b border-[#E3E7EF] pb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#FF7D6B]" />
-                  <h3 className="text-sm font-bold text-[#102654]">AI Document Summary (DOC-04)</h3>
+                  <Sparkles className="w-4 h-4 text-[#FF7A66]" />
+                  <h3 className="text-sm font-bold text-[#122654]">AI Document Summary (DOC-04)</h3>
                 </div>
                 <button
                   type="button"
@@ -366,22 +366,22 @@ export default function DocumentsPage() {
               </div>
 
               <div>
-                <div className="text-xs font-bold text-[#102654]">{selectedDoc.filename}</div>
-                <div className="text-[11px] text-[#5B6478] mt-0.5">
+                <div className="text-xs font-bold text-[#122654]">{selectedDoc.filename}</div>
+                <div className="text-[11px] text-[#4A5878] mt-0.5">
                   Category: <strong>{selectedDoc.category}</strong> • Linked to{' '}
                   <strong>{selectedDoc.linkedScheduleName || 'Unlinked'}</strong>
                 </div>
               </div>
 
               {/* Summary Bullet Points with Clause References */}
-              <div className="bg-[#F6F7FB] p-3.5 rounded-xl border border-[#E3E7EF] space-y-2">
+              <div className="bg-[#F5F8FD] p-3.5 rounded-xl border border-[#E3E7EF] space-y-2">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-[#7E8DA6]">
                   Extracted Clauses &amp; Terms
                 </div>
-                <ul className="space-y-1.5 text-xs text-[#102654]">
+                <ul className="space-y-1.5 text-xs text-[#122654]">
                   {selectedDoc.aiSummary.map((bullet, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="text-[#FF7D6B] font-bold leading-tight">•</span>
+                      <span className="text-[#FF7A66] font-bold leading-tight">•</span>
                       <span className="leading-relaxed">{bullet}</span>
                     </li>
                   ))}
@@ -404,9 +404,9 @@ export default function DocumentsPage() {
                           .replace('-', '')}`
                       );
                     }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF7D6B]" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#FF7A66]" />
                     <span>Auto-fill {selectedDoc.linkedScheduleRef} from this document</span>
                   </button>
                   <p className="text-[10px] text-center text-[#7E8DA6] mt-1.5">
@@ -416,9 +416,9 @@ export default function DocumentsPage() {
               )}
             </div>
           ) : (
-            <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 text-center text-[#5B6478]">
-              <FileText className="w-8 h-8 text-[#D5DBE7] mx-auto mb-2" />
-              <div className="text-xs font-bold text-[#102654]">Select a Document</div>
+            <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 text-center text-[#4A5878]">
+              <FileText className="w-8 h-8 text-[#D3DCEE] mx-auto mb-2" />
+              <div className="text-xs font-bold text-[#122654]">Select a Document</div>
               <p className="text-[11px] mt-1 text-[#7E8DA6]">
                 Click any document row to view its extracted clauses, AI summary bullets, and auto-fill actions.
               </p>

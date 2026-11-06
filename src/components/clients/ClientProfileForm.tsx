@@ -39,9 +39,9 @@ const SIGNOFF: [string, string][] = [
   ['3', 'Plus partner approval'],
 ];
 
-const inputCls = 'w-full min-h-[38px] px-3 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#1D4E89]';
+const inputCls = 'w-full min-h-[38px] px-3 text-xs bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#1D4E89]';
 const pill = (on: boolean) =>
-  `text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer ${on ? 'bg-[#102654] border-[#102654] text-white' : 'bg-white border-[#D5DBE7] text-[#102654]'}`;
+  `text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer ${on ? 'bg-[#122654] border-[#122654] text-white' : 'bg-white border-[#D3DCEE] text-[#122654]'}`;
 
 interface PaperChanges {
   engagement_id: string;
@@ -107,13 +107,13 @@ export function ClientProfileForm({ client }: { client: Client }) {
     <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
       <div className="flex items-center justify-between gap-3 border-b border-[#E3E7EF] pb-3">
         <div>
-          <h2 className="text-sm font-bold text-[#102654]">Client profile</h2>
-          <p className="text-[11px] text-[#5B6478]">These answers decide the working papers for this client: {paperCount} papers.</p>
+          <h2 className="text-sm font-bold text-[#122654]">Client profile</h2>
+          <p className="text-[11px] text-[#4A5878]">These answers decide the working papers for this client: {paperCount} papers.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <label className="text-[11px] font-semibold text-[#5B6478] sm:col-span-1">
+        <label className="text-[11px] font-semibold text-[#4A5878] sm:col-span-1">
           Entity type and standard
           <select className={`${inputCls} mt-1`} value={f.company_type} onChange={(e) => setF({ ...f, company_type: e.target.value as CompanyType })}>
             {COMPANY_TYPES.map((t) => (
@@ -121,18 +121,18 @@ export function ClientProfileForm({ client }: { client: Client }) {
             ))}
           </select>
         </label>
-        <label className="text-[11px] font-semibold text-[#5B6478]">
+        <label className="text-[11px] font-semibold text-[#4A5878]">
           Company number
           <input className={`${inputCls} mt-1`} value={f.company_no} onChange={(e) => setF({ ...f, company_no: e.target.value })} placeholder="01234567" />
         </label>
-        <label className="text-[11px] font-semibold text-[#5B6478]">
+        <label className="text-[11px] font-semibold text-[#4A5878]">
           Year end
           <input className={`${inputCls} mt-1`} value={f.year_end} onChange={(e) => setF({ ...f, year_end: e.target.value })} placeholder="2026-03-31" />
         </label>
       </div>
 
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold text-[#5B6478]">VAT</p>
+        <p className="text-[11px] font-semibold text-[#4A5878]">VAT</p>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="VAT registered">
           <button type="button" role="radio" aria-checked={f.vat_registered} className={pill(f.vat_registered)} onClick={() => setF({ ...f, vat_registered: true })}>VAT registered</button>
           <button type="button" role="radio" aria-checked={!f.vat_registered} className={pill(!f.vat_registered)} onClick={() => setF({ ...f, vat_registered: false })}>Not registered</button>
@@ -147,7 +147,7 @@ export function ClientProfileForm({ client }: { client: Client }) {
       </div>
 
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold text-[#5B6478]">Payroll</p>
+        <p className="text-[11px] font-semibold text-[#4A5878]">Payroll</p>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Runs payroll">
           <button type="button" role="radio" aria-checked={f.payroll} className={pill(f.payroll)} onClick={() => setF({ ...f, payroll: true })}>Runs payroll</button>
           <button type="button" role="radio" aria-checked={!f.payroll} className={pill(!f.payroll)} onClick={() => setF({ ...f, payroll: false })}>No payroll</button>
@@ -155,7 +155,7 @@ export function ClientProfileForm({ client }: { client: Client }) {
       </div>
 
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold text-[#5B6478]">Services you provide</p>
+        <p className="text-[11px] font-semibold text-[#4A5878]">Services you provide</p>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Services">
           {SERVICES.map(([k, l]) => (
             <button key={k} type="button" role="checkbox" aria-checked={f.services.includes(k)} className={pill(f.services.includes(k))} onClick={() => setF({ ...f, services: toggle(f.services, k) })}>
@@ -166,7 +166,7 @@ export function ClientProfileForm({ client }: { client: Client }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <label className="text-[11px] font-semibold text-[#5B6478]">
+        <label className="text-[11px] font-semibold text-[#4A5878]">
           Sign-off
           <select className={`${inputCls} mt-1`} value={f.signoff_levels} onChange={(e) => setF({ ...f, signoff_levels: e.target.value })}>
             {SIGNOFF.map(([k, l]) => (
@@ -175,7 +175,7 @@ export function ClientProfileForm({ client }: { client: Client }) {
           </select>
         </label>
         <div className="sm:col-span-2">
-          <p className="text-[11px] font-semibold text-[#5B6478] mb-1">Team</p>
+          <p className="text-[11px] font-semibold text-[#4A5878] mb-1">Team</p>
           <div className="flex flex-wrap gap-2" role="group" aria-label="Team">
             {team.map((u) => (
               <button key={u.id} type="button" role="checkbox" aria-checked={f.team_user_ids.includes(u.id)} className={pill(f.team_user_ids.includes(u.id))} onClick={() => setF({ ...f, team_user_ids: toggle(f.team_user_ids, u.id) })}>
@@ -191,7 +191,7 @@ export function ClientProfileForm({ client }: { client: Client }) {
           type="button"
           onClick={save}
           disabled={busy || Boolean(client.archived_at)}
-          className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[10px] cursor-pointer disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 min-h-[38px] px-4 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[10px] cursor-pointer disabled:opacity-60"
         >
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save profile
@@ -205,7 +205,7 @@ export function ClientProfileForm({ client }: { client: Client }) {
         </p>
       )}
       {result && (
-        <div role="status" className="p-3 rounded-[10px] bg-[#E6F4EF] border border-[#0B6B52]/20 text-xs text-[#102654] space-y-1">
+        <div role="status" className="p-3 rounded-[10px] bg-[#E6F4EF] border border-[#0B6B52]/20 text-xs text-[#122654] space-y-1">
           <p className="font-semibold text-[#0B6B52] flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5" /> Profile saved.
             {!changed.length && ' The working papers already match.'}

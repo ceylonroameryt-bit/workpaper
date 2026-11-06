@@ -8,6 +8,6 @@ export async function POST(req: Request) {
     label: '✦ suggestion',
     draft: `✦ suggestion: Based on testing performed on ${workpaperRef}, all closing figures tie out to nominal ledgers without variance. Capital additions over £1,000 threshold were agreed to supplier invoice documentation. Depreciation recalculation verified that rates applied adhere to disclosed accounting policy.`,
     options: ['Use suggestion', 'Edit first', 'Dismiss'],
-    notice: 'Nothing enters the paper until explicitly accepted by an auditor.',
+    notice: 'Nothing enters the paper until explicitly accepted by a reviewer.',
   });
 }

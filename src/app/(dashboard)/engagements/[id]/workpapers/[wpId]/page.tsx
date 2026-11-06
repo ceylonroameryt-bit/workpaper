@@ -197,8 +197,8 @@ export default function WorkpaperPage() {
     const tpl = templateFor(rawWpId.toUpperCase().replace(/^WP_/, '').replace(/^([A-Z])(\d)/, '$1-$2'));
     return (
       <div className="max-w-3xl mx-auto blynt-card p-8 flex flex-col items-start gap-3">
-        <h1 className="text-xl font-bold text-[#102654]">Working paper not found</h1>
-        <p className="text-sm text-[#5B6478]">
+        <h1 className="text-xl font-bold text-[#122654]">Working paper not found</h1>
+        <p className="text-sm text-[#4A5878]">
           {engagement
             ? tpl
               ? `${tpl.ref} ${tpl.title} is not part of this engagement yet.`
@@ -214,7 +214,7 @@ export default function WorkpaperPage() {
                 db.logAudit(engagement.firm_id, actor, 'ADD_WORKPAPER', 'workpapers', wp?.id ?? tpl.ref, null, { ref: tpl.ref });
                 if (wp) router.replace(`/engagements/${engagement.id}/workpapers/${wp.id}`);
               }}
-              className="min-h-[40px] px-4 bg-[#102654] text-white text-xs font-bold rounded-[10px]"
+              className="min-h-[40px] px-4 bg-[#122654] text-white text-xs font-bold rounded-[10px]"
             >
               Add {tpl.ref} to this engagement
             </button>
@@ -230,7 +230,7 @@ export default function WorkpaperPage() {
   const result = evaluatePaper(workpaper);
   if (!result) {
     return (
-      <div className="max-w-3xl mx-auto blynt-card p-8 text-sm text-[#5B6478]">
+      <div className="max-w-3xl mx-auto blynt-card p-8 text-sm text-[#4A5878]">
         {workpaper.ref} uses a template this version of Workpapers does not support.
       </div>
     );
@@ -598,25 +598,25 @@ export default function WorkpaperPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-[16px] max-w-md w-full p-6 shadow-xl flex flex-col gap-4">
             <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="font-bold text-base text-[#102654] flex items-center gap-2">
+              <h3 className="font-bold text-base text-[#122654] flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-[#B8432F]" />
                 Unreview Schedule (REV-02)
               </h3>
-              <button onClick={() => setUnreviewOpen(false)} className="text-[#7E8DA6] hover:text-[#102654]">
+              <button onClick={() => setUnreviewOpen(false)} className="text-[#7E8DA6] hover:text-[#122654]">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-[#5B6478]">
+            <p className="text-xs text-[#4A5878]">
               This schedule has been reviewed. To modify figures, comments, mappings or documents, enter a reason for unreviewing. Reviewer sign-off will be removed and the schedule will be flagged as <strong>Changed after review</strong>.
             </p>
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-semibold text-[#102654]">Reason for unreview (minimum 10 characters):</span>
+              <span className="font-semibold text-[#122654]">Reason for unreview (minimum 10 characters):</span>
               <textarea
                 rows={3}
                 value={unreviewReason}
                 onChange={(e) => setUnreviewReason(e.target.value)}
                 placeholder="e.g. Updating bank reconciliation following receipt of late bank statement..."
-                className="p-2 border border-[#D5DBE7] rounded-[8px] text-xs"
+                className="p-2 border border-[#D3DCEE] rounded-[8px] text-xs"
               />
               <span className="text-[10px] text-[#7E8DA6]">{unreviewReason.trim().length} / 10 characters minimum</span>
             </label>
@@ -624,7 +624,7 @@ export default function WorkpaperPage() {
               <button
                 type="button"
                 onClick={() => setUnreviewOpen(false)}
-                className="px-3 py-1.5 text-xs font-semibold text-[#5B6478] hover:bg-[#F6F7FB] rounded-[8px]"
+                className="px-3 py-1.5 text-xs font-semibold text-[#4A5878] hover:bg-[#F5F8FD] rounded-[8px]"
               >
                 Cancel
               </button>
@@ -646,21 +646,21 @@ export default function WorkpaperPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-[16px] max-w-lg w-full p-6 shadow-xl flex flex-col gap-4">
             <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="font-bold text-base text-[#102654] flex items-center gap-2">
-                <Layers className="w-5 h-5 text-[#102654]" />
+              <h3 className="font-bold text-base text-[#122654] flex items-center gap-2">
+                <Layers className="w-5 h-5 text-[#122654]" />
                 Schedule Templates Library (WPS-02)
               </h3>
-              <button onClick={() => setTemplateModalOpen(false)} className="text-[#7E8DA6] hover:text-[#102654]">
+              <button onClick={() => setTemplateModalOpen(false)} className="text-[#7E8DA6] hover:text-[#122654]">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-[#5B6478]">
+            <p className="text-xs text-[#4A5878]">
               Switching template layout preserves mapped balances and entered figures for this client.
             </p>
             <div className="flex flex-col gap-2.5 max-h-80 overflow-y-auto">
               <div
                 className={`p-3 rounded-[10px] border cursor-pointer ${
-                  !data.active_template_variant ? 'border-[#102654] bg-[#F6F7FB]' : 'border-[#E3E7EF] hover:border-[#102654]'
+                  !data.active_template_variant ? 'border-[#122654] bg-[#F5F8FD]' : 'border-[#E3E7EF] hover:border-[#122654]'
                 }`}
                 onClick={() => {
                   saveData({ active_template_variant: null, active_template_title: null });
@@ -669,14 +669,14 @@ export default function WorkpaperPage() {
                   refresh();
                 }}
               >
-                <div className="font-bold text-xs text-[#102654]">Default: {t.title}</div>
-                <div className="text-[11px] text-[#5B6478] mt-0.5">Practice standard methodology layout.</div>
+                <div className="font-bold text-xs text-[#122654]">Default: {t.title}</div>
+                <div className="text-[11px] text-[#4A5878] mt-0.5">Practice standard methodology layout.</div>
               </div>
               {(t.alternativeTemplates ?? []).map((alt) => (
                 <div
                   key={alt.id}
                   className={`p-3 rounded-[10px] border cursor-pointer ${
-                    data.active_template_variant === alt.id ? 'border-[#102654] bg-[#F6F7FB]' : 'border-[#E3E7EF] hover:border-[#102654]'
+                    data.active_template_variant === alt.id ? 'border-[#122654] bg-[#F5F8FD]' : 'border-[#E3E7EF] hover:border-[#122654]'
                   }`}
                   onClick={() => {
                     saveData({ active_template_variant: alt.id, active_template_title: alt.name });
@@ -685,8 +685,8 @@ export default function WorkpaperPage() {
                     refresh();
                   }}
                 >
-                  <div className="font-bold text-xs text-[#102654]">Alternative: {alt.name}</div>
-                  <div className="text-[11px] text-[#5B6478] mt-0.5">{alt.description}</div>
+                  <div className="font-bold text-xs text-[#122654]">Alternative: {alt.name}</div>
+                  <div className="text-[11px] text-[#4A5878] mt-0.5">{alt.description}</div>
                 </div>
               ))}
             </div>
@@ -696,7 +696,7 @@ export default function WorkpaperPage() {
 
       {/* Header */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-[#5B6478] flex-wrap">
+        <div className="flex items-center gap-1.5 text-xs text-[#4A5878] flex-wrap">
           <Link href={`/engagements/${engagementId}`} className="hover:text-[#B8432F] font-semibold">
             {client?.name ?? 'Engagement'}
           </Link>
@@ -708,8 +708,8 @@ export default function WorkpaperPage() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#102654] text-white">{workpaper.ref}</span>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-[#102654] tracking-tight">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#122654] text-white">{workpaper.ref}</span>
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#122654] tracking-tight">
                 {t.title}
                 {data.bank_name ? ` · ${data.bank_name}` : ''}
               </h1>
@@ -721,21 +721,21 @@ export default function WorkpaperPage() {
               )}
             </div>
             <div className="flex items-center gap-3 flex-wrap mt-2">
-              <span className="text-xs text-[#5B6478]">
-                Template: <strong className="text-[#102654]">{data.active_template_title || t.title}</strong>
+              <span className="text-xs text-[#4A5878]">
+                Template: <strong className="text-[#122654]">{data.active_template_title || t.title}</strong>
               </span>
               {t.alternativeTemplates && t.alternativeTemplates.length > 0 && !isLocked && (
                 <button
                   type="button"
                   onClick={() => setTemplateModalOpen(true)}
-                  className="px-2 py-0.5 text-[11px] font-bold text-[#102654] bg-[#F6F7FB] border border-[#D5DBE7] hover:border-[#102654] rounded-[6px]"
+                  className="px-2 py-0.5 text-[11px] font-bold text-[#122654] bg-[#F5F8FD] border border-[#D3DCEE] hover:border-[#122654] rounded-[6px]"
                 >
                   Change template (WPS-02)
                 </button>
               )}
               {result.totals.total !== undefined && (
-                <span className="text-xs text-[#5B6478]">
-                  Schedule: <strong className="font-mono text-[#102654]">{formatPence(result.totals.total)}</strong>
+                <span className="text-xs text-[#4A5878]">
+                  Schedule: <strong className="font-mono text-[#122654]">{formatPence(result.totals.total)}</strong>
                 </span>
               )}
               {result.totals.difference !== undefined && (
@@ -748,25 +748,25 @@ export default function WorkpaperPage() {
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-[#5B6478] mt-1">
+            <p className="text-[11px] text-[#4A5878] mt-1">
               Template v{workpaper.template_version} · Preparer {latestSignoff('preparer')?.user_name ?? '—'} · Reviewer{' '}
               {latestSignoff('reviewer')?.user_name ?? '—'} · {savedAt ? '✓ Saved' : `Updated ${fmtDateTime(workpaper.updated_at)}`}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {/* Collapse / Expand Panel Toggles */}
-            <div className="inline-flex items-center bg-[#F6F7FB] p-0.5 rounded-[8px] border border-[#D5DBE7]">
+            <div className="inline-flex items-center bg-[#F5F8FD] p-0.5 rounded-[8px] border border-[#D3DCEE]">
               <button
                 type="button"
                 onClick={togglePaperNav}
                 className={`min-h-[32px] px-2.5 inline-flex items-center gap-1.5 text-xs font-bold rounded-[6px] transition-colors ${
                   showPaperNav
-                    ? 'bg-white text-[#102654] shadow-sm'
-                    : 'text-[#5B6478] hover:text-[#102654] hover:bg-white/60'
+                    ? 'bg-white text-[#122654] shadow-sm'
+                    : 'text-[#4A5878] hover:text-[#122654] hover:bg-white/60'
                 }`}
                 title={showPaperNav ? 'Hide paper index (collapse left)' : 'Show paper index'}
               >
-                {showPaperNav ? <PanelLeftClose className="w-3.5 h-3.5 text-[#FF7D6B]" /> : <PanelLeftOpen className="w-3.5 h-3.5 text-[#5B6478]" />}
+                {showPaperNav ? <PanelLeftClose className="w-3.5 h-3.5 text-[#FF7A66]" /> : <PanelLeftOpen className="w-3.5 h-3.5 text-[#4A5878]" />}
                 <span>{showPaperNav ? 'Hide index' : 'Papers'}</span>
               </button>
               <button
@@ -774,16 +774,16 @@ export default function WorkpaperPage() {
                 onClick={toggleComments}
                 className={`min-h-[32px] px-2.5 inline-flex items-center gap-1.5 text-xs font-bold rounded-[6px] transition-colors ${
                   showComments
-                    ? 'bg-white text-[#102654] shadow-sm'
-                    : 'text-[#5B6478] hover:text-[#102654] hover:bg-white/60'
+                    ? 'bg-white text-[#122654] shadow-sm'
+                    : 'text-[#4A5878] hover:text-[#122654] hover:bg-white/60'
                 }`}
                 title={showComments ? 'Hide comments panel (collapse right)' : 'Show comments panel'}
               >
-                {showComments ? <PanelRightClose className="w-3.5 h-3.5 text-[#FF7D6B]" /> : <PanelRightOpen className="w-3.5 h-3.5 text-[#5B6478]" />}
+                {showComments ? <PanelRightClose className="w-3.5 h-3.5 text-[#FF7A66]" /> : <PanelRightOpen className="w-3.5 h-3.5 text-[#4A5878]" />}
                 <span>
                   {showComments ? 'Hide comments' : 'Comments'}
                   {comments.filter((c) => c.status === 'open').length > 0 && (
-                    <span className="ml-1 px-1.5 py-0.2 bg-[#FF7D6B] text-white text-[10px] rounded-full">
+                    <span className="ml-1 px-1.5 py-0.2 bg-[#FF7A66] text-white text-[10px] rounded-full">
                       {comments.filter((c) => c.status === 'open').length}
                     </span>
                   )}
@@ -814,7 +814,7 @@ export default function WorkpaperPage() {
             {/* Propose Journal (JNL-02) */}
             <Link
               href={`/engagements/${engagementId}/journals?propose=${workpaper.ref}&amount=${result.totals.difference || 0}`}
-              className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#102654] bg-white border border-[#D5DBE7] hover:border-[#102654] rounded-[8px]"
+              className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#122654] bg-white border border-[#D3DCEE] hover:border-[#122654] rounded-[8px]"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#B8432F]" /> Propose journal
             </Link>
@@ -824,7 +824,7 @@ export default function WorkpaperPage() {
               <button
                 type="button"
                 onClick={() => setUnreviewOpen(true)}
-                className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#B8432F] bg-white border border-[#FF7D6B] hover:bg-[#FFF1EE] rounded-[8px]"
+                className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#B8432F] bg-white border border-[#FF7A66] hover:bg-[#FFF1EE] rounded-[8px]"
               >
                 <Unlock className="w-3.5 h-3.5" /> Unreview to edit
               </button>
@@ -834,7 +834,7 @@ export default function WorkpaperPage() {
             <button
               type="button"
               onClick={() => alert(`Exporting ${workpaper.ref} to PDF and Excel with practice branding...`)}
-              className="min-h-[36px] px-2.5 inline-flex items-center gap-1 text-xs font-bold text-[#102654] bg-white border border-[#D5DBE7] hover:border-[#102654] rounded-[8px]"
+              className="min-h-[36px] px-2.5 inline-flex items-center gap-1 text-xs font-bold text-[#122654] bg-white border border-[#D3DCEE] hover:border-[#122654] rounded-[8px]"
             >
               <Download className="w-3.5 h-3.5" /> Export
             </button>
@@ -846,7 +846,7 @@ export default function WorkpaperPage() {
                 pendingRow.current = null;
                 fileInput.current?.click();
               }}
-              className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#102654] bg-white border border-[#D5DBE7] hover:border-[#102654] rounded-[8px] disabled:opacity-40"
+              className="min-h-[36px] px-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#122654] bg-white border border-[#D3DCEE] hover:border-[#122654] rounded-[8px] disabled:opacity-40"
             >
               <Upload className="w-3.5 h-3.5" /> Attach file
             </button>
@@ -857,7 +857,7 @@ export default function WorkpaperPage() {
                 aria-label="Previous paper"
                 title="Previous paper ( [ )"
                 onClick={() => prevPaper && router.push(`/engagements/${engagementId}/workpapers/${prevPaper.id}`)}
-                className="min-h-[36px] px-2 border border-[#D5DBE7] rounded-l-[8px] bg-white hover:bg-[#F6F7FB] disabled:opacity-40"
+                className="min-h-[36px] px-2 border border-[#D3DCEE] rounded-l-[8px] bg-white hover:bg-[#F5F8FD] disabled:opacity-40"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -867,7 +867,7 @@ export default function WorkpaperPage() {
                 aria-label="Next paper"
                 title="Next paper ( ] )"
                 onClick={() => nextPaper && router.push(`/engagements/${engagementId}/workpapers/${nextPaper.id}`)}
-                className="min-h-[36px] px-2 border-y border-r border-[#D5DBE7] rounded-r-[8px] bg-white hover:bg-[#F6F7FB] disabled:opacity-40"
+                className="min-h-[36px] px-2 border-y border-r border-[#D3DCEE] rounded-r-[8px] bg-white hover:bg-[#F5F8FD] disabled:opacity-40"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -883,7 +883,7 @@ export default function WorkpaperPage() {
           ))}
         </nav>
         {isLocked && (
-          <div className="p-3 rounded-[10px] bg-[#F6F7FB] border border-[#D5DBE7] text-xs text-[#5B6478]">
+          <div className="p-3 rounded-[10px] bg-[#F5F8FD] border border-[#D3DCEE] text-xs text-[#4A5878]">
             This engagement is locked. The paper is read-only.
           </div>
         )}
@@ -897,7 +897,7 @@ export default function WorkpaperPage() {
           <div
             role="status"
             className={`p-3 rounded-[10px] text-xs border ${
-              message.kind === 'ok' ? 'bg-[#E6F4EF] border-[#0B6B52]/30 text-[#0B6B52]' : 'bg-[#FFF1EE] border-[#FF7D6B]/40 text-[#A23A27]'
+              message.kind === 'ok' ? 'bg-[#E6F4EF] border-[#0B6B52]/30 text-[#0B6B52]' : 'bg-[#FFF1EE] border-[#FF7A66]/40 text-[#A23A27]'
             }`}
           >
             {message.text}
@@ -918,7 +918,7 @@ export default function WorkpaperPage() {
       >
         {/* Paper navigator: a compact picker on smaller screens, the full list on wide ones */}
         <label className="xl:hidden flex items-center gap-2 text-xs">
-          <span className="font-bold text-[#102654] whitespace-nowrap">Jump to paper</span>
+          <span className="font-bold text-[#122654] whitespace-nowrap">Jump to paper</span>
           <select
             aria-label="Jump to paper"
             value={workpaper.id}
@@ -933,7 +933,7 @@ export default function WorkpaperPage() {
                 router.push(`/engagements/${engagementId}/workpapers/${v}`);
               }
             }}
-            className="flex-1 min-w-0 min-h-[36px] px-2 border border-[#D5DBE7] rounded-[8px] bg-white text-[#102654]"
+            className="flex-1 min-w-0 min-h-[36px] px-2 border border-[#D3DCEE] rounded-[8px] bg-white text-[#122654]"
           >
             {papers.map((p) => (
               <option key={p.id} value={p.id}>
@@ -958,7 +958,7 @@ export default function WorkpaperPage() {
               <button
                 type="button"
                 onClick={togglePaperNav}
-                className="p-1 text-[#7E8DA6] hover:text-[#102654] hover:bg-[#F6F7FB] rounded-[6px] transition-colors"
+                className="p-1 text-[#7E8DA6] hover:text-[#122654] hover:bg-[#F5F8FD] rounded-[6px] transition-colors"
                 title="Hide paper index"
                 aria-label="Hide paper index"
               >
@@ -977,7 +977,7 @@ export default function WorkpaperPage() {
                       key={p.id}
                       href={`/engagements/${engagementId}/workpapers/${p.id}`}
                       className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded-[8px] ${
-                        p.id === workpaper.id ? 'bg-[#102654] text-white font-bold' : 'text-[#102654] hover:bg-[#F6F7FB]'
+                        p.id === workpaper.id ? 'bg-[#122654] text-white font-bold' : 'text-[#122654] hover:bg-[#F5F8FD]'
                       }`}
                     >
                       <span className="truncate">
@@ -988,10 +988,10 @@ export default function WorkpaperPage() {
                   ))}
               </div>
             ))}
-            <div className="px-2 pt-2 border-t border-[#E3E7EF] text-[10px] text-[#5B6478]">All {papers.length} papers</div>
+            <div className="px-2 pt-2 border-t border-[#E3E7EF] text-[10px] text-[#4A5878]">All {papers.length} papers</div>
             {!isLocked && missingRefs.length > 0 && (
               <label className="flex flex-col gap-1 px-2 pt-2">
-                <span className="text-[10px] font-bold text-[#5B6478]">Add a paper</span>
+                <span className="text-[10px] font-bold text-[#4A5878]">Add a paper</span>
                 <select
                   aria-label="Add a paper"
                   value=""
@@ -1002,7 +1002,7 @@ export default function WorkpaperPage() {
                       router.push(`/engagements/${engagementId}/workpapers/${wp.id}`);
                     }
                   }}
-                  className="min-h-[32px] px-1.5 border border-[#D5DBE7] rounded-[8px] bg-white"
+                  className="min-h-[32px] px-1.5 border border-[#D3DCEE] rounded-[8px] bg-white"
                 >
                   <option value="">Choose…</option>
                   {missingRefs.map((tp) => (
@@ -1019,11 +1019,11 @@ export default function WorkpaperPage() {
         {/* Main column */}
         <div className="flex flex-col gap-5 min-w-0">
           {reviewedBy && (
-            <div role="status" className="p-3 rounded-[10px] bg-[#EAF5FC] border border-[#1D4E89]/20 text-xs text-[#102654]">
+            <div role="status" className="p-3 rounded-[10px] bg-[#EAF5FC] border border-[#1D4E89]/20 text-xs text-[#122654]">
               {reviewedBy.role === 'partner' ? 'Approved' : 'Reviewed'} by <strong>{reviewedBy.user_name}</strong> on {fmtDateTime(reviewedBy.signed_at)}: read only. Use <strong>Unreview to edit</strong> to change it. Comments can still be added.
             </div>
           )}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[#102654]">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#122654]">
             <label className="inline-flex items-center gap-1.5">
               Assigned to
               <select
@@ -1031,7 +1031,7 @@ export default function WorkpaperPage() {
                 disabled={isLocked}
                 value={workpaper.assignee_id ?? ''}
                 onChange={(e) => assign({ assignee_id: e.target.value || null })}
-                className="min-h-[32px] px-2 border border-[#D5DBE7] rounded-[8px] bg-white"
+                className="min-h-[32px] px-2 border border-[#D3DCEE] rounded-[8px] bg-white"
               >
                 <option value="">No one</option>
                 {team.map((u) => (
@@ -1047,16 +1047,16 @@ export default function WorkpaperPage() {
                 disabled={isLocked}
                 value={workpaper.due_date ?? ''}
                 onChange={(e) => assign({ due_date: e.target.value || null })}
-                className={`min-h-[32px] px-2 border rounded-[8px] bg-white ${workpaper.due_date && workpaper.due_date < new Date().toISOString().slice(0, 10) ? 'border-[#B8432F] text-[#B8432F]' : 'border-[#D5DBE7]'}`}
+                className={`min-h-[32px] px-2 border rounded-[8px] bg-white ${workpaper.due_date && workpaper.due_date < new Date().toISOString().slice(0, 10) ? 'border-[#B8432F] text-[#B8432F]' : 'border-[#D3DCEE]'}`}
               />
             </label>
           </div>
           {changesSinceReview.length > 0 && (
-            <div className="p-3 rounded-[10px] bg-[#FFF4DB] border border-[#C58B00]/40 text-xs text-[#102654]">
+            <div className="p-3 rounded-[10px] bg-[#FFF4DB] border border-[#C58B00]/40 text-xs text-[#122654]">
               <p className="font-bold mb-1.5">Changes since the last review ({changesSinceReview.length})</p>
               <p className="text-[11px] text-[#805B00] mb-2">Unreviewed by {data.last_unreviewed_by} on {data.last_unreviewed_at ? fmtDateTime(data.last_unreviewed_at) : ''}: “{data.last_unreview_reason}”</p>
               <table className="w-full text-[11px]">
-                <thead className="text-[#5B6478]">
+                <thead className="text-[#4A5878]">
                   <tr><th className="text-left">Field</th><th className="text-left">Was</th><th className="text-left">Now</th></tr>
                 </thead>
                 <tbody>
@@ -1075,11 +1075,11 @@ export default function WorkpaperPage() {
               defaultValue={data.objective}
               onBlur={(e) => e.target.value !== data.objective && saveData({ objective: e.target.value })}
               rows={2}
-              className="w-full p-2.5 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] disabled:bg-[#F6F7FB]"
+              className="w-full p-2.5 text-xs bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] disabled:bg-[#F5F8FD]"
             />
             <div className="flex flex-wrap gap-1.5 mt-2">
               {(data.assertions ?? t.assertions).map((a: string) => (
-                <span key={a} className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#F6F7FB] border border-[#D5DBE7] text-[#3A4560]">
+                <span key={a} className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#F5F8FD] border border-[#D3DCEE] text-[#3A4560]">
                   {a}
                   {!isLocked && (
                     <button
@@ -1113,12 +1113,12 @@ export default function WorkpaperPage() {
             stateLabel={result.leads.length === 0 ? 'No lead accounts' : leadsAgreed ? 'From TB' : 'Not mapped yet'}
           >
             {result.leads.length === 0 ? (
-              <p className="text-xs text-[#5B6478]">This paper has no trial balance lead accounts.</p>
+              <p className="text-xs text-[#4A5878]">This paper has no trial balance lead accounts.</p>
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-[#102654]">
-                    <thead className="bg-[#F6F7FB] text-[10px] uppercase tracking-wider text-[#5B6478]">
+                  <table className="w-full text-xs text-[#122654]">
+                    <thead className="bg-[#F5F8FD] text-[10px] uppercase tracking-wider text-[#4A5878]">
                       <tr>
                         <th className="p-2 text-left">Account</th>
                         <th className="p-2 text-right">Prior year</th>
@@ -1143,7 +1143,7 @@ export default function WorkpaperPage() {
                     </tbody>
                   </table>
                 </div>
-                <p className="text-[10px] text-[#5B6478] mt-2">
+                <p className="text-[10px] text-[#4A5878] mt-2">
                   Brackets are credits. Figures come from confirmed account mappings plus approved adjustments — they are never typed.{' '}
                   {!leadsAgreed && (
                     <Link href={`/engagements/${engagementId}/mapping`} className="font-bold text-[#B8432F] hover:underline">
@@ -1165,7 +1165,7 @@ export default function WorkpaperPage() {
             {t.kind === 'dla' && <DlaSchedule {...scheduleProps} />}
             {t.kind === 'loans' && <LoansSchedule {...scheduleProps} />}
             {t.kind === 'checklist' && <ChecklistSchedule {...scheduleProps} />}
-            <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#5B6478] flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#4A5878] flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-bold">Tickmarks:</span>
               {tickLibrary.map((tk) => (
                 <span key={tk.code} className="inline-flex items-center gap-1">
@@ -1209,13 +1209,13 @@ export default function WorkpaperPage() {
                 <li
                   key={c.id}
                   className={`p-3 rounded-[10px] border text-xs ${
-                    c.passed ? 'bg-[#E6F4EF] border-[#0B6B52]/20' : c.explanation ? 'bg-[#FFF4DB] border-[#C58B00]/30' : 'bg-[#FFF1EE] border-[#FF7D6B]/30'
+                    c.passed ? 'bg-[#E6F4EF] border-[#0B6B52]/20' : c.explanation ? 'bg-[#FFF4DB] border-[#C58B00]/30' : 'bg-[#FFF1EE] border-[#FF7A66]/30'
                   }`}
                 >
-                  <div className="font-bold text-[#102654]">
+                  <div className="font-bold text-[#122654]">
                     {c.passed ? '✓' : c.explanation ? '◐' : '!'} {c.label}
                   </div>
-                  <div className="text-[#5B6478] mt-0.5 font-mono text-[11px] break-words">{c.detail}</div>
+                  <div className="text-[#4A5878] mt-0.5 font-mono text-[11px] break-words">{c.detail}</div>
                   {!c.passed && (
                     <div className="mt-2 flex flex-col sm:flex-row gap-2">
                       <input
@@ -1225,7 +1225,7 @@ export default function WorkpaperPage() {
                         placeholder="Explain why this is acceptable…"
                         value={explainDrafts[c.id] ?? c.explanation ?? ''}
                         onChange={(e) => setExplainDrafts((d) => ({ ...d, [c.id]: e.target.value }))}
-                        className="flex-1 px-2 py-1.5 text-xs bg-white border border-[#D5DBE7] rounded-[8px]"
+                        className="flex-1 px-2 py-1.5 text-xs bg-white border border-[#D3DCEE] rounded-[8px]"
                       />
                       <button
                         type="button"
@@ -1238,7 +1238,7 @@ export default function WorkpaperPage() {
                             return n;
                           });
                         }}
-                        className="min-h-[32px] px-3 text-xs font-bold bg-[#102654] text-white rounded-[8px] disabled:opacity-40"
+                        className="min-h-[32px] px-3 text-xs font-bold bg-[#122654] text-white rounded-[8px] disabled:opacity-40"
                       >
                         Save explanation
                       </button>
@@ -1258,7 +1258,7 @@ export default function WorkpaperPage() {
           >
             <ul className="flex flex-col gap-1">
               {procedures.map((p) => (
-                <li key={p.id} className="rounded-[8px] hover:bg-[#F6F7FB]">
+                <li key={p.id} className="rounded-[8px] hover:bg-[#F5F8FD]">
                   <div className="flex items-start gap-2.5 p-2">
                     <button
                       type="button"
@@ -1267,18 +1267,18 @@ export default function WorkpaperPage() {
                       aria-pressed={Boolean(p.done_at || p.not_applicable_reason)}
                       className="flex items-start gap-2.5 text-left flex-1 text-xs disabled:cursor-not-allowed"
                     >
-                      <span className={`mt-0.5 font-bold ${p.done_at ? 'text-[#0B6B52]' : p.not_applicable_reason ? 'text-[#5B6478]' : 'text-[#7E8DA6]'}`}>
+                      <span className={`mt-0.5 font-bold ${p.done_at ? 'text-[#0B6B52]' : p.not_applicable_reason ? 'text-[#4A5878]' : 'text-[#7E8DA6]'}`}>
                         {p.done_at ? '✓' : p.not_applicable_reason ? '–' : '○'}
                       </span>
                       <span>
-                        <span className={p.done_at || p.not_applicable_reason ? 'text-[#5B6478]' : 'text-[#102654]'}>{p.text}</span>
+                        <span className={p.done_at || p.not_applicable_reason ? 'text-[#4A5878]' : 'text-[#122654]'}>{p.text}</span>
                         {p.done_at && (
                           <span className="block text-[10px] text-[#0B6B52] mt-0.5">
                             {db.users.find((u) => u.id === p.done_by)?.name ?? 'Unknown'} · {fmtDate(p.done_at)}
                           </span>
                         )}
                         {p.not_applicable_reason && (
-                          <span className="block text-[10px] text-[#5B6478] mt-0.5">Not applicable: {p.not_applicable_reason}</span>
+                          <span className="block text-[10px] text-[#4A5878] mt-0.5">Not applicable: {p.not_applicable_reason}</span>
                         )}
                       </span>
                     </button>
@@ -1287,7 +1287,7 @@ export default function WorkpaperPage() {
                         <button
                           type="button"
                           onClick={() => setNaDraft({ id: p.id, reason: '' })}
-                          className="text-[10px] font-bold text-[#5B6478] hover:text-[#102654] whitespace-nowrap"
+                          className="text-[10px] font-bold text-[#4A5878] hover:text-[#122654] whitespace-nowrap"
                         >
                           Not applicable…
                         </button>
@@ -1313,12 +1313,12 @@ export default function WorkpaperPage() {
                         value={naDraft.reason}
                         onChange={(e) => setNaDraft({ id: p.id, reason: e.target.value })}
                         onKeyDown={(e) => e.key === 'Enter' && markNa()}
-                        className="flex-1 px-2 py-1.5 text-xs border border-[#D5DBE7] rounded-[8px]"
+                        className="flex-1 px-2 py-1.5 text-xs border border-[#D3DCEE] rounded-[8px]"
                       />
-                      <button type="button" onClick={markNa} disabled={!naDraft.reason.trim()} className="px-3 text-xs font-bold bg-[#102654] text-white rounded-[8px] disabled:opacity-40">
+                      <button type="button" onClick={markNa} disabled={!naDraft.reason.trim()} className="px-3 text-xs font-bold bg-[#122654] text-white rounded-[8px] disabled:opacity-40">
                         Save
                       </button>
-                      <button type="button" onClick={() => setNaDraft(null)} className="px-2 text-xs text-[#5B6478]">
+                      <button type="button" onClick={() => setNaDraft(null)} className="px-2 text-xs text-[#4A5878]">
                         Cancel
                       </button>
                     </div>
@@ -1335,9 +1335,9 @@ export default function WorkpaperPage() {
                   value={newProcedure}
                   onChange={(e) => setNewProcedure(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addProcedure()}
-                  className="flex-1 px-2.5 py-1.5 text-xs border border-[#D5DBE7] rounded-[8px]"
+                  className="flex-1 px-2.5 py-1.5 text-xs border border-[#D3DCEE] rounded-[8px]"
                 />
-                <button type="button" onClick={addProcedure} disabled={!newProcedure.trim()} className="inline-flex items-center gap-1 px-3 text-xs font-bold bg-white border border-[#D5DBE7] rounded-[8px] disabled:opacity-40">
+                <button type="button" onClick={addProcedure} disabled={!newProcedure.trim()} className="inline-flex items-center gap-1 px-3 text-xs font-bold bg-white border border-[#D3DCEE] rounded-[8px] disabled:opacity-40">
                   <Plus className="w-3.5 h-3.5" /> Add
                 </button>
               </div>
@@ -1358,10 +1358,10 @@ export default function WorkpaperPage() {
                   const files = Array.from(e.dataTransfer.files ?? []);
                   if (files.length) void doUpload(files, null);
                 }}
-                className={`p-4 rounded-[12px] border-2 border-dashed text-center text-xs ${dragOver ? 'border-[#FF7D6B] bg-[#FFF1EE]' : 'border-[#D5DBE7] bg-[#F6F7FB]'}`}
+                className={`p-4 rounded-[12px] border-2 border-dashed text-center text-xs ${dragOver ? 'border-[#FF7A66] bg-[#FFF1EE]' : 'border-[#D3DCEE] bg-[#F5F8FD]'}`}
               >
-                <div className="font-bold text-[#102654]">{uploading ? 'Uploading…' : 'Drop files here, paste a screenshot, or choose files'}</div>
-                <div className="text-[10px] text-[#5B6478] mt-1">
+                <div className="font-bold text-[#122654]">{uploading ? 'Uploading…' : 'Drop files here, paste a screenshot, or choose files'}</div>
+                <div className="text-[10px] text-[#4A5878] mt-1">
                   PDF, Excel, Word, images, email (.eml) · up to 4 MB each · every file is fingerprinted (sha256) and kept unchanged
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
@@ -1369,7 +1369,7 @@ export default function WorkpaperPage() {
                     aria-label="File type"
                     value={uploadCategory}
                     onChange={(e) => setUploadCategory(e.target.value as AttachmentCategory)}
-                    className="min-h-[32px] px-2 border border-[#D5DBE7] rounded-[8px] bg-white"
+                    className="min-h-[32px] px-2 border border-[#D3DCEE] rounded-[8px] bg-white"
                   >
                     {allCategories.map((c) => (
                       <option key={c} value={c}>
@@ -1389,7 +1389,7 @@ export default function WorkpaperPage() {
                     aria-label="Link to"
                     value={uploadLink}
                     onChange={(e) => setUploadLink(e.target.value)}
-                    className="min-h-[32px] px-2 border border-[#D5DBE7] rounded-[8px] bg-white max-w-[220px]"
+                    className="min-h-[32px] px-2 border border-[#D3DCEE] rounded-[8px] bg-white max-w-[220px]"
                   >
                     <option value="paper">Whole paper</option>
                     {result.anchors.map((a) => (
@@ -1408,7 +1408,7 @@ export default function WorkpaperPage() {
                       pendingRow.current = null;
                       fileInput.current?.click();
                     }}
-                    className="min-h-[32px] px-3 text-xs font-bold bg-[#102654] text-white rounded-[8px] disabled:opacity-40"
+                    className="min-h-[32px] px-3 text-xs font-bold bg-[#122654] text-white rounded-[8px] disabled:opacity-40"
                   >
                     Choose files
                   </button>
@@ -1427,7 +1427,7 @@ export default function WorkpaperPage() {
                         type="button"
                         aria-pressed={fileFilter === f}
                         onClick={() => setFileFilter(f as typeof fileFilter)}
-                        className={`px-2.5 py-1 text-[11px] font-bold rounded-full border ${fileFilter === f ? 'bg-[#102654] text-white border-[#102654]' : 'bg-white border-[#D5DBE7] text-[#102654]'}`}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-full border ${fileFilter === f ? 'bg-[#122654] text-white border-[#122654]' : 'bg-white border-[#D3DCEE] text-[#122654]'}`}
                       >
                         {f === 'all' ? 'All' : f === 'permanent' ? 'Permanent' : f} {n}
                       </button>
@@ -1435,8 +1435,8 @@ export default function WorkpaperPage() {
                   })}
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-[#102654]">
-                    <thead className="bg-[#F6F7FB] text-[10px] uppercase tracking-wider text-[#5B6478]">
+                  <table className="w-full text-xs text-[#122654]">
+                    <thead className="bg-[#F5F8FD] text-[10px] uppercase tracking-wider text-[#4A5878]">
                       <tr>
                         <th className="p-2 text-left">File</th>
                         <th className="p-2 text-left">Type</th>
@@ -1452,14 +1452,14 @@ export default function WorkpaperPage() {
                           <tr key={a.id}>
                             <td className="p-2">
                               <button type="button" onClick={() => setPreview(a)} className="flex items-center gap-2 text-left hover:underline">
-                                <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-[#102654] text-white">{fileKind(a)}</span>
+                                <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-[#122654] text-white">{fileKind(a)}</span>
                                 <span className="font-semibold break-all">{a.filename}</span>
                               </button>
                               <div className="text-[10px] font-mono text-[#7E8DA6] mt-0.5">sha256 {a.sha256.slice(0, 4)}…{a.sha256.slice(-2)}</div>
                             </td>
                             <td className="p-2">
                               {a.category}
-                              {a.is_permanent && <span className="ml-1 text-[10px] text-[#5B6478]">· Permanent</span>}
+                              {a.is_permanent && <span className="ml-1 text-[10px] text-[#4A5878]">· Permanent</span>}
                             </td>
                             <td className="p-2">
                               <select
@@ -1467,7 +1467,7 @@ export default function WorkpaperPage() {
                                 disabled={isLocked}
                                 value={row?.row ?? 'paper'}
                                 onChange={(e) => relink(a, e.target.value)}
-                                className={`max-w-[200px] px-1.5 py-1 border rounded-[8px] bg-white ${row?.row ? 'border-[#D5DBE7]' : 'border-[#C58B00]/40'}`}
+                                className={`max-w-[200px] px-1.5 py-1 border rounded-[8px] bg-white ${row?.row ? 'border-[#D3DCEE]' : 'border-[#C58B00]/40'}`}
                               >
                                 <option value="paper">Whole paper</option>
                                 {result.anchors.map((an) => (
@@ -1481,10 +1481,10 @@ export default function WorkpaperPage() {
                               {initials(a.uploaded_by_name)} · {fmtDate(a.uploaded_at)}
                             </td>
                             <td className="p-2 text-right whitespace-nowrap">
-                              <button type="button" onClick={() => setPreview(a)} className="font-bold text-[#102654] hover:underline mr-3">
+                              <button type="button" onClick={() => setPreview(a)} className="font-bold text-[#122654] hover:underline mr-3">
                                 Preview
                               </button>
-                              <a href={fileUrl(a, true)} className="font-bold text-[#102654] hover:underline mr-3">
+                              <a href={fileUrl(a, true)} className="font-bold text-[#122654] hover:underline mr-3">
                                 Download
                               </a>
                               {!isLocked && (
@@ -1499,40 +1499,40 @@ export default function WorkpaperPage() {
                     </tbody>
                   </table>
                 </div>
-                <p className="text-[10px] text-[#5B6478] mt-2">Attach to a single figure with ⧉ on its row. Permanent files carry forward each year.</p>
+                <p className="text-[10px] text-[#4A5878] mt-2">Attach to a single figure with ⧉ on its row. Permanent files carry forward each year.</p>
               </>
             )}
           </Section>
 
           <Section id="conclusion" num={7} title="Conclusion" state={stateOf('conclusion')} stateLabel={conclusionText.trim() ? 'Written' : 'Not written'}>
             {botDraft && !isLocked && (
-              <div className="p-3 mb-3 rounded-[12px] bg-[#FFF1EE] border border-[#FF7D6B]/40 text-xs">
+              <div className="p-3 mb-3 rounded-[12px] bg-[#FFF1EE] border border-[#FF7A66]/40 text-xs">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#A23A27]">
                   <Sparkles className="w-3.5 h-3.5" /> Blynt Bot draft · not in the paper yet
                 </div>
-                <p className="mt-1.5 text-[#102654] leading-relaxed">{botDraft}</p>
+                <p className="mt-1.5 text-[#122654] leading-relaxed">{botDraft}</p>
                 <div className="flex gap-2 mt-2">
                   <button
                     type="button"
                     onClick={() => saveData({ conclusion: { ...(data.conclusion ?? {}), text: botDraft, source: 'bot', accepted_by: actor.name } })}
-                    className="px-3 py-1 text-xs font-bold bg-[#102654] text-white rounded-[6px]"
+                    className="px-3 py-1 text-xs font-bold bg-[#122654] text-white rounded-[6px]"
                   >
                     Use this draft
                   </button>
-                  <button type="button" onClick={() => setConclusionDraft(botDraft)} className="px-3 py-1 text-xs font-bold bg-white border border-[#D5DBE7] rounded-[6px]">
+                  <button type="button" onClick={() => setConclusionDraft(botDraft)} className="px-3 py-1 text-xs font-bold bg-white border border-[#D3DCEE] rounded-[6px]">
                     Edit first
                   </button>
                   <button
                     type="button"
                     onClick={() => saveData({ conclusion: { ...(data.conclusion ?? {}), bot_dismissed: true } })}
-                    className="px-3 py-1 text-xs font-bold text-[#5B6478]"
+                    className="px-3 py-1 text-xs font-bold text-[#4A5878]"
                   >
                     Dismiss
                   </button>
                 </div>
               </div>
             )}
-            <label className="text-[11px] font-semibold text-[#102654]" htmlFor="conclusion-text">
+            <label className="text-[11px] font-semibold text-[#122654]" htmlFor="conclusion-text">
               Your conclusion
             </label>
             <textarea
@@ -1548,12 +1548,12 @@ export default function WorkpaperPage() {
               }}
               rows={3}
               placeholder="Summarise the work done and whether the balance is fairly stated."
-              className="w-full mt-1 p-3 text-xs bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] disabled:bg-[#F6F7FB]"
+              className="w-full mt-1 p-3 text-xs bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] disabled:bg-[#F5F8FD]"
             />
             
             {/* Preparer notes box (REC-01) */}
             <div className="mt-3 pt-3 border-t border-[#E3E7EF]">
-              <label className="text-[11px] font-semibold text-[#102654] block mb-1" htmlFor="preparer-notes">
+              <label className="text-[11px] font-semibold text-[#122654] block mb-1" htmlFor="preparer-notes">
                 Preparer notes (REC-01)
               </label>
               <textarea
@@ -1566,8 +1566,8 @@ export default function WorkpaperPage() {
                   }
                 }}
                 rows={2}
-                placeholder="Internal audit / working notes for manager review..."
-                className="w-full p-2.5 text-xs bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none focus:border-[#FF7D6B] disabled:bg-[#F6F7FB]"
+                placeholder="Internal working notes for manager review..."
+                className="w-full p-2.5 text-xs bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66] disabled:bg-[#F5F8FD]"
               />
             </div>
           </Section>
@@ -1575,7 +1575,7 @@ export default function WorkpaperPage() {
           </fieldset>
 
           <Section id="signoff" num={8} title="Sign-off" state={stateOf('signoff')}>
-            <p className="text-[11px] text-[#5B6478] mb-3">
+            <p className="text-[11px] text-[#4A5878] mb-3">
               Signing as <strong>{actor.name}</strong> ({actor.role}). {levelsFor(workpaper)} sign-off level{levelsFor(workpaper) === 1 ? '' : 's'} for this file, in order; one person signs one level. A reviewed schedule is read-only until it is unreviewed.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1583,8 +1583,8 @@ export default function WorkpaperPage() {
                 const so = latestSignoff(role);
                 const blocked = canSign(role);
                 return (
-                  <div key={role} className="p-3 rounded-[10px] bg-[#F6F7FB] border border-[#E3E7EF] text-xs flex flex-col">
-                    <div className="font-bold text-[#102654]">{ROLE_LABEL[role]}</div>
+                  <div key={role} className="p-3 rounded-[10px] bg-[#F5F8FD] border border-[#E3E7EF] text-xs flex flex-col">
+                    <div className="font-bold text-[#122654]">{ROLE_LABEL[role]}</div>
                     {so ? (
                       <div className="text-[11px] text-[#0B6B52] mt-1">
                         ✓ {so.user_name} · {fmtDateTime(so.signed_at)}
@@ -1595,7 +1595,7 @@ export default function WorkpaperPage() {
                           type="button"
                           disabled={Boolean(blocked) || signing}
                           onClick={() => sign(role)}
-                          className="mt-2 min-h-[36px] bg-[#102654] hover:bg-[#0B1B3D] text-white font-bold rounded-[8px] disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="mt-2 min-h-[36px] bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold rounded-[8px] disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           {role === 'preparer' ? 'Mark as prepared' : `Sign as ${ROLE_LABEL[role].toLowerCase()}`}
                         </button>
@@ -1626,7 +1626,7 @@ export default function WorkpaperPage() {
                     type="button"
                     aria-selected={sideTab === tab.id}
                     onClick={() => setSideTab(tab.id)}
-                    className={`flex items-center gap-1 px-2.5 py-2 text-xs font-bold border-b-2 -mb-px whitespace-nowrap ${sideTab === tab.id ? 'border-[#FF7D6B] text-[#102654]' : 'border-transparent text-[#5B6478]'}`}
+                    className={`flex items-center gap-1 px-2.5 py-2 text-xs font-bold border-b-2 -mb-px whitespace-nowrap ${sideTab === tab.id ? 'border-[#FF7A66] text-[#122654]' : 'border-transparent text-[#4A5878]'}`}
                   >
                     <tab.icon className="w-3.5 h-3.5" /> {tab.label}
                   </button>
@@ -1635,7 +1635,7 @@ export default function WorkpaperPage() {
               <button
                 type="button"
                 onClick={toggleComments}
-                className="p-1 -mt-1 text-[#7E8DA6] hover:text-[#102654] hover:bg-[#F6F7FB] rounded-[6px] transition-colors"
+                className="p-1 -mt-1 text-[#7E8DA6] hover:text-[#122654] hover:bg-[#F5F8FD] rounded-[6px] transition-colors"
                 title="Hide comments panel"
                 aria-label="Hide comments panel"
               >
@@ -1646,7 +1646,7 @@ export default function WorkpaperPage() {
             {sideTab === 'evidence' && (
               <div className="flex flex-col gap-3 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-[#102654]">Attached Documents ({attachments.length})</span>
+                  <span className="font-bold text-[#122654]">Attached Documents ({attachments.length})</span>
                   {!isLocked && (
                     <button
                       type="button"
@@ -1661,7 +1661,7 @@ export default function WorkpaperPage() {
                   )}
                 </div>
                 {attachments.length === 0 ? (
-                  <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] text-[#5B6478] text-[11px]">
+                  <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] text-[#4A5878] text-[11px]">
                     No files linked to this schedule yet. Drag and drop or click attach above to link supporting evidence (DOC-06).
                   </div>
                 ) : (
@@ -1669,12 +1669,12 @@ export default function WorkpaperPage() {
                     {attachments.map((a) => (
                       <div
                         key={a.id}
-                        className="p-2.5 rounded-[10px] border border-[#D5DBE7] bg-white flex flex-col gap-1 hover:border-[#102654] cursor-pointer"
+                        className="p-2.5 rounded-[10px] border border-[#D3DCEE] bg-white flex flex-col gap-1 hover:border-[#122654] cursor-pointer"
                         onClick={() => setPreview(a)}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-[#102654] truncate max-w-[180px]">{a.filename}</span>
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#F6F7FB] text-[#5B6478]">
+                          <span className="font-bold text-[#122654] truncate max-w-[180px]">{a.filename}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#F5F8FD] text-[#4A5878]">
                             {a.category}
                           </span>
                         </div>
@@ -1692,11 +1692,11 @@ export default function WorkpaperPage() {
             {sideTab === 'ai_review' && (
               <div className="flex flex-col gap-3 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-[#102654] flex items-center gap-1.5">
+                  <span className="font-bold text-[#122654] flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#B8432F]" />
                     AI Schedule Review Bot (ANL-04)
                   </span>
-                  <span className="text-[10px] text-[#5B6478]">Automated checks</span>
+                  <span className="text-[10px] text-[#4A5878]">Automated checks</span>
                 </div>
                 {db.ai_review_findings.filter((f) => f.workpaper_id === workpaper.id || f.schedule_ref === workpaper.ref).length === 0 ? (
                   <div className="p-3.5 rounded-[10px] bg-[#E6F4EF] border border-[#0B6B52]/30 flex flex-col gap-1">
@@ -1704,7 +1704,7 @@ export default function WorkpaperPage() {
                       <CheckCircle2 className="w-4 h-4" />
                       No issues found
                     </div>
-                    <p className="text-[#5B6478] text-[11px] mt-0.5">
+                    <p className="text-[#4A5878] text-[11px] mt-0.5">
                       All 8 automated checks passed: balance sheet tie, depreciation proof in total, accrual reversal, and DLA tax review.
                     </p>
                   </div>
@@ -1717,20 +1717,20 @@ export default function WorkpaperPage() {
                           key={f.id}
                           className={`p-3 rounded-[10px] border flex flex-col gap-1.5 ${
                             f.status === 'fixed'
-                              ? 'bg-[#F6F7FB] border-[#E3E7EF] opacity-75'
+                              ? 'bg-[#F5F8FD] border-[#E3E7EF] opacity-75'
                               : f.severity === 'error'
-                              ? 'bg-[#FFF1EE] border-[#FF7D6B]'
+                              ? 'bg-[#FFF1EE] border-[#FF7A66]'
                               : f.severity === 'warning'
                               ? 'bg-[#FFF4DB] border-[#C58B00]/40'
                               : 'bg-[#EFF6FF] border-[#93C5FD]'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-1">
-                            <span className="font-bold text-[#102654]">{f.title}</span>
+                            <span className="font-bold text-[#122654]">{f.title}</span>
                             <span
                               className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
                                 f.severity === 'error'
-                                  ? 'bg-[#FF7D6B] text-white'
+                                  ? 'bg-[#FF7A66] text-white'
                                   : f.severity === 'warning'
                                   ? 'bg-[#FFF4DB] text-[#805B00]'
                                   : 'bg-[#E6F4EF] text-[#0B6B52]'
@@ -1739,7 +1739,7 @@ export default function WorkpaperPage() {
                               {f.severity}
                             </span>
                           </div>
-                          <p className="text-[#5B6478] text-[11px]">{f.detail}</p>
+                          <p className="text-[#4A5878] text-[11px]">{f.detail}</p>
                           {f.status === 'open' && !isLocked && (
                             <div className="flex items-center justify-between pt-1 border-t border-[#E3E7EF]/60">
                               <div className="flex items-center gap-1">
@@ -1750,7 +1750,7 @@ export default function WorkpaperPage() {
                                     db.logAudit(engagement.firm_id, actor, 'RESOLVE_AI_FINDING', 'ai_review_findings', f.id, null, { action: 'fixed' });
                                     refresh();
                                   }}
-                                  className="px-2 py-0.5 bg-[#102654] text-white text-[10px] font-bold rounded"
+                                  className="px-2 py-0.5 bg-[#122654] text-white text-[10px] font-bold rounded"
                                 >
                                   Fixed
                                 </button>
@@ -1765,7 +1765,7 @@ export default function WorkpaperPage() {
                                       refresh();
                                     }
                                   }}
-                                  className="px-2 py-0.5 bg-white border border-[#D5DBE7] text-[#5B6478] text-[10px] font-semibold rounded hover:text-[#102654]"
+                                  className="px-2 py-0.5 bg-white border border-[#D3DCEE] text-[#4A5878] text-[10px] font-semibold rounded hover:text-[#122654]"
                                 >
                                   Dismiss
                                 </button>
@@ -1805,26 +1805,26 @@ export default function WorkpaperPage() {
 
             {sideTab === 'comments' && (
               <div className="flex flex-col gap-3 text-xs">
-                {comments.length === 0 && <p className="text-[#5B6478]">No comments yet.</p>}
+                {comments.length === 0 && <p className="text-[#4A5878]">No comments yet.</p>}
                 {comments.map((c, i) => (
-                  <div key={c.id} className={`p-3 rounded-[10px] border ${c.status === 'open' ? (c.type === 'review_note' ? 'bg-[#FFF9EC] border-[#C58B00]/30' : 'bg-white border-[#D5DBE7]') : 'bg-[#F6F7FB] border-[#E3E7EF] opacity-80'}`}>
+                  <div key={c.id} className={`p-3 rounded-[10px] border ${c.status === 'open' ? (c.type === 'review_note' ? 'bg-[#FFF9EC] border-[#C58B00]/30' : 'bg-white border-[#D3DCEE]') : 'bg-[#F5F8FD] border-[#E3E7EF] opacity-80'}`}>
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-[#102654]">
+                      <span className="font-bold text-[#122654]">
                         {i + 1} {c.created_by_name}
                       </span>
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#5B6478]">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#4A5878]">
                         {c.type === 'review_note' ? '◐ Review note' : c.type === 'client_query' ? '◷ Client query' : 'Comment'}
                         {c.status === 'resolved' ? ' · resolved' : ''}
                       </span>
                     </div>
-                    <p className="mt-1 text-[#102654] break-words">{c.body}</p>
+                    <p className="mt-1 text-[#122654] break-words">{c.body}</p>
                     <div className="text-[10px] font-mono text-[#7E8DA6] mt-1">Anchor: {c.anchor_summary || 'Whole paper'}</div>
                     {(c.replies ?? []).map((r) => (
-                      <div key={r.id} className="mt-2 pl-2 border-l-2 border-[#D5DBE7]">
-                        <div className="text-[10px] font-bold text-[#102654]">
+                      <div key={r.id} className="mt-2 pl-2 border-l-2 border-[#D3DCEE]">
+                        <div className="text-[10px] font-bold text-[#122654]">
                           {r.created_by_name} · {fmtDateTime(r.created_at)}
                         </div>
-                        <p className="text-[#102654] break-words">{r.body}</p>
+                        <p className="text-[#122654] break-words">{r.body}</p>
                       </div>
                     ))}
                     {c.status === 'open' && !isLocked && (
@@ -1837,9 +1837,9 @@ export default function WorkpaperPage() {
                             value={replyDrafts[c.id] ?? ''}
                             onChange={(e) => setReplyDrafts((d) => ({ ...d, [c.id]: e.target.value }))}
                             onKeyDown={(e) => e.key === 'Enter' && reply(c.id)}
-                            className="flex-1 min-w-0 px-2 py-1 border border-[#D5DBE7] rounded-[6px]"
+                            className="flex-1 min-w-0 px-2 py-1 border border-[#D3DCEE] rounded-[6px]"
                           />
-                          <button type="button" onClick={() => reply(c.id)} disabled={!replyDrafts[c.id]?.trim()} className="px-2 font-bold text-[#102654] disabled:opacity-40">
+                          <button type="button" onClick={() => reply(c.id)} disabled={!replyDrafts[c.id]?.trim()} className="px-2 font-bold text-[#122654] disabled:opacity-40">
                             Reply
                           </button>
                         </div>
@@ -1852,12 +1852,12 @@ export default function WorkpaperPage() {
                 ))}
                 {!isLocked && (
                   <div className="flex flex-col gap-1.5 pt-2 border-t border-[#E3E7EF]">
-                    <select aria-label="Comment type" value={noteType} onChange={(e) => setNoteType(e.target.value as typeof noteType)} className="min-h-[32px] px-2 border border-[#D5DBE7] rounded-[8px] bg-white">
+                    <select aria-label="Comment type" value={noteType} onChange={(e) => setNoteType(e.target.value as typeof noteType)} className="min-h-[32px] px-2 border border-[#D3DCEE] rounded-[8px] bg-white">
                       <option value="review_note">Review note (blocks sign-off)</option>
                       <option value="comment">Comment</option>
                       <option value="client_query">Client query</option>
                     </select>
-                    <select aria-label="Comment on" value={noteAnchor} onChange={(e) => setNoteAnchor(e.target.value)} className="min-h-[32px] px-2 border border-[#D5DBE7] rounded-[8px] bg-white">
+                    <select aria-label="Comment on" value={noteAnchor} onChange={(e) => setNoteAnchor(e.target.value)} className="min-h-[32px] px-2 border border-[#D3DCEE] rounded-[8px] bg-white">
                       <option value="paper">Whole paper</option>
                       {result.anchors.map((a) => (
                         <option key={a.id} value={a.id}>
@@ -1871,9 +1871,9 @@ export default function WorkpaperPage() {
                       value={noteBody}
                       onChange={(e) => setNoteBody(e.target.value)}
                       placeholder="Write a comment… type @name to tag a colleague"
-                      className="p-2 border border-[#D5DBE7] rounded-[8px]"
+                      className="p-2 border border-[#D3DCEE] rounded-[8px]"
                     />
-                    <button type="button" onClick={addNote} disabled={!noteBody.trim()} className="min-h-[34px] bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] font-bold rounded-[8px] disabled:opacity-40">
+                    <button type="button" onClick={addNote} disabled={!noteBody.trim()} className="min-h-[34px] bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] font-bold rounded-[8px] disabled:opacity-40">
                       Add {noteType === 'review_note' ? 'review note' : noteType === 'client_query' ? 'client query' : 'comment'}
                     </button>
                   </div>
@@ -1885,16 +1885,16 @@ export default function WorkpaperPage() {
               <div className="flex flex-col gap-3 text-xs">
                 {/* Saved Versions (AUD-02) */}
                 {db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id).length > 0 && (
-                  <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex flex-col gap-1.5">
-                    <span className="font-bold text-[#102654]">Saved Versions ({db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id).length})</span>
+                  <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] flex flex-col gap-1.5">
+                    <span className="font-bold text-[#122654]">Saved Versions ({db.schedule_versions.filter((v) => v.workpaper_id === workpaper.id).length})</span>
                     <div className="flex flex-col gap-1">
                       {db.schedule_versions
                         .filter((v) => v.workpaper_id === workpaper.id)
                         .map((v) => (
-                          <div key={v.id} className="p-2 bg-white rounded border border-[#D5DBE7] flex items-center justify-between">
+                          <div key={v.id} className="p-2 bg-white rounded border border-[#D3DCEE] flex items-center justify-between">
                             <div>
-                              <div className="font-bold text-[#102654]">Version {v.version_number}</div>
-                              <div className="text-[10px] text-[#5B6478]">{v.created_by_name} · {fmtDateTime(v.created_at)}</div>
+                              <div className="font-bold text-[#122654]">Version {v.version_number}</div>
+                              <div className="text-[10px] text-[#4A5878]">{v.created_by_name} · {fmtDateTime(v.created_at)}</div>
                               {v.reason && <div className="text-[10px] text-[#805B00] italic mt-0.5">"{v.reason}"</div>}
                             </div>
                             <span className="text-[10px] font-bold text-[#0B6B52]">Saved</span>
@@ -1907,10 +1907,10 @@ export default function WorkpaperPage() {
                 {versions.length >= 2 && <VersionCompare versions={versions} current={data} />}
 
                 <ol className="flex flex-col gap-2 text-xs">
-                  {history.length === 0 && <li className="text-[#5B6478]">No changes yet.</li>}
+                  {history.length === 0 && <li className="text-[#4A5878]">No changes yet.</li>}
                   {history.map((h) => (
                     <li key={h.id} className="pb-2 border-b border-[#E3E7EF] last:border-0">
-                      <div className="text-[#102654]">
+                      <div className="text-[#122654]">
                         <strong>{h.actor_name}</strong> {h.action.toLowerCase().replace(/_/g, ' ')}
                       </div>
                       <div className="text-[10px] text-[#7E8DA6] font-mono">{fmtDateTime(h.at)}</div>
@@ -1920,7 +1920,7 @@ export default function WorkpaperPage() {
               </div>
             )}
 
-            <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#5B6478]">
+            <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#4A5878]">
               {latestSignoff('preparer') ? '✓' : '○'} Preparer · {latestSignoff('reviewer') ? '✓' : '○'} Reviewer · {latestSignoff('partner') ? '✓' : '○'} Partner
               <br />
               Shortcuts: [ ] previous or next paper · paste to attach a screenshot
@@ -1949,17 +1949,17 @@ function VersionCompare({ versions, current }: { versions: { id: string; version
   );
   return (
     <div className="p-3 bg-white rounded-[10px] border border-[#E3E7EF] flex flex-col gap-2">
-      <span className="font-bold text-[#102654]">Compare versions</span>
+      <span className="font-bold text-[#122654]">Compare versions</span>
       <div className="flex gap-2">
-        <select aria-label="Compare from" value={a} onChange={(e) => setA(e.target.value)} className="flex-1 min-h-[30px] px-1.5 border border-[#D5DBE7] rounded text-[11px]">{options}</select>
-        <select aria-label="Compare to" value={b} onChange={(e) => setB(e.target.value)} className="flex-1 min-h-[30px] px-1.5 border border-[#D5DBE7] rounded text-[11px]">{options}</select>
+        <select aria-label="Compare from" value={a} onChange={(e) => setA(e.target.value)} className="flex-1 min-h-[30px] px-1.5 border border-[#D3DCEE] rounded text-[11px]">{options}</select>
+        <select aria-label="Compare to" value={b} onChange={(e) => setB(e.target.value)} className="flex-1 min-h-[30px] px-1.5 border border-[#D3DCEE] rounded text-[11px]">{options}</select>
       </div>
       {changes.length === 0 ? (
-        <span className="text-[11px] text-[#5B6478]">No differences.</span>
+        <span className="text-[11px] text-[#4A5878]">No differences.</span>
       ) : (
         <ul className="text-[11px] flex flex-col gap-1">
           {changes.slice(0, 30).map((c) => (
-            <li key={c.field}><span className="font-mono text-[#5B6478]">{c.field}</span>: {c.before || '—'} → <strong>{c.after || '—'}</strong></li>
+            <li key={c.field}><span className="font-mono text-[#4A5878]">{c.field}</span>: {c.before || '—'} → <strong>{c.after || '—'}</strong></li>
           ))}
         </ul>
       )}

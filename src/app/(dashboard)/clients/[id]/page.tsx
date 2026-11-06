@@ -108,12 +108,12 @@ export default function ClientRecordPage() {
       <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-[#102654]">{client.name}</h1>
+            <h1 className="text-xl font-bold text-[#122654]">{client.name}</h1>
             <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] px-2.5 py-1 rounded-full font-mono font-semibold">
               Co. No. {client.company_no || '09876543'}
             </span>
           </div>
-          <p className="text-xs text-[#5B6478] mt-1">
+          <p className="text-xs text-[#4A5878] mt-1">
             Standard: <strong>{client.company_type || 'FRS 102 1A'}</strong> • Financial Year End:{' '}
             <strong>{client.year_end || '30 September'}</strong>
           </p>
@@ -123,15 +123,15 @@ export default function ClientRecordPage() {
           <button
             type="button"
             onClick={handleChLookup}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F6F7FB] hover:bg-[#E3E7EF] border border-[#D5DBE7] text-[#102654] text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F5F8FD] hover:bg-[#E3E7EF] border border-[#D3DCEE] text-[#122654] text-xs font-semibold rounded-xl transition-colors cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#FF7D6B]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#FF7A66]" />
             <span>{chLoading ? 'Querying API...' : 'Look up on Companies House (FIL-01)'}</span>
           </button>
 
           <Link
             href="/engagements/new"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-xl shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl shadow-xs transition-colors"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>New Engagement</span>
@@ -147,7 +147,7 @@ export default function ClientRecordPage() {
           {/* Engagements List */}
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[#E3E7EF] pb-3">
-              <h2 className="text-sm font-bold text-[#102654]">Client Engagements (ENG-01)</h2>
+              <h2 className="text-sm font-bold text-[#122654]">Client Engagements (ENG-01)</h2>
               <span className="text-xs text-[#7E8DA6]">{clientEngagements.length} Total</span>
             </div>
 
@@ -155,25 +155,25 @@ export default function ClientRecordPage() {
               {clientEngagements.map((eng) => (
                 <div
                   key={eng.id}
-                  className="p-4 rounded-xl border border-[#E3E7EF] hover:border-[#102654]/40 bg-[#F6F7FB]/50 flex items-center justify-between transition-colors"
+                  className="p-4 rounded-xl border border-[#E3E7EF] hover:border-[#122654]/40 bg-[#F5F8FD]/50 flex items-center justify-between transition-colors"
                 >
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-bold text-xs text-[#1D4E89] bg-[#EAF5FC] px-2 py-0.5 rounded">
                         {eng.id}
                       </span>
-                      <span className="text-xs font-bold text-[#102654]">
+                      <span className="text-xs font-bold text-[#122654]">
                         Year-End Accounts: {formatDate(eng.period_end, { year: 'numeric', month: 'short' })}
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#5B6478] mt-1">
+                    <div className="text-[11px] text-[#4A5878] mt-1">
                       Period: {formatDate(eng.period_start)} to {formatDate(eng.period_end)} • Framework: {eng.framework}
                     </div>
                   </div>
 
                   <Link
                     href={`/engagements/${eng.id}`}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-2xs transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-2xs transition-colors"
                   >
                     Open Engagement <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
@@ -188,13 +188,13 @@ export default function ClientRecordPage() {
         {/* Right Col: Companies House Data Card (FIL-01) */}
         <div className="space-y-4">
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#102654] border-b border-[#E3E7EF] pb-3">
-              <Building2 className="w-4 h-4 text-[#FF7D6B]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-[#122654] border-b border-[#E3E7EF] pb-3">
+              <Building2 className="w-4 h-4 text-[#FF7A66]" />
               <span>Companies House Public Registry (FIL-01)</span>
             </div>
 
             {chData && (
-              <div className="space-y-3 text-xs text-[#102654]">
+              <div className="space-y-3 text-xs text-[#122654]">
                 <div>
                   <span className="text-[10px] text-[#7E8DA6] block uppercase font-bold">Status</span>
                   <span className="font-bold text-[#0B6B52]">{chData.status}</span>
@@ -214,11 +214,11 @@ export default function ClientRecordPage() {
                 <div className="pt-2 border-t border-gray-100 flex justify-between">
                   <div>
                     <span className="text-[10px] text-[#7E8DA6] block">Next Accounts Due</span>
-                    <span className="font-mono font-bold text-[#102654]">{chData.accountsDue}</span>
+                    <span className="font-mono font-bold text-[#122654]">{chData.accountsDue}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-[#7E8DA6] block">Confirmation Stmt</span>
-                    <span className="font-mono font-bold text-[#102654]">{chData.confirmationDue}</span>
+                    <span className="font-mono font-bold text-[#122654]">{chData.confirmationDue}</span>
                   </div>
                 </div>
               </div>

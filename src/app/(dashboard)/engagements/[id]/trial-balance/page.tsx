@@ -108,7 +108,7 @@ export default function TrialBalancePage() {
             ledgerOpeningPence: -150000n,
             priorYearFinalPence: -175000n,
             diffPence: 25000n,
-            likelyJournal: 'PY-JNL-004: Audit fee accrual true-up (£250.00)',
+            likelyJournal: 'PY-JNL-004: Accountancy fee accrual true-up (£250.00)',
             status: 'unexplained',
           },
         ]
@@ -146,7 +146,7 @@ export default function TrialBalancePage() {
               ledgerOpeningPence: -150000n,
               priorYearFinalPence: -175000n,
               diffPence: 25000n,
-              likelyJournal: 'PY-JNL-004: Audit fee accrual true-up (£250.00)',
+              likelyJournal: 'PY-JNL-004: Accountancy fee accrual true-up (£250.00)',
               status: 'unexplained',
             },
           ]
@@ -412,7 +412,7 @@ export default function TrialBalancePage() {
         type: 'adjusting',
         source_schedule: 'TB',
         date: eng?.period_end,
-        narrative: adjNarrative || 'Audit journal adjustment',
+        narrative: adjNarrative || 'Journal adjustment',
         lines: [
           { blynt_code: adjDebitAccount, debit_p: adjDebitAmount, credit_p: '0', narrative: 'Debit line' },
           { blynt_code: adjCreditAccount, debit_p: '0', credit_p: adjCreditAmount, narrative: 'Credit line' },
@@ -444,18 +444,18 @@ export default function TrialBalancePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#5B6478] mb-1">
+          <div className="flex items-center gap-2 text-xs text-[#4A5878] mb-1">
             <Link href="/" className="hover:text-[#B8432F]">Blynt</Link>
             <span>/</span>
-            <span className="text-[#102654] font-semibold">{engagementSummary(engagementId).clientName}</span>
+            <span className="text-[#122654] font-semibold">{engagementSummary(engagementId).clientName}</span>
             <span>/</span>
             <span>3 Trial balance and leads</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
             Trial balance &amp; lead schedules
           </h1>
-          <p className="text-xs text-[#5B6478] mt-0.5">
-            Audit-adjusted trial balance. Net balance strictly computed in integer pence: {formatPence(netRowPence)}.
+          <p className="text-xs text-[#4A5878] mt-0.5">
+            Adjusted trial balance. Net balance strictly computed in integer pence: {formatPence(netRowPence)}.
           </p>
         </div>
 
@@ -463,7 +463,7 @@ export default function TrialBalancePage() {
           <button
             type="button"
             onClick={() => setShowUploadModal(true)}
-            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98]"
+            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F5F8FD] text-[#122654] border border-[#D3DCEE] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98]"
           >
             <Upload className="w-4 h-4 text-[#1D4E89]" />
             <span>Upload TB (DAT-02)</span>
@@ -472,7 +472,7 @@ export default function TrialBalancePage() {
           <button
             type="button"
             onClick={() => setShowLedgerConnectModal(true)}
-            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98]"
+            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F5F8FD] text-[#122654] border border-[#D3DCEE] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98]"
           >
             <Database className="w-4 h-4 text-[#0B6B52]" />
             <span>Import from Xero (DAT-01)</span>
@@ -482,7 +482,7 @@ export default function TrialBalancePage() {
             type="button"
             onClick={handleRefreshLedger}
             disabled={isRefreshing}
-            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F6F7FB] text-[#102654] border border-[#D5DBE7] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98] disabled:opacity-60"
+            className="min-h-[40px] px-3.5 py-2 bg-white hover:bg-[#F5F8FD] text-[#122654] border border-[#D3DCEE] text-xs font-bold rounded-[10px] flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all active:scale-[0.98] disabled:opacity-60"
           >
             <RefreshCw className={`w-4 h-4 text-[#1D4E89] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
@@ -491,7 +491,7 @@ export default function TrialBalancePage() {
           <button
             type="button"
             onClick={() => setShowProposeModal(true)}
-            className="min-h-[40px] px-4 py-2 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-xs cursor-pointer transition-all active:scale-[0.98]"
+            className="min-h-[40px] px-4 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-[10px] flex items-center gap-2 shadow-xs cursor-pointer transition-all active:scale-[0.98]"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Propose adjustment</span>
@@ -534,7 +534,7 @@ export default function TrialBalancePage() {
           </div>
           <div className="bg-white/90 p-3 rounded-xl border border-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono">
             <div>
-              <span className="font-bold text-[#102654]">#1010 Barclays Operating Account</span>
+              <span className="font-bold text-[#122654]">#1010 Barclays Operating Account</span>
               <span className="text-amber-900 font-semibold ml-2">Moved by +£8,500.00 (Late supplier posting detected)</span>
             </div>
             <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-[10px] font-sans font-bold border border-amber-300 shrink-0">
@@ -553,7 +553,7 @@ export default function TrialBalancePage() {
               <div className="text-xs font-bold text-[#B42318]">
                 Trial balance locked: unmapped balance is {formatPence(unmappedBalancePence)}
               </div>
-              <div className="text-[11px] text-[#5B6478]">
+              <div className="text-[11px] text-[#4A5878]">
                 All imported accounts must be confirmed to statutory nominals before final trial balance can unlock.
               </div>
             </div>
@@ -563,7 +563,7 @@ export default function TrialBalancePage() {
               <button
                 type="button"
                 onClick={handleConfirmAllReady}
-                className="min-h-[38px] px-3.5 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-[8px] flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                className="min-h-[38px] px-3.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-[8px] flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                 title="Bulk confirm high-confidence Ready mappings (DAT-04)"
               >
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -585,7 +585,7 @@ export default function TrialBalancePage() {
       {unexplainedCount > 0 ? (
         <div
           onClick={() => setShowOpeningCheckModal(true)}
-          className="p-4 bg-[#FFF4ED] border border-[#FF7D6B] rounded-[14px] flex items-center justify-between cursor-pointer hover:bg-[#FFE8DC] transition-colors shadow-xs"
+          className="p-4 bg-[#FFF4ED] border border-[#FF7A66] rounded-[14px] flex items-center justify-between cursor-pointer hover:bg-[#FFE8DC] transition-colors shadow-xs"
         >
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-[#B8432F] shrink-0" />
@@ -593,7 +593,7 @@ export default function TrialBalancePage() {
               <div className="text-xs font-bold text-[#B8432F]">
                 Opening balances: {unexplainedCount} difference{unexplainedCount === 1 ? '' : 's'}
               </div>
-              <div className="text-[11px] text-[#5B6478]">
+              <div className="text-[11px] text-[#4A5878]">
                 Compares the ledger&apos;s opening trial balance with the prior period&apos;s final adjusted trial balance. Click to resolve.
               </div>
             </div>
@@ -616,7 +616,7 @@ export default function TrialBalancePage() {
               <span className="text-xs font-bold text-[#0B6B52]">
                 Opening balances agree
               </span>
-              <span className="text-[11px] text-[#5B6478] ml-2">
+              <span className="text-[11px] text-[#4A5878] ml-2">
                 All ledger opening balances match prior-year final adjusted figures.
               </span>
             </div>
@@ -629,45 +629,45 @@ export default function TrialBalancePage() {
 
       {/* Checks Panel */}
       <div className="blynt-card p-4 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-        <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
+        <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
           <CheckCircle2 className="w-4 h-4 text-[#0B6B52] shrink-0" />
           <div>
-            <div className="font-bold text-[#102654]">Net Balance = 0.00</div>
-            <div className="text-[10px] text-[#5B6478] font-mono">
+            <div className="font-bold text-[#122654]">Net Balance = 0.00</div>
+            <div className="text-[10px] text-[#4A5878] font-mono">
               Net: {formatPence(netRowPence)}
             </div>
           </div>
         </div>
 
-        <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
+        <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
           {isLockedByUnmapped ? (
             <AlertTriangle className="w-4 h-4 text-[#B42318] shrink-0" />
           ) : (
             <CheckCircle2 className="w-4 h-4 text-[#0B6B52] shrink-0" />
           )}
           <div>
-            <div className="font-bold text-[#102654]">Account Mapping</div>
-            <div className="text-[10px] text-[#5B6478]">
+            <div className="font-bold text-[#122654]">Account Mapping</div>
+            <div className="text-[10px] text-[#4A5878]">
               {isLockedByUnmapped ? 'Action needed' : 'All accounts mapped'}
             </div>
           </div>
         </div>
 
-        <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
+        <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
           <ShieldCheck className="w-4 h-4 text-[#0B6B52] shrink-0" />
           <div>
-            <div className="font-bold text-[#102654]">Snapshot Integrity</div>
-            <div className="text-[10px] text-[#5B6478] font-mono truncate max-w-[120px]">
+            <div className="font-bold text-[#122654]">Snapshot Integrity</div>
+            <div className="text-[10px] text-[#4A5878] font-mono truncate max-w-[120px]">
               {snapshot ? `SHA: ${snapshot.sha256.substring(0, 10)}...` : "No trial balance imported"}
             </div>
           </div>
         </div>
 
-        <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
+        <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
           <CheckCircle2 className="w-4 h-4 text-[#0B6B52] shrink-0" />
           <div>
-            <div className="font-bold text-[#102654]">Variances Flagged</div>
-            <div className="text-[10px] text-[#5B6478]">Threshold: &gt;= {varianceThreshold}%</div>
+            <div className="font-bold text-[#122654]">Variances Flagged</div>
+            <div className="text-[10px] text-[#4A5878]">Threshold: &gt;= {varianceThreshold}%</div>
           </div>
         </div>
       </div>
@@ -676,14 +676,14 @@ export default function TrialBalancePage() {
       <div className="blynt-card p-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           {/* Toggle Lead Schedules vs All accounts */}
-          <div className="flex bg-[#F6F7FB] p-1 rounded-[10px] border border-[#D5DBE7]">
+          <div className="flex bg-[#F5F8FD] p-1 rounded-[10px] border border-[#D3DCEE]">
             <button
               type="button"
               onClick={() => setViewMode('leads')}
               className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
                 viewMode === 'leads'
-                  ? 'bg-white text-[#102654] shadow-xs'
-                  : 'text-[#5B6478] hover:text-[#102654]'
+                  ? 'bg-white text-[#122654] shadow-xs'
+                  : 'text-[#4A5878] hover:text-[#122654]'
               }`}
             >
               Lead schedules
@@ -693,8 +693,8 @@ export default function TrialBalancePage() {
               onClick={() => setViewMode('accounts')}
               className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
                 viewMode === 'accounts'
-                  ? 'bg-white text-[#102654] shadow-xs'
-                  : 'text-[#5B6478] hover:text-[#102654]'
+                  ? 'bg-white text-[#122654] shadow-xs'
+                  : 'text-[#4A5878] hover:text-[#122654]'
               }`}
             >
               All accounts
@@ -702,14 +702,14 @@ export default function TrialBalancePage() {
           </div>
 
           {/* Compare toggle */}
-          <div className="flex bg-[#F6F7FB] p-1 rounded-[10px] border border-[#D5DBE7]">
+          <div className="flex bg-[#F5F8FD] p-1 rounded-[10px] border border-[#D3DCEE]">
             <button
               type="button"
               onClick={() => setCompareMode('py')}
               className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
                 compareMode === 'py'
-                  ? 'bg-white text-[#102654] shadow-xs'
-                  : 'text-[#5B6478] hover:text-[#102654]'
+                  ? 'bg-white text-[#122654] shadow-xs'
+                  : 'text-[#4A5878] hover:text-[#122654]'
               }`}
             >
               Compare prior year
@@ -719,8 +719,8 @@ export default function TrialBalancePage() {
               onClick={() => setCompareMode('refresh')}
               className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
                 compareMode === 'refresh'
-                  ? 'bg-white text-[#102654] shadow-xs'
-                  : 'text-[#5B6478] hover:text-[#102654]'
+                  ? 'bg-white text-[#122654] shadow-xs'
+                  : 'text-[#4A5878] hover:text-[#122654]'
               }`}
             >
               Compare last refresh
@@ -729,13 +729,13 @@ export default function TrialBalancePage() {
         </div>
 
         <div className="relative w-full md:w-64">
-          <Search className="w-3.5 h-3.5 text-[#5B6478] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder="Search lead or nominal..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full min-h-[38px] pl-8 pr-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none"
+            className="w-full min-h-[38px] pl-8 pr-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
           />
         </div>
       </div>
@@ -744,9 +744,9 @@ export default function TrialBalancePage() {
       <div className="blynt-card overflow-hidden">
         <div className="overflow-x-auto">
           {viewMode === 'leads' ? (
-            <table className="w-full text-left text-xs text-[#102654]">
+            <table className="w-full text-left text-xs text-[#122654]">
               <caption className="sr-only">Trial balance lead schedules table</caption>
-              <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
+              <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
                 <tr>
                   <th scope="col" className="p-3 pl-6">Lead</th>
                   <th scope="col" className="p-3">Schedule Title</th>
@@ -770,20 +770,20 @@ export default function TrialBalancePage() {
                   return (
                     <tr
                       key={lead.letter}
-                      className="hover:bg-[#F6F7FB] transition-colors cursor-pointer"
+                      className="hover:bg-[#F5F8FD] transition-colors cursor-pointer"
                       onClick={() => paperHref && router.push(paperHref)}
                     >
                       <td className="p-3 pl-6">
-                        <span className="w-6 h-6 rounded-md bg-[#102654] text-white flex items-center justify-center font-mono font-bold text-xs">
+                        <span className="w-6 h-6 rounded-md bg-[#122654] text-white flex items-center justify-center font-mono font-bold text-xs">
                           {lead.letter}
                         </span>
                       </td>
 
-                      <td className="p-3 font-bold text-[#102654]">
+                      <td className="p-3 font-bold text-[#122654]">
                         {lead.title}
                       </td>
 
-                      <td className="p-3 text-right font-mono-numbers text-[#5B6478]">
+                      <td className="p-3 text-right font-mono-numbers text-[#4A5878]">
                         {lead.hasPrior ? (
                           <button
                             type="button"
@@ -821,11 +821,11 @@ export default function TrialBalancePage() {
                             {formatPence(lead.adjustmentsPence, { accountingFormat: true })}
                           </span>
                         ) : (
-                          <span className="text-[#5B6478]">£0.00</span>
+                          <span className="text-[#4A5878]">£0.00</span>
                         )}
                       </td>
 
-                      <td className="p-3 text-right font-mono-numbers font-bold text-[#102654]">
+                      <td className="p-3 text-right font-mono-numbers font-bold text-[#122654]">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -845,7 +845,7 @@ export default function TrialBalancePage() {
                             className={`font-semibold px-1.5 py-0.5 rounded ${
                               isOverThreshold
                                 ? 'bg-[#FFF4DB] text-[#6B4700] font-bold'
-                                : 'text-[#5B6478]'
+                                : 'text-[#4A5878]'
                             }`}
                           >
                             {percent > 0 ? `+${percent.toFixed(1)}%` : `${percent.toFixed(1)}%`}
@@ -856,7 +856,7 @@ export default function TrialBalancePage() {
                         )}
                       </td>
 
-                      <td className="p-3 font-mono font-semibold text-[#102654]">
+                      <td className="p-3 font-mono font-semibold text-[#122654]">
                         {paperHref ? (
                           <Link href={paperHref} onClick={(e) => e.stopPropagation()} className="hover:text-[#B8432F] hover:underline">
                             {lead.workpaperRef}
@@ -874,7 +874,7 @@ export default function TrialBalancePage() {
                 })}
 
                 {/* Net Total Row (Must strictly equal 0.00) */}
-                <tr className="bg-[#F6F7FB] font-bold border-t-2 border-[#102654]">
+                <tr className="bg-[#F5F8FD] font-bold border-t-2 border-[#122654]">
                   <td className="p-4 pl-6" colSpan={2}>
                     Net Balance (Debits - Credits)
                   </td>
@@ -902,9 +902,9 @@ export default function TrialBalancePage() {
               </tbody>
             </table>
           ) : (
-            <table className="w-full text-left text-xs text-[#102654]">
+            <table className="w-full text-left text-xs text-[#122654]">
               <caption className="sr-only">All nominal accounts trial balance</caption>
-              <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
+              <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
                 <tr>
                   <th scope="col" className="p-3 pl-6">Account Code</th>
                   <th scope="col" className="p-3">Account Name</th>
@@ -931,18 +931,18 @@ export default function TrialBalancePage() {
                   const blyntAcc = m.blynt_code ? db.blynt_accounts.find((b) => b.code === m.blynt_code) : null;
 
                   return (
-                    <tr key={m.id} className="hover:bg-[#F6F7FB] transition-colors">
-                      <td className="p-3 pl-6 font-mono font-bold text-[#102654]">
+                    <tr key={m.id} className="hover:bg-[#F5F8FD] transition-colors">
+                      <td className="p-3 pl-6 font-mono font-bold text-[#122654]">
                         {m.source_code || '—'}
                       </td>
-                      <td className="p-3 font-semibold text-[#102654]">
+                      <td className="p-3 font-semibold text-[#122654]">
                         {m.source_name}
                       </td>
                       <td className="p-3">
                         {m.blynt_code ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-[#EEF2F6] text-[#102654] border border-[#D5DBE7]">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-[#EEF2F6] text-[#122654] border border-[#D3DCEE]">
                             <span className="font-bold">{m.blynt_code}</span>
-                            <span className="text-[#5B6478]">({blyntAcc?.name || 'Mapped'})</span>
+                            <span className="text-[#4A5878]">({blyntAcc?.name || 'Mapped'})</span>
                           </span>
                         ) : (
                           <span className="text-[#B8432F] font-semibold text-[11px]">Unmapped</span>
@@ -976,7 +976,7 @@ export default function TrialBalancePage() {
                           '—'
                         )}
                       </td>
-                      <td className="p-3 text-right font-mono-numbers font-bold text-[#102654]">
+                      <td className="p-3 text-right font-mono-numbers font-bold text-[#122654]">
                         <button
                           type="button"
                           onClick={() => setDrillAccount({ code: m.source_code, name: m.source_name })}
@@ -986,7 +986,7 @@ export default function TrialBalancePage() {
                           {formatPence(bal, { accountingFormat: true })}
                         </button>
                       </td>
-                      <td className="p-3 text-right font-mono-numbers text-[#5B6478]">
+                      <td className="p-3 text-right font-mono-numbers text-[#4A5878]">
                         {priorPence !== null ? (
                           <button
                             type="button"
@@ -1018,20 +1018,20 @@ export default function TrialBalancePage() {
                 })}
 
                 {/* Total Row */}
-                <tr className="bg-[#F6F7FB] font-bold border-t-2 border-[#102654]">
+                <tr className="bg-[#F5F8FD] font-bold border-t-2 border-[#122654]">
                   <td className="p-4 pl-6" colSpan={3}>
                     Total Nominal Accounts ({filteredAccounts.length})
                   </td>
-                  <td className="p-4 text-right font-mono-numbers text-[#102654]">
+                  <td className="p-4 text-right font-mono-numbers text-[#122654]">
                     {formatPence(totalTbDebits, { accountingFormat: true })}
                   </td>
-                  <td className="p-4 text-right font-mono-numbers text-[#102654]">
+                  <td className="p-4 text-right font-mono-numbers text-[#122654]">
                     {formatPence(totalTbCredits, { accountingFormat: true })}
                   </td>
                   <td className="p-4 text-right font-mono-numbers text-sm text-[#0B6B52]">
                     {formatPence(totalTbDebits - totalTbCredits, { accountingFormat: true })}
                   </td>
-                  <td className="p-4 text-right font-mono-numbers text-[#5B6478]">
+                  <td className="p-4 text-right font-mono-numbers text-[#4A5878]">
                     —
                   </td>
                   <td className="p-4 pr-6 text-right">
@@ -1050,17 +1050,17 @@ export default function TrialBalancePage() {
       <div className="blynt-card p-6">
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#E3E7EF]">
           <div>
-            <h2 className="text-base font-bold text-[#102654]">
+            <h2 className="text-base font-bold text-[#122654]">
               Adjusting Journal Entries (AJE)
             </h2>
-            <p className="text-xs text-[#5B6478] mt-0.5">
+            <p className="text-xs text-[#4A5878] mt-0.5">
               Balanced adjustment lines. Server permission rule: Approver must differ from proposer and hold reviewer role or above.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setShowProposeModal(true)}
-            className="px-3 py-1.5 bg-[#F6F7FB] border border-[#D5DBE7] hover:border-[#102654] text-[#102654] text-xs font-semibold rounded-[8px]"
+            className="px-3 py-1.5 bg-[#F5F8FD] border border-[#D3DCEE] hover:border-[#122654] text-[#122654] text-xs font-semibold rounded-[8px]"
           >
             + Propose adjustment
           </button>
@@ -1078,10 +1078,10 @@ export default function TrialBalancePage() {
             <div key={adj.id} className="py-4 flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-xs bg-[#102654] text-white px-2 py-0.5 rounded">
+                  <span className="font-mono font-bold text-xs bg-[#122654] text-white px-2 py-0.5 rounded">
                     {adj.ref}
                   </span>
-                  <span className="text-xs font-bold text-[#102654]">{adj.narrative}</span>
+                  <span className="text-xs font-bold text-[#122654]">{adj.narrative}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={adj.status === 'approved' ? 'signed_off' : 'in_progress'} label={adj.status} />
@@ -1089,7 +1089,7 @@ export default function TrialBalancePage() {
                     <button
                       type="button"
                       onClick={() => handleApproveAdjustment(adj.id)}
-                      className="px-3 py-1 bg-[#102654] text-white font-bold text-xs rounded-[8px] hover:bg-[#0B1B3D] cursor-pointer"
+                      className="px-3 py-1 bg-[#122654] text-white font-bold text-xs rounded-[8px] hover:bg-[#0B1A3B] cursor-pointer"
                     >
                       Approve (Reviewer)
                     </button>
@@ -1098,9 +1098,9 @@ export default function TrialBalancePage() {
               </div>
 
               {/* Lines */}
-              <div className="bg-[#F6F7FB] rounded-[10px] p-2.5 text-xs font-mono-numbers flex flex-col gap-1">
+              <div className="bg-[#F5F8FD] rounded-[10px] p-2.5 text-xs font-mono-numbers flex flex-col gap-1">
                 {adj.lines.map((l, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-[#5B6478]">
+                  <div key={idx} className="flex items-center justify-between text-[#4A5878]">
                     <span>Account #{l.blynt_code} ({l.narrative})</span>
                     <span>
                       {l.debit_p !== '0' ? `Dr ${formatPence(l.debit_p)}` : `Cr ${formatPence(l.credit_p)}`}
@@ -1109,7 +1109,7 @@ export default function TrialBalancePage() {
                 ))}
               </div>
 
-              <div className="text-[10px] text-[#5B6478]">
+              <div className="text-[10px] text-[#4A5878]">
                 Proposed by {adj.proposed_by_name} •{' '}
                 {adj.approved_by_name ? `Approved by ${adj.approved_by_name}` : 'Awaiting reviewer sign-off'}
               </div>
@@ -1123,13 +1123,13 @@ export default function TrialBalancePage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4"
         >
           <div className="bg-white rounded-[16px] border border-[#E3E7EF] shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
-            <h3 className="text-base font-bold text-[#102654] mb-1">
+            <h3 className="text-base font-bold text-[#122654] mb-1">
               Propose balanced adjustment
             </h3>
-            <p className="text-xs text-[#5B6478] mb-4">
+            <p className="text-xs text-[#4A5878] mb-4">
               All lines must balance strictly in integer pence before submission.
             </p>
 
@@ -1141,7 +1141,7 @@ export default function TrialBalancePage() {
 
             <form onSubmit={handleProposeAdjustment} className="flex flex-col gap-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#102654] mb-1">
+                <label className="block font-semibold text-[#122654] mb-1">
                   Adjustment narrative
                 </label>
                 <input
@@ -1150,20 +1150,20 @@ export default function TrialBalancePage() {
                   placeholder="e.g. Accrue September electricity invoice"
                   value={adjNarrative}
                   onChange={(e) => setAdjNarrative(e.target.value)}
-                  className="w-full min-h-[40px] px-3 bg-[#F6F7FB] border border-[#D5DBE7] rounded-[8px] text-[#102654] outline-none"
+                  className="w-full min-h-[40px] px-3 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
                 />
               </div>
 
               {/* Debit Line */}
-              <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] grid grid-cols-2 gap-3">
+              <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#102654] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Debit account
                   </label>
                   <select
                     value={adjDebitAccount}
                     onChange={(e) => setAdjDebitAccount(e.target.value)}
-                    className="w-full min-h-[36px] px-2 bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654]"
+                    className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654]"
                   >
                     {db.blynt_accounts.map((b) => (
                       <option key={b.code} value={b.code}>
@@ -1173,28 +1173,28 @@ export default function TrialBalancePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#102654] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Debit amount (£)
                   </label>
                   <input
                     type="text"
                     value={adjDebitAmount}
                     onChange={(e) => setAdjDebitAmount(e.target.value)}
-                    className="w-full min-h-[36px] px-2 bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654] font-mono"
+                    className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654] font-mono"
                   />
                 </div>
               </div>
 
               {/* Credit Line */}
-              <div className="p-3 bg-[#F6F7FB] rounded-[10px] border border-[#E3E7EF] grid grid-cols-2 gap-3">
+              <div className="p-3 bg-[#F5F8FD] rounded-[10px] border border-[#E3E7EF] grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#102654] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Credit account
                   </label>
                   <select
                     value={adjCreditAccount}
                     onChange={(e) => setAdjCreditAccount(e.target.value)}
-                    className="w-full min-h-[36px] px-2 bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654]"
+                    className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654]"
                   >
                     {db.blynt_accounts.map((b) => (
                       <option key={b.code} value={b.code}>
@@ -1204,14 +1204,14 @@ export default function TrialBalancePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#102654] mb-1">
+                  <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Credit amount (£)
                   </label>
                   <input
                     type="text"
                     value={adjCreditAmount}
                     onChange={(e) => setAdjCreditAmount(e.target.value)}
-                    className="w-full min-h-[36px] px-2 bg-white border border-[#D5DBE7] rounded-[8px] text-[#102654] font-mono"
+                    className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654] font-mono"
                   />
                 </div>
               </div>
@@ -1220,13 +1220,13 @@ export default function TrialBalancePage() {
                 <button
                   type="button"
                   onClick={() => setShowProposeModal(false)}
-                  className="px-4 py-2 border border-[#D5DBE7] text-xs font-semibold text-[#5B6478] rounded-[8px]"
+                  className="px-4 py-2 border border-[#D3DCEE] text-xs font-semibold text-[#4A5878] rounded-[8px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#102654] text-white text-xs font-bold rounded-[8px] hover:bg-[#0B1B3D]"
+                  className="px-5 py-2 bg-[#122654] text-white text-xs font-bold rounded-[8px] hover:bg-[#0B1A3B]"
                 >
                   Submit proposal
                 </button>
@@ -1238,22 +1238,22 @@ export default function TrialBalancePage() {
 
       {/* ENG-04 Opening Balance Check Modal */}
       {showOpeningCheckModal && (
-        <div className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] shadow-2xl max-w-3xl w-full border border-[#D5DBE7] overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+        <div className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl max-w-3xl w-full border border-[#D3DCEE] overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div>
-                <h3 className="text-base font-extrabold text-[#102654] flex items-center gap-2">
+                <h3 className="text-base font-extrabold text-[#122654] flex items-center gap-2">
                   <Scale className="w-5 h-5 text-[#B8432F]" />
                   Opening Balance Check against Ledger (ENG-04)
                 </h3>
-                <p className="text-xs text-[#5B6478] mt-0.5">
+                <p className="text-xs text-[#4A5878] mt-0.5">
                   Verifies ledger opening balances against last year&apos;s final figures so unposted adjustments in Xero/QuickBooks are caught.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowOpeningCheckModal(false)}
-                className="p-1 text-[#5B6478] hover:text-[#102654] rounded-md"
+                className="p-1 text-[#4A5878] hover:text-[#122654] rounded-md"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1262,7 +1262,7 @@ export default function TrialBalancePage() {
             <div className="p-5 overflow-y-auto space-y-4">
               <div className="border border-[#E3E7EF] rounded-[12px] overflow-hidden">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#F6F7FB] border-b border-[#E3E7EF] text-[11px] font-bold text-[#5B6478]">
+                  <thead className="bg-[#F5F8FD] border-b border-[#E3E7EF] text-[11px] font-bold text-[#4A5878]">
                     <tr>
                       <th className="p-3">Nominal Account</th>
                       <th className="p-3 text-right">Ledger Opening</th>
@@ -1276,19 +1276,19 @@ export default function TrialBalancePage() {
                     {openingDiffs.map((diff) => (
                       <tr key={diff.id} className="hover:bg-[#F9FAFC]">
                         <td className="p-3">
-                          <span className="font-mono font-bold text-[#102654] mr-1.5">{diff.accountCode}</span>
-                          <span className="text-[#102654]">{diff.accountName}</span>
+                          <span className="font-mono font-bold text-[#122654] mr-1.5">{diff.accountCode}</span>
+                          <span className="text-[#122654]">{diff.accountName}</span>
                         </td>
-                        <td className="p-3 text-right font-mono text-[#102654]">
+                        <td className="p-3 text-right font-mono text-[#122654]">
                           {formatPence(diff.ledgerOpeningPence)}
                         </td>
-                        <td className="p-3 text-right font-mono text-[#102654]">
+                        <td className="p-3 text-right font-mono text-[#122654]">
                           {formatPence(diff.priorYearFinalPence)}
                         </td>
                         <td className="p-3 text-right font-mono font-bold text-[#B8432F]">
                           {formatPence(diff.diffPence)}
                         </td>
-                        <td className="p-3 text-[11px] text-[#5B6478]">
+                        <td className="p-3 text-[11px] text-[#4A5878]">
                           {diff.likelyJournal}
                         </td>
                         <td className="p-3 text-center">
@@ -1297,7 +1297,7 @@ export default function TrialBalancePage() {
                               <button
                                 type="button"
                                 onClick={() => handlePostOpeningToLedger(diff.id)}
-                                className="px-2.5 py-1 bg-[#102654] hover:bg-[#0B1B3D] text-white text-[11px] font-bold rounded-[6px]"
+                                className="px-2.5 py-1 bg-[#122654] hover:bg-[#0B1A3B] text-white text-[11px] font-bold rounded-[6px]"
                               >
                                 Post journal to ledger
                               </button>
@@ -1307,7 +1307,7 @@ export default function TrialBalancePage() {
                                   const c = window.prompt('Enter reason for opening balance difference:');
                                   if (c) handleExplainOpeningDiff(diff.id, c);
                                 }}
-                                className="px-2.5 py-1 border border-[#D5DBE7] hover:bg-slate-50 text-[#102654] text-[11px] font-semibold rounded-[6px]"
+                                className="px-2.5 py-1 border border-[#D3DCEE] hover:bg-slate-50 text-[#122654] text-[11px] font-semibold rounded-[6px]"
                               >
                                 Mark as explained
                               </button>
@@ -1325,8 +1325,8 @@ export default function TrialBalancePage() {
                 </table>
               </div>
 
-              <div className="p-3 bg-[#F6F7FB] border border-[#E3E7EF] rounded-[10px] text-xs text-[#5B6478]">
-                <strong className="text-[#102654] block mb-1">Standard Acceptance Rule (ENG-04):</strong>
+              <div className="p-3 bg-[#F5F8FD] border border-[#E3E7EF] rounded-[10px] text-xs text-[#4A5878]">
+                <strong className="text-[#122654] block mb-1">Standard Acceptance Rule (ENG-04):</strong>
                 Any difference over £1 is flagged on the lead schedule. The file cannot be partner-approved with unexplained opening differences.
               </div>
             </div>
@@ -1335,7 +1335,7 @@ export default function TrialBalancePage() {
               <button
                 type="button"
                 onClick={() => setShowOpeningCheckModal(false)}
-                className="px-4 py-2 bg-[#102654] hover:bg-[#0B1B3D] text-white text-xs font-bold rounded-[8px]"
+                className="px-4 py-2 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[8px]"
               >
                 Close
               </button>
@@ -1347,9 +1347,9 @@ export default function TrialBalancePage() {
       {/* DAT-07 Transaction Drill-Down Side Panel */}
       {drillAccount && (
         <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex justify-end">
-          <div className="w-full max-w-2xl bg-white h-full shadow-2xl border-l border-[#D5DBE7] flex flex-col animate-in slide-in-from-right duration-200">
+          <div className="w-full max-w-2xl bg-white h-full shadow-2xl border-l border-[#D3DCEE] flex flex-col animate-in slide-in-from-right duration-200">
             {/* Panel Header */}
-            <div className="p-5 bg-[#102654] text-white flex items-center justify-between shrink-0">
+            <div className="p-5 bg-[#122654] text-white flex items-center justify-between shrink-0">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono bg-white/20 px-2 py-0.5 rounded text-xs font-bold text-white">
@@ -1386,21 +1386,21 @@ export default function TrialBalancePage() {
             </div>
 
             {/* Drill Search & Sort Bar */}
-            <div className="p-3.5 bg-[#F6F7FB] border-b border-[#E3E7EF] flex items-center justify-between gap-3 shrink-0">
+            <div className="p-3.5 bg-[#F5F8FD] border-b border-[#E3E7EF] flex items-center justify-between gap-3 shrink-0">
               <div className="relative flex-1">
-                <Search className="w-3.5 h-3.5 text-[#5B6478] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search contact, description, or amount..."
                   value={drillSearch}
                   onChange={(e) => setDrillSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#D5DBE7] rounded-lg text-[#102654] outline-none"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#D3DCEE] rounded-lg text-[#122654] outline-none"
                 />
               </div>
               <select
                 value={drillSort}
                 onChange={(e) => setDrillSort(e.target.value as any)}
-                className="text-xs bg-white border border-[#D5DBE7] rounded-lg px-2.5 py-1.5 text-[#102654] font-medium outline-none"
+                className="text-xs bg-white border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"
               >
                 <option value="date_desc">Newest date first</option>
                 <option value="date_asc">Oldest date first</option>
@@ -1419,7 +1419,7 @@ export default function TrialBalancePage() {
             {/* Transactions List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
               {accountTransactions.length === 0 ? (
-                <div className="text-center py-12 text-xs text-[#5B6478]">
+                <div className="text-center py-12 text-xs text-[#4A5878]">
                   {drillSearch
                     ? 'No transactions found matching your search.'
                     : 'No transactions for this account. They come in when the trial balance is pulled from Xero.'}
@@ -1436,15 +1436,15 @@ export default function TrialBalancePage() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-[#102654]">{tx.contact}</span>
-                            <span className="text-[10px] bg-[#EEF2F6] text-[#5B6478] px-2 py-0.5 rounded font-mono">
+                            <span className="text-xs font-bold text-[#122654]">{tx.contact}</span>
+                            <span className="text-[10px] bg-[#EEF2F6] text-[#4A5878] px-2 py-0.5 rounded font-mono">
                               {tx.date}
                             </span>
                           </div>
-                          <p className="text-xs text-[#5B6478] mt-0.5 leading-relaxed">{tx.description}</p>
+                          <p className="text-xs text-[#4A5878] mt-0.5 leading-relaxed">{tx.description}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <div className={`text-xs font-bold font-mono ${isDebit ? 'text-[#102654]' : 'text-purple-900'}`}>
+                          <div className={`text-xs font-bold font-mono ${isDebit ? 'text-[#122654]' : 'text-purple-900'}`}>
                             {formatPence(net, { accountingFormat: true })}
                           </div>
                           <div className="text-[10px] text-[#7E8DA6] font-mono">
@@ -1489,14 +1489,14 @@ export default function TrialBalancePage() {
             </div>
 
             {/* Panel Footer */}
-            <div className="p-3.5 bg-[#F6F7FB] border-t border-[#E3E7EF] flex items-center justify-between shrink-0 text-xs">
-              <span className="text-[#5B6478]">
-                Total: <strong className="text-[#102654]">{formatPence(accountTransactions.reduce((acc, t) => acc + asPence(t.amount_p), 0n))}</strong>
+            <div className="p-3.5 bg-[#F5F8FD] border-t border-[#E3E7EF] flex items-center justify-between shrink-0 text-xs">
+              <span className="text-[#4A5878]">
+                Total: <strong className="text-[#122654]">{formatPence(accountTransactions.reduce((acc, t) => acc + asPence(t.amount_p), 0n))}</strong>
               </span>
               <button
                 type="button"
                 onClick={() => setDrillAccount(null)}
-                className="px-4 py-1.5 bg-[#102654] text-white text-xs font-bold rounded-lg cursor-pointer hover:bg-[#1D4E89]"
+                className="px-4 py-1.5 bg-[#122654] text-white text-xs font-bold rounded-lg cursor-pointer hover:bg-[#1D4E89]"
               >
                 Done
               </button>
@@ -1512,7 +1512,7 @@ export default function TrialBalancePage() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2">
                 <Paperclip className="w-4 h-4 text-[#1D4E89]" />
-                <h4 className="text-sm font-bold text-[#102654]">{selectedReceipt}</h4>
+                <h4 className="text-sm font-bold text-[#122654]">{selectedReceipt}</h4>
               </div>
               <button
                 type="button"
@@ -1524,14 +1524,14 @@ export default function TrialBalancePage() {
             </div>
             <div className="py-6 flex flex-col items-center justify-center bg-slate-50 rounded-xl my-4 border border-dashed border-slate-300">
               <FileSpreadsheet className="w-12 h-12 text-[#1D4E89] mb-2" />
-              <span className="text-xs font-semibold text-[#102654]">{selectedReceipt}</span>
-              <span className="text-[11px] text-[#5B6478] mt-1">Verified attached document from ledger pull</span>
+              <span className="text-xs font-semibold text-[#122654]">{selectedReceipt}</span>
+              <span className="text-[11px] text-[#4A5878] mt-1">Verified attached document from ledger pull</span>
             </div>
             <div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => setSelectedReceipt(null)}
-                className="px-4 py-2 bg-[#102654] text-white text-xs font-bold rounded-lg"
+                className="px-4 py-2 bg-[#122654] text-white text-xs font-bold rounded-lg"
               >
                 Close Preview
               </button>
@@ -1542,31 +1542,31 @@ export default function TrialBalancePage() {
 
       {/* DAT-02 Upload TB Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] shadow-2xl max-w-2xl w-full border border-[#D5DBE7] overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+        <div className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl max-w-2xl w-full border border-[#D3DCEE] overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div>
-                <h3 className="text-base font-extrabold text-[#102654] flex items-center gap-2">
+                <h3 className="text-base font-extrabold text-[#122654] flex items-center gap-2">
                   <Upload className="w-5 h-5 text-[#1D4E89]" />
                   Upload Trial Balance (DAT-02)
                 </h3>
-                <p className="text-xs text-[#5B6478] mt-0.5">
+                <p className="text-xs text-[#4A5878] mt-0.5">
                   Upload .csv, .xlsx or .xls file with AI column detection and balancing validation.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowUploadModal(false)}
-                className="p-1 text-[#5B6478] hover:text-[#102654] rounded-md"
+                className="p-1 text-[#4A5878] hover:text-[#122654] rounded-md"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6 space-y-4 overflow-y-auto">
-              <div className="border-2 border-dashed border-[#D5DBE7] hover:border-[#1D4E89] rounded-xl p-8 text-center bg-[#F9FAFC] cursor-pointer transition-colors">
+              <div className="border-2 border-dashed border-[#D3DCEE] hover:border-[#1D4E89] rounded-xl p-8 text-center bg-[#F9FAFC] cursor-pointer transition-colors">
                 <Upload className="w-10 h-10 text-[#7E8DA6] mx-auto mb-2" />
-                <div className="text-xs font-bold text-[#102654]">
+                <div className="text-xs font-bold text-[#122654]">
                   {uploadFileName ? uploadFileName : 'Drag & drop your Trial Balance file here, or browse'}
                 </div>
                 <div className="text-[11px] text-[#7E8DA6] mt-1">Supports CSV, Excel (.xlsx, .xls) up to 50MB</div>
@@ -1584,7 +1584,7 @@ export default function TrialBalancePage() {
                 />
                 <label
                   htmlFor="tb-file-input"
-                  className="mt-3 inline-block px-4 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg cursor-pointer"
+                  className="mt-3 inline-block px-4 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-lg cursor-pointer"
                 >
                   Browse Computer
                 </label>
@@ -1599,19 +1599,19 @@ export default function TrialBalancePage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
                     <div className="bg-white p-2 rounded border border-blue-100">
                       <span className="text-gray-500 block">Code:</span>
-                      <strong className="text-[#102654]">Col A (Nominal Code)</strong>
+                      <strong className="text-[#122654]">Col A (Nominal Code)</strong>
                     </div>
                     <div className="bg-white p-2 rounded border border-blue-100">
                       <span className="text-gray-500 block">Name:</span>
-                      <strong className="text-[#102654]">Col B (Account Title)</strong>
+                      <strong className="text-[#122654]">Col B (Account Title)</strong>
                     </div>
                     <div className="bg-white p-2 rounded border border-blue-100">
                       <span className="text-gray-500 block">Debit:</span>
-                      <strong className="text-[#102654]">Col C (Debit £)</strong>
+                      <strong className="text-[#122654]">Col C (Debit £)</strong>
                     </div>
                     <div className="bg-white p-2 rounded border border-blue-100">
                       <span className="text-gray-500 block">Credit:</span>
-                      <strong className="text-[#102654]">Col D (Credit £)</strong>
+                      <strong className="text-[#122654]">Col D (Credit £)</strong>
                     </div>
                   </div>
                   <div className="pt-2 text-[11px] text-emerald-700 flex items-center gap-1.5 font-bold">
@@ -1622,11 +1622,11 @@ export default function TrialBalancePage() {
               )}
             </div>
 
-            <div className="p-4 border-t border-[#E3E7EF] flex justify-end gap-2.5 bg-[#F6F7FB]">
+            <div className="p-4 border-t border-[#E3E7EF] flex justify-end gap-2.5 bg-[#F5F8FD]">
               <button
                 type="button"
                 onClick={() => setShowUploadModal(false)}
-                className="px-4 py-2 border border-[#D5DBE7] text-xs font-semibold text-[#5B6478] rounded-[8px]"
+                className="px-4 py-2 border border-[#D3DCEE] text-xs font-semibold text-[#4A5878] rounded-[8px]"
               >
                 Cancel
               </button>
@@ -1648,7 +1648,7 @@ export default function TrialBalancePage() {
                   );
                 }}
                 disabled={!uploadFileName}
-                className="px-5 py-2 bg-[#102654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-[8px] disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-bold rounded-[8px] disabled:opacity-50 cursor-pointer"
               >
                 Import Trial Balance
               </button>
@@ -1659,10 +1659,10 @@ export default function TrialBalancePage() {
 
       {/* DAT-01 Connect Ledger Modal */}
       {showLedgerConnectModal && (
-        <div className="fixed inset-0 z-50 bg-[#0B1B3D]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] shadow-2xl max-w-md w-full border border-[#D5DBE7] overflow-hidden">
-            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
-              <h3 className="text-base font-extrabold text-[#102654] flex items-center gap-2">
+        <div className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[16px] shadow-2xl max-w-md w-full border border-[#D3DCEE] overflow-hidden">
+            <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
+              <h3 className="text-base font-extrabold text-[#122654] flex items-center gap-2">
                 <Database className="w-5 h-5 text-[#0B6B52]" />
                 Connect Cloud Ledger (DAT-01)
               </h3>
@@ -1675,7 +1675,7 @@ export default function TrialBalancePage() {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-xs text-[#5B6478]">
+              <p className="text-xs text-[#4A5878]">
                 Authenticate OAuth 2.0 connection to pull chart of accounts, monthly TB, transactions, and contacts in under 60 seconds.
               </p>
               <div className="space-y-3">
@@ -1692,7 +1692,7 @@ export default function TrialBalancePage() {
                       X
                     </div>
                     <div className="text-left">
-                      <div className="text-xs font-bold text-[#102654]">Xero Cloud Accounting</div>
+                      <div className="text-xs font-bold text-[#122654]">Xero Cloud Accounting</div>
                       <div className="text-[10px] text-emerald-700 font-semibold">Connected: Harlow &amp; Finch Fine Goods Ltd</div>
                     </div>
                   </div>
@@ -1712,7 +1712,7 @@ export default function TrialBalancePage() {
                       qb
                     </div>
                     <div className="text-left">
-                      <div className="text-xs font-bold text-[#102654]">Intuit QuickBooks Online</div>
+                      <div className="text-xs font-bold text-[#122654]">Intuit QuickBooks Online</div>
                       <div className="text-[10px] text-gray-500">Ready to authenticate</div>
                     </div>
                   </div>
@@ -1720,11 +1720,11 @@ export default function TrialBalancePage() {
                 </button>
               </div>
             </div>
-            <div className="p-4 border-t border-[#E3E7EF] flex justify-end bg-[#F6F7FB]">
+            <div className="p-4 border-t border-[#E3E7EF] flex justify-end bg-[#F5F8FD]">
               <button
                 type="button"
                 onClick={() => setShowLedgerConnectModal(false)}
-                className="px-4 py-2 border border-[#D5DBE7] text-xs font-semibold text-[#5B6478] rounded-[8px]"
+                className="px-4 py-2 border border-[#D3DCEE] text-xs font-semibold text-[#4A5878] rounded-[8px]"
               >
                 Close
               </button>

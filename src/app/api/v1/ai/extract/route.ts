@@ -11,6 +11,6 @@ export async function POST(req: Request) {
     page: 1,
     boundingBox: { x: 42, y: 78, width: 18, height: 4 },
     source_snippet: 'TOTAL INVOICE AMOUNT DUE: £2,400.00 INCL VAT',
-    notice: 'AI extraction must be verified and linked by an auditor.',
+    notice: 'AI extraction must be verified and linked by a reviewer.',
   });
 }

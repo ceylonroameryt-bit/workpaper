@@ -145,6 +145,31 @@ describe('C · trial balance import rejects bad input instead of guessing', () =
   });
 });
 
+describe('C3 · names have limits', () => {
+  it('a client needs a name, and over-long client, firm or user names are refused', async () => {
+    const { services } = await import('../lib/server/services');
+    const actor = { id: 'usr_admin', name: 'A', role: 'admin' as const };
+    const mk = (name: string) => () => services.createClient('firm_blynt_uk', actor, { name, company_no: '', company_type: 'Sole trader', year_end: '', data_source: 'csv' });
+    expect(mk('   ')).toThrow(/name/);
+    expect(mk('x'.repeat(201))).toThrow(/name/);
+    expect(mk('Fine Ltd')).not.toThrow();
+    const { POST: signup } = await import('../app/api/v1/auth/signup/route');
+    const res = await signup(new Request('http://localhost/api/v1/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fullName: 'Pat Long', workEmail: 'long@example.test', firmName: 'F'.repeat(300), role: 'partner', password: 'Quiet-Harbour-Ledger-2026!' }) }));
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('C2 · trial balance import limits', () => {
+  it('rejects absurd amounts and over-long names', async () => {
+    const { importTrialBalance } = await import('../lib/server/tb-import');
+    const actor = { id: 'usr_admin', name: 'A', role: 'admin' as const, firmId: 'firm_blynt_uk' };
+    const big = importTrialBalance(actor, 'eng_harlow_fy26', [{ code: '1', name: 'a', debit: '99999999999999', credit: '0' }, { code: '2', name: 'b', debit: '0', credit: '99999999999999' }], 'csv');
+    expect(big.status).toBe(400);
+    const long = importTrialBalance(actor, 'eng_harlow_fy26', [{ code: '1', name: 'a'.repeat(300), debit: '1', credit: '0' }, { code: '2', name: 'b', debit: '0', credit: '1' }], 'csv');
+    expect(long.status).toBe(400);
+  });
+});
+
 describe('D · change detection describes credit balances the way accountants read them', () => {
   it('share capital going from £10,500 to £10,750 credit is an increase', () => {
     db.tb_lines.push({ id: 'l1', snapshot_id: 'snap_prior', source_code: '3000', source_name: 'Share Capital', source_type: 'Equity', debit_p: '0', credit_p: '1050000' });

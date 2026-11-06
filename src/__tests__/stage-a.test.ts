@@ -207,7 +207,7 @@ describe('Step 3 · A late posting is detected on refresh', () => {
 
 describe('Step 4 · Account mapping, confidence gate and rules library', () => {
   it('a subcontract cost is cost of sales, not a suspense account ("contra" inside "Subcontract")', () => {
-    const s = getStatutoryDetails('5100', 'Direct Subcontract Wages', 'Cost of Sales');
+    const s = getStatutoryDetails('230', 'Direct Subcontract Wages', 'Cost of Sales');
     expect(s.statutory_line).toBe('Cost of sales');
     expect(s.schedule_ref).not.toBe('REC-16');
     // A real contra or suspense account still goes to REC-16
@@ -216,35 +216,35 @@ describe('Step 4 · Account mapping, confidence gate and rules library', () => {
   });
 
   it('income and expense accounts never point at REC-01, which is not a schedule', () => {
-    const pl = db.blynt_accounts.filter((a) => /^[456]/.test(a.code));
+    const pl = db.blynt_accounts.filter((a) => /^[1-5]/.test(a.code));
     expect(pl.length).toBeGreaterThan(0);
     for (const a of pl) expect(getStatutoryDetails(a.code, a.name, a.type).schedule_ref).not.toBe('REC-01');
     // P&L lines that do have a supporting schedule keep it
-    expect(getStatutoryDetails('6200', 'Staff Salaries', 'Overhead').schedule_ref).toBe('REC-05'); // payroll
-    expect(getStatutoryDetails('6900', 'Depreciation Charge for Year', 'Overhead').schedule_ref).toBe('REC-03'); // fixed assets
-    expect(getStatutoryDetails('6950', 'Loss / (Profit) on Disposal of Assets', 'Overhead').schedule_ref).toBe('REC-03');
+    expect(getStatutoryDetails('300', 'Staff Salaries', 'Overhead').schedule_ref).toBe('REC-05'); // payroll
+    expect(getStatutoryDetails('492', 'Depreciation Charge for Year', 'Overhead').schedule_ref).toBe('REC-03'); // fixed assets
+    expect(getStatutoryDetails('493', 'Loss / (Profit) on Disposal of Assets', 'Overhead').schedule_ref).toBe('REC-03');
     expect(getStatutoryDetails(null, 'Mystery balance', 'Other').schedule_ref).not.toBe('REC-01');
   });
 
   it('an expense account with "bank" in its name is not mapped to a bank account (found in Xero Demo Company)', () => {
     const fees = matchBlyntAccount('Bank Fees', 'Expense', '404')!;
     expect(fees.lead_letter).not.toBe('B');
-    expect(fees.blynt_code).toMatch(/^6/); // an overhead, not cash at bank
+    expect(fees.blynt_code).toMatch(/^4/); // an overhead, not cash at bank
     // A real bank account is still cash at bank
-    expect(matchBlyntAccount('Business Bank Account', 'Bank', '090')).toMatchObject({ blynt_code: '1010', lead_letter: 'B' });
+    expect(matchBlyntAccount('Business Bank Account', 'Bank', '090')).toMatchObject({ blynt_code: '600', lead_letter: 'B' });
   });
 
   it('a client code that clashes with the Blynt chart does not override a clear account name', () => {
-    // 1200 is Trade Debtors in the Blynt chart; the name says bank
-    const bank = matchBlyntAccount('Business Current Account', 'Bank', '1200')!;
+    // 710 is Trade receivables in the Blynt chart; the name says bank
+    const bank = matchBlyntAccount('Business Current Account', 'Bank', '710')!;
     expect(bank.lead_letter).toBe('B');
     expect(bank.confidence).toBeLessThan(90); // goes to Check, not Ready
     expect(bank.reason).toMatch(/check this/);
 
     // Name agrees with the code: full confidence
-    expect(matchBlyntAccount('Sales Ledger Control', 'Current Asset', '1200')).toMatchObject({ blynt_code: '1200', confidence: 100 });
+    expect(matchBlyntAccount('Sales Ledger Control', 'Current Asset', '710')).toMatchObject({ blynt_code: '710', confidence: 100 });
     // Name gives no clue: keep the code, but not Ready
-    expect(matchBlyntAccount('Account XJ-9', '', '1200')).toMatchObject({ blynt_code: '1200', confidence: 85 });
+    expect(matchBlyntAccount('Account XJ-9', '', '710')).toMatchObject({ blynt_code: '710', confidence: 85 });
   });
 
   const eng = 'eng_harlow_fy26';
@@ -255,9 +255,9 @@ describe('Step 4 · Account mapping, confidence gate and rules library', () => {
     db.account_mappings.push(m);
     expect(m.status).not.toBe('confirmed');
 
-    services.updateMapping(FIRM, admin, 'm1', '6000');
+    services.updateMapping(FIRM, admin, 'm1', '400');
     const next = services.buildMapping(FIRM, eng, 'm2', line, 1000n);
-    expect(next).toMatchObject({ blynt_code: '6000', status: 'confirmed', method: 'rule', gate: 'ready' });
+    expect(next).toMatchObject({ blynt_code: '400', status: 'confirmed', method: 'rule', gate: 'ready' });
 
     // The client rule does not leak to another client
     const other = services.buildMapping(FIRM, 'eng_acme_fy26', 'm3', line, 1000n);
@@ -272,7 +272,7 @@ describe('Step 4 · Account mapping, confidence gate and rules library', () => {
     expect(a.method).toBe('ai');
     expect(b.method).toBe('ai');
     services.confirmSelectedMappings(FIRM, admin, eng, ['a1']); // accepted as suggested
-    services.updateMapping(FIRM, admin, 'b1', '6000'); // edited
+    services.updateMapping(FIRM, admin, 'b1', '400'); // edited
     const acc = accuracy(FIRM, 'mapping', eng);
     expect(acc).toMatchObject({ decided: 2, accepted_unchanged: 1, edited: 1, rate: 50 });
   });
@@ -298,7 +298,7 @@ describe('Step 4 · Account mapping, confidence gate and rules library', () => {
 
   it('practice rules from a preparer wait for manager approval', () => {
     const preparer: Actor = { id: 'usr_test_preparer', name: 'P', role: 'preparer', firmId: FIRM };
-    const r = learnFromCorrection(preparer, { type: 'mapping', scope: 'practice', pattern: '*widgets*', target_value: '5000' });
+    const r = learnFromCorrection(preparer, { type: 'mapping', scope: 'practice', pattern: '*widgets*', target_value: '210' });
     expect(r.active).toBe(false);
     expect(services.buildMapping(FIRM, eng, 'w1', { code: '8888', name: 'Blue Widgets', type: 'Other' }, 1n).method).not.toBe('rule');
   });

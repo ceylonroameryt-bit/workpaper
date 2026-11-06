@@ -30,7 +30,7 @@ export const STATUS_DEFINITIONS: Record<StatusKey, StatusMeta> = {
     key: 'not_started',
     symbol: '○',
     label: 'Not started',
-    colorClass: 'text-[#5B6478]',
+    colorClass: 'text-[#4A5878]',
     bgClass: 'bg-[#F4F5F7]',
   },
   in_progress: {
@@ -58,7 +58,7 @@ export const STATUS_DEFINITIONS: Record<StatusKey, StatusMeta> = {
     key: 'prepared',
     symbol: '●',
     label: 'Prepared',
-    colorClass: 'text-[#102654]',
+    colorClass: 'text-[#122654]',
     bgClass: 'bg-[#EAF5FC]',
   },
   signed_off: {
@@ -86,7 +86,7 @@ export const STATUS_DEFINITIONS: Record<StatusKey, StatusMeta> = {
     key: 'waiting_on_client',
     symbol: '◷',
     label: 'Waiting on client',
-    colorClass: 'text-[#5B6478]',
+    colorClass: 'text-[#4A5878]',
     bgClass: 'bg-[#F4F5F7]',
   },
   ai_suggestion: {
@@ -234,11 +234,14 @@ export interface Engagement {
 export interface BlyntAccount {
   code: string;
   name: string;
-  type: 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Cost of Sales' | 'Overhead';
-  normal_balance: 'Debit' | 'Credit';
+  type: 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Cost of Sales' | 'Overhead' | 'System';
+  normal_balance: 'Debit' | 'Credit' | 'Mixed';
   lead_letter: string; // e.g. "A", "B", "C", "D", "E", "F", "K", "Q", "Z"
   is_control: boolean;
   is_system: boolean;
+  statutory_line?: string;
+  schedule_ref?: string;
+  cash_flow_category?: 'Operating activities' | 'Investing activities' | 'Financing activities' | 'Cash and cash equivalents';
   used_by_count?: number;
 }
 

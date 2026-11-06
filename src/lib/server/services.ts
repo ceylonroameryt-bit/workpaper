@@ -47,10 +47,12 @@ export const services = {
     actor: { id: string; name: string; role: UserRole },
     data: { name: string; company_no: string; company_type: any; year_end: string; data_source: any }
   ) {
+    const name = String(data.name ?? '').trim();
+    if (!name || name.length > 200) throw new ServiceError('Enter the client’s name (up to 200 characters).');
     const newClient = {
       id: `cli_${Date.now()}`,
       firm_id: firmId,
-      name: data.name,
+      name,
       company_no: data.company_no,
       company_type: data.company_type,
       year_end: data.year_end,

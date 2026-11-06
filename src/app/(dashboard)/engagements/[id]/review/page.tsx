@@ -33,10 +33,10 @@ import { getReviewNotes, engagementSummary } from '@/lib/api';
 import { ReviewNoteItem, UserProfile } from '@/lib/types';
 
 function parseAuthor(author: any) {
-  if (!author) return { name: 'Auditor', title: 'Team Member', avatar: '' };
-  if (typeof author === 'string') return { name: author, title: 'Auditor', avatar: '' };
+  if (!author) return { name: 'Team member', title: 'Team member', avatar: '' };
+  if (typeof author === 'string') return { name: author, title: 'Team member', avatar: '' };
   return {
-    name: author.name || 'Auditor',
+    name: author.name || 'Team member',
     title: author.title || author.role || 'Team Member',
     avatar: author.avatar || '',
   };
@@ -185,24 +185,24 @@ export default function ReviewNotesHubPage() {
   return (
     <div className="flex flex-col gap-6">
       {actionError && (
-        <div role="status" className="p-3 rounded-[10px] text-xs border bg-[#FFF1EE] border-[#FF7D6B]/40 text-[#A23A27]">
+        <div role="status" className="p-3 rounded-[10px] text-xs border bg-[#FFF1EE] border-[#FF7A66]/40 text-[#A23A27]">
           {actionError}
         </div>
       )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#5B6478] mb-1">
-            <Link href={`/engagements/${engagementId}`} className="hover:text-[#102654] font-medium">
+          <div className="flex items-center gap-2 text-xs text-[#4A5878] mb-1">
+            <Link href={`/engagements/${engagementId}`} className="hover:text-[#122654] font-medium">
               {engagementSummary(engagementId).clientName}
             </Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-[#102654] font-semibold">Review &amp; Completion (REV)</span>
+            <span className="text-[#122654] font-semibold">Review &amp; Completion (REV)</span>
           </div>
-          <h1 className="text-[28px] font-semibold text-[#102654] tracking-tight">
+          <h1 className="text-[28px] font-semibold text-[#122654] tracking-tight">
             Review, Tasks &amp; Partner Completion
           </h1>
-          <p className="text-sm text-[#5B6478] mt-0.5">
+          <p className="text-sm text-[#4A5878] mt-0.5">
             {openCount > 0
               ? `! ${openCount} open review notes currently block partner sign-off (REV-03).`
               : '✓ All review points cleared. File ready for partner completion checklist (REV-05).'}
@@ -210,14 +210,14 @@ export default function ReviewNotesHubPage() {
         </div>
 
         {/* View Mode Switcher */}
-        <div className="flex items-center gap-2 bg-[#F6F7FB] p-1 rounded-xl border border-[#D5DBE7]">
+        <div className="flex items-center gap-2 bg-[#F5F8FD] p-1 rounded-xl border border-[#D3DCEE]">
           <button
             type="button"
             onClick={() => setReviewMode('points')}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
               reviewMode === 'points'
-                ? 'bg-white text-[#102654] shadow-xs'
-                : 'text-[#5B6478] hover:text-[#102654]'
+                ? 'bg-white text-[#122654] shadow-xs'
+                : 'text-[#4A5878] hover:text-[#122654]'
             }`}
           >
             Review Points &amp; Mentions ({openCount})
@@ -227,8 +227,8 @@ export default function ReviewNotesHubPage() {
             onClick={() => setReviewMode('completion')}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
               reviewMode === 'completion'
-                ? 'bg-[#102654] text-white shadow-xs'
-                : 'text-[#5B6478] hover:text-[#102654]'
+                ? 'bg-[#122654] text-white shadow-xs'
+                : 'text-[#4A5878] hover:text-[#122654]'
             }`}
           >
             File Completion &amp; Lock (REV-05)
@@ -241,8 +241,8 @@ export default function ReviewNotesHubPage() {
         <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-6 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E3E7EF] pb-4">
             <div>
-              <h2 className="text-base font-bold text-[#102654]">Partner Completion Checklist (REV-05)</h2>
-              <p className="text-xs text-[#5B6478]">
+              <h2 className="text-base font-bold text-[#122654]">Partner Completion Checklist (REV-05)</h2>
+              <p className="text-xs text-[#4A5878]">
                 All conditions must pass before partner final approval locks the file (ENG-06).
               </p>
             </div>
@@ -275,7 +275,7 @@ export default function ReviewNotesHubPage() {
 
           {/* Condition Cards */}
           <div className="space-y-3">
-            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div className="flex items-center gap-3">
                 {openCount === 0 ? (
                   <CheckCircle2 className="w-5 h-5 text-emerald-600" />
@@ -283,8 +283,8 @@ export default function ReviewNotesHubPage() {
                   <AlertCircle className="w-5 h-5 text-red-600" />
                 )}
                 <div>
-                  <div className="text-xs font-bold text-[#102654]">1. Open Review Points &amp; Queries</div>
-                  <div className="text-[11px] text-[#5B6478]">
+                  <div className="text-xs font-bold text-[#122654]">1. Open Review Points &amp; Queries</div>
+                  <div className="text-[11px] text-[#4A5878]">
                     {openCount === 0 ? 'All review points have been answered and cleared.' : `${openCount} open review points must be resolved first.`}
                   </div>
                 </div>
@@ -294,12 +294,12 @@ export default function ReviewNotesHubPage() {
               </span>
             </div>
 
-            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <div>
-                  <div className="text-xs font-bold text-[#102654]">2. Standard Completeness &amp; Disclosure Checklist</div>
-                  <div className="text-[11px] text-[#5B6478]">
+                  <div className="text-xs font-bold text-[#122654]">2. Standard Completeness &amp; Disclosure Checklist</div>
+                  <div className="text-[11px] text-[#4A5878]">
                     100% of mandatory disclosure checklist items completed under FRS 102 1A (STD-03).
                   </div>
                 </div>
@@ -307,12 +307,12 @@ export default function ReviewNotesHubPage() {
               <span className="text-xs font-bold font-mono text-emerald-700">Passed ✓</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <div>
-                  <div className="text-xs font-bold text-[#102654]">3. Control Account Schedules Reconciled</div>
-                  <div className="text-[11px] text-[#5B6478]">
+                  <div className="text-xs font-bold text-[#122654]">3. Control Account Schedules Reconciled</div>
+                  <div className="text-[11px] text-[#4A5878]">
                     All applicable balance sheet schedules agree to the trial balance within £1 tolerance.
                   </div>
                 </div>
@@ -320,12 +320,12 @@ export default function ReviewNotesHubPage() {
               <span className="text-xs font-bold font-mono text-emerald-700">Passed ✓</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <div>
-                  <div className="text-xs font-bold text-[#102654]">4. Opening Balances Agreement Check (ENG-04)</div>
-                  <div className="text-[11px] text-[#5B6478]">
+                  <div className="text-xs font-bold text-[#122654]">4. Opening Balances Agreement Check (ENG-04)</div>
+                  <div className="text-[11px] text-[#4A5878]">
                     Opening balances match prior period closing balances to the penny.
                   </div>
                 </div>
@@ -333,12 +333,12 @@ export default function ReviewNotesHubPage() {
               <span className="text-xs font-bold font-mono text-emerald-700">Passed ✓</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F6F7FB]">
+            <div className="p-4 rounded-xl border border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <div>
-                  <div className="text-xs font-bold text-[#102654]">5. Suspense and Clearing Accounts Must Be Zero (REC-16)</div>
-                  <div className="text-[11px] text-[#5B6478]">
+                  <div className="text-xs font-bold text-[#122654]">5. Suspense and Clearing Accounts Must Be Zero (REC-16)</div>
+                  <div className="text-[11px] text-[#4A5878]">
                     All suspense, clearing, and wages control accounts are nil.
                   </div>
                 </div>
@@ -349,10 +349,10 @@ export default function ReviewNotesHubPage() {
 
           {/* Unlock Modal in Completion View */}
           {showUnlockModal && (
-            <div className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4">
               <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-[#E3E7EF]">
-                <h3 className="text-base font-bold text-[#102654] mb-2">Unlock Period (ENG-06)</h3>
-                <p className="text-xs text-[#5B6478] mb-4">
+                <h3 className="text-base font-bold text-[#122654] mb-2">Unlock Period (ENG-06)</h3>
+                <p className="text-xs text-[#4A5878] mb-4">
                   Unlocking requires partner role and resets approval stamps. Enter reason:
                 </p>
                 <textarea
@@ -366,7 +366,7 @@ export default function ReviewNotesHubPage() {
                   <button
                     type="button"
                     onClick={() => setShowUnlockModal(false)}
-                    className="px-3 py-1.5 text-xs text-[#5B6478]"
+                    className="px-3 py-1.5 text-xs text-[#4A5878]"
                   >
                     Cancel
                   </button>
@@ -398,20 +398,20 @@ export default function ReviewNotesHubPage() {
             />
 
             <div className="relative flex items-center w-full">
-              <Search className="w-4 h-4 text-[#5B6478] absolute left-3 pointer-events-none" />
+              <Search className="w-4 h-4 text-[#4A5878] absolute left-3 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search notes by ref, title, text..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full min-h-[44px] pl-9 pr-3 text-xs bg-[#F6F7FB] border border-[#D5DBE7] rounded-[10px] text-[#102654] placeholder:text-[#5B6478] focus-visible:outline-2 focus-visible:outline-[#FF7D6B] focus-visible:outline-offset-2"
+                className="w-full min-h-[44px] pl-9 pr-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] placeholder:text-[#4A5878] focus-visible:outline-2 focus-visible:outline-[#FF7A66] focus-visible:outline-offset-2"
               />
             </div>
           </div>
 
           <div className="divide-y divide-[#E3E7EF] overflow-y-auto max-h-[640px]">
             {filteredNotes.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#5B6478]">
+              <div className="p-8 text-center text-xs text-[#4A5878]">
                 No review notes matching your selection.
               </div>
             ) : (
@@ -425,26 +425,26 @@ export default function ReviewNotesHubPage() {
                     onClick={() => setSelectedNoteId(note.id)}
                     className={`p-4 transition-colors cursor-pointer flex flex-col gap-2 ${
                       isSelected
-                        ? 'bg-[#FFF1EE]/40 border-l-4 border-l-[#FF7D6B]'
-                        : 'hover:bg-[#F6F7FB]'
+                        ? 'bg-[#FFF1EE]/40 border-l-4 border-l-[#FF7A66]'
+                        : 'hover:bg-[#F5F8FD]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-[#102654] bg-[#EAF5FC] px-2 py-0.5 rounded">
+                      <span className="font-mono text-xs font-bold text-[#122654] bg-[#EAF5FC] px-2 py-0.5 rounded">
                         {note.workpaperRef}
                       </span>
                       <StatusPill status={note.status} size="sm" />
                     </div>
 
-                    <div className="text-xs font-semibold text-[#102654]">
+                    <div className="text-xs font-semibold text-[#122654]">
                       {note.workpaperTitle || note.workpaperName}
                     </div>
 
-                    <p className="text-xs text-[#5B6478] line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-[#4A5878] line-clamp-2 leading-relaxed">
                       {note.content || note.text}
                     </p>
 
-                    <div className="flex items-center justify-between text-[11px] text-[#5B6478] pt-1">
+                    <div className="flex items-center justify-between text-[11px] text-[#4A5878] pt-1">
                       <div className="flex items-center gap-1.5">
                         <Avatar name={authorInfo.name} size="sm" />
                         <span>{authorInfo.name}</span>
@@ -465,17 +465,17 @@ export default function ReviewNotesHubPage() {
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-[#E3E7EF]">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-sm font-bold text-[#102654] px-2.5 py-0.5 rounded bg-[#EAF5FC]">
+                  <span className="font-mono text-sm font-bold text-[#122654] px-2.5 py-0.5 rounded bg-[#EAF5FC]">
                     {selectedNote.workpaperRef}
                   </span>
                   <StatusPill status={selectedNote.status} />
                 </div>
-                <h2 className="text-lg font-semibold text-[#102654]">
+                <h2 className="text-lg font-semibold text-[#122654]">
                   {selectedNote.workpaperTitle || selectedNote.workpaperName}
                 </h2>
                 {selectedNote.cellRef && (
-                  <div className="text-xs text-[#5B6478] mt-0.5 font-mono">
-                    Anchor Target: cell <span className="font-semibold text-[#102654]">{selectedNote.cellRef}</span>
+                  <div className="text-xs text-[#4A5878] mt-0.5 font-mono">
+                    Anchor Target: cell <span className="font-semibold text-[#122654]">{selectedNote.cellRef}</span>
                   </div>
                 )}
               </div>
@@ -494,27 +494,27 @@ export default function ReviewNotesHubPage() {
             {(() => {
               const origAuthor = parseAuthor(selectedNote.author);
               return (
-                <div className="p-4 rounded-[12px] bg-[#F6F7FB] border border-[#E3E7EF] flex flex-col gap-2.5">
+                <div className="p-4 rounded-[12px] bg-[#F5F8FD] border border-[#E3E7EF] flex flex-col gap-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Avatar name={origAuthor.name} avatarUrl={origAuthor.avatar} size="sm" />
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-semibold text-[#102654]">
+                          <span className="text-xs font-semibold text-[#122654]">
                             {origAuthor.name}
                           </span>
                         </div>
-                        <div className="text-[11px] text-[#5B6478]">
+                        <div className="text-[11px] text-[#4A5878]">
                           {origAuthor.title}
                         </div>
                       </div>
                     </div>
-                    <span className="text-xs font-mono text-[#5B6478]">
+                    <span className="text-xs font-mono text-[#4A5878]">
                       {selectedNote.createdAt}
                     </span>
                   </div>
 
-                  <p className="text-xs text-[#102654] leading-relaxed mt-1">
+                  <p className="text-xs text-[#122654] leading-relaxed mt-1">
                     {selectedNote.content || selectedNote.text}
                   </p>
                 </div>
@@ -523,12 +523,12 @@ export default function ReviewNotesHubPage() {
 
             {/* Thread Replies */}
             <div className="flex flex-col gap-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#5B6478]">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#4A5878]">
                 Responses ({(selectedNote.replies || []).length})
               </span>
 
               {(selectedNote.replies || []).length === 0 ? (
-                <div className="p-4 rounded-[10px] bg-[#F6F7FB] text-xs text-[#5B6478] text-center border border-dashed border-[#D5DBE7]">
+                <div className="p-4 rounded-[10px] bg-[#F5F8FD] text-xs text-[#4A5878] text-center border border-dashed border-[#D3DCEE]">
                   No replies yet. Awaiting response.
                 </div>
               ) : (
@@ -543,7 +543,7 @@ export default function ReviewNotesHubPage() {
                         <div className="flex items-center gap-2">
                           <Avatar name={replyAuthor.name} avatarUrl={replyAuthor.avatar} size="sm" />
                           <div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#102654]">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#122654]">
                               <span>{replyAuthor.name}</span>
                             </div>
                             <div className="text-[10px] text-[#5B6676]">
@@ -551,11 +551,11 @@ export default function ReviewNotesHubPage() {
                             </div>
                           </div>
                         </div>
-                        <span className="text-[11px] font-mono text-[#5B6478]">
+                        <span className="text-[11px] font-mono text-[#4A5878]">
                           {reply.createdAt}
                         </span>
                       </div>
-                      <p className="text-xs text-[#102654] leading-relaxed">
+                      <p className="text-xs text-[#122654] leading-relaxed">
                         {reply.content || reply.text}
                       </p>
                     </div>
@@ -566,8 +566,8 @@ export default function ReviewNotesHubPage() {
 
             {/* Reply Box and Action Buttons */}
             <div className="pt-3 border-t border-[#E3E7EF] flex flex-col gap-3">
-              <label htmlFor="review-reply-input" className="text-xs font-semibold uppercase tracking-wider text-[#5B6478]">
-                Post Auditor Response
+              <label htmlFor="review-reply-input" className="text-xs font-semibold uppercase tracking-wider text-[#4A5878]">
+                Post response
               </label>
               <textarea
                 id="review-reply-input"
@@ -575,7 +575,7 @@ export default function ReviewNotesHubPage() {
                 value={replyInput}
                 onChange={(e) => setReplyInput(e.target.value)}
                 placeholder="Provide explanation, reference attached vouching support, or propose next steps..."
-                className="w-full p-3 text-xs border border-[#D5DBE7] rounded-[10px] bg-white text-[#102654] focus-visible:outline-2 focus-visible:outline-[#FF7D6B] focus-visible:outline-offset-2"
+                className="w-full p-3 text-xs border border-[#D3DCEE] rounded-[10px] bg-white text-[#122654] focus-visible:outline-2 focus-visible:outline-[#FF7A66] focus-visible:outline-offset-2"
               />
 
               <div className="flex items-center justify-between">

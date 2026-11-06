@@ -174,14 +174,15 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
       anchors.push({ id: m.id, label: `${m.type === 'addition' ? 'Addition' : 'Disposal'} · ${m.item || 'item'}` });
     }
     Object.assign(totals, { cost, dep, nbv: cost - dep, charge, expected, pl });
-    const lead = (prefix: string) => {
-      const l = leads.find((x) => x.code === prefix);
-      return l && l.mapped ? l.final : null;
+    const sumLeads = (codes: string[]) => {
+      const ls = leads.filter((x) => codes.includes(x.code) && x.mapped);
+      return ls.length ? ls.reduce((acc, x) => acc + x.final, 0n) : null;
     };
-    checks.push(tie('cost_tb', 'Closing cost agrees to trial balance', cost, lead('15'), 'TB 1500'));
-    const depTb = lead('17');
-    checks.push(tie('dep_tb', 'Closing depreciation agrees to trial balance', dep, depTb === null ? null : -depTb, 'TB 1700'));
-    checks.push(tie('charge_tb', 'Charge agrees to trial balance', charge, lead('6900'), 'TB 6900'));
+    const costTb = sumLeads(['650', '660', '670', '680', '690']);
+    checks.push(tie('cost_tb', 'Closing cost agrees to trial balance', cost, costTb, 'TB 650-690 cost'));
+    const depTb = sumLeads(['651', '661', '671', '681', '691', '696']);
+    checks.push(tie('dep_tb', 'Closing depreciation agrees to trial balance', dep, depTb === null ? null : -depTb, 'TB 651-696 depreciation'));
+    checks.push(tie('charge_tb', 'Charge agrees to trial balance', charge, sumLeads(['492']), 'TB 492'));
     checks.push({
       id: 'proof',
       label: 'Proof in total of depreciation',
@@ -189,9 +190,9 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
       passed: (charge - expected <= 100n && expected - charge <= 100n),
     });
     const disposals = movements.filter((m) => m.type === 'disposal');
-    if (disposals.length || lead('6950') !== null) {
-      const plTb = lead('6950');
-      checks.push(tie('pl_tb', 'Disposal loss or profit agrees to trial balance', -pl, plTb, 'TB 6950'));
+    if (disposals.length || sumLeads(['493']) !== null) {
+      const plTb = sumLeads(['493']);
+      checks.push(tie('pl_tb', 'Disposal loss or profit agrees to trial balance', -pl, plTb, 'TB 493'));
     }
     const unvouched = movements.filter(
       (m) => (m.type === 'disposal' || asPence(m.cost_p) > 100000n) && linkedFiles(wp.id, m.id).length === 0
@@ -265,7 +266,7 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
     totals.liability = calculatedLiability;
     totals.difference = calculatedLiability - (tbShown ?? 0n);
 
-    checks.push(tie('vat_tb', 'Calculated VAT liability agrees to VAT control account', calculatedLiability, tbShown, 'VAT control (TB 2200)'));
+    checks.push(tie('vat_tb', 'Calculated VAT liability agrees to VAT control account', calculatedLiability, tbShown, 'VAT control (TB 780)'));
     const unmatched = returns.filter((r) => !r.matched && asPence(r.paid_amount_p ?? '0') > 0n);
     checks.push({
       id: 'vat_payments_matched',
@@ -356,7 +357,7 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
     totals.lease_liability = totalLiability;
     totals.difference = totalLiability - (tbShown ?? 0n);
 
-    checks.push(tie('lease_tb', 'Lease liability agrees to trial balance', totalLiability, tbShown, 'Lease liabilities (TB 2310/2320)'));
+    checks.push(tie('lease_tb', 'Lease liability agrees to trial balance', totalLiability, tbShown, 'Lease liabilities (TB 820)'));
     checks.push({
       id: 'commitments_split',
       label: 'Commitments maturity split completed',
@@ -396,7 +397,7 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
     totals.s455_tax = totalS455;
     totals.difference = netDla - (tbShown ?? 0n);
 
-    checks.push(tie('dla_tb', "Directors' loan balance agrees to trial balance", netDla, tbShown, 'DLA (TB 2100)'));
+    checks.push(tie('dla_tb', "Directors' loan balance agrees to trial balance", netDla, tbShown, 'DLA (TB 798)'));
     checks.push({
       id: 'dla_overdrawn_check',
       label: "s455 tax check on overdrawn loan accounts",
@@ -427,7 +428,7 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
     anchors.push({ id: 'principal', label: `${data.lender || 'Loan'} · Principal` });
     anchors.push({ id: 'maturity', label: `${data.lender || 'Loan'} · Maturity Split` });
 
-    checks.push(tie('loan_tb', 'Loan principal agrees to trial balance', principal, tbShown, 'Bank loans (TB 2300)'));
+    checks.push(tie('loan_tb', 'Loan principal agrees to trial balance', principal, tbShown, 'Bank loans (TB 799/800)'));
     checks.push({
       id: 'loan_maturity_tie',
       label: 'Maturity analysis agrees to total principal',

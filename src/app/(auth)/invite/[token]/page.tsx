@@ -61,8 +61,8 @@ export default function AcceptInvitePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F6F7FB] text-[#102654] p-4">
-      <div className="w-full max-w-[440px] bg-white border border-[#D5DBE7] rounded-[14px] p-8 shadow-sm">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F8FD] text-[#122654] p-4">
+      <div className="w-full max-w-[440px] bg-white border border-[#D3DCEE] rounded-[14px] p-8 shadow-sm">
         <div className="mb-8">
           <BlyntLogo variant="full" theme="light" size="md" />
         </div>
@@ -70,7 +70,7 @@ export default function AcceptInvitePage() {
         {done ? (
           <>
             <h1 className="text-xl font-bold mb-2">Your account is ready</h1>
-            <p className="text-sm text-[#5B6478] mb-6">
+            <p className="text-sm text-[#4A5878] mb-6">
               Sign in with {info?.email}. You will be asked to set up two-factor sign-in with an authenticator app.
             </p>
             <Link href="/login">
@@ -81,7 +81,7 @@ export default function AcceptInvitePage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <h1 className="text-xl font-bold mb-1">Join {info.firm_name || 'your practice'}</h1>
-              <p className="text-sm text-[#5B6478]">
+              <p className="text-sm text-[#4A5878]">
                 {info.name}, you have been invited as <strong className="capitalize">{info.role}</strong> ({info.email}). Choose a password to finish.
               </p>
             </div>
@@ -92,7 +92,7 @@ export default function AcceptInvitePage() {
             <Field label="Confirm password" htmlFor="inv-confirm">
               <Input id="inv-confirm" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
             </Field>
-            <div className="flex items-center gap-2 text-xs text-[#5B6478]">
+            <div className="flex items-center gap-2 text-xs text-[#4A5878]">
               <ShieldCheck className="w-4 h-4 text-[#0B6B4D]" />
               <span>Two-factor sign-in is required for every user.</span>
             </div>
@@ -102,7 +102,7 @@ export default function AcceptInvitePage() {
           </form>
         ) : (
           <div className="text-sm">
-            {error ? <p className="text-[#9A4A00]">{error}</p> : <p className="text-[#5B6478]">Checking your invitation...</p>}
+            {error ? <p className="text-[#9A4A00]">{error}</p> : <p className="text-[#4A5878]">Checking your invitation...</p>}
           </div>
         )}
       </div>

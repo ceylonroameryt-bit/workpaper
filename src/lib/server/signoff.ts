@@ -31,6 +31,7 @@ function paperFor(actor: Actor, wpId: string) {
   const eng = wp && db.engagements.find((e) => e.id === wp.engagement_id && e.firm_id === actor.firmId);
   if (!wp || !eng) throw new ServiceError('Workpaper not found', 404, 'NOT_FOUND');
   if (eng.status === 'locked') throw new ServiceError('This engagement is locked. Unlock it before signing.', 409, 'LOCKED');
+  if (db.clients.find((c) => c.id === eng.client_id)?.archived_at) throw new ServiceError('This client is archived. Restore it before signing.', 409, 'ARCHIVED');
   return { wp, eng };
 }
 

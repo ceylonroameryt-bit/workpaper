@@ -79,24 +79,24 @@ export default function MappingListsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#5B6478] mb-1">
+          <div className="flex items-center gap-2 text-xs text-[#4A5878] mb-1">
             <Link href="/" className="hover:text-[#B8432F]">Blynt</Link>
             <span>/</span>
             <span>Library</span>
             <span>/</span>
-            <span className="text-[#102654] font-semibold">Mapping lists</span>
+            <span className="text-[#122654] font-semibold">Mapping lists</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
             Mapping lists per company type
           </h1>
-          <p className="text-xs text-[#5B6478] mt-0.5">
+          <p className="text-xs text-[#4A5878] mt-0.5">
             Standard chart mapping rules applied automatically when importing trial balances from Xero, QuickBooks, or CSV.
           </p>
         </div>
 
         <Link
           href="/library/chart-of-accounts"
-          className="min-h-[44px] px-4 py-2 bg-[#102654] text-white text-xs font-bold rounded-[10px] flex items-center gap-2 hover:bg-[#0B1B3D]"
+          className="min-h-[44px] px-4 py-2 bg-[#122654] text-white text-xs font-bold rounded-[10px] flex items-center gap-2 hover:bg-[#0B1A3B]"
         >
           <BookOpen className="w-4 h-4" />
           <span>View Blynt chart of accounts</span>
@@ -108,7 +108,7 @@ export default function MappingListsPage() {
         {mappingPacks.map((pack) => (
           <div
             key={pack.companyType}
-            className="blynt-card p-5 flex flex-col justify-between hover:border-[#102654]/40 hover:shadow-sm transition-all"
+            className="blynt-card p-5 flex flex-col justify-between hover:border-[#122654]/40 hover:shadow-sm transition-all"
           >
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -119,18 +119,18 @@ export default function MappingListsPage() {
                   ✓ {pack.status}
                 </span>
               </div>
-              <h3 className="font-bold text-sm text-[#102654] mb-1">
+              <h3 className="font-bold text-sm text-[#122654] mb-1">
                 {pack.companyType}
               </h3>
-              <p className="text-xs text-[#5B6478]">
+              <p className="text-xs text-[#4A5878]">
                 {pack.matchCoverage} on standard default charts
               </p>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-[#E3E7EF] flex items-center justify-between text-xs text-[#5B6478]">
+            <div className="mt-5 pt-3 border-t border-[#E3E7EF] flex items-center justify-between text-xs text-[#4A5878]">
               <div className="font-mono-numbers">
-                <span className="font-bold text-[#102654]">{pack.ruleCount}</span> rules •{' '}
-                <span className="font-bold text-[#102654]">{pack.clientsUsing}</span> clients
+                <span className="font-bold text-[#122654]">{pack.ruleCount}</span> rules •{' '}
+                <span className="font-bold text-[#122654]">{pack.clientsUsing}</span> clients
               </div>
               <button
                 type="button"

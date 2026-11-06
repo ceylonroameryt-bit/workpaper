@@ -42,6 +42,7 @@ export function updateStaff(actor: Actor, userId: string, d: { name?: unknown; r
   const m = db.memberships.find((x) => x.user_id === userId && x.firm_id === actor.firmId);
   const user = db.users.find((u) => u.id === userId);
   if (!m || !user) throw new ServiceError('User not found', 404, 'NOT_FOUND');
+  if (d.role !== undefined && !ROLES.includes(d.role as UserRole)) throw new ServiceError('Choose a role.');
   if (userId === actor.id && ((d.role !== undefined && d.role !== m.role) || d.status === 'deactivated')) {
     throw new ServiceError('You can’t change your own role or deactivate yourself.', 409, 'SELF');
   }

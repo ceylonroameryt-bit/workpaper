@@ -136,14 +136,18 @@ describe('role rules on save', () => {
 
 
 describe('session secret', () => {
-  it('a production server refuses to run without AUTH_SECRET', async () => {
+  it('a production server never signs sessions with the key in the code', async () => {
     const { secret } = await import('../lib/server/auth');
     const env = process.env as Record<string, string | undefined>;
     const [node, auth] = [env.NODE_ENV, env.AUTH_SECRET];
     try {
       env.NODE_ENV = 'production';
       delete env.AUTH_SECRET;
-      expect(() => secret()).toThrow(/AUTH_SECRET/);
+      // Nothing configured: a random key made at start-up, never the one in the code
+      const own = secret();
+      expect(own.length).toBeGreaterThanOrEqual(32);
+      expect(own).not.toContain('blynt-dev-only');
+      expect(secret()).toBe(own);
       env.AUTH_SECRET = 'x'.repeat(40);
       expect(secret()).toBe('x'.repeat(40));
       // No usable AUTH_SECRET (missing or too short) but a database URL: a stable key derived from it
@@ -183,6 +187,24 @@ describe('seeded demo passwords on a live server', () => {
       ensureCredentials();
       expect(db.credentials.map((c) => c.user_id)).toEqual(['usr_test_preparer']); // demo password gone, real one kept
       expect(verifyPassword('A-Real-Password-2026!', db.credentials[0].password_hash)).toBe(true);
+    } finally {
+      env.NODE_ENV = node;
+    }
+  });
+});
+
+describe('a live workspace starts empty', () => {
+  it('production has the chart of accounts but no demo practice, users or clients', async () => {
+    const { db } = await import('../lib/server/db');
+    const env = process.env as Record<string, string | undefined>;
+    const node = env.NODE_ENV;
+    try {
+      env.NODE_ENV = 'production';
+      const fresh = new (db.constructor as new () => typeof db)();
+      expect(fresh.firms).toHaveLength(0);
+      expect(fresh.users).toHaveLength(0);
+      expect(fresh.clients).toHaveLength(0);
+      expect(fresh.blynt_accounts.length).toBeGreaterThan(0);
     } finally {
       env.NODE_ENV = node;
     }

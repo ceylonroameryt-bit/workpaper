@@ -77,7 +77,7 @@ export const PeriodSelector: React.FC = () => {
           onClick={() => setOpen(!open)}
           aria-expanded={open}
           aria-label="Choose period"
-          className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-[#F6F7FB] border border-[#D5DBE7] hover:border-[#102654]/40 rounded-[10px] text-xs font-medium text-[#102654] transition-all cursor-pointer shadow-2xs"
+          className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-[#F5F8FD] border border-[#D3DCEE] hover:border-[#122654]/40 rounded-[10px] text-xs font-medium text-[#122654] transition-all cursor-pointer shadow-2xs"
         >
           <Calendar className="w-3.5 h-3.5 text-[#1D4E89]" />
           <span className="font-semibold truncate max-w-[170px] sm:max-w-xs">{activeEngagement ? periodLabel(activeEngagement) : 'No period yet'}</span>
@@ -87,13 +87,13 @@ export const PeriodSelector: React.FC = () => {
               Locked
             </span>
           )}
-          <ChevronDown className={`w-3 h-3 text-[#5B6478] transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-3 h-3 text-[#4A5878] transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
 
         {open && (
           <div className="absolute left-0 mt-2 w-80 sm:w-96 bg-white border border-[#E3E7EF] rounded-[16px] shadow-2xl p-4 z-50">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
-              <span className="flex items-center gap-2 text-xs font-bold text-[#102654]">
+              <span className="flex items-center gap-2 text-xs font-bold text-[#122654]">
                 <Calendar className="w-4 h-4 text-[#1D4E89]" /> {activeCompany?.name ?? 'Periods'}
               </span>
               {isLocked && (
@@ -113,11 +113,11 @@ export const PeriodSelector: React.FC = () => {
                       role="option"
                       aria-selected={on}
                       onClick={() => choose(e.id)}
-                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-left cursor-pointer ${on ? 'bg-[#EEF3FD]' : 'hover:bg-[#F6F7FB]'}`}
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-left cursor-pointer ${on ? 'bg-[#EEF2F9]' : 'hover:bg-[#F5F8FD]'}`}
                     >
                       <span>
-                        <span className="block text-xs font-semibold text-[#102654]">{periodLabel(e)}</span>
-                        <span className="block text-[11px] text-[#5B6478]">
+                        <span className="block text-xs font-semibold text-[#122654]">{periodLabel(e)}</span>
+                        <span className="block text-[11px] text-[#4A5878]">
                           {e.period_start} to {e.period_end} · {e.status === 'locked' ? 'Locked' : e.status}
                         </span>
                       </span>
@@ -126,7 +126,7 @@ export const PeriodSelector: React.FC = () => {
                   </li>
                 );
               })}
-              {!periods.length && <li className="px-2.5 py-2 text-xs text-[#5B6478]">No engagements for this client yet.</li>}
+              {!periods.length && <li className="px-2.5 py-2 text-xs text-[#4A5878]">No engagements for this client yet.</li>}
             </ul>
 
             <div className="mt-2 pt-3 border-t border-[#E3E7EF]">
@@ -147,17 +147,17 @@ export const PeriodSelector: React.FC = () => {
 
       {/* Unlock Confirmation Modal (ENG-06) */}
       {showUnlockModal && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-[#0B1B3D]/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white border border-[#E3E7EF] rounded-[20px] shadow-2xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 text-[#B8432F] mb-3">
               <AlertCircle className="w-6 h-6 shrink-0" />
-              <h3 className="text-base font-bold text-[#102654]">Unlock Engagement Period</h3>
+              <h3 className="text-base font-bold text-[#122654]">Unlock Engagement Period</h3>
             </div>
-            <p className="text-xs text-[#5B6478] leading-relaxed mb-4">
-              Unlocking resets the partner approval. Only a partner or admin can unlock, and the reason is kept in the audit trail (ENG-06).
+            <p className="text-xs text-[#4A5878] leading-relaxed mb-4">
+              Unlocking resets the partner approval. Only a partner or admin can unlock, and the reason is kept in the activity log (ENG-06).
             </p>
             <div className="mb-4">
-              <label htmlFor="unlock-reason" className="block text-xs font-semibold text-[#102654] mb-1">
+              <label htmlFor="unlock-reason" className="block text-xs font-semibold text-[#122654] mb-1">
                 Reason for unlocking (min. 10 characters) <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -166,7 +166,7 @@ export const PeriodSelector: React.FC = () => {
                 onChange={(e) => setUnlockReason(e.target.value)}
                 placeholder="e.g. Client provided revised stock take certificate post-completion."
                 rows={3}
-                className="w-full text-xs p-2.5 border border-[#D5DBE7] rounded-lg focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#102654]"
+                className="w-full text-xs p-2.5 border border-[#D3DCEE] rounded-lg focus:ring-1 focus:ring-[#1D4E89] outline-none text-[#122654]"
               />
               {unlockError && <p role="alert" className="text-red-600 text-[11px] mt-1">{unlockError}</p>}
             </div>
@@ -178,7 +178,7 @@ export const PeriodSelector: React.FC = () => {
                   setUnlockReason('');
                   setUnlockError('');
                 }}
-                className="px-3.5 py-2 text-xs text-[#5B6478] hover:text-[#102654] font-medium"
+                className="px-3.5 py-2 text-xs text-[#4A5878] hover:text-[#122654] font-medium"
               >
                 Cancel
               </button>

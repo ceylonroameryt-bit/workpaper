@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
                 Workpapers
               </span>
               <span className="text-[10px] uppercase font-bold tracking-wider text-[#5B6676]">
-                Audit Platform
+                Working Papers
               </span>
             </div>
           </Link>
@@ -85,7 +85,7 @@ export default function ResetPasswordPage() {
                   Set new password
                 </h1>
                 <p className="text-sm text-[#5B6676] mt-2 mb-6 leading-relaxed">
-                  Choose a strong, unique password to secure your audit engagements and client workpapers.
+                  Choose a strong, unique password to secure your clients' working papers.
                 </p>
 
                 {errorMsg && (
@@ -242,12 +242,12 @@ export default function ResetPasswordPage() {
             Security Best Practices
           </h2>
           <p className="text-sm text-[#5B6676] leading-relaxed mb-6">
-            In compliance with ISA 230 and SOC 2 requirements, passphrases must not be shared among audit team members. Every team member has unique cryptographic access to the engagement audit trail.
+            Passwords must not be shared between team members. Everyone has their own sign-in, so the activity log shows who did what.
           </p>
         </div>
 
         <div className="text-xs text-[#5B6676]">
-          Workpapers Audit Compliance Portal
+          Blynt Workpapers
         </div>
       </div>
     </div>

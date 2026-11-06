@@ -13,12 +13,16 @@ import { Adjustment, AdjustmentLine } from '../types/models';
 
 export const JOURNAL_TYPES = ['adjusting', 'reclassification', 'client_posted', 'proposed_by_ai'] as const;
 
+// £1 billion per line: far beyond any real journal, and keeps every total safe
+const MAX_PENCE = 100_000_000_000n;
+
 const dayAfter = (d: string) => new Date(new Date(`${d}T00:00:00Z`).getTime() + 86_400_000).toISOString().slice(0, 10);
 
 function openEngagement(actor: Actor, engagementId: string) {
   const eng = db.engagements.find((e) => e.id === engagementId && e.firm_id === actor.firmId);
   if (!eng) throw new ServiceError('Engagement not found', 404, 'NOT_FOUND');
   if (eng.status === 'locked') throw new ServiceError('This engagement is locked. Unlock it before changing journals.', 409, 'LOCKED');
+  if (db.clients.find((c) => c.id === eng.client_id)?.archived_at) throw new ServiceError('This client is archived. Restore it before changing journals.', 409, 'ARCHIVED');
   return eng;
 }
 
@@ -48,8 +52,12 @@ export function createJournal(actor: Actor, engagementId: string, d: any): Adjus
   const id = `aje_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const lines: AdjustmentLine[] = raw.map((l, i) => {
     if (!codes.has(l.blynt_code)) throw new ServiceError(`Line ${i + 1}: choose an account from the chart.`);
+    for (const v of [l.debit_p, l.credit_p]) {
+      if (/\.\d{3,}/.test(String(v ?? ''))) throw new ServiceError(`Line ${i + 1}: amounts are in pounds and whole pence, such as 10.50.`);
+    }
     const debit = toPence(String(l.debit_p || '0'));
     const credit = toPence(String(l.credit_p || '0'));
+    if (debit > MAX_PENCE || credit > MAX_PENCE) throw new ServiceError(`Line ${i + 1}: that amount is too large for a journal line.`);
     if (debit < 0n || credit < 0n || (debit > 0n && credit > 0n)) throw new ServiceError(`Line ${i + 1}: enter a debit or a credit, not both.`);
     dr += debit;
     cr += credit;

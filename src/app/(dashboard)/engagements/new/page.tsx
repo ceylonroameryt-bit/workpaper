@@ -8,7 +8,7 @@ import { db } from '@/lib/server/db';
 import { Client, CompanyType } from '@/lib/types/models';
 import { packForClient } from '@/lib/workpapers/templates';
 import { useCompany } from '@/context/CompanyContext';
-import { companyNumberError, structureFields, structureForCompanyType } from '@/lib/practice-structure';
+import { companyNumberError, structureFields, structureForCompanyType, UK_POSTCODE, UK_VAT } from '@/lib/practice-structure';
 import { Frequency, FREQUENCY_MONTHS, periodStart as startOf } from '@/lib/periods';
 
 /**
@@ -43,11 +43,11 @@ const BLANK = { trading_name: '', company_no: '', address_line: '', postcode: ''
 const detailsOf = (c?: Client) => ({ ...BLANK, ...Object.fromEntries(Object.entries(c ?? {}).filter(([k, v]) => k in BLANK && typeof v === 'string')) }) as typeof BLANK;
 
 const inputCls =
-  'w-full min-h-[42px] px-3 text-sm bg-white border border-[#D5DBE7] rounded-[10px] text-[#102654] outline-none focus:border-[#FF7D6B] focus:ring-2 focus:ring-[#FF7D6B]/20 placeholder:text-[#9AA6BC]';
+  'w-full min-h-[42px] px-3 text-sm bg-white border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] focus:ring-2 focus:ring-[#FF7A66]/20 placeholder:text-[#9AA6BC]';
 
 function Q({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="block text-sm font-semibold text-[#102654] mt-6 mb-2">
+    <label htmlFor={htmlFor} className="block text-sm font-semibold text-[#122654] mt-6 mb-2">
       {children}
     </label>
   );
@@ -61,18 +61,18 @@ function Card({ on, title, sub, onClick }: { on: boolean; title: string; sub: st
       aria-checked={on}
       onClick={onClick}
       className={`relative text-left px-3.5 py-3 rounded-[10px] border transition-colors cursor-pointer ${
-        on ? 'bg-[#EEF3FD] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D5DBE7] hover:border-[#A6B4D0]'
+        on ? 'bg-[#EEF2F9] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D3DCEE] hover:border-[#A6B4D0]'
       }`}
     >
       {on && <Check className="absolute top-2.5 right-2.5 w-3.5 h-3.5 text-[#1D4E89]" />}
-      <span className="block text-sm font-semibold text-[#102654] pr-4">{title}</span>
-      <span className="block text-[11px] text-[#5B6478] mt-0.5">{sub}</span>
+      <span className="block text-sm font-semibold text-[#122654] pr-4">{title}</span>
+      <span className="block text-[11px] text-[#4A5878] mt-0.5">{sub}</span>
     </button>
   );
 }
 
 function YesNo({ value, yes, no, onChange, label }: { value: boolean; yes: string; no: string; onChange: (v: boolean) => void; label: string }) {
-  const pill = (on: boolean) => `text-xs font-semibold px-3.5 py-2 rounded-full border cursor-pointer ${on ? 'bg-[#102654] border-[#102654] text-white' : 'bg-white border-[#D5DBE7] text-[#102654]'}`;
+  const pill = (on: boolean) => `text-xs font-semibold px-3.5 py-2 rounded-full border cursor-pointer ${on ? 'bg-[#122654] border-[#122654] text-white' : 'bg-white border-[#D3DCEE] text-[#122654]'}`;
   return (
     <div className="flex gap-2" role="radiogroup" aria-label={label}>
       <button type="button" role="radio" aria-checked={value} className={pill(value)} onClick={() => onChange(true)}>{yes}</button>
@@ -123,6 +123,8 @@ export default function NewEngagementWizard() {
   const structure = structureForCompanyType(type);
   const sf = structureFields(structure);
   const crnError = sf.companyNumber && details.company_no.trim() ? companyNumberError(structure, details.company_no, details.jurisdiction) : '';
+  const postcodeError = details.postcode.trim() && !UK_POSTCODE.test(details.postcode.trim().toUpperCase()) ? 'Enter a valid UK postcode.' : '';
+  const vatError = vat && details.vat_number.trim() && !UK_VAT.test(details.vat_number.replace(/\s/g, '').toUpperCase()) ? 'Enter a valid UK VAT number.' : '';
   const setD = (k: keyof typeof BLANK) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setDetails({ ...details, [k]: e.target.value });
 
   const pickClient = (id: string) => {
@@ -172,7 +174,13 @@ export default function NewEngagementWizard() {
     let id = clientId;
     if (isNew) id = (await api('/api/v1/clients', 'POST', { name: clientName, company_no: '', company_type: type, year_end: yearEnd, data_source: 'csv' })).id;
     // The profile saves the details and decides the papers; the engagement is then created from it
-    await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll, team_user_ids: team });
+    try {
+      await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll, team_user_ids: team });
+    } catch (e) {
+      // Don't leave a half-made client behind when its details are refused
+      if (isNew) await api(`/api/v1/clients/${encodeURIComponent(id)}/archive`, 'POST', { archived: true, reason: 'Set-up cancelled' }).catch(() => {});
+      throw e;
+    }
     const eng = await api('/api/v1/engagements', 'POST', {
       client_id: id,
       period_start: periodStart,
@@ -192,7 +200,7 @@ export default function NewEngagementWizard() {
   const next = async () => {
     setError('');
     if (step === 0 && !clientName) return setError('Enter the client’s name.');
-    if (step === 0 && crnError) return setError(crnError);
+    if (step === 0 && (crnError || postcodeError || vatError)) return setError(crnError || postcodeError || vatError);
     if (step === 1 && (!periodStart || !yearEnd || periodStart >= yearEnd)) return setError(`Set a period start before the ${END_LABEL[frequency].toLowerCase()}.`);
     if (step < STEPS.length - 1) return go(step + 1);
     setSaving(true);
@@ -206,14 +214,14 @@ export default function NewEngagementWizard() {
 
   return (
     <div className="flex flex-col gap-4 max-w-5xl mx-auto pb-16">
-      <Link href="/clients" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5B6478] hover:text-[#102654]">
+      <Link href="/clients" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#4A5878] hover:text-[#122654]">
         <ChevronLeft className="w-4 h-4" /> Back to clients
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] rounded-[16px] overflow-hidden border border-[#E3E7EF] bg-white">
         {/* Step rail */}
-        <aside className="bg-[#0B1B3D] text-white px-6 py-8">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF7D6B]">New engagement</p>
+        <aside className="bg-[#0B1A3B] text-white px-6 py-8">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF7A66]">New engagement</p>
           <p className="mt-2 text-xs text-[#A6B4D0] leading-relaxed">Four short steps. Each answer shows what it changes.</p>
           <ol className="mt-8 flex lg:flex-col gap-1 overflow-x-auto" aria-label="Steps">
             {STEPS.map((s, i) => {
@@ -230,12 +238,12 @@ export default function NewEngagementWizard() {
                   >
                     <span
                       className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold border ${
-                        on ? 'bg-[#FF7D6B] border-[#FF7D6B] text-[#0B1B3D]' : done ? 'border-emerald-400/60 text-emerald-300' : 'border-white/20 text-[#7E8DA6]'
+                        on ? 'bg-[#FF7A66] border-[#FF7A66] text-[#0B1A3B]' : done ? 'border-emerald-400/60 text-emerald-300' : 'border-white/20 text-[#7E8DA6]'
                       }`}
                     >
                       {done ? <Check className="w-3.5 h-3.5" /> : i + 1}
                     </span>
-                    <span className={`hidden sm:block text-sm ${on ? 'font-bold text-white' : done ? 'text-[#D5DBE7]' : 'text-[#7E8DA6]'}`}>{s}</span>
+                    <span className={`hidden sm:block text-sm ${on ? 'font-bold text-white' : done ? 'text-[#D3DCEE]' : 'text-[#7E8DA6]'}`}>{s}</span>
                   </button>
                 </li>
               );
@@ -244,14 +252,14 @@ export default function NewEngagementWizard() {
         </aside>
 
         {/* Step body */}
-        <main className="px-4 sm:px-10 py-8 bg-[#F6F7FB]">
+        <main className="px-4 sm:px-10 py-8 bg-[#F5F8FD]">
           <div className="max-w-[640px]">
             <p className="text-xs font-bold text-[#B8432F]">Step {step + 1} of {STEPS.length}</p>
 
             {step === 0 && (
               <>
-                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#102654]">Client details</h1>
-                <p className="text-sm text-[#5B6478] mt-1">Who the client is. These answers decide the working papers.</p>
+                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#122654]">Client details</h1>
+                <p className="text-sm text-[#4A5878] mt-1">Who the client is. These answers decide the working papers.</p>
                 <Q htmlFor="client">Client</Q>
                 <select id="client" className={inputCls} value={clientId} onChange={(e) => pickClient(e.target.value)}>
                   {activeClients.map((c) => (
@@ -285,9 +293,10 @@ export default function NewEngagementWizard() {
                   </div>
                 )}
                 <Q>{sf.addressLabel}</Q>
+                {postcodeError && <p className="text-xs text-[#B8432F] -mt-1 mb-2">{postcodeError}</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-3">
                   <input aria-label="Address" className={inputCls} value={details.address_line} onChange={setD('address_line')} placeholder="12 High Street, Leeds" />
-                  <input aria-label="Postcode" className={inputCls} value={details.postcode} onChange={setD('postcode')} placeholder="LS1 4AB" />
+                  <input aria-label="Postcode" className={inputCls} value={details.postcode} onChange={setD('postcode')} placeholder="LS1 4AB" aria-invalid={Boolean(postcodeError)} />
                   <select aria-label="Country" className={inputCls} value={details.jurisdiction} onChange={setD('jurisdiction')}>
                     <option value="england_wales">England and Wales</option>
                     <option value="scotland">Scotland</option>
@@ -299,7 +308,8 @@ export default function NewEngagementWizard() {
                 {vat && (
                   <div className="sm:w-1/2">
                     <Q htmlFor="vat">VAT number</Q>
-                    <input id="vat" className={inputCls} value={details.vat_number} onChange={setD('vat_number')} placeholder="GB123456789" />
+                    <input id="vat" className={inputCls} value={details.vat_number} onChange={setD('vat_number')} placeholder="GB123456789" aria-invalid={Boolean(vatError)} />
+                    {vatError && <p className="text-xs text-[#B8432F] mt-1">{vatError}</p>}
                   </div>
                 )}
                 <Q>Does it run payroll?</Q>
@@ -309,8 +319,8 @@ export default function NewEngagementWizard() {
 
             {step === 1 && (
               <>
-                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#102654]">Period</h1>
-                <p className="text-sm text-[#5B6478] mt-1">How often you prepare a file for this client, and the period it covers.</p>
+                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#122654]">Period</h1>
+                <p className="text-sm text-[#4A5878] mt-1">How often you prepare a file for this client, and the period it covers.</p>
                 <Q>How often?</Q>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup" aria-label="Frequency">
                   {FREQUENCIES.map(([k, title, sub]) => (
@@ -342,8 +352,8 @@ export default function NewEngagementWizard() {
 
             {step === 2 && (
               <>
-                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#102654]">Team</h1>
-                <p className="text-sm text-[#5B6478] mt-1">Who works on this client. Optional: you can change it later on the client page.</p>
+                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#122654]">Team</h1>
+                <p className="text-sm text-[#4A5878] mt-1">Who works on this client. Optional: you can change it later on the client page.</p>
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="group" aria-label="Team">
                   {firmUsers.map((u) => (
                     <button
@@ -352,11 +362,11 @@ export default function NewEngagementWizard() {
                       role="checkbox"
                       aria-checked={team.includes(u.id)}
                       onClick={() => toggleTeam(u.id)}
-                      className={`relative text-left px-3.5 py-3 rounded-[10px] border cursor-pointer ${team.includes(u.id) ? 'bg-[#EEF3FD] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D5DBE7] hover:border-[#A6B4D0]'}`}
+                      className={`relative text-left px-3.5 py-3 rounded-[10px] border cursor-pointer ${team.includes(u.id) ? 'bg-[#EEF2F9] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D3DCEE] hover:border-[#A6B4D0]'}`}
                     >
                       {team.includes(u.id) && <Check className="absolute top-2.5 right-2.5 w-3.5 h-3.5 text-[#1D4E89]" />}
-                      <span className="block text-sm font-semibold text-[#102654] pr-4">{u.name}</span>
-                      <span className="block text-[11px] text-[#5B6478] mt-0.5 capitalize">{roleOf(u.id)}</span>
+                      <span className="block text-sm font-semibold text-[#122654] pr-4">{u.name}</span>
+                      <span className="block text-[11px] text-[#4A5878] mt-0.5 capitalize">{roleOf(u.id)}</span>
                     </button>
                   ))}
                 </div>
@@ -365,8 +375,8 @@ export default function NewEngagementWizard() {
 
             {step === 3 && (
               <>
-                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#102654]">Data source</h1>
-                <p className="text-sm text-[#5B6478] mt-1">Where the client’s books are.</p>
+                <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#122654]">Data source</h1>
+                <p className="text-sm text-[#4A5878] mt-1">Where the client’s books are.</p>
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup" aria-label="Data source">
                   {SOURCES.map(([k, title, sub]) => (
                     <Card key={k} on={source === k} title={title} sub={sub} onClick={() => setSource(k)} />
@@ -376,12 +386,12 @@ export default function NewEngagementWizard() {
             )}
 
             {changes[step].length > 0 && (
-              <div className="mt-8 flex gap-3 p-4 rounded-[12px] bg-[#EEF3FD] border border-[#1D4E89]/15">
+              <div className="mt-8 flex gap-3 p-4 rounded-[12px] bg-[#EEF2F9] border border-[#1D4E89]/15">
                 <Zap className="w-4 h-4 text-[#1D4E89] shrink-0 mt-0.5" />
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-[#1D4E89] mb-1">What this changes in Blynt</p>
                   {changes[step].map((l) => (
-                    <p key={l} className="text-xs text-[#102654] leading-relaxed">{l}</p>
+                    <p key={l} className="text-xs text-[#122654] leading-relaxed">{l}</p>
                   ))}
                 </div>
               </div>
@@ -395,7 +405,7 @@ export default function NewEngagementWizard() {
 
             <div className="mt-8 flex items-center gap-3">
               {step > 0 && (
-                <button type="button" onClick={() => go(step - 1)} className="inline-flex items-center gap-1.5 min-h-[42px] px-4 bg-white border border-[#D5DBE7] rounded-[10px] text-xs font-bold text-[#102654] hover:border-[#A6B4D0] cursor-pointer">
+                <button type="button" onClick={() => go(step - 1)} className="inline-flex items-center gap-1.5 min-h-[42px] px-4 bg-white border border-[#D3DCEE] rounded-[10px] text-xs font-bold text-[#122654] hover:border-[#A6B4D0] cursor-pointer">
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
               )}
@@ -403,7 +413,7 @@ export default function NewEngagementWizard() {
                 type="button"
                 onClick={next}
                 disabled={saving}
-                className="inline-flex items-center gap-2 min-h-[42px] px-5 bg-[#102654] hover:bg-[#0B1B3D] text-white font-bold text-xs rounded-[10px] cursor-pointer disabled:opacity-60"
+                className="inline-flex items-center gap-2 min-h-[42px] px-5 bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold text-xs rounded-[10px] cursor-pointer disabled:opacity-60"
               >
                 {saving ? 'Creating…' : step < STEPS.length - 1 ? 'Continue' : source === 'csv' ? 'Create engagement' : `Create and connect ${sourceName}`}
                 {!saving && <ArrowRight className="w-4 h-4" />}

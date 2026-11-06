@@ -295,17 +295,6 @@ export default function ImportDataPage() {
     reader.readAsText(file);
   };
 
-  // Load sample CSV directly
-  const handleLoadSample = async (samplePath: string, name: string) => {
-    try {
-      const res = await fetch(samplePath);
-      const text = await res.text();
-      parseCsv(text, name);
-    } catch (err) {
-      setValidationError('Failed to load sample CSV: ' + String(err));
-    }
-  };
-
   // Clear existing test data on engagement
   const handleClearTestData = async () => {
     if (!confirm('Are you sure you want to remove all existing trial balance and mapping data for this engagement? This cannot be undone.')) {
@@ -379,17 +368,17 @@ export default function ImportDataPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#5B6478] mb-1">
+          <div className="flex items-center gap-2 text-xs text-[#4A5878] mb-1">
             <Link href="/" className="hover:text-[#B8432F]">Blynt</Link>
             <span>/</span>
-            <span className="text-[#102654] font-semibold">{activeClient?.name ?? "Engagement"}</span>
+            <span className="text-[#122654] font-semibold">{activeClient?.name ?? "Engagement"}</span>
             <span>/</span>
             <span>1 Import data</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102654] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#122654] tracking-tight">
             Import trial balance
           </h1>
-          <p className="text-xs text-[#5B6478] mt-0.5">
+          <p className="text-xs text-[#4A5878] mt-0.5">
             Ingest trial balance with real CSV parsing, debits=credits verification, and immutable cryptographic snapshot.
           </p>
         </div>
@@ -399,7 +388,7 @@ export default function ImportDataPage() {
             type="button"
             onClick={handleClearTestData}
             disabled={isClearing}
-            className="min-h-[44px] px-3.5 py-2 border border-[#D5DBE7] hover:border-[#B42318] hover:bg-[#FDECEA] text-[#B42318] text-xs font-bold rounded-[10px] flex items-center gap-2 transition-colors cursor-pointer"
+            className="min-h-[44px] px-3.5 py-2 border border-[#D3DCEE] hover:border-[#B42318] hover:bg-[#FDECEA] text-[#B42318] text-xs font-bold rounded-[10px] flex items-center gap-2 transition-colors cursor-pointer"
           >
             <Trash2 className="w-4 h-4 text-[#B42318]" />
             <span>{isClearing ? 'Clearing...' : 'Clear test data'}</span>
@@ -407,7 +396,7 @@ export default function ImportDataPage() {
 
           <Link
             href={`/engagements/${engagementId}/mapping`}
-            className="min-h-[44px] px-4 py-2 bg-[#102654] text-white text-xs font-bold rounded-[10px] flex items-center gap-2 hover:bg-[#0B1B3D]"
+            className="min-h-[44px] px-4 py-2 bg-[#122654] text-white text-xs font-bold rounded-[10px] flex items-center gap-2 hover:bg-[#0B1A3B]"
           >
             <span>Go to mapping</span>
             <ArrowRight className="w-4 h-4" />
@@ -423,137 +412,9 @@ export default function ImportDataPage() {
         </div>
       )}
 
-      {/* CSV Samples & Templates Card */}
-      <div className="blynt-card p-5 bg-[#F6F7FB] border border-[#D5DBE7]">
-        <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#E3E7EF]">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#102654]">
-            <FileSpreadsheet className="w-4 h-4 text-[#1D4E89]" />
-            <span>Trial balance CSV samples &amp; downloadable templates</span>
-          </div>
-          <span className="text-[10px] text-[#5B6478] font-mono">Ready to use</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Sample 0: MB Therapy Real Practice File */}
-          <div className="bg-white p-3.5 rounded-[12px] border border-[#102654]/30 shadow-xs flex flex-col justify-between gap-3 ring-1 ring-[#102654]/10">
-            <div>
-              <div className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#FF7D6B]" />
-                MB Therapy Ltd (Client Practice)
-              </div>
-              <p className="text-[11px] text-[#5B6478] mt-1">
-                39 rows • Balanced at £164,755.68 • Preamble headers &amp; blank bank code.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="/samples/mb_therapy_trial_balance.csv"
-                download="mb_therapy_trial_balance.csv"
-                className="flex-1 py-1.5 px-2 bg-[#F6F7FB] hover:bg-[#EAF5FC] border border-[#D5DBE7] text-[#102654] text-[10px] font-semibold rounded-[6px] text-center flex items-center justify-center gap-1"
-              >
-                <Download className="w-3 h-3 text-[#5B6478]" />
-                Download
-              </a>
-              <button
-                type="button"
-                onClick={() => handleLoadSample('/samples/mb_therapy_trial_balance.csv', 'mb_therapy_trial_balance.csv')}
-                className="py-1.5 px-3 bg-[#FF7D6B] hover:bg-[#ff9485] text-[#0B1B3D] text-[10px] font-bold rounded-[6px] cursor-pointer shadow-xs"
-              >
-                Load &amp; Parse
-              </button>
-            </div>
-          </div>
-          {/* Sample 1: Acme Corp Balanced */}
-          <div className="bg-white p-3.5 rounded-[12px] border border-[#E3E7EF] flex flex-col justify-between gap-3">
-            <div>
-              <div className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#0B6B52]" />
-                Test Company Ltd (Balanced)
-              </div>
-              <p className="text-[11px] text-[#5B6478] mt-1">
-                27 rows • Balanced at £14,349,000.00 • Difference £0.00.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="/samples/acme_corp_trial_balance.csv"
-                download="acme_corp_trial_balance.csv"
-                className="flex-1 py-1.5 px-2.5 bg-[#F6F7FB] hover:bg-[#EAF5FC] border border-[#D5DBE7] text-[#102654] text-[11px] font-semibold rounded-[6px] text-center flex items-center justify-center gap-1"
-              >
-                <Download className="w-3 h-3 text-[#5B6478]" />
-                Download CSV
-              </a>
-              <button
-                type="button"
-                onClick={() => handleLoadSample('/samples/acme_corp_trial_balance.csv', 'acme_corp_trial_balance.csv')}
-                className="py-1.5 px-3 bg-[#102654] hover:bg-[#0B1B3D] text-white text-[11px] font-bold rounded-[6px] cursor-pointer"
-              >
-                Load
-              </button>
-            </div>
-          </div>
-
-          {/* Sample 2: Unbalanced Test */}
-          <div className="bg-white p-3.5 rounded-[12px] border border-[#E3E7EF] flex flex-col justify-between gap-3">
-            <div>
-              <div className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-[#A23A27]" />
-                Unbalanced Sample (£15 diff)
-              </div>
-              <p className="text-[11px] text-[#5B6478] mt-1">
-                2 rows • Tests Acceptance Rule 1 (Rejection with difference shown).
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="/samples/trial_balance_unbalanced.csv"
-                download="trial_balance_unbalanced.csv"
-                className="flex-1 py-1.5 px-2.5 bg-[#F6F7FB] hover:bg-[#FFF1EE] border border-[#D5DBE7] text-[#102654] text-[11px] font-semibold rounded-[6px] text-center flex items-center justify-center gap-1"
-              >
-                <Download className="w-3 h-3 text-[#5B6478]" />
-                Download CSV
-              </a>
-              <button
-                type="button"
-                onClick={() => handleLoadSample('/samples/trial_balance_unbalanced.csv', 'trial_balance_unbalanced.csv')}
-                className="py-1.5 px-3 bg-[#B8432F] hover:bg-[#a03825] text-white text-[11px] font-bold rounded-[6px] cursor-pointer"
-              >
-                Load
-              </button>
-            </div>
-          </div>
-
-          {/* Sample 3: Blank Template */}
-          <div className="bg-white p-3.5 rounded-[12px] border border-[#E3E7EF] flex flex-col justify-between gap-3">
-            <div>
-              <div className="text-xs font-bold text-[#102654] flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#1D4E89]" />
-                Blank Template CSV
-              </div>
-              <p className="text-[11px] text-[#5B6478] mt-1">
-                Standard headers ready for entering custom trial balances.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="/samples/blank_template.csv"
-                download="blank_template.csv"
-                className="flex-1 py-1.5 px-2.5 bg-[#F6F7FB] hover:bg-[#EAF5FC] border border-[#D5DBE7] text-[#102654] text-[11px] font-semibold rounded-[6px] text-center flex items-center justify-center gap-1"
-              >
-                <Download className="w-3 h-3 text-[#5B6478]" />
-                Download CSV
-              </a>
-              <button
-                type="button"
-                onClick={() => handleLoadSample('/samples/blank_template.csv', 'blank_template.csv')}
-                className="py-1.5 px-3 bg-[#102654] hover:bg-[#0B1B3D] text-white text-[11px] font-bold rounded-[6px] cursor-pointer"
-              >
-                Load
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <a href="/samples/blank_template.csv" download className="self-start text-xs font-semibold text-[#1D4E89] hover:underline">
+        Download blank CSV template
+      </a>
 
       {/* Source Selection Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -569,12 +430,12 @@ export default function ImportDataPage() {
             onClick={() => setActiveSource(tab.id as any)}
             className={`p-3.5 rounded-[14px] text-left border transition-all cursor-pointer ${
               activeSource === tab.id
-                ? 'bg-white border-[#102654] shadow-sm ring-2 ring-[#102654]'
+                ? 'bg-white border-[#122654] shadow-sm ring-2 ring-[#122654]'
                 : 'bg-white/60 border-[#E3E7EF] hover:bg-white'
             }`}
           >
-            <div className="text-xs font-bold text-[#102654]">{tab.name}</div>
-            <div className="text-[10px] text-[#5B6478] mt-0.5">{tab.desc}</div>
+            <div className="text-xs font-bold text-[#122654]">{tab.name}</div>
+            <div className="text-[10px] text-[#4A5878] mt-0.5">{tab.desc}</div>
           </button>
         ))}
       </div>
@@ -601,7 +462,7 @@ export default function ImportDataPage() {
         />
 
         {validationError && (
-          <div role="alert" className="p-3 rounded-[10px] text-xs border bg-[#FFF1EE] border-[#FF7D6B]/40 text-[#A23A27]">
+          <div role="alert" className="p-3 rounded-[10px] text-xs border bg-[#FFF1EE] border-[#FF7A66]/40 text-[#A23A27]">
             {validationError}
           </div>
         )}
@@ -612,22 +473,22 @@ export default function ImportDataPage() {
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed border-[#D5DBE7] hover:border-[#FF7D6B] rounded-[16px] p-8 text-center bg-[#F6F7FB] hover:bg-[#FFF1EE]/20 transition-colors cursor-pointer flex flex-col items-center justify-center gap-3"
+            className="border-2 border-dashed border-[#D3DCEE] hover:border-[#FF7A66] rounded-[16px] p-8 text-center bg-[#F5F8FD] hover:bg-[#FFF1EE]/20 transition-colors cursor-pointer flex flex-col items-center justify-center gap-3"
           >
-            <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-[#102654]">
+            <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-[#122654]">
               <Upload className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-sm font-bold text-[#102654]">
+              <div className="text-sm font-bold text-[#122654]">
                 Choose your CSV file or drag and drop here
               </div>
-              <p className="text-xs text-[#5B6478] mt-1">
+              <p className="text-xs text-[#4A5878] mt-1">
                 Reads and calculates directly in integer pence. Supports .csv up to 50 MB.
               </p>
             </div>
             <button
               type="button"
-              className="mt-2 min-h-[40px] px-4 bg-white border border-[#D5DBE7] hover:border-[#102654] rounded-[10px] text-xs font-bold text-[#102654] shadow-2xs"
+              className="mt-2 min-h-[40px] px-4 bg-white border border-[#D3DCEE] hover:border-[#122654] rounded-[10px] text-xs font-bold text-[#122654] shadow-2xs"
             >
               Browse CSV file
             </button>
@@ -639,10 +500,10 @@ export default function ImportDataPage() {
               <div className="flex items-center gap-3">
                 <FileSpreadsheet className="w-5 h-5 text-[#1D4E89]" />
                 <div>
-                  <div className="text-xs font-bold text-[#102654]">
+                  <div className="text-xs font-bold text-[#122654]">
                     {fileName || 'Trial_Balance.csv'}
                   </div>
-                  <div className="text-[11px] text-[#5B6478]">
+                  <div className="text-[11px] text-[#4A5878]">
                     {parsedRows.length} nominal accounts parsed successfully
                   </div>
                 </div>
@@ -662,12 +523,12 @@ export default function ImportDataPage() {
 
             {/* Unbalanced Trial Balance Alert (Ground Rule 1 & Acceptance Test 1) */}
             {!isBalanced && (
-              <div className="p-4 bg-[#FFF1EE] border-2 border-[#FF7D6B] rounded-[12px] flex flex-col gap-2">
+              <div className="p-4 bg-[#FFF1EE] border-2 border-[#FF7A66] rounded-[12px] flex flex-col gap-2">
                 <div className="flex items-center gap-2 text-sm font-bold text-[#A23A27]">
                   <AlertCircle className="w-5 h-5 text-[#B8432F]" />
                   <span>Unbalanced Trial Balance Rejected</span>
                 </div>
-                <p className="text-xs text-[#5B6478]">
+                <p className="text-xs text-[#4A5878]">
                   Total debits ({formatPence(totalDebits)}) do not equal total credits ({formatPence(totalCredits)}).
                   Net difference: <span className="font-mono font-bold text-[#A23A27]">{formatPence(difference)}</span>.
                   The trial balance cannot be imported until debits equal credits.
@@ -676,8 +537,8 @@ export default function ImportDataPage() {
             )}
 
             {/* Pre-Import Checks Panel */}
-            <div className="p-4 bg-[#F6F7FB] border border-[#E3E7EF] rounded-[14px] flex flex-col gap-3">
-              <div className="text-xs font-bold text-[#102654]">
+            <div className="p-4 bg-[#F5F8FD] border border-[#E3E7EF] rounded-[14px] flex flex-col gap-3">
+              <div className="text-xs font-bold text-[#122654]">
                 Pre-import verification checks (Strict BigInt pence calculation)
               </div>
 
@@ -690,10 +551,10 @@ export default function ImportDataPage() {
                     <AlertTriangle className="w-4 h-4 text-[#B8432F] shrink-0" />
                   )}
                   <div>
-                    <div className="font-bold text-[#102654]">
+                    <div className="font-bold text-[#122654]">
                       {isBalanced ? 'Debits = Credits' : 'Unbalanced'}
                     </div>
-                    <div className="text-[10px] font-mono text-[#5B6478]">
+                    <div className="text-[10px] font-mono text-[#4A5878]">
                       Diff: {formatPence(difference)}
                     </div>
                   </div>
@@ -707,8 +568,8 @@ export default function ImportDataPage() {
                     <AlertTriangle className="w-4 h-4 text-[#B8432F] shrink-0" />
                   )}
                   <div>
-                    <div className="font-bold text-[#102654]">Unique Codes</div>
-                    <div className="text-[10px] text-[#5B6478]">
+                    <div className="font-bold text-[#122654]">Unique Codes</div>
+                    <div className="text-[10px] text-[#4A5878]">
                       {duplicateCodes.length === 0
                         ? `${parsedRows.length} unique nominals`
                         : `${duplicateCodes.length} duplicates detected`}
@@ -720,8 +581,8 @@ export default function ImportDataPage() {
                 <div className="p-3 bg-white rounded-[10px] border border-[#E3E7EF] flex items-center gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-[#0B6B52] shrink-0" />
                   <div>
-                    <div className="font-bold text-[#102654]">Data Integrity</div>
-                    <div className="text-[10px] text-[#5B6478]">
+                    <div className="font-bold text-[#122654]">Data Integrity</div>
+                    <div className="text-[10px] text-[#4A5878]">
                       All rows parsed to integer pence
                     </div>
                   </div>
@@ -732,17 +593,17 @@ export default function ImportDataPage() {
             {/* Parsed Rows Preview Table */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-bold text-[#102654]">
+                <h3 className="text-xs font-bold text-[#122654]">
                   Preview ({parsedRows.length} accounts)
                 </h3>
-                <span className="text-[11px] font-mono text-[#5B6478]">
+                <span className="text-[11px] font-mono text-[#4A5878]">
                   Debits: {formatPence(totalDebits)} | Credits: {formatPence(totalCredits)}
                 </span>
               </div>
 
               <div className="border border-[#E3E7EF] rounded-[12px] overflow-hidden max-h-72 overflow-y-auto">
-                <table className="w-full text-left text-xs text-[#102654]">
-                  <thead className="bg-[#F6F7FB] text-[#5B6478] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF] sticky top-0">
+                <table className="w-full text-left text-xs text-[#122654]">
+                  <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF] sticky top-0">
                     <tr>
                       <th scope="col" className="p-2.5 pl-3">Code</th>
                       <th scope="col" className="p-2.5">Account Description</th>
@@ -753,10 +614,10 @@ export default function ImportDataPage() {
                   </thead>
                   <tbody className="divide-y divide-[#E3E7EF]">
                     {parsedRows.map((r, idx) => (
-                      <tr key={idx} className="hover:bg-[#F6F7FB]">
-                        <td className="p-2.5 pl-3 font-mono font-bold text-[#102654]">{r.code}</td>
-                        <td className="p-2.5 font-semibold text-[#102654]">{r.name}</td>
-                        <td className="p-2.5 text-[#5B6478]">{r.type}</td>
+                      <tr key={idx} className="hover:bg-[#F5F8FD]">
+                        <td className="p-2.5 pl-3 font-mono font-bold text-[#122654]">{r.code}</td>
+                        <td className="p-2.5 font-semibold text-[#122654]">{r.name}</td>
+                        <td className="p-2.5 text-[#4A5878]">{r.type}</td>
                         <td className="p-2.5 text-right font-mono-numbers">
                           {r.debitPence > 0n ? formatPence(r.debitPence) : '—'}
                         </td>
@@ -773,7 +634,7 @@ export default function ImportDataPage() {
             {/* Commit Import Action */}
             {!isCommitted ? (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-[#E3E7EF]">
-                <div className="text-xs text-[#5B6478]">
+                <div className="text-xs text-[#4A5878]">
                   Creating an import creates an immutable snapshot with cryptographic SHA-256 checksum.
                 </div>
                 <button
@@ -782,8 +643,8 @@ export default function ImportDataPage() {
                   disabled={!isBalanced}
                   className={`min-h-[44px] px-6 text-xs font-bold rounded-[10px] flex items-center justify-center gap-2 shadow-sm transition-all ${
                     isBalanced
-                      ? 'bg-[#102654] hover:bg-[#0B1B3D] text-white cursor-pointer'
-                      : 'bg-[#D5DBE7] text-[#7E8DA6] cursor-not-allowed'
+                      ? 'bg-[#122654] hover:bg-[#0B1A3B] text-white cursor-pointer'
+                      : 'bg-[#D3DCEE] text-[#7E8DA6] cursor-not-allowed'
                   }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
@@ -797,7 +658,7 @@ export default function ImportDataPage() {
                     <CheckCircle2 className="w-5 h-5" />
                     Trial balance imported &amp; snapshot committed
                   </div>
-                  <div className="text-[11px] text-[#102654] font-mono mt-1">
+                  <div className="text-[11px] text-[#122654] font-mono mt-1">
                     SHA-256: {snapshotHash}
                   </div>
                 </div>
