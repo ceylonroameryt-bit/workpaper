@@ -115,6 +115,10 @@ class Database {
     for (const k of Database.COLLECTIONS) {
       if (Array.isArray(state[k])) (this as any)[k] = state[k];
     }
+    // The standard chart always comes from the code, so a saved workspace picks up chart
+    // updates; accounts the practice added itself are kept
+    const standard = new Set(STANDARD_CHART.map((a) => a.code));
+    this.blynt_accounts = [...STANDARD_CHART.map((a) => ({ ...a })), ...this.blynt_accounts.filter((a) => !a.is_system && !standard.has(a.code))];
   }
 
   // Working papers for a new engagement: the client's profile, or just a company type
