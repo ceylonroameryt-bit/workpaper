@@ -35,8 +35,8 @@ const STATUS_STYLE: Record<Adjustment['status'], string> = {
   accepted: 'bg-[#EAF5FC] text-[#1D4E89]',
   approved: 'bg-[#E6F4EF] text-[#0B6B52]',
   posted: 'bg-[#E6F4EF] text-[#0B6B52]',
-  reversed: 'bg-[#F4F5F7] text-[#4A5878]',
-  rejected: 'bg-[#F4F5F7] text-[#4A5878]',
+  reversed: 'bg-[#F5F8FD] text-[#4A5878]',
+  rejected: 'bg-[#F5F8FD] text-[#4A5878]',
 };
 const TABS: ['all' | Adjustment['status'], string][] = [
   ['all', 'All'],
@@ -196,7 +196,7 @@ export default function JournalsPage() {
       </div>
 
       {notice && (
-        <div role={notice.ok ? 'status' : 'alert'} className={`p-3 rounded-[10px] text-xs font-medium flex items-start gap-2 ${notice.ok ? 'bg-[#E6F4EF] text-[#0B6B52]' : 'bg-[#FFF1DC] text-[#9A4A00]'}`}>
+        <div role={notice.ok ? 'status' : 'alert'} className={`p-3 rounded-[10px] text-xs font-medium flex items-start gap-2 ${notice.ok ? 'bg-[#E6F4EF] text-[#0B6B52]' : 'bg-[#FFF4DB] text-[#6B4700]'}`}>
           {!notice.ok && <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />} {notice.text}
         </div>
       )}
@@ -277,14 +277,14 @@ export default function JournalsPage() {
                         {j.status === 'proposed' && (
                           <>
                             <button type="button" disabled={busy} onClick={() => act(j, 'accept')} className="px-2 py-1 rounded bg-[#EAF5FC] text-[#1D4E89] font-semibold cursor-pointer">Accept</button>
-                            <button type="button" disabled={busy} onClick={() => reject(j)} className="px-2 py-1 rounded bg-[#F4F5F7] text-[#4A5878] font-semibold cursor-pointer">Reject</button>
+                            <button type="button" disabled={busy} onClick={() => reject(j)} className="px-2 py-1 rounded bg-[#F5F8FD] text-[#4A5878] font-semibold cursor-pointer">Reject</button>
                           </>
                         )}
                         {approvable && (
                           <button type="button" disabled={busy} onClick={() => act(j, 'approve')} className="px-2 py-1 rounded bg-[#E6F4EF] text-[#0B6B52] font-semibold cursor-pointer">Approve</button>
                         )}
                         {(j.status === 'approved' || j.status === 'posted') && (
-                          <button type="button" disabled={busy} onClick={() => act(j, 'reverse')} className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#F4F5F7] text-[#122654] font-semibold cursor-pointer">
+                          <button type="button" disabled={busy} onClick={() => act(j, 'reverse')} className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#F5F8FD] text-[#122654] font-semibold cursor-pointer">
                             <RotateCcw className="w-3 h-3" /> Reverse
                           </button>
                         )}

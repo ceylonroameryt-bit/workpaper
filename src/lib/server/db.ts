@@ -87,7 +87,7 @@ class Database {
   // Server-only: QuickBooks Online connections with encrypted tokens (see quickbooks.ts)
   qbo_connections: QboConnectionRecord[] = [];
   // Server-only: password hashes. Never sent to the browser (see state-guard.ts)
-  credentials: { user_id: string; password_hash: string; mfa_secret?: string; mfa_pending_secret?: string; mfa_last_step?: number }[] = [];
+  credentials: { user_id: string; password_hash: string; mfa_secret?: string; mfa_pending_secret?: string; mfa_last_step?: number; reset_token_hash?: string; reset_expires_at?: string }[] = [];
 
   constructor() {
     // Demo practice and clients for development and tests only; a live workspace starts empty

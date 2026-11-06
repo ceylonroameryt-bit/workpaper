@@ -308,7 +308,7 @@ export default function PracticeReviewNotesPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-white p-3 rounded-[12px] border border-[#E3E7EF] shadow-2xs">
             <div className="relative flex-1">
               <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
+              <input aria-label="Search comments and replies"
                 type="text"
                 placeholder="Search comments and replies"
                 value={search}
@@ -318,7 +318,7 @@ export default function PracticeReviewNotesPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <select
+              <select aria-label="Filter by type"
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value as any)}
                 className="min-h-[38px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
@@ -329,7 +329,7 @@ export default function PracticeReviewNotesPage() {
                 <option value="client_query">Client queries</option>
               </select>
 
-              <select
+              <select aria-label="Filter by client"
                 value={clientFilter}
                 onChange={(e) => setClientFilter(e.target.value)}
                 className="min-h-[38px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
@@ -497,7 +497,7 @@ export default function PracticeReviewNotesPage() {
 
                               {/* Post Reply */}
                               <div className="flex gap-2 mt-1">
-                                <input
+                                <input aria-label="Write a reply. Type @ to mention someone"
                                   type="text"
                                   placeholder="Write a reply. Type @ to mention someone..."
                                   value={replyText[c.id] || ''}

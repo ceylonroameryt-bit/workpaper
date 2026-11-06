@@ -514,7 +514,7 @@ export default function AccountMappingPage() {
             className={`min-h-[42px] px-5 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${
               isFullyMapped
                 ? 'bg-[#0B6B52] hover:bg-[#095742] text-white shadow-xs'
-                : 'bg-[#F4F5F7] text-[#4A5878] border border-[#D3DCEE]'
+                : 'bg-[#F5F8FD] text-[#4A5878] border border-[#D3DCEE]'
             }`}
           >
             {isFullyMapped ? <Unlock className="w-4 h-4 text-emerald-300" /> : <Lock className="w-4 h-4" />}
@@ -704,7 +704,7 @@ export default function AccountMappingPage() {
                 <span>{tab.label}</span>
                 <span
                   className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[#F4F5F7] text-[#4A5878]'
+                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[#F5F8FD] text-[#4A5878]'
                   }`}
                 >
                   {tab.count}
@@ -717,7 +717,7 @@ export default function AccountMappingPage() {
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
+              <input aria-label="Search code, name, schedule"
                 id="mapping-search"
                 type="text"
                 placeholder="Search code, name, schedule..."
@@ -825,7 +825,7 @@ export default function AccountMappingPage() {
                     {/* Code & Name */}
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-[#122654] bg-[#F4F5F7] px-2 py-0.5 rounded text-[11px]">
+                        <span className="font-mono font-bold text-[#122654] bg-[#F5F8FD] px-2 py-0.5 rounded text-[11px]">
                           {row.source_code}
                         </span>
                         <div>

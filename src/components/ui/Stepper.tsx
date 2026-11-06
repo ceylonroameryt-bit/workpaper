@@ -44,10 +44,10 @@ export const Stepper: React.FC<StepperProps> = ({
                 <span
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 transition-colors ${
                     isComplete
-                      ? 'bg-[#E2F4EC] text-[#0B6B4D] border border-transparent'
+                      ? 'bg-[#E6F4EF] text-[#0B6B52] border border-transparent'
                       : isCurrent
-                      ? 'bg-[#1E4FD8] text-white ring-4 ring-[#E8EEFD]'
-                      : 'bg-[#F4F5F7] text-[#5B6676] border border-[#D5D9E0]'
+                      ? 'bg-[#1D4E89] text-white ring-4 ring-[#EAF5FC]'
+                      : 'bg-[#F5F8FD] text-[#4A5878] border border-[#D3DCEE]'
                   }`}
                 >
                   {isComplete ? <Check className="w-4 h-4" /> : stepNumber}
@@ -57,16 +57,16 @@ export const Stepper: React.FC<StepperProps> = ({
                   <span
                     className={`text-xs font-semibold uppercase tracking-wider ${
                       isCurrent
-                        ? 'text-[#1E4FD8]'
+                        ? 'text-[#1D4E89]'
                         : isComplete
-                        ? 'text-[#1B2430]'
-                        : 'text-[#5B6676]'
+                        ? 'text-[#122654]'
+                        : 'text-[#4A5878]'
                     }`}
                   >
                     {step.title}
                   </span>
                   {step.description && (
-                    <span className="text-[11px] text-[#5B6676] hidden sm:inline">
+                    <span className="text-[11px] text-[#4A5878] hidden sm:inline">
                       {step.description}
                     </span>
                   )}
@@ -76,7 +76,7 @@ export const Stepper: React.FC<StepperProps> = ({
               {index !== steps.length - 1 && (
                 <div
                   className={`flex-1 h-0.5 mx-4 transition-colors ${
-                    stepNumber < currentStep ? 'bg-[#0B6B4D]' : 'bg-[#E3E6EB]'
+                    stepNumber < currentStep ? 'bg-[#0B6B52]' : 'bg-[#E3E7EF]'
                   }`}
                   aria-hidden="true"
                 />

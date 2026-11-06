@@ -508,7 +508,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-bold text-[#122654] mb-1">
                   Reconciliation Tolerance (£)
                 </label>
-                <input
+                <input aria-label="Reconciliation Tolerance (£)"
                   type="text"
                   value={reconciliationTolerance}
                   onChange={(e) => setReconciliationTolerance(e.target.value)}
@@ -539,7 +539,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-bold text-[#122654] mb-1">
                   Capitalisation Threshold (£)
                 </label>
-                <input
+                <input aria-label="Capitalisation Threshold (£)"
                   type="text"
                   value={capitalisationThreshold}
                   onChange={(e) => setCapitalisationThreshold(e.target.value)}
@@ -554,7 +554,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-bold text-[#122654] mb-1">
                   AI &apos;Ready&apos; Confidence Threshold (%)
                 </label>
-                <input
+                <input aria-label="AI ready threshold (%)"
                   type="number"
                   value={aiReadyThreshold}
                   onChange={(e) => setAiReadyThreshold(e.target.value)}
@@ -569,7 +569,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-bold text-[#122654] mb-1">
                   Deadline Alert Days
                 </label>
-                <input
+                <input aria-label="Deadline Alert Days"
                   type="number"
                   value={deadlineAlertDays}
                   onChange={(e) => setDeadlineAlertDays(e.target.value)}
@@ -857,13 +857,13 @@ export default function PracticeSettingsPage() {
                 <div>
                   <label className="block text-xs font-bold text-[#122654] mb-1.5">Brand Navy Primary</label>
                   <div className="flex items-center gap-2">
-                    <input
+                    <input aria-label="Brand Navy Primary"
                       type="color"
                       value={brandPrimary}
                       onChange={(e) => setBrandPrimary(e.target.value)}
                       className="w-9 h-9 rounded-lg border-none cursor-pointer"
                     />
-                    <input
+                    <input aria-label="Brand navy primary colour (hex)"
                       type="text"
                       value={brandPrimary}
                       onChange={(e) => setBrandPrimary(e.target.value)}
@@ -875,13 +875,13 @@ export default function PracticeSettingsPage() {
                 <div>
                   <label className="block text-xs font-bold text-[#122654] mb-1.5">Brand Coral Accent</label>
                   <div className="flex items-center gap-2">
-                    <input
+                    <input aria-label="Brand Coral Accent"
                       type="color"
                       value={brandAccent}
                       onChange={(e) => setBrandAccent(e.target.value)}
                       className="w-9 h-9 rounded-lg border-none cursor-pointer"
                     />
-                    <input
+                    <input aria-label="Brand coral accent colour (hex)"
                       type="text"
                       value={brandAccent}
                       onChange={(e) => setBrandAccent(e.target.value)}
@@ -893,7 +893,7 @@ export default function PracticeSettingsPage() {
 
               <div>
                 <label className="block text-xs font-bold text-[#122654] mb-1.5">Typography Family</label>
-                <select
+                <select aria-label="Typography Family"
                   value={brandFont}
                   onChange={(e) => setBrandFont(e.target.value)}
                   className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
@@ -906,7 +906,7 @@ export default function PracticeSettingsPage() {
 
               <div>
                 <label className="block text-xs font-bold text-[#122654] mb-1.5">Report Footer Disclaimer</label>
-                <textarea
+                <textarea aria-label="Report Footer Disclaimer"
                   rows={3}
                   value={footerDisclaimer}
                   onChange={(e) => setFooterDisclaimer(e.target.value)}
@@ -1108,7 +1108,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Full Name <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Full name"
                   type="text"
                   placeholder="e.g. Alex Montgomery"
                   value={inviteName}
@@ -1121,7 +1121,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Email Address <span className="text-red-500">*</span>
                 </label>
-                <input
+                <input aria-label="Work email"
                   type="email"
                   placeholder="e.g. alex.montgomery@blynt.co.uk"
                   value={inviteEmail}
@@ -1134,7 +1134,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Role &amp; Signing Authority
                 </label>
-                <select
+                <select aria-label="Role & Signing Authority"
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as any)}
                   className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
@@ -1196,9 +1196,9 @@ export default function PracticeSettingsPage() {
               {inviteError && <p className="text-red-600 text-[11px] font-semibold">{inviteError}</p>}
 
               {inviteLink && (
-                <div className="p-3 rounded-lg bg-[#EAF6F0] border border-[#0B6B4D]/20 text-xs text-[#122654] space-y-2">
+                <div className="p-3 rounded-lg bg-[#EAF6F0] border border-[#0B6B52]/20 text-xs text-[#122654] space-y-2">
                   <p className="font-semibold">Invitation created. Send this link to {inviteEmail.trim()} (valid for 7 days):</p>
-                  <input readOnly value={inviteLink} onFocus={(e) => e.target.select()} className="w-full font-mono text-[11px] p-2 border border-[#D3DCEE] rounded bg-white" />
+                  <input aria-label="Invite link" readOnly value={inviteLink} onFocus={(e) => e.target.select()} className="w-full font-mono text-[11px] p-2 border border-[#D3DCEE] rounded bg-white" />
                   <button type="button" onClick={() => navigator.clipboard?.writeText(inviteLink)} className="text-[#1D4E89] font-semibold hover:underline">
                     Copy link
                   </button>
@@ -1255,7 +1255,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Rule Type (DAT-09)
                 </label>
-                <select
+                <select aria-label="Rule Type (DAT-09)"
                   value={newRuleType}
                   onChange={(e) => setNewRuleType(e.target.value as any)}
                   className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
@@ -1271,7 +1271,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Matching Pattern (Wildcard matching)
                 </label>
-                <input
+                <input aria-label="Matching Pattern (Wildcard matching)"
                   type="text"
                   placeholder="e.g. *Software*Subscription* or *Dell*PowerEdge*"
                   value={newRulePattern}
@@ -1284,7 +1284,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Target Value / Classification
                 </label>
-                <select
+                <select aria-label="Target Value / Classification"
                   value={newRuleTarget}
                   onChange={(e) => setNewRuleTarget(e.target.value)}
                   className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"
@@ -1305,7 +1305,7 @@ export default function PracticeSettingsPage() {
                 <label className="block text-xs font-semibold text-[#122654] mb-1">
                   Rule Scope (DAT-09)
                 </label>
-                <select
+                <select aria-label="Rule Scope (DAT-09)"
                   value={newRuleScope}
                   onChange={(e) => setNewRuleScope(e.target.value as any)}
                   className="w-full text-xs p-2.5 bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg text-[#122654] font-medium"

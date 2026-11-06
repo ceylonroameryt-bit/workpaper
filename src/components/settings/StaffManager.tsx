@@ -142,7 +142,7 @@ export function StaffManager({ currentUserId }: { currentUserId: string }) {
                   </div>
                 </td>
                 <td className="py-2.5 px-4">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-[#E6F4EF] text-[#0B6B52]' : 'bg-[#F4F5F7] text-[#4A5878]'}`}>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-[#E6F4EF] text-[#0B6B52]' : 'bg-[#F5F8FD] text-[#4A5878]'}`}>
                     {s.status === 'active' ? 'Active' : 'Deactivated'}
                   </span>
                 </td>
@@ -186,6 +186,24 @@ function StaffEditor({ person, isSelf, onClose, onSaved }: { person: StaffRow; i
   const clients = db.clients.filter((c) => !c.archived_at);
   const seesAll = role === 'partner' || role === 'admin';
 
+  const [resetLink, setResetLink] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const createResetLink = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/v1/users/${encodeURIComponent(person.id)}/password-reset`, { method: 'POST' });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) setResetLink(body.link);
+      else setError(body.error || 'Could not create a reset link. Try again.');
+    } catch {
+      setError('Could not reach the server. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const save = async (patch: Record<string, unknown>) => {
     setBusy(true);
     setError('');
@@ -211,7 +229,7 @@ function StaffEditor({ person, isSelf, onClose, onSaved }: { person: StaffRow; i
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E3E7EF]">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-[#122654]">{person.name}</h2>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${person.status === 'active' ? 'bg-[#E6F4EF] text-[#0B6B52]' : 'bg-[#F4F5F7] text-[#4A5878]'}`}>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${person.status === 'active' ? 'bg-[#E6F4EF] text-[#0B6B52]' : 'bg-[#F5F8FD] text-[#4A5878]'}`}>
               {person.status === 'active' ? 'Active' : 'Deactivated'}
             </span>
           </div>
@@ -280,9 +298,34 @@ function StaffEditor({ person, isSelf, onClose, onSaved }: { person: StaffRow; i
           <section className="space-y-1">
             <h3 className="text-sm font-bold">Authentication</h3>
             <p className="flex items-center gap-1.5">
-              {person.mfa_enabled ? <ShieldCheck className="w-3.5 h-3.5 text-[#0B6B52]" /> : <ShieldOff className="w-3.5 h-3.5 text-[#9A4A00]" />}
+              {person.mfa_enabled ? <ShieldCheck className="w-3.5 h-3.5 text-[#0B6B52]" /> : <ShieldOff className="w-3.5 h-3.5 text-[#6B4700]" />}
               Two-factor authentication {person.mfa_enabled ? 'is on' : 'is not set up yet'}
             </p>
+            {resetLink ? (
+              <div className="mt-2 p-2.5 rounded-[8px] bg-[#F5F8FD] border border-[#E3E7EF] space-y-1.5">
+                <label htmlFor="reset-link" className="block font-semibold">Password reset link (works once, for one hour)</label>
+                <div className="flex gap-1.5">
+                  <input id="reset-link" readOnly value={resetLink} onFocus={(e) => e.target.select()} className="flex-1 min-w-0 min-h-[34px] px-2 border border-[#D3DCEE] rounded-[6px] bg-white font-mono text-[11px]" />
+                  <button
+                    type="button"
+                    onClick={() => navigator.clipboard?.writeText(resetLink).then(() => setCopied(true))}
+                    className="min-h-[34px] px-2.5 bg-[#122654] text-white font-bold rounded-[6px] cursor-pointer"
+                  >
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#4A5878]">Send it to {person.name} privately. Their current password keeps working until they use it.</p>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={createResetLink}
+                className="mt-2 min-h-[34px] px-3 border border-[#D3DCEE] rounded-[8px] font-bold text-[#122654] hover:bg-[#F5F8FD] cursor-pointer disabled:opacity-60"
+              >
+                Create reset link
+              </button>
+            )}
           </section>
 
           {error && (

@@ -134,7 +134,7 @@ export default function ClientsPage() {
         </div>
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-[#4A5878] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
+          <input aria-label="Search by client name or company number"
             type="text"
             placeholder="Search by client name or company number..."
             value={search}
@@ -146,7 +146,7 @@ export default function ClientsPage() {
 
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           {/* Company Type Filter */}
-          <select
+          <select aria-label="Filter by client type"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
             className="min-h-[44px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66]"
@@ -160,7 +160,7 @@ export default function ClientsPage() {
           </select>
 
           {/* Data Source Filter */}
-          <select
+          <select aria-label="Filter by data source"
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
             className="min-h-[44px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66]"
@@ -227,7 +227,7 @@ export default function ClientsPage() {
                         Co #{client.company_no || '09876543'}
                       </div>
                       {client.archived_at && (
-                        <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#F4F5F7] border border-[#D3DCEE] text-[#4A5878]" title={client.archive_reason || undefined}>
+                        <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#F5F8FD] border border-[#D3DCEE] text-[#4A5878]" title={client.archive_reason || undefined}>
                           <Archive className="w-3 h-3" />
                           Archived {new Date(client.archived_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                           {client.archive_reason ? ` · ${client.archive_reason}` : ''}
@@ -236,7 +236,7 @@ export default function ClientsPage() {
                     </td>
 
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded bg-[#F4F5F7] border border-[#D3DCEE] text-[11px] font-medium">
+                      <span className="px-2 py-0.5 rounded bg-[#F5F8FD] border border-[#D3DCEE] text-[11px] font-medium">
                         {client.company_type}
                       </span>
                     </td>

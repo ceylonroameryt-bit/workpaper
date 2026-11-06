@@ -323,7 +323,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-2xl max-w-xl w-full overflow-hidden animate-in fade-in zoom-in-95">
             <div className="p-4 border-b border-[#E3E7EF] flex items-center gap-3">
               <Search className="w-4 h-4 text-[#4A5878]" />
-              <input
+              <input aria-label="Search working papers, accounts, clients, or commands"
                 id="global-search-title"
                 type="text"
                 autoFocus
@@ -447,7 +447,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
             </div>
 
             <form onSubmit={handleAskBot} className="p-4 border-t border-[#E3E7EF] flex gap-2">
-              <input
+              <input aria-label="Ask Blynt Bot about this paper or engagement"
                 type="text"
                 placeholder="Ask Blynt Bot about this paper or engagement..."
                 value={botPrompt}

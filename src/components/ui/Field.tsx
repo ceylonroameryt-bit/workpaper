@@ -24,21 +24,21 @@ export const Field: React.FC<FieldProps> = ({
       {label && (
         <label
           htmlFor={htmlFor}
-          className="text-xs font-semibold uppercase tracking-wider text-[#5B6676] flex items-center gap-1"
+          className="text-xs font-semibold uppercase tracking-wider text-[#4A5878] flex items-center gap-1"
         >
           <span>{label}</span>
-          {required && <span className="text-[#9A4A00]">*</span>}
+          {required && <span className="text-[#6B4700]">*</span>}
         </label>
       )}
 
       {children}
 
       {hint && !error && (
-        <span className="text-xs text-[#5B6676] mt-0.5">{hint}</span>
+        <span className="text-xs text-[#4A5878] mt-0.5">{hint}</span>
       )}
 
       {error && (
-        <span className="text-xs text-[#9A4A00] font-medium mt-0.5 flex items-center gap-1" role="alert">
+        <span className="text-xs text-[#6B4700] font-medium mt-0.5 flex items-center gap-1" role="alert">
           {error}
         </span>
       )}
@@ -57,21 +57,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative flex items-center w-full">
         {prefixIcon && (
-          <div className="absolute left-3.5 text-[#5B6676] pointer-events-none flex items-center">
+          <div className="absolute left-3.5 text-[#4A5878] pointer-events-none flex items-center">
             {prefixIcon}
           </div>
         )}
         <input
           ref={ref}
           className={`w-full min-h-[44px] px-3.5 py-2.5 bg-white border ${
-            error ? 'border-[#9A4A00]' : 'border-[#D5D9E0]'
-          } rounded-[10px] text-sm text-[#1B2430] placeholder:text-[#5B6676]/60 transition-colors focus-visible:outline-2 focus-visible:outline-[#1E4FD8] focus-visible:outline-offset-2 disabled:bg-[#F4F5F7] disabled:text-[#5B6676] ${
+            error ? 'border-[#6B4700]' : 'border-[#D3DCEE]'
+          } rounded-[10px] text-sm text-[#122654] placeholder:text-[#4A5878]/60 transition-colors focus-visible:outline-2 focus-visible:outline-[#1D4E89] focus-visible:outline-offset-2 disabled:bg-[#F5F8FD] disabled:text-[#4A5878] ${
             prefixIcon ? 'pl-10' : ''
           } ${suffixIcon ? 'pr-10' : ''} ${className}`}
           {...props}
         />
         {suffixIcon && (
-          <div className="absolute right-3.5 text-[#5B6676] pointer-events-none flex items-center">
+          <div className="absolute right-3.5 text-[#4A5878] pointer-events-none flex items-center">
             {suffixIcon}
           </div>
         )}
@@ -91,8 +91,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         className={`w-full min-h-[44px] px-3.5 py-2.5 bg-white border ${
-          error ? 'border-[#9A4A00]' : 'border-[#D5D9E0]'
-        } rounded-[10px] text-sm text-[#1B2430] transition-colors focus-visible:outline-2 focus-visible:outline-[#1E4FD8] focus-visible:outline-offset-2 disabled:bg-[#F4F5F7] ${className}`}
+          error ? 'border-[#6B4700]' : 'border-[#D3DCEE]'
+        } rounded-[10px] text-sm text-[#122654] transition-colors focus-visible:outline-2 focus-visible:outline-[#1D4E89] focus-visible:outline-offset-2 disabled:bg-[#F5F8FD] ${className}`}
         {...props}
       >
         {children}

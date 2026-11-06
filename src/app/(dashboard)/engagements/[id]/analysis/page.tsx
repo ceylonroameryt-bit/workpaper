@@ -147,7 +147,7 @@ export default function AnalysisPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <select
+          <select aria-label="Comparison"
             value={comparisonMode}
             onChange={(e) => setComparisonMode(e.target.value as any)}
             className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-3 py-1.5 text-[#122654] font-medium outline-none"
@@ -287,7 +287,7 @@ export default function AnalysisPage() {
 
                   {/* Manual Comment Box (ANL-03) */}
                   <div className="mt-3 flex items-center gap-3">
-                    <input
+                    <input aria-label="Add preparer explanation or variance note"
                       type="text"
                       defaultValue={line.comment}
                       placeholder="Add preparer explanation or variance note..."

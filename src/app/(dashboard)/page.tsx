@@ -672,7 +672,7 @@ export default function PracticeHomePage() {
                       <td className="p-3">
                         <div className="flex items-center gap-1">
                           {eng.stages.map((st, sidx) => {
-                            let pillStyle = 'bg-[#F4F5F7] text-[#7E8DA6] border-[#D3DCEE]';
+                            let pillStyle = 'bg-[#F5F8FD] text-[#7E8DA6] border-[#D3DCEE]';
                             if (st.status === 'done') {
                               pillStyle = 'bg-[#E6F4EF] text-[#0B6B52] border-[#0B6B52]/30 font-semibold';
                             } else if (st.status === 'alert') {
@@ -793,7 +793,7 @@ export default function PracticeHomePage() {
             )}
 
             <form onSubmit={handleAskBot} className="flex gap-2">
-              <input
+              <input aria-label="Ask about mappings, variances, papers"
                 type="text"
                 placeholder="Ask about mappings, variances, papers..."
                 value={botPrompt}

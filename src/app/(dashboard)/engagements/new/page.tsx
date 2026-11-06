@@ -398,7 +398,7 @@ export default function NewEngagementWizard() {
             )}
 
             {error && (
-              <div role="alert" className="mt-6 p-3 rounded-[10px] bg-[#FFF1DC] border border-[#9A4A00]/20 text-[#9A4A00] text-xs font-medium">
+              <div role="alert" className="mt-6 p-3 rounded-[10px] bg-[#FFF4DB] border border-[#6B4700]/20 text-[#6B4700] text-xs font-medium">
                 {error}
               </div>
             )}

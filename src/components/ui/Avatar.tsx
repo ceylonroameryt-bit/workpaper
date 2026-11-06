@@ -45,7 +45,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div
-      className={`relative inline-flex items-center justify-center rounded-full bg-[#E8EEFD] text-[#1E4FD8] font-semibold border border-[#D5D9E0]/60 shrink-0 overflow-hidden select-none ${sizeClasses[size]} ${className}`}
+      className={`relative inline-flex items-center justify-center rounded-full bg-[#EAF5FC] text-[#1D4E89] font-semibold border border-[#D3DCEE]/60 shrink-0 overflow-hidden select-none ${sizeClasses[size]} ${className}`}
       title={tooltip}
     >
       {avatarUrl ? (

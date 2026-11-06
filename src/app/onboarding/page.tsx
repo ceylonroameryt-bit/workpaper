@@ -389,7 +389,7 @@ export default function OnboardingPage() {
                     )}
                     {r.error && <p className="text-[11px] text-[#B8432F] mt-1">{r.error}</p>}
                     {r.link && (
-                      <div className="flex items-center gap-2 mt-1.5 text-[11px] text-[#0B6B4D]">
+                      <div className="flex items-center gap-2 mt-1.5 text-[11px] text-[#0B6B52]">
                         <Check className="w-3.5 h-3.5 shrink-0" />
                         <span className="truncate font-mono">{r.link}</span>
                         <button type="button" onClick={() => navigator.clipboard?.writeText(r.link!)} className="inline-flex items-center gap-1 font-semibold text-[#1D4E89] hover:underline cursor-pointer">
@@ -427,7 +427,7 @@ export default function OnboardingPage() {
           <Changes lines={changes[step]} />
 
           {error && (
-            <div role="alert" className="mt-6 p-3 rounded-[10px] bg-[#FFF1DC] border border-[#9A4A00]/20 text-[#9A4A00] text-xs font-medium">
+            <div role="alert" className="mt-6 p-3 rounded-[10px] bg-[#FFF4DB] border border-[#6B4700]/20 text-[#6B4700] text-xs font-medium">
               {error}
             </div>
           )}

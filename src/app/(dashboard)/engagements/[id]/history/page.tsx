@@ -228,7 +228,7 @@ export default function HistoryPage() {
             <div className="flex items-center gap-2.5">
               <div className="relative w-64">
                 <Search className="w-3.5 h-3.5 text-[#7E8DA6] absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
+                <input aria-label="Filter by user, action, or entity"
                   type="text"
                   placeholder="Filter by user, action, or entity..."
                   value={search}
@@ -237,7 +237,7 @@ export default function HistoryPage() {
                 />
               </div>
 
-              <select
+              <select aria-label="Filter by action"
                 value={actionFilter}
                 onChange={(e) => setActionFilter(e.target.value)}
                 className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"
@@ -324,7 +324,7 @@ export default function HistoryPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <select
+              <select aria-label="Compare from version"
                 value={versionA}
                 onChange={(e) => setVersionA(e.target.value)}
                 className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 font-medium"
@@ -335,7 +335,7 @@ export default function HistoryPage() {
 
               <span className="text-xs font-bold text-[#7E8DA6]">vs</span>
 
-              <select
+              <select aria-label="Compare to version"
                 value={versionB}
                 onChange={(e) => setVersionB(e.target.value)}
                 className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 font-medium"

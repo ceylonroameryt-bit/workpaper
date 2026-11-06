@@ -124,7 +124,7 @@ export default function ChartOfAccountsPage() {
 
         <div className="relative w-full md:w-64 shrink-0">
           <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
+          <input aria-label="Search nominal or name"
             type="text"
             placeholder="Search nominal or name..."
             value={search}
@@ -185,7 +185,7 @@ export default function ChartOfAccountsPage() {
                   </td>
                   <td className="p-3 pr-6 text-right">
                     {acc.is_system ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-[#F4F5F7] text-[#4A5878] border border-[#D3DCEE]">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-[#F5F8FD] text-[#4A5878] border border-[#D3DCEE]">
                         <Lock className="w-3 h-3" /> System
                       </span>
                     ) : (
@@ -221,7 +221,7 @@ export default function ChartOfAccountsPage() {
                 <label className="block font-semibold text-[#122654] mb-1.5">
                   Nominal account code (e.g. 6850)
                 </label>
-                <input
+                <input aria-label="Nominal account code (e.g. 6850)"
                   type="text"
                   required
                   value={newCode}
@@ -235,7 +235,7 @@ export default function ChartOfAccountsPage() {
                 <label className="block font-semibold text-[#122654] mb-1.5">
                   Account description
                 </label>
-                <input
+                <input aria-label="Account description"
                   type="text"
                   required
                   value={newName}
@@ -250,7 +250,7 @@ export default function ChartOfAccountsPage() {
                   <label className="block font-semibold text-[#122654] mb-1.5">
                     Category
                   </label>
-                  <select
+                  <select aria-label="Category"
                     value={newType}
                     onChange={(e) => setNewType(e.target.value as any)}
                     className="w-full min-h-[40px] px-2 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
@@ -267,7 +267,7 @@ export default function ChartOfAccountsPage() {
                   <label className="block font-semibold text-[#122654] mb-1.5">
                     Lead schedule letter
                   </label>
-                  <select
+                  <select aria-label="Lead schedule letter"
                     value={newLead}
                     onChange={(e) => setNewLead(e.target.value)}
                     className="w-full min-h-[40px] px-2 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
