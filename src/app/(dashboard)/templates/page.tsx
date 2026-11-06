@@ -442,7 +442,7 @@ export default function TemplatesCatalogPage() {
 
       {/* Primary Tab Navigation */}
       <div className="flex items-center justify-between border-b border-[#E3E7EF] flex-wrap gap-3">
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('by_type')}

@@ -317,11 +317,11 @@ export default function PracticeReviewNotesPage() {
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <select aria-label="Filter by type"
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="min-h-[38px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
+                className="min-h-[38px] max-w-full px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
               >
                 <option value="all">All types</option>
                 <option value="review_note">Review notes</option>
@@ -332,7 +332,7 @@ export default function PracticeReviewNotesPage() {
               <select aria-label="Filter by client"
                 value={clientFilter}
                 onChange={(e) => setClientFilter(e.target.value)}
-                className="min-h-[38px] px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
+                className="min-h-[38px] max-w-full px-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] font-semibold outline-none focus:border-[#FF7A66] cursor-pointer"
               >
                 <option value="all">All clients</option>
                 {clients.map((cli) => (

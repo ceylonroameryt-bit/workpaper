@@ -183,11 +183,11 @@ export default function DisclosuresPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E3E7EF] pb-1">
+      <div className="flex items-center gap-2 border-b border-[#E3E7EF] pb-1 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('checklist')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'checklist'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -203,7 +203,7 @@ export default function DisclosuresPage() {
         <button
           type="button"
           onClick={() => setActiveTab('notes')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'notes'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -219,7 +219,7 @@ export default function DisclosuresPage() {
         <button
           type="button"
           onClick={() => setActiveTab('accounts')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'accounts'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -232,7 +232,7 @@ export default function DisclosuresPage() {
         <button
           type="button"
           onClick={() => setActiveTab('post_balance')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'post_balance'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'

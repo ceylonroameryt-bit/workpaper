@@ -160,11 +160,11 @@ export default function AnalysisPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E3E7EF] pb-1">
+      <div className="flex items-center gap-2 border-b border-[#E3E7EF] pb-1 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('pnl')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'pnl'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -177,7 +177,7 @@ export default function AnalysisPage() {
         <button
           type="button"
           onClick={() => setActiveTab('balance_sheet')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'balance_sheet'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -190,7 +190,7 @@ export default function AnalysisPage() {
         <button
           type="button"
           onClick={() => setActiveTab('unusual')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'unusual'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
