@@ -1,5 +1,5 @@
 import { syncIn, syncOut } from '@/lib/server/store';
-import { getActorFromRequest, jsonResponse, errorResponse } from '@/lib/server/api-helpers';
+import { getActorFromRequest, jsonResponse, errorResponse, publicOrigin } from '@/lib/server/api-helpers';
 import { db } from '@/lib/server/db';
 import { createInvite } from '@/lib/server/invites';
 import { canSetUpPractice } from '@/lib/server/onboarding';
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const { invite, token } = createInvite(actor, body);
     await syncOut();
-    const link = `${new URL(req.url).origin}/invite/${token}`;
+    const link = `${publicOrigin(req)}/invite/${token}`;
     return jsonResponse({ invite, link }, 201);
   } catch (err) {
     return errorResponse(err);

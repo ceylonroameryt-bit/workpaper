@@ -19,3 +19,14 @@ describe('Connect Xero/QuickBooks failures go back to the client page', () => {
     expect(connectFailed(req, 'xero', '', new ServiceError('x', 503, 'XERO_NOT_CONFIGURED'))).toBeNull();
   });
 });
+
+describe('public address for links', () => {
+  it('uses APP_URL when set (AWS sees 0.0.0.0:3000 internally), else the request address', async () => {
+    const { publicOrigin } = await import('../lib/server/api-helpers');
+    const internal = new Request('http://0.0.0.0:3000/api/v1/invites');
+    process.env.APP_URL = 'https://app.example/';
+    expect(publicOrigin(internal)).toBe('https://app.example');
+    delete process.env.APP_URL;
+    expect(publicOrigin(internal)).toBe('http://0.0.0.0:3000');
+  });
+});
