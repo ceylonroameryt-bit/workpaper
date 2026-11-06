@@ -4,14 +4,12 @@ import React, { useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Building2,
   Calendar,
   CheckCircle2,
   Clock,
   ExternalLink,
   Plus,
   Search,
-  Sparkles,
   Users,
   ShieldCheck,
   FileSpreadsheet,
@@ -29,53 +27,14 @@ import { useLocale } from '@/context/LocaleContext';
 export default function ClientRecordPage() {
   const params = useParams();
   const router = useRouter();
-  const clientId = (params?.id as string) || 'cli_harlow';
+  const clientId = (params?.id as string) || '';
   const { clients, activeEngagement, addCompany } = useCompany();
   const { formatDate } = useLocale();
 
-  const client = db.clients.find((c) => c.id === clientId) || db.clients[0] || {
-    id: clientId,
-    name: 'Harlow & Finch Fine Goods Ltd',
-    company_no: '09876543',
-    company_type: 'Small company (FRS 102 1A)',
-    year_end: '2026-09-30',
-    data_source: 'xero',
-  };
+  const client = db.clients.find((c) => c.id === clientId);
 
-  const clientEngagements = db.engagements.filter((e) => e.client_id === client.id);
+  const clientEngagements = client ? db.engagements.filter((e) => e.client_id === client.id) : [];
 
-  // Companies House Lookup Simulation (FIL-01)
-  const [chLoading, setChLoading] = useState(false);
-  const [chData, setChData] = useState<{
-    status: string;
-    sic: string;
-    registeredOffice: string;
-    incorporationDate: string;
-    accountsDue: string;
-    confirmationDue: string;
-  } | null>({
-    status: 'Active (Companies House Verified)',
-    sic: '47710 - Retail sale of clothing in specialised stores',
-    registeredOffice: '44 Grosvenor Gardens, London, SW1W 0DH',
-    incorporationDate: '14 May 2015',
-    accountsDue: '30 June 2027',
-    confirmationDue: '28 May 2027',
-  });
-
-  const handleChLookup = () => {
-    setChLoading(true);
-    setTimeout(() => {
-      setChLoading(false);
-      setChData({
-        status: 'Active (Live from Companies House API)',
-        sic: '47710 - Retail sale of clothing',
-        registeredOffice: '44 Grosvenor Gardens, London, SW1W 0DH',
-        incorporationDate: '14 May 2015',
-        accountsDue: '30 June 2027',
-        confirmationDue: '28 May 2027',
-      });
-    }, 700);
-  };
 
   // Result of "Connect Xero", passed back by the callback
   const search = useSearchParams();
@@ -94,6 +53,16 @@ export default function ClientRecordPage() {
               : null;
   const latestEngagement = [...clientEngagements].sort((a, b) => b.period_end.localeCompare(a.period_end))[0];
 
+  if (!client) {
+    return (
+      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-8 text-center space-y-3">
+        <h1 className="text-lg font-bold text-[#122654]">Client not found</h1>
+        <p className="text-xs text-[#4A5878]">This client doesn&apos;t exist or you don&apos;t have access to it.</p>
+        <Link href="/clients" className="inline-block text-xs font-bold text-[#B8432F] hover:underline">Back to clients</Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {xeroMessage && (
@@ -106,26 +75,19 @@ export default function ClientRecordPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">{client.name}</h1>
-            <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] px-2.5 py-1 rounded-full font-mono font-semibold">
-              Co. No. {client.company_no || '09876543'}
-            </span>
+            {client.company_no && (
+              <span className="text-xs bg-[#EAF5FC] text-[#1D4E89] px-2.5 py-1 rounded-full font-mono font-semibold">
+                Co. No. {client.company_no}
+              </span>
+            )}
           </div>
           <p className="text-xs text-[#4A5878] mt-1">
-            Standard: <strong>{client.company_type || 'FRS 102 1A'}</strong> • Financial Year End:{' '}
-            <strong>{client.year_end || '30 September'}</strong>
+            Standard: <strong>{client.company_type || 'Not set'}</strong> • Financial Year End:{' '}
+            <strong>{client.year_end ? formatDate(client.year_end) : 'Not set'}</strong>
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleChLookup}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F5F8FD] hover:bg-[#E3E7EF] border border-[#D3DCEE] text-[#122654] text-xs font-semibold rounded-xl transition-colors cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#FF7A66]" />
-            <span>{chLoading ? 'Querying API...' : 'Look up on Companies House (FIL-01)'}</span>
-          </button>
-
           <Link
             href="/engagements/new"
             className="flex items-center gap-1.5 px-3.5 py-2 bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] text-xs font-bold rounded-xl shadow-xs transition-colors"
@@ -136,9 +98,8 @@ export default function ClientRecordPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Client Facts & Engagements */}
-        <div className="lg:col-span-2 space-y-6">
+      <div>
+        <div className="space-y-6">
           <XeroPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           <QuickBooksPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           {/* Engagements List */}
@@ -180,47 +141,6 @@ export default function ClientRecordPage() {
           </div>
 
           <ClientProfileForm key={client.id} client={client as Client} />
-        </div>
-
-        {/* Right Col: Companies House Data Card (FIL-01) */}
-        <div className="space-y-4">
-          <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#122654] border-b border-[#E3E7EF] pb-3">
-              <Building2 className="w-4 h-4 text-[#FF7A66]" />
-              <span>Companies House Public Registry (FIL-01)</span>
-            </div>
-
-            {chData && (
-              <div className="space-y-3 text-xs text-[#122654]">
-                <div>
-                  <span className="text-[10px] text-[#7E8DA6] block uppercase font-bold">Status</span>
-                  <span className="font-bold text-[#0B6B52]">{chData.status}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#7E8DA6] block uppercase font-bold">Nature of Business (SIC)</span>
-                  <span>{chData.sic}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#7E8DA6] block uppercase font-bold">Registered Office</span>
-                  <span>{chData.registeredOffice}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#7E8DA6] block uppercase font-bold">Incorporated</span>
-                  <span>{chData.incorporationDate}</span>
-                </div>
-                <div className="pt-2 border-t border-gray-100 flex justify-between">
-                  <div>
-                    <span className="text-[10px] text-[#7E8DA6] block">Next Accounts Due</span>
-                    <span className="font-mono font-bold text-[#122654]">{chData.accountsDue}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-[#7E8DA6] block">Confirmation Stmt</span>
-                    <span className="font-mono font-bold text-[#122654]">{chData.confirmationDue}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
