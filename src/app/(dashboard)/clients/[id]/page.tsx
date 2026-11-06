@@ -79,22 +79,19 @@ export default function ClientRecordPage() {
 
   // Result of "Connect Xero", passed back by the callback
   const search = useSearchParams();
-  const xeroResult = search.get('xero');
-  const qboResult = search.get('qbo');
+  const [ledger, ledgerResult] = search.get('xero') ? ['Xero', search.get('xero')] : search.get('qbo') ? ['QuickBooks', search.get('qbo')] : ['', null];
   const xeroMessage =
-    xeroResult === 'connected'
-      ? { ok: true, text: 'Xero connected. Pull the trial balance from an engagement.' }
-      : xeroResult === 'declined'
-        ? { ok: false, text: 'Xero access was not granted, so nothing was connected.' }
-        : xeroResult === 'error'
-          ? { ok: false, text: 'The Xero connection didn\u2019t complete. Try again, and sign in as the same user who started it.' }
-          : qboResult === 'connected'
-            ? { ok: true, text: 'QuickBooks connected. Pull the trial balance from an engagement.' }
-            : qboResult === 'declined'
-              ? { ok: false, text: 'QuickBooks access was not granted, so nothing was connected.' }
-              : qboResult === 'error'
-                ? { ok: false, text: 'The QuickBooks connection didn’t complete. Try again, and sign in as the same user who started it.' }
-                : null;
+    ledgerResult === 'connected'
+      ? { ok: true, text: `${ledger} connected. Pull the trial balance from an engagement.` }
+      : ledgerResult === 'declined'
+        ? { ok: false, text: `${ledger} access was not granted, so nothing was connected.` }
+        : ledgerResult === 'not_configured'
+          ? { ok: false, text: `${ledger} isn’t switched on for this practice yet, so it couldn’t be connected. Your admin needs to add the ${ledger} app details to the server. Until then, import the trial balance from a CSV file.` }
+          : ledgerResult === 'archived'
+            ? { ok: false, text: `This client is archived. Restore it before connecting ${ledger}.` }
+            : ledgerResult === 'error'
+              ? { ok: false, text: `The ${ledger} connection didn’t complete. Try again, and sign in as the same user who started it.` }
+              : null;
   const latestEngagement = [...clientEngagements].sort((a, b) => b.period_end.localeCompare(a.period_end))[0];
 
   return (
