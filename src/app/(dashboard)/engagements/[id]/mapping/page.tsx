@@ -32,8 +32,7 @@ import { toPence, asPence, formatPence } from '@/lib/money';
 import { matchBlyntAccount, getStatutoryDetails } from '@/lib/mapping/auto-mapper';
 import { getActor, getCurrentUserId } from '@/lib/session';
 import { engagementSummary } from '@/lib/api';
-import { newAccount, sectionRange } from '@/lib/coa';
-import { STANDARD_CHART } from '@/lib/standard-chart';
+import { NewAccountForm } from '@/components/coa/NewAccountForm';
 
 function ChartOptions() {
   return (
@@ -47,39 +46,21 @@ function ChartOptions() {
   );
 }
 
-/** Search the chart by code or name; when nothing fits, add a code inside a chosen section. */
+/** Search the chart by code or name; when nothing fits, create a practice account. */
 function AccountPicker({ value, label, firmId, onPick }: { value: string; label: string; firmId: string; onPick: (code: string) => void }) {
   const current = db.blynt_accounts.find((a) => a.code === value);
   const [text, setText] = useState(current ? `${current.code} ${current.name}` : '');
   const [creating, setCreating] = useState(false);
-  const [base, setBase] = useState(STANDARD_CHART.find((a) => a.code === value)?.code ?? '');
-  const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
-  const range = sectionRange(base);
+  const known = (t: string) => db.blynt_accounts.find((a) => `${a.code} ${a.name}` === t || a.code === t.trim());
 
   const pick = (t: string) => {
     setText(t);
-    const hit = db.blynt_accounts.find((a) => `${a.code} ${a.name}` === t || a.code === t.trim());
+    const hit = known(t);
     if (hit && hit.code !== value) onPick(hit.code);
-  };
-  const startCreate = () => {
-    setName(db.blynt_accounts.some((a) => `${a.code} ${a.name}` === text) ? '' : text.replace(/^\d+\s*/, ''));
-    setError('');
-    setCreating(true);
-  };
-  const save = () => {
-    const acc = newAccount(db.blynt_accounts, code, name, firmId);
-    if (typeof acc === 'string') return setError(acc);
-    if (range && (Number(code) < range.from || Number(code) > range.to)) return setError(`Use a code from ${range.from} to ${range.to}.`);
-    db.blynt_accounts.push(acc);
-    setText(`${acc.code} ${acc.name}`);
-    setCreating(false);
-    onPick(acc.code);
   };
 
   return (
-    <div className="w-full max-w-[240px] space-y-1.5">
+    <div className="w-full max-w-[260px] space-y-1.5">
       <div className="flex gap-1">
         <input
           aria-label={label}
@@ -87,29 +68,24 @@ function AccountPicker({ value, label, firmId, onPick }: { value: string; label:
           value={text}
           placeholder="Search code or name…"
           onChange={(e) => pick(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && !db.blynt_accounts.some((a) => `${a.code} ${a.name}` === text) && startCreate()}
+          onKeyDown={(e) => e.key === 'Enter' && !known(text) && setCreating(true)}
           className="min-w-0 flex-1 text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] focus:border-[#122654] rounded-lg bg-white text-[#122654]"
         />
-        <button type="button" onClick={startCreate} title="Create a new account" aria-label="Create a new account" className="px-2 text-xs font-bold border border-[#D3DCEE] rounded-lg text-[#122654] hover:bg-[#EAF5FC]">
+        <button type="button" onClick={() => setCreating(true)} title="Create a new account" aria-label="Create a new account" className="px-2 text-xs font-bold border border-[#D3DCEE] rounded-lg text-[#122654] hover:bg-[#EAF5FC]">
           +
         </button>
       </div>
       {creating && (
-        <div className="p-2 border border-[#D3DCEE] rounded-lg bg-[#F5F8FD] space-y-1.5 text-[11px]">
-          <select aria-label="Section" value={base} onChange={(e) => { setBase(e.target.value); setCode(''); }} className="w-full py-1 px-1.5 border border-[#D3DCEE] rounded bg-white">
-            <option value="">Section…</option>
-            {STANDARD_CHART.map((a) => (
-              <option key={a.code} value={a.code}>{a.code} {a.name}</option>
-            ))}
-          </select>
-          <input aria-label="New code" value={code} onChange={(e) => setCode(e.target.value)} placeholder={range ? `Code ${range.from}–${range.to}` : 'Pick a section first'} disabled={!range} className="w-full py-1 px-1.5 border border-[#D3DCEE] rounded bg-white" />
-          <input aria-label="New account name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Account name" className="w-full py-1 px-1.5 border border-[#D3DCEE] rounded bg-white" />
-          {error && <p role="alert" className="text-[#B8432F]">{error}</p>}
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setCreating(false)} className="text-[#4A5878]">Cancel</button>
-            <button type="button" onClick={save} disabled={!range} className="px-2 py-0.5 rounded bg-[#122654] text-white font-semibold disabled:opacity-50">Create &amp; map</button>
-          </div>
-        </div>
+        <NewAccountForm
+          firmId={firmId}
+          initialName={known(text) ? '' : text.replace(/^\d+\s*/, '')}
+          onCancel={() => setCreating(false)}
+          onCreated={(acc) => {
+            setText(`${acc.code} ${acc.name}`);
+            setCreating(false);
+            onPick(acc.code);
+          }}
+        />
       )}
     </div>
   );

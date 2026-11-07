@@ -245,6 +245,8 @@ export interface BlyntAccount {
   used_by_count?: number;
   /** Set on accounts a practice added; the standard chart has none */
   firm_id?: string;
+  /** The standard account a practice account is classified like */
+  parent_code?: string;
 }
 
 export interface MappingList {
