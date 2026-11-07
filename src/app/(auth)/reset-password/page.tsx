@@ -1,253 +1,166 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import {
-  Briefcase,
-  Lock,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  Check,
-  X,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Field, Input } from '@/components/ui/Field';
+import { AlertCircle, Check, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { AuthBrandPanel } from '@/components/layout/AuthBrandPanel';
+import { passwordChecks, passwordError } from '@/lib/validation';
+
+const inputClass =
+  'w-full min-h-[44px] px-3.5 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] focus:ring-2 focus:ring-[#FF7A66]/20';
 
 export default function ResetPasswordPage() {
-  const router = useRouter();
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [token, setToken] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [doneEmail, setDoneEmail] = useState('');
 
-  // Password rules validation
-  const hasMinLength = newPassword.length >= 8;
-  const hasUppercase = /[A-Z]/.test(newPassword);
-  const hasNumber = /[0-9]/.test(newPassword);
-  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
-  const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
-  const isStrong = hasMinLength && hasUppercase && hasNumber && hasSpecial;
+  useEffect(() => setToken(new URLSearchParams(window.location.search).get('token') || ''), []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const checks = passwordChecks(password);
+  const mismatch = confirm.length > 0 && confirm !== password;
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-
-    if (!isStrong) {
-      setErrorMsg('Please ensure your password satisfies all security requirements.');
-      return;
+    if (busy) return;
+    const bad = passwordError(password);
+    if (bad) return setError(bad);
+    if (password !== confirm) return setError('The passwords don’t match.');
+    setBusy(true);
+    setError('');
+    try {
+      const res = await fetch('/api/v1/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) setDoneEmail(body.email || 'your account');
+      else setError(body.error || 'Could not reset the password. Try again.');
+    } catch {
+      setError('Could not reach the server. Try again.');
+    } finally {
+      setBusy(false);
     }
-
-    if (!passwordsMatch) {
-      setErrorMsg('Passwords do not match.');
-      return;
-    }
-
-    setIsUpdating(true);
-    setTimeout(() => {
-      setIsUpdating(false);
-      setIsSuccess(true);
-    }, 600);
   };
 
-  return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-white text-[#1B2430]">
-      {/* Left Column: Reset Password Form */}
-      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-between p-8 sm:p-12 lg:p-16">
-        <div>
-          {/* Logo */}
-          <Link href="/clients" className="flex items-center gap-2.5 mb-12">
-            <div className="w-9 h-9 rounded-[10px] bg-[#1E4FD8] flex items-center justify-center text-white font-bold">
-              <Briefcase className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-lg tracking-tight text-[#1B2430]">
-                Workpapers
-              </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#5B6676]">
-                Working Papers
-              </span>
-            </div>
-          </Link>
+  let content: React.ReactNode;
+  if (token === null) {
+    content = null;
+  } else if (!token) {
+    content = (
+      <>
+        <h2 className="text-2xl font-bold tracking-tight">Reset link needed</h2>
+        <p className="text-xs text-[#4A5878] mt-1.5">
+          To set a new password, open the reset link your practice admin or partner sent you.
+        </p>
+        <Link href="/forgot-password" className="inline-block mt-6 text-xs font-bold text-[#B8432F] hover:underline">
+          How to get a reset link
+        </Link>
+      </>
+    );
+  } else if (doneEmail) {
+    content = (
+      <>
+        <div className="w-12 h-12 rounded-full bg-[#E6F4EF] text-[#0B6B52] flex items-center justify-center mb-4">
+          <CheckCircle2 className="w-6 h-6" />
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight">Password updated</h2>
+        <p className="text-xs text-[#4A5878] mt-1.5">You can now sign in to {doneEmail} with your new password.</p>
+        <Link
+          href="/login"
+          className="mt-6 w-full min-h-[44px] bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold text-xs rounded-[10px] flex items-center justify-center"
+        >
+          Sign in
+        </Link>
+      </>
+    );
+  } else {
+    content = (
+      <>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold tracking-tight">Set a new password</h2>
+          <p className="text-xs text-[#4A5878] mt-1.5">Choose a strong password you don&apos;t use anywhere else.</p>
+        </div>
 
-          <div className="max-w-[400px]">
-            {!isSuccess ? (
-              <>
-                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#E8EEFD] text-[#1E4FD8] text-xs font-semibold mb-4 border border-[#1E4FD8]/20">
-                  <Lock className="w-4 h-4" />
-                  <span>Secure Password Reset</span>
-                </div>
-
-                <h1 className="text-[26px] sm:text-[28px] font-semibold text-[#1B2430] tracking-tight">
-                  Set new password
-                </h1>
-                <p className="text-sm text-[#5B6676] mt-2 mb-6 leading-relaxed">
-                  Choose a strong, unique password to secure your clients' working papers.
-                </p>
-
-                {errorMsg && (
-                  <div className="p-3 rounded-[8px] bg-[#FFF1DC] border border-[#9A4A00]/20 text-[#9A4A00] text-xs font-medium mb-4">
-                    {errorMsg}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label
-                      htmlFor="new-password"
-                      className="text-xs font-semibold uppercase tracking-wider text-[#5B6676]"
-                    >
-                      New Password
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="new-password"
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="••••••••••••"
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5B6676] hover:text-[#1B2430] cursor-pointer"
-                        tabIndex={-1}
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <Field label="Confirm Password" htmlFor="confirm-password">
-                    <Input
-                      id="confirm-password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                    />
-                  </Field>
-
-                  {/* Password Strength Checklist */}
-                  <div className="p-3 rounded-[10px] bg-[#F4F5F7] border border-[#E3E6EB] flex flex-col gap-1.5 text-xs">
-                    <span className="font-semibold text-[#1B2430] text-[11px] uppercase tracking-wider">
-                      Requirements:
-                    </span>
-                    <div className="flex items-center gap-2 text-xs">
-                      {hasMinLength ? (
-                        <Check className="w-3.5 h-3.5 text-[#0B6B4D]" />
-                      ) : (
-                        <span className="w-3.5 h-3.5 rounded-full border border-[#D5D9E0] inline-block" />
-                      )}
-                      <span className={hasMinLength ? 'text-[#0B6B4D] font-medium' : 'text-[#5B6676]'}>
-                        At least 8 characters
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {hasUppercase ? (
-                        <Check className="w-3.5 h-3.5 text-[#0B6B4D]" />
-                      ) : (
-                        <span className="w-3.5 h-3.5 rounded-full border border-[#D5D9E0] inline-block" />
-                      )}
-                      <span className={hasUppercase ? 'text-[#0B6B4D] font-medium' : 'text-[#5B6676]'}>
-                        At least one uppercase letter (A-Z)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {hasNumber && hasSpecial ? (
-                        <Check className="w-3.5 h-3.5 text-[#0B6B4D]" />
-                      ) : (
-                        <span className="w-3.5 h-3.5 rounded-full border border-[#D5D9E0] inline-block" />
-                      )}
-                      <span className={hasNumber && hasSpecial ? 'text-[#0B6B4D] font-medium' : 'text-[#5B6676]'}>
-                        At least one number &amp; symbol
-                      </span>
-                    </div>
-                    {confirmPassword && (
-                      <div className="flex items-center gap-2 text-xs pt-1 border-t border-[#E3E6EB]">
-                        {passwordsMatch ? (
-                          <Check className="w-3.5 h-3.5 text-[#0B6B4D]" />
-                        ) : (
-                          <X className="w-3.5 h-3.5 text-[#9A4A00]" />
-                        )}
-                        <span className={passwordsMatch ? 'text-[#0B6B4D] font-medium' : 'text-[#9A4A00]'}>
-                          {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-2">
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      className="w-full"
-                      size="md"
-                      disabled={isUpdating}
-                    >
-                      {isUpdating ? 'Updating password...' : 'Update Password & Sign In'}
-                    </Button>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <div className="flex flex-col items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#E2F4EC] text-[#0B6B4D] flex items-center justify-center mb-1">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-
-                <h1 className="text-[26px] font-semibold text-[#1B2430] tracking-tight">
-                  Password updated
-                </h1>
-
-                <p className="text-sm text-[#5B6676] leading-relaxed">
-                  Your password has been changed successfully. You can now use your new password to sign into Workpapers.
-                </p>
-
-                <Button
-                  variant="primary"
-                  className="w-full mt-2"
-                  size="md"
-                  onClick={() => router.push('/login')}
-                >
-                  Proceed to Sign In
-                </Button>
-              </div>
-            )}
+        {error && (
+          <div role="alert" className="p-3 mb-4 rounded-[10px] bg-[#FDECEA] border border-[#B42318]/30 text-[#B42318] text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
           </div>
-        </div>
+        )}
 
-        {/* Footer */}
-        <div className="mt-12 pt-6 border-t border-[#E3E6EB] flex items-center gap-6 text-xs text-[#5B6676]">
-          <span>© 2026 Workpapers Inc.</span>
-          <Link href="/login" className="hover:text-[#1B2430]">
-            Sign in
-          </Link>
-          <Link href="/signup" className="hover:text-[#1B2430]">
-            Sign up
-          </Link>
-        </div>
-      </div>
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <div>
+            <label htmlFor="new-password" className="block text-xs font-semibold mb-1.5">New password</label>
+            <div className="relative">
+              <input
+                id="new-password"
+                type={show ? 'text' : 'password'}
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${inputClass} pr-10`}
+              />
+              <button
+                type="button"
+                onClick={() => setShow(!show)}
+                aria-label={show ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A5878] hover:text-[#122654] p-1"
+              >
+                {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[11px]">
+              {checks.map((c) => (
+                <li key={c.label} className={`flex items-center gap-1.5 ${c.ok ? 'text-[#0B6B52]' : 'text-[#4A5878]'}`}>
+                  {c.ok ? <Check className="w-3 h-3" /> : <span className="w-3 h-3 rounded-full border border-[#D3DCEE] inline-block" />}
+                  {c.label}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-      {/* Right Column: Information Panel */}
-      <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 bg-[#E9EFFD] p-12 lg:p-16 flex-col justify-between border-l border-[#D5D9E0]/50">
-        <div className="max-w-[500px]">
-          <h2 className="text-3xl font-semibold text-[#1B2430] tracking-tight leading-tight mb-4">
-            Security Best Practices
-          </h2>
-          <p className="text-sm text-[#5B6676] leading-relaxed mb-6">
-            Passwords must not be shared between team members. Everyone has their own sign-in, so the activity log shows who did what.
-          </p>
-        </div>
+          <div>
+            <label htmlFor="confirm-password" className="block text-xs font-semibold mb-1.5">Confirm new password</label>
+            <input
+              id="confirm-password"
+              type={show ? 'text' : 'password'}
+              autoComplete="new-password"
+              required
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              aria-invalid={mismatch}
+              className={inputClass}
+            />
+            {mismatch && <p className="text-[11px] text-[#B42318] mt-1">The passwords don&apos;t match.</p>}
+          </div>
 
-        <div className="text-xs text-[#5B6676]">
-          Blynt Workpapers
+          <button
+            type="submit"
+            disabled={busy}
+            className="w-full min-h-[44px] bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold text-xs rounded-[10px] shadow-sm mt-2 cursor-pointer disabled:opacity-50"
+          >
+            {busy ? 'Saving…' : 'Set new password'}
+          </button>
+        </form>
+      </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F5F8FD] text-[#122654]">
+      <AuthBrandPanel />
+      <div className="lg:col-span-6 xl:col-span-7 bg-white p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-center">
+        <div className="max-w-[420px] w-full">
+          {content}
+          <div className="mt-8 pt-6 border-t border-[#E3E7EF] text-center text-xs text-[#4A5878]">
+            <Link href="/login" className="hover:text-[#122654]">← Back to sign in</Link>
+          </div>
         </div>
       </div>
     </div>

@@ -2,14 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import {
-  Briefcase,
-  ShieldCheck,
-  KeyRound,
-  CheckCircle2,
-  Lock,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { AlertCircle, KeyRound } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { AuthBrandPanel } from '@/components/layout/AuthBrandPanel';
 
 export default function MfaVerificationPage() {
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
@@ -110,168 +105,96 @@ export default function MfaVerificationPage() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-white text-[#1B2430]">
-      {/* Left Column: MFA Verification Form */}
-      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-between p-8 sm:p-12 lg:p-16">
-        <div>
-          {/* Logo */}
-          <Link href="/clients" className="flex items-center gap-2.5 mb-12">
-            <div className="w-9 h-9 rounded-[10px] bg-[#1E4FD8] flex items-center justify-center text-white font-bold">
-              <Briefcase className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-lg tracking-tight text-[#1B2430]">
-                Workpapers
-              </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#5B6676]">
-                Working Papers
-              </span>
-            </div>
-          </Link>
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F5F8FD] text-[#122654]">
+      <AuthBrandPanel />
 
-          <div className="max-w-[420px]">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#E8EEFD] text-[#1E4FD8] text-xs font-semibold mb-4 border border-[#1E4FD8]/20">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Two-Factor Authentication</span>
-            </div>
-
-            <h1 className="text-[26px] sm:text-[28px] font-semibold text-[#1B2430] tracking-tight">
-              {step === 'setup' ? 'Set up two-factor sign-in' : 'Verify your identity'}
-            </h1>
-            <p className="text-sm text-[#5B6676] mt-1.5 mb-6 leading-relaxed">
+      <div className="lg:col-span-6 xl:col-span-7 bg-white p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-center">
+        <div className="max-w-[420px] w-full">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold tracking-tight text-[#122654]">
+              {step === 'setup' ? 'Set up two-factor sign-in' : 'Two-factor authentication'}
+            </h2>
+            <p className="text-xs text-[#4A5878] mt-1.5">
               {step === 'setup'
-                ? 'Two-factor sign-in is required. Add this account to your authenticator app (Google Authenticator, Microsoft Authenticator or 1Password), then enter the 6-digit code it shows.'
+                ? 'Two-factor sign-in is required. Scan the QR code with your authenticator app (Google Authenticator, Microsoft Authenticator or 1Password), then enter the 6-digit code it shows.'
                 : 'Enter the 6-digit code from your authenticator app.'}
             </p>
+          </div>
 
-            {step === 'setup' && enrolment && (
-              <div className="p-4 rounded-[10px] border border-[#D5D9E0] bg-[#F4F5F7] mb-6 text-xs">
-                <div className="flex items-center gap-2 font-semibold text-[#1B2430] mb-2">
+          {step === 'setup' && enrolment && (
+            <div className="mb-6 p-4 bg-[#F5F8FD] border border-[#E3E7EF] rounded-[12px] flex flex-col sm:flex-row items-center gap-4">
+              <div className="p-2 bg-white rounded-[10px] border border-[#D3DCEE] shrink-0">
+                <QRCodeSVG
+                  value={enrolment.otpauth}
+                  size={148}
+                  level="M"
+                  fgColor="#0B1A3B"
+                  title="QR code to add Blynt Workpapers to your authenticator app"
+                />
+              </div>
+              <div className="text-xs min-w-0">
+                <div className="flex items-center gap-1.5 font-semibold text-[#122654] mb-1.5">
                   <KeyRound className="w-3.5 h-3.5" />
-                  <span>Set-up key</span>
+                  <span>Can&apos;t scan? Enter this key</span>
                 </div>
-                <code className="block font-mono text-sm tracking-wider break-all text-[#1B2430] select-all">
+                <code className="block font-mono text-[13px] tracking-wider break-all text-[#1D4E89] select-all">
                   {enrolment.secret.replace(/(.{4})/g, '$1 ').trim()}
                 </code>
-                <a href={enrolment.otpauth} className="inline-block mt-2 text-[#1E4FD8] font-semibold hover:underline">
+                <a href={enrolment.otpauth} className="inline-block mt-2 text-[#B8432F] font-semibold hover:underline">
                   Open in authenticator app on this device
                 </a>
               </div>
-            )}
-
-            {/* Error Message Banner */}
-            {errorMessage && (
-              <div className="p-3 rounded-[8px] bg-[#FFF1DC] border border-[#9A4A00]/20 text-[#9A4A00] text-xs font-medium mb-4">
-                {errorMessage}
-              </div>
-            )}
-
-            <form onSubmit={handleManualSubmit} className="flex flex-col gap-5">
-              <div>
-                <label className="block text-xs font-medium text-[#5B6676] mb-3">
-                  6-Digit Security Code
-                </label>
-                <div className="flex items-center justify-between gap-2 sm:gap-2.5 on-paste" onPaste={handlePaste}>
-                  {digits.map((digit, index) => (
-                    <input
-                      key={index}
-                      ref={(el) => {
-                        inputRefs.current[index] = el;
-                      }}
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete={index === 0 ? 'one-time-code' : 'off'}
-                      aria-label={`Digit ${index + 1}`}
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleDigitChange(index, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(index, e)}
-                      className="w-12 h-13 sm:w-13 sm:h-14 text-center font-mono-numbers text-xl font-bold bg-white border border-[#D5D9E0] rounded-[10px] text-[#1B2430] focus:border-[#1E4FD8] focus:ring-2 focus:ring-[#1E4FD8]/20 focus-visible:outline-none transition-all shadow-2xs"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                variant="primary"
-                size="md"
-                className="w-full"
-                disabled={isVerifying}
-              >
-                {isVerifying ? 'Verifying authentication...' : 'Verify & Continue'}
-              </Button>
-            </form>
-
-            <div className="mt-8 pt-6 border-t border-[#E3E6EB] text-center">
-              <Link
-                href="/login"
-                className="text-xs text-[#5B6676] hover:text-[#1E4FD8] font-medium"
-              >
-                ← Return to Sign In
-              </Link>
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* Footer */}
-        <div className="mt-12 pt-6 border-t border-[#E3E6EB] flex items-center gap-6 text-xs text-[#5B6676]">
-          <span>© 2026 Workpapers Inc.</span>
-          <span>SOC 2 Type II Certified</span>
-          <span>Encrypted with TLS 1.3</span>
-        </div>
-      </div>
+          {errorMessage && (
+            <div
+              role="alert"
+              className="p-3 mb-4 rounded-[10px] bg-[#FDECEA] border border-[#B42318]/30 text-[#B42318] text-xs flex items-center gap-2"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
-      {/* Right Column: Security Panel */}
-      <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 bg-[#E9EFFD] p-12 lg:p-16 flex-col justify-between border-l border-[#D5D9E0]/50">
-        <div className="max-w-[540px]">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[#1E4FD8] text-xs font-semibold mb-6 border border-[#E3E6EB]">
-            <Lock className="w-3.5 h-3.5 text-[#1E4FD8]" />
-            <span>Bank-grade security and access controls</span>
-          </div>
-
-          <h2 className="text-3xl xl:text-4xl font-semibold text-[#1B2430] tracking-tight leading-tight mb-4">
-            Protecting client financial data
-          </h2>
-
-          <p className="text-sm text-[#5B6676] leading-relaxed mb-8">
-            Workpapers enforces mandatory hardware or TOTP multi-factor authentication for all engagement teams to safeguard working papers and client evidence.
-          </p>
-
-          <div className="flex flex-col gap-3.5">
-            {[
-              {
-                title: 'Tamper-Evident Working Papers',
-                desc: 'All working papers, nominal adjustments, and evidence extractions are hashed with SHA-256 for legal sign-off defensibility.',
-              },
-              {
-                title: 'Role-Based Access Control (RBAC)',
-                desc: 'Staff are restricted to permitted engagements with granular preparer, manager, and partner sign-off tiers.',
-              },
-              {
-                title: 'Zero Permanent Storage for AI',
-                desc: 'LLM extractions occur in ephemeral isolated containers with zero customer data retention for AI model training.',
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="p-4 rounded-[12px] bg-white border border-[#D5D9E0] flex items-start gap-3.5 shadow-2xs"
-              >
-                <CheckCircle2 className="w-5 h-5 text-[#0B6B4D] shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-sm font-semibold text-[#1B2430]">{item.title}</h4>
-                  <p className="text-xs text-[#5B6676] mt-0.5 leading-relaxed">{item.desc}</p>
-                </div>
+          <form onSubmit={handleManualSubmit} className="flex flex-col gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#122654] mb-1.5">6-digit security code</label>
+              <div className="flex items-center justify-between gap-2" onPaste={handlePaste}>
+                {digits.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => {
+                      inputRefs.current[index] = el;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                    aria-label={`Digit ${index + 1}`}
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleDigitChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    className="w-12 h-12 text-center font-mono text-lg font-bold bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] focus:ring-2 focus:ring-[#FF7A66]/20"
+                  />
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        <div className="flex items-center gap-3 text-xs text-[#5B6676]">
-          <span className="font-mono-numbers">TOTP (RFC 6238)</span>
-          <span>•</span>
-          <span>Required for every user</span>
+            <button
+              type="submit"
+              disabled={isVerifying}
+              className="w-full min-h-[44px] bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold text-xs rounded-[10px] shadow-sm transition-transform active:scale-[0.99] cursor-pointer mt-2 disabled:opacity-50"
+            >
+              {isVerifying ? 'Verifying…' : 'Verify & continue'}
+            </button>
+          </form>
+
+          <div className="mt-8 pt-6 border-t border-[#E3E7EF] text-center text-xs text-[#4A5878]">
+            <Link href="/login" className="hover:text-[#122654]">
+              ← Back to sign in
+            </Link>
+          </div>
         </div>
       </div>
     </div>

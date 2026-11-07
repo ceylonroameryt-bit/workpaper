@@ -355,7 +355,7 @@ export default function ReviewNotesHubPage() {
                 <p className="text-xs text-[#4A5878] mb-4">
                   Unlocking requires partner role and resets approval stamps. Enter reason:
                 </p>
-                <textarea
+                <textarea aria-label="Reason for unlocking (min. 10 chars)"
                   value={unlockReason}
                   onChange={(e) => setUnlockReason(e.target.value)}
                   placeholder="Reason for unlocking (min. 10 chars)..."
@@ -399,7 +399,7 @@ export default function ReviewNotesHubPage() {
 
             <div className="relative flex items-center w-full">
               <Search className="w-4 h-4 text-[#4A5878] absolute left-3 pointer-events-none" />
-              <input
+              <input aria-label="Search notes by ref, title, text"
                 type="text"
                 placeholder="Search notes by ref, title, text..."
                 value={searchQuery}
@@ -546,7 +546,7 @@ export default function ReviewNotesHubPage() {
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-[#122654]">
                               <span>{replyAuthor.name}</span>
                             </div>
-                            <div className="text-[10px] text-[#5B6676]">
+                            <div className="text-[10px] text-[#4A5878]">
                               {replyAuthor.title}
                             </div>
                           </div>

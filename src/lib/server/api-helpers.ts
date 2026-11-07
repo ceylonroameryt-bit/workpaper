@@ -98,3 +98,12 @@ export function errorResponse(err: any) {
   // Don't send internal error text to the browser
   return jsonResponse({ error: 'Something went wrong on our side. Try again.', code: 'SERVER_ERROR' }, 500);
 }
+
+/**
+ * The site's public address for links and redirects. On AWS the app sees its internal
+ * address (0.0.0.0:3000) in req.url, so APP_URL is set there; locally req.url is right.
+ */
+export function publicOrigin(req: Request): string {
+  const configured = process.env.APP_URL?.trim().replace(/\/+$/, '');
+  return configured || new URL(req.url).origin;
+}

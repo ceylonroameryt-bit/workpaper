@@ -247,7 +247,7 @@ export default function DocumentsPage() {
 
             <div className="relative w-48">
               <Search className="w-3.5 h-3.5 text-[#7E8DA6] absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
+              <input aria-label="Search files"
                 type="text"
                 placeholder="Search files..."
                 value={search}

@@ -84,12 +84,12 @@ export default function EngagementOverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[28px] font-semibold text-[#1B2430] tracking-tight">
+            <h1 className="text-[28px] font-semibold text-[#122654] tracking-tight">
               {engagement.clientName}
             </h1>
             <StatusPill status={engagement.stage} />
           </div>
-          <p className="text-sm text-[#5B6676] mt-0.5 font-mono-numbers">
+          <p className="text-sm text-[#4A5878] mt-0.5 font-mono-numbers">
             {engagement.period} • Year End: {engagement.yearEnd} • Standard: {engagement.framework}
           </p>
         </div>
@@ -108,7 +108,7 @@ export default function EngagementOverviewPage() {
             <Button
               variant="outline"
               size="md"
-              icon={<Table2 className="w-4 h-4 text-[#1E4FD8]" />}
+              icon={<Table2 className="w-4 h-4 text-[#1D4E89]" />}
             >
               Trial balance
             </Button>
@@ -117,7 +117,7 @@ export default function EngagementOverviewPage() {
             <Button
               variant="outline"
               size="md"
-              icon={<CheckCircle2 className="w-4 h-4 text-[#0B6B4D]" />}
+              icon={<CheckCircle2 className="w-4 h-4 text-[#0B6B52]" />}
             >
               Review &amp; Approval
             </Button>
@@ -131,7 +131,7 @@ export default function EngagementOverviewPage() {
           title="Prepared"
           value={`${engagement.preparedWorkpapers} of ${engagement.totalWorkpapers}`}
           subtitle={
-            <span className="flex items-center gap-1 text-[#1E4FD8]">
+            <span className="flex items-center gap-1 text-[#1D4E89]">
               <Clock className="w-3.5 h-3.5" />
               <span>Marked as prepared</span>
             </span>
@@ -141,7 +141,7 @@ export default function EngagementOverviewPage() {
           title="Reviewed"
           value={`${engagement.reviewedWorkpapers} of ${engagement.totalWorkpapers}`}
           subtitle={
-            <span className="flex items-center gap-1 text-[#0B6B4D]">
+            <span className="flex items-center gap-1 text-[#0B6B52]">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Signed off by reviewer</span>
             </span>
@@ -151,7 +151,7 @@ export default function EngagementOverviewPage() {
           title="Open review notes"
           value={String(engagement.openReviewNotes)}
           subtitle={
-            <span className="flex items-center gap-1 text-[#9A4A00]">
+            <span className="flex items-center gap-1 text-[#6B4700]">
               <AlertCircle className="w-3.5 h-3.5" />
               <span>Blocks partner lock</span>
             </span>
@@ -161,7 +161,7 @@ export default function EngagementOverviewPage() {
           title="Partner lock"
           value={engagement.partnerLockStatus}
           subtitle={
-            <span className="flex items-center gap-1 text-[#5B6676]">
+            <span className="flex items-center gap-1 text-[#4A5878]">
               <Lock className="w-3.5 h-3.5" />
               <span>Requires 0 open review notes</span>
             </span>
@@ -191,10 +191,10 @@ export default function EngagementOverviewPage() {
                 <span className="w-2 h-2 rounded-full bg-[#5B3FD0] mt-1.5 shrink-0" />
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-xs text-[#1B2430]">
+                    <span className="font-semibold text-xs text-[#122654]">
                       {wp.ref}: {wp.name}
                     </span>
-                    <span className="text-[11px] text-[#5B6676]">({wp.area})</span>
+                    <span className="text-[11px] text-[#4A5878]">({wp.area})</span>
                   </div>
                   <p className="text-xs text-[#3F2A9E] mt-0.5">
                     {wp.aiFlagReason}
@@ -221,7 +221,7 @@ export default function EngagementOverviewPage() {
         subtitle={`${workpapers.length} working papers in this engagement`}
       >
         {/* Filter and Tab Bar */}
-        <div className="p-4 border-b border-[#E3E6EB] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-4 border-b border-[#E3E7EF] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <Tabs
             tabs={tabs}
             activeTab={activeTab}
@@ -229,20 +229,20 @@ export default function EngagementOverviewPage() {
           />
 
           <div className="relative flex items-center min-w-[240px]">
-            <Search className="w-4 h-4 text-[#5B6676] absolute left-3 pointer-events-none" />
-            <input
+            <Search className="w-4 h-4 text-[#4A5878] absolute left-3 pointer-events-none" />
+            <input aria-label="Filter by ref, name, or area"
               type="text"
               placeholder="Filter by ref, name, or area..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full min-h-[38px] pl-9 pr-3 text-xs bg-[#F4F5F7] border border-[#D5D9E0] rounded-[10px] text-[#1B2430] placeholder:text-[#5B6676] focus-visible:outline-2 focus-visible:outline-[#1E4FD8] focus-visible:outline-offset-2"
+              className="w-full min-h-[38px] pl-9 pr-3 text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] placeholder:text-[#4A5878] focus-visible:outline-2 focus-visible:outline-[#1D4E89] focus-visible:outline-offset-2"
             />
           </div>
         </div>
 
         {/* Table Content */}
-        <table className="w-full text-left text-sm text-[#1B2430]">
-          <thead className="bg-[#F8F9FA] text-[#5B6676] text-[11px] font-semibold uppercase tracking-wider border-b border-[#E3E6EB]">
+        <table className="w-full text-left text-sm text-[#122654]">
+          <thead className="bg-[#F8F9FA] text-[#4A5878] text-[11px] font-semibold uppercase tracking-wider border-b border-[#E3E7EF]">
             <tr>
               <th scope="col" className="px-5 py-3.5">
                 Ref
@@ -270,10 +270,10 @@ export default function EngagementOverviewPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E3E6EB]">
+          <tbody className="divide-y divide-[#E3E7EF]">
             {filteredWorkpapers.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-5 py-6 text-xs text-[#5B6676]">
+                <td colSpan={8} className="px-5 py-6 text-xs text-[#4A5878]">
                   No working papers match this view.
                 </td>
               </tr>
@@ -284,13 +284,13 @@ export default function EngagementOverviewPage() {
                 className="hover:bg-[#F8F9FA]/80 transition-colors group cursor-pointer"
                 onClick={() => router.push(`/engagements/${engagementId}/workpapers/${wp.id}`)}
               >
-                <td className="px-5 py-4 font-mono-numbers font-semibold text-xs text-[#1E4FD8] whitespace-nowrap">
+                <td className="px-5 py-4 font-mono-numbers font-semibold text-xs text-[#1D4E89] whitespace-nowrap">
                   {wp.ref}
                 </td>
 
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-[#1B2430] group-hover:text-[#1E4FD8] transition-colors">
+                    <span className="font-semibold text-sm text-[#122654] group-hover:text-[#1D4E89] transition-colors">
                       {wp.name}
                     </span>
                     {wp.flaggedByAi && (
@@ -304,11 +304,11 @@ export default function EngagementOverviewPage() {
                   </div>
                 </td>
 
-                <td className="px-5 py-4 text-xs text-[#5B6676] whitespace-nowrap">
+                <td className="px-5 py-4 text-xs text-[#4A5878] whitespace-nowrap">
                   {wp.area}
                 </td>
 
-                <td className="px-5 py-4 text-xs font-medium text-[#1B2430] whitespace-nowrap">
+                <td className="px-5 py-4 text-xs font-medium text-[#122654] whitespace-nowrap">
                   {wp.preparer}
                 </td>
 
@@ -318,15 +318,15 @@ export default function EngagementOverviewPage() {
 
                 <td className="px-5 py-4 text-center whitespace-nowrap">
                   {wp.notesCount > 0 ? (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-mono-numbers font-semibold bg-[#FFF1DC] text-[#9A4A00]">
+                    <span className="text-xs px-2 py-0.5 rounded-full font-mono-numbers font-semibold bg-[#FFF4DB] text-[#6B4700]">
                       {wp.notesCount}
                     </span>
                   ) : (
-                    <span className="text-xs text-[#5B6676]/50 font-mono-numbers">—</span>
+                    <span className="text-xs text-[#4A5878]/50 font-mono-numbers">—</span>
                   )}
                 </td>
 
-                <td className="px-5 py-4 text-xs font-mono-numbers text-[#5B6676] whitespace-nowrap">
+                <td className="px-5 py-4 text-xs font-mono-numbers text-[#4A5878] whitespace-nowrap">
                   {wp.updatedAt}
                 </td>
 
@@ -334,7 +334,7 @@ export default function EngagementOverviewPage() {
                   <Link
                     href={`/engagements/${engagementId}/workpapers/${wp.id}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#1E4FD8] hover:text-[#163BA3] px-3 py-1.5 rounded-[8px] hover:bg-[#E8EEFD] transition-colors"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D4E89] hover:text-[#163BA3] px-3 py-1.5 rounded-[8px] hover:bg-[#EAF5FC] transition-colors"
                   >
                     <span>Open editor</span>
                     <ExternalLink className="w-3.5 h-3.5" />

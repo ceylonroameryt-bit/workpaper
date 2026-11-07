@@ -31,7 +31,7 @@ export const STATUS_DEFINITIONS: Record<StatusKey, StatusMeta> = {
     symbol: '○',
     label: 'Not started',
     colorClass: 'text-[#4A5878]',
-    bgClass: 'bg-[#F4F5F7]',
+    bgClass: 'bg-[#F5F8FD]',
   },
   in_progress: {
     key: 'in_progress',
@@ -87,7 +87,7 @@ export const STATUS_DEFINITIONS: Record<StatusKey, StatusMeta> = {
     symbol: '◷',
     label: 'Waiting on client',
     colorClass: 'text-[#4A5878]',
-    bgClass: 'bg-[#F4F5F7]',
+    bgClass: 'bg-[#F5F8FD]',
   },
   ai_suggestion: {
     key: 'ai_suggestion',
@@ -243,6 +243,10 @@ export interface BlyntAccount {
   schedule_ref?: string;
   cash_flow_category?: 'Operating activities' | 'Investing activities' | 'Financing activities' | 'Cash and cash equivalents';
   used_by_count?: number;
+  /** Set on accounts a practice added; the standard chart has none */
+  firm_id?: string;
+  /** The standard account a practice account is classified like */
+  parent_code?: string;
 }
 
 export interface MappingList {

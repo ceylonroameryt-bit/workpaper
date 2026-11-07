@@ -436,7 +436,7 @@ export default function ReportsPage() {
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#122654] mb-1">Debtor Days</label>
-                <input
+                <input aria-label="Debtor Days"
                   type="number"
                   value={debtorDays}
                   onChange={(e) => setDebtorDays(Number(e.target.value))}
@@ -446,7 +446,7 @@ export default function ReportsPage() {
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#122654] mb-1">Creditor Days</label>
-                <input
+                <input aria-label="Creditor Days"
                   type="number"
                   value={creditorDays}
                   onChange={(e) => setCreditorDays(Number(e.target.value))}
@@ -456,7 +456,7 @@ export default function ReportsPage() {
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#122654] mb-1">Minimum Cash Buffer (£)</label>
-                <input
+                <input aria-label="Minimum Cash Buffer (£)"
                   type="text"
                   value={minimumCash}
                   onChange={(e) => setMinimumCash(e.target.value)}
@@ -466,7 +466,7 @@ export default function ReportsPage() {
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#122654] mb-1">Planned Q2 Capex (£)</label>
-                <input
+                <input aria-label="Planned Q2 Capex (£)"
                   type="text"
                   value={capexSpend}
                   onChange={(e) => setCapexSpend(e.target.value)}

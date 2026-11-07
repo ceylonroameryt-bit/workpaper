@@ -311,9 +311,13 @@ export default function PracticeHomePage() {
                   </span>
                 </div>
                 <div className="text-xs text-[#4A5878] mt-1 flex flex-wrap items-center gap-3 font-mono-numbers">
-                  <span>Companies House #{activeCompany.company_no}</span>
-                  <span>•</span>
-                  <span>Year End: {new Date(activeCompany.year_end || (activeCompany as any).yearEnd || '2026-09-30').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  {activeCompany.company_no && (
+                    <>
+                      <span>Companies House #{activeCompany.company_no}</span>
+                      <span>•</span>
+                    </>
+                  )}
+                  <span>Year End: {activeCompany.year_end ? new Date(activeCompany.year_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not set'}</span>
                   <span>•</span>
                   <span>Source: {activeCompany.data_source === 'csv' ? 'CSV/Excel' : activeCompany.data_source}</span>
                 </div>
@@ -672,7 +676,7 @@ export default function PracticeHomePage() {
                       <td className="p-3">
                         <div className="flex items-center gap-1">
                           {eng.stages.map((st, sidx) => {
-                            let pillStyle = 'bg-[#F4F5F7] text-[#7E8DA6] border-[#D3DCEE]';
+                            let pillStyle = 'bg-[#F5F8FD] text-[#7E8DA6] border-[#D3DCEE]';
                             if (st.status === 'done') {
                               pillStyle = 'bg-[#E6F4EF] text-[#0B6B52] border-[#0B6B52]/30 font-semibold';
                             } else if (st.status === 'alert') {
@@ -793,7 +797,7 @@ export default function PracticeHomePage() {
             )}
 
             <form onSubmit={handleAskBot} className="flex gap-2">
-              <input
+              <input aria-label="Ask about mappings, variances, papers"
                 type="text"
                 placeholder="Ask about mappings, variances, papers..."
                 value={botPrompt}

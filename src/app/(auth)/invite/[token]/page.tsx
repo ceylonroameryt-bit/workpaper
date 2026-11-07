@@ -85,7 +85,7 @@ export default function AcceptInvitePage() {
                 {info.name}, you have been invited as <strong className="capitalize">{info.role}</strong> ({info.email}). Choose a password to finish.
               </p>
             </div>
-            {error && <div className="p-3 rounded-[8px] bg-[#FFF1DC] text-[#9A4A00] text-xs font-medium">{error}</div>}
+            {error && <div className="p-3 rounded-[8px] bg-[#FFF4DB] text-[#6B4700] text-xs font-medium">{error}</div>}
             <Field label="Password" htmlFor="inv-password" hint="12+ characters with upper and lower case, a number and a symbol">
               <Input id="inv-password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </Field>
@@ -93,7 +93,7 @@ export default function AcceptInvitePage() {
               <Input id="inv-confirm" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
             </Field>
             <div className="flex items-center gap-2 text-xs text-[#4A5878]">
-              <ShieldCheck className="w-4 h-4 text-[#0B6B4D]" />
+              <ShieldCheck className="w-4 h-4 text-[#0B6B52]" />
               <span>Two-factor sign-in is required for every user.</span>
             </div>
             <Button type="submit" variant="primary" size="md" className="w-full" disabled={saving}>
@@ -102,7 +102,7 @@ export default function AcceptInvitePage() {
           </form>
         ) : (
           <div className="text-sm">
-            {error ? <p className="text-[#9A4A00]">{error}</p> : <p className="text-[#4A5878]">Checking your invitation...</p>}
+            {error ? <p className="text-[#6B4700]">{error}</p> : <p className="text-[#4A5878]">Checking your invitation...</p>}
           </div>
         )}
       </div>

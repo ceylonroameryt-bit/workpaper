@@ -188,11 +188,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
             type="button"
             onClick={() => setSearchOpen(true)}
             aria-label="Global search (Command K)"
-            className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-[#4A5878] bg-[#F5F8FD] border border-[#D3DCEE] rounded-full hover:border-[#122654]/40 hover:text-[#122654] transition-all min-control-h min-h-[38px] w-40 sm:w-56 xl:w-72 justify-between"
+            className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-[#4A5878] bg-[#F5F8FD] border border-[#D3DCEE] rounded-full hover:border-[#122654]/40 hover:text-[#122654] transition-all min-control-h min-h-[38px] w-10 sm:w-56 xl:w-72 justify-between"
           >
             <div className="flex items-center gap-2 truncate">
               <Search className="w-3.5 h-3.5 shrink-0 text-[#7E8DA6]" />
-              <span className="truncate">Search clients, accounts, papers...</span>
+              <span className="hidden sm:inline truncate">Search clients, accounts, papers...</span>
             </div>
             <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-mono font-semibold bg-white border border-[#D3DCEE] px-1.5 py-0.5 rounded text-[#4A5878] shrink-0 shadow-2xs">
               <Command className="w-2.5 h-2.5" /> K
@@ -323,7 +323,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
           <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-2xl max-w-xl w-full overflow-hidden animate-in fade-in zoom-in-95">
             <div className="p-4 border-b border-[#E3E7EF] flex items-center gap-3">
               <Search className="w-4 h-4 text-[#4A5878]" />
-              <input
+              <input aria-label="Search working papers, accounts, clients, or commands"
                 id="global-search-title"
                 type="text"
                 autoFocus
@@ -447,7 +447,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
             </div>
 
             <form onSubmit={handleAskBot} className="p-4 border-t border-[#E3E7EF] flex gap-2">
-              <input
+              <input aria-label="Ask Blynt Bot about this paper or engagement"
                 type="text"
                 placeholder="Ask Blynt Bot about this paper or engagement..."
                 value={botPrompt}

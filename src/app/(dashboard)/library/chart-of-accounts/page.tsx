@@ -11,16 +11,12 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
-import type { BlyntAccount } from '@/lib/types/models';
+import { NewAccountForm } from '@/components/coa/NewAccountForm';
 
 export default function ChartOfAccountsPage() {
   const [search, setSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newCode, setNewCode] = useState('');
-  const [newName, setNewName] = useState('');
-  const [newType, setNewType] = useState<BlyntAccount['type']>('Overhead');
-  const [newLead, setNewLead] = useState('E');
 
   const accounts = db.blynt_accounts;
 
@@ -44,25 +40,6 @@ export default function ChartOfAccountsPage() {
     return matchSearch && matchGroup;
   });
 
-  const handleAddAccount = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCode || !newName) return;
-
-    db.blynt_accounts.push({
-      code: newCode,
-      name: newName,
-      type: newType,
-      normal_balance: newType === 'Asset' || newType === 'Cost of Sales' || newType === 'Overhead' ? 'Debit' : 'Credit',
-      lead_letter: newLead,
-      is_control: false,
-      is_system: false,
-      used_by_count: 0,
-    });
-
-    setShowAddModal(false);
-    setNewCode('');
-    setNewName('');
-  };
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto pb-16">
@@ -124,7 +101,7 @@ export default function ChartOfAccountsPage() {
 
         <div className="relative w-full md:w-64 shrink-0">
           <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
+          <input aria-label="Search nominal or name"
             type="text"
             placeholder="Search nominal or name..."
             value={search}
@@ -185,7 +162,7 @@ export default function ChartOfAccountsPage() {
                   </td>
                   <td className="p-3 pr-6 text-right">
                     {acc.is_system ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-[#F4F5F7] text-[#4A5878] border border-[#D3DCEE]">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-[#F5F8FD] text-[#4A5878] border border-[#D3DCEE]">
                         <Lock className="w-3 h-3" /> System
                       </span>
                     ) : (
@@ -213,90 +190,10 @@ export default function ChartOfAccountsPage() {
               Add custom firm account
             </h3>
             <p className="text-xs text-[#4A5878] mb-5">
-              Cannot edit system account codes or categories. Add a firm-specific nominal.
+              Type a name: Blynt recommends a category and gives the next free code in its range.
             </p>
 
-            <form onSubmit={handleAddAccount} className="flex flex-col gap-4 text-xs">
-              <div>
-                <label className="block font-semibold text-[#122654] mb-1.5">
-                  Nominal account code (e.g. 6850)
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newCode}
-                  onChange={(e) => setNewCode(e.target.value)}
-                  placeholder="6850"
-                  className="w-full min-h-[40px] px-3 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#122654] mb-1.5">
-                  Account description
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="e.g. ESG & Carbon Offset Subscriptions"
-                  className="w-full min-h-[40px] px-3 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#122654] mb-1.5">
-                    Category
-                  </label>
-                  <select
-                    value={newType}
-                    onChange={(e) => setNewType(e.target.value as any)}
-                    className="w-full min-h-[40px] px-2 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
-                  >
-                    <option value="Overhead">Overhead</option>
-                    <option value="Asset">Asset</option>
-                    <option value="Liability">Liability</option>
-                    <option value="Cost of Sales">Cost of Sales</option>
-                    <option value="Revenue">Revenue</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-[#122654] mb-1.5">
-                    Lead schedule letter
-                  </label>
-                  <select
-                    value={newLead}
-                    onChange={(e) => setNewLead(e.target.value)}
-                    className="w-full min-h-[40px] px-2 bg-[#F5F8FD] border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none"
-                  >
-                    {['A', 'B', 'C', 'D', 'E', 'F', 'K', 'T', 'I', 'Z'].map((l) => (
-                      <option key={l} value={l}>
-                        Schedule {l}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E3E7EF] mt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-[#D3DCEE] text-xs font-semibold text-[#4A5878] rounded-[8px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-[#122654] hover:bg-[#0B1A3B] text-white text-xs font-bold rounded-[8px]"
-                >
-                  Save account
-                </button>
-              </div>
-            </form>
+            <NewAccountForm firmId={db.firms[0]?.id ?? ''} onCancel={() => setShowAddModal(false)} onCreated={() => setShowAddModal(false)} />
           </div>
         </div>
       )}

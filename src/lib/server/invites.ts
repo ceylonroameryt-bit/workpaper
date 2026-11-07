@@ -113,3 +113,39 @@ export function setClientAssignments(actor: Actor, userId: string, clientIds: st
   db.logAudit(actor.firmId, actor, 'SET_CLIENT_ACCESS', 'memberships', userId, before, { client_ids: next });
   return m;
 }
+
+const RESET_TTL_MS = 60 * 60 * 1000;
+
+/**
+ * No mail service yet: an admin or partner creates a one-time password reset link and
+ * sends it to the person. Only the token's SHA-256 is kept; a new link replaces an older one.
+ */
+export function createPasswordReset(actor: Actor, userId: string): { token: string; expires_at: string } {
+  if (!canSetUpPractice(actor, db.firms.find((f) => f.id === actor.firmId))) throw new ServiceError('Only an admin or partner can reset a password.', 403, 'FORBIDDEN');
+  const member = db.memberships.find((m) => m.user_id === userId && m.firm_id === actor.firmId);
+  const cred = db.credentials.find((c) => c.user_id === userId);
+  if (!member || !cred) throw new ServiceError('User not found', 404, 'NOT_FOUND');
+  const token = crypto.randomBytes(32).toString('base64url');
+  cred.reset_token_hash = sha256(token);
+  cred.reset_expires_at = new Date(Date.now() + RESET_TTL_MS).toISOString();
+  db.logAudit(actor.firmId, actor, 'CREATE_PASSWORD_RESET', 'users', userId, null, { expires_at: cred.reset_expires_at });
+  return { token, expires_at: cred.reset_expires_at };
+}
+
+/** Sets a new password from a reset link; the link works once. */
+export function resetPassword(token: string, password: string) {
+  const hash = sha256(String(token || ''));
+  const cred = db.credentials.find((c) => c.reset_token_hash === hash);
+  if (!cred || !cred.reset_expires_at || new Date(cred.reset_expires_at) < new Date()) {
+    throw new ServiceError('This reset link is invalid or has expired. Ask your practice admin for a new one.', 404, 'RESET_INVALID');
+  }
+  const user = db.users.find((u) => u.id === cred.user_id);
+  const badPassword = passwordError(String(password || ''), { email: user?.email, name: user?.name });
+  if (badPassword) throw new ServiceError(badPassword);
+  cred.password_hash = hashPassword(password);
+  delete cred.reset_token_hash;
+  delete cred.reset_expires_at;
+  const member = db.memberships.find((m) => m.user_id === cred.user_id);
+  if (member && user) db.logAudit(member.firm_id, { id: user.id, name: user.name, role: member.role }, 'RESET_PASSWORD', 'users', user.id, null, { reset: true });
+  return { email: user?.email ?? '' };
+}

@@ -442,7 +442,7 @@ export default function TemplatesCatalogPage() {
 
       {/* Primary Tab Navigation */}
       <div className="flex items-center justify-between border-b border-[#E3E7EF] flex-wrap gap-3">
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('by_type')}
@@ -502,7 +502,7 @@ export default function TemplatesCatalogPage() {
         {/* Quick search */}
         <div className="relative min-w-[200px] mb-2 sm:mb-0">
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#7E8DA6]" />
-          <input
+          <input aria-label="Search templates"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -963,7 +963,7 @@ export default function TemplatesCatalogPage() {
                 Paste a Blynt template JSON package definition or select an official pack to import into your firm library.
               </p>
 
-              <textarea
+              <textarea aria-label="Paste template JSON or leave blank to import the standard"
                 rows={5}
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}

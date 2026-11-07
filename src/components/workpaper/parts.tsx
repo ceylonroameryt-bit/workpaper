@@ -53,7 +53,7 @@ const STATE_META: Record<SectionState, { symbol: string; label: string; cls: str
   done: { symbol: '✓', label: 'Done', cls: 'text-[#0B6B52] bg-[#E6F4EF] border-[#0B6B52]/30' },
   progress: { symbol: '◑', label: 'In progress', cls: 'text-[#1D4E89] bg-[#EAF5FC] border-[#1D4E89]/30' },
   attention: { symbol: '!', label: 'Needs you', cls: 'text-[#A23A27] bg-[#FFF1EE] border-[#FF7A66]/40' },
-  todo: { symbol: '○', label: 'Not started', cls: 'text-[#4A5878] bg-[#F4F5F7] border-[#D3DCEE]' },
+  todo: { symbol: '○', label: 'Not started', cls: 'text-[#4A5878] bg-[#F5F8FD] border-[#D3DCEE]' },
 };
 
 export function StatePill({ state, label }: { state: SectionState; label?: string }) {

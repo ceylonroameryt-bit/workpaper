@@ -314,7 +314,7 @@ export default function WorkingPaperIndexPage() {
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative min-w-48">
             <Search className="w-3.5 h-3.5 text-[#7E8DA6] absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
+            <input aria-label="Search schedules or codes"
               type="text"
               placeholder="Search schedules or codes..."
               value={searchQuery}
@@ -323,7 +323,7 @@ export default function WorkingPaperIndexPage() {
             />
           </div>
 
-          <select
+          <select aria-label="Filter by status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"
@@ -337,7 +337,7 @@ export default function WorkingPaperIndexPage() {
             <option value="approved">Approved</option>
           </select>
 
-          <select
+          <select aria-label="Filter by flag"
             value={flagFilter}
             onChange={(e) => setFlagFilter(e.target.value)}
             className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"
@@ -664,7 +664,7 @@ export default function WorkingPaperIndexPage() {
               <label className="block text-xs font-semibold text-[#122654] mb-1">
                 Reason for marking Not Applicable:
               </label>
-              <textarea
+              <textarea aria-label="Reason for marking Not Applicable"
                 rows={3}
                 placeholder="e.g. No transactions or commitments in this financial year..."
                 value={untickReason}

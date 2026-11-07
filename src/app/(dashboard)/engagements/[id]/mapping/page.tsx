@@ -32,6 +32,7 @@ import { toPence, asPence, formatPence } from '@/lib/money';
 import { matchBlyntAccount, getStatutoryDetails } from '@/lib/mapping/auto-mapper';
 import { getActor, getCurrentUserId } from '@/lib/session';
 import { engagementSummary } from '@/lib/api';
+import { NewAccountForm } from '@/components/coa/NewAccountForm';
 
 function ChartOptions() {
   return (
@@ -45,6 +46,51 @@ function ChartOptions() {
   );
 }
 
+/** Search the chart by code or name; when nothing fits, create a practice account. */
+function AccountPicker({ value, label, firmId, onPick }: { value: string; label: string; firmId: string; onPick: (code: string) => void }) {
+  const current = db.blynt_accounts.find((a) => a.code === value);
+  const [text, setText] = useState(current ? `${current.code} ${current.name}` : '');
+  const [creating, setCreating] = useState(false);
+  const known = (t: string) => db.blynt_accounts.find((a) => `${a.code} ${a.name}` === t || a.code === t.trim());
+
+  const pick = (t: string) => {
+    setText(t);
+    const hit = known(t);
+    if (hit && hit.code !== value) onPick(hit.code);
+  };
+
+  return (
+    <div className="w-full max-w-[260px] space-y-1.5">
+      <div className="flex gap-1">
+        <input
+          aria-label={label}
+          list="blynt-chart"
+          value={text}
+          placeholder="Search code or name…"
+          onChange={(e) => pick(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && !known(text) && setCreating(true)}
+          className="min-w-0 flex-1 text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] focus:border-[#122654] rounded-lg bg-white text-[#122654]"
+        />
+        <button type="button" onClick={() => setCreating(true)} title="Create a new account" aria-label="Create a new account" className="px-2 text-xs font-bold border border-[#D3DCEE] rounded-lg text-[#122654] hover:bg-[#EAF5FC]">
+          +
+        </button>
+      </div>
+      {creating && (
+        <NewAccountForm
+          firmId={firmId}
+          initialName={known(text) ? '' : text.replace(/^\d+\s*/, '')}
+          onCancel={() => setCreating(false)}
+          onCreated={(acc) => {
+            setText(`${acc.code} ${acc.name}`);
+            setCreating(false);
+            onPick(acc.code);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function AccountMappingPage() {
   const params = useParams();
   const router = useRouter();
@@ -52,6 +98,7 @@ export default function AccountMappingPage() {
   const engagementRow = db.engagements.find((e) => e.id === engagementId);
   const firmId = engagementRow?.firm_id ?? 'firm_blynt_uk';
   const engagementClientId = engagementRow?.client_id ?? null;
+  const clientName = db.clients.find((c) => c.id === engagementClientId)?.name ?? 'this client';
 
   const [mappings, setMappings] = useState<AccountMapping[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -484,7 +531,7 @@ export default function AccountMappingPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto pb-16 animate-in fade-in duration-200">
+    <div className="flex flex-col gap-6 w-full min-w-0 pb-16 animate-in fade-in duration-200">
       {/* Header with Title and v1.1 Breadcrumbs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -514,7 +561,7 @@ export default function AccountMappingPage() {
             className={`min-h-[42px] px-5 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${
               isFullyMapped
                 ? 'bg-[#0B6B52] hover:bg-[#095742] text-white shadow-xs'
-                : 'bg-[#F4F5F7] text-[#4A5878] border border-[#D3DCEE]'
+                : 'bg-[#F5F8FD] text-[#4A5878] border border-[#D3DCEE]'
             }`}
           >
             {isFullyMapped ? <Unlock className="w-4 h-4 text-emerald-300" /> : <Lock className="w-4 h-4" />}
@@ -704,7 +751,7 @@ export default function AccountMappingPage() {
                 <span>{tab.label}</span>
                 <span
                   className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[#F4F5F7] text-[#4A5878]'
+                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[#F5F8FD] text-[#4A5878]'
                   }`}
                 >
                   {tab.count}
@@ -717,7 +764,7 @@ export default function AccountMappingPage() {
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
+              <input aria-label="Search code, name, schedule"
                 id="mapping-search"
                 type="text"
                 placeholder="Search code, name, schedule..."
@@ -768,6 +815,11 @@ export default function AccountMappingPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
+          <datalist id="blynt-chart">
+            {db.blynt_accounts.map((a) => (
+              <option key={a.code} value={`${a.code} ${a.name}`} />
+            ))}
+          </datalist>
           <table className="w-full text-left text-xs text-[#122654]">
             <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
               <tr>
@@ -783,8 +835,8 @@ export default function AccountMappingPage() {
                 <th scope="col" className="p-3 text-right">Balance</th>
                 <th scope="col" className="p-3">Statutory Line &amp; Schedule</th>
                 <th scope="col" className="p-3">Confidence &amp; Gate</th>
-                <th scope="col" className="p-3 min-w-[280px]">AI Reason &amp; Evidence (DAT-03)</th>
-                <th scope="col" className="p-3 min-w-[220px]">Blynt Account (Mapping)</th>
+                <th scope="col" className="p-3">AI Reason &amp; Evidence (DAT-03)</th>
+                <th scope="col" className="p-3">Blynt Account (Mapping)</th>
                 <th scope="col" className="p-3 pr-4 text-right">Action</th>
               </tr>
             </thead>
@@ -825,7 +877,7 @@ export default function AccountMappingPage() {
                     {/* Code & Name */}
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-[#122654] bg-[#F4F5F7] px-2 py-0.5 rounded text-[11px]">
+                        <span className="font-mono font-bold text-[#122654] bg-[#F5F8FD] px-2 py-0.5 rounded text-[11px]">
                           {row.source_code}
                         </span>
                         <div>
@@ -907,15 +959,13 @@ export default function AccountMappingPage() {
 
                     {/* Blynt Account Dropdown */}
                     <td className="p-3" onClick={(e) => e.stopPropagation()}>
-                      <select
-                        aria-label={`Select mapping for ${row.source_name}`}
+                      <AccountPicker
+                        key={row.blynt_code || ''}
                         value={row.blynt_code || ''}
-                        onChange={(e) => handleInitiateChangeMapping(row.id, e.target.value)}
-                        className="text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] hover:border-[#122654] focus:border-[#122654] rounded-lg bg-white text-[#122654] shadow-2xs transition-all cursor-pointer w-full max-w-[240px]"
-                      >
-                        <option value="">Select Blynt COA Account…</option>
-                  <ChartOptions />
-                      </select>
+                        label={`Select mapping for ${row.source_name}`}
+                        firmId={firmId}
+                        onPick={(code) => handleInitiateChangeMapping(row.id, code)}
+                      />
                     </td>
 
                     {/* Actions */}
@@ -1041,7 +1091,7 @@ export default function AccountMappingPage() {
                     className="mt-0.5 text-[#0B6B52]"
                   />
                   <div>
-                    <div className="font-bold text-[#0B6B52]">This client only (Harlow Food Group)</div>
+                    <div className="font-bold text-[#0B6B52]">This client only ({clientName})</div>
                     <div className="text-[11px] text-[#4A5878]">Remembered for all future engagements and roll-forward periods for this client.</div>
                   </div>
                 </label>

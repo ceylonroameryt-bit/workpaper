@@ -26,12 +26,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         aria-valuemax={100}
       >
         <div
-          className="bg-[#1E4FD8] h-full rounded-full transition-all duration-300"
+          className="bg-[#1D4E89] h-full rounded-full transition-all duration-300"
           style={{ width: `${clamped}%` }}
         />
       </div>
       {showLabel && (
-        <span className="text-xs font-mono-numbers font-medium text-[#5B6676] min-w-[32px] text-right shrink-0">
+        <span className="text-xs font-mono-numbers font-medium text-[#4A5878] min-w-[32px] text-right shrink-0">
           {clamped}%
         </span>
       )}

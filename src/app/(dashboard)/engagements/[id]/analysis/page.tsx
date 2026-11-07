@@ -147,7 +147,7 @@ export default function AnalysisPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <select
+          <select aria-label="Comparison"
             value={comparisonMode}
             onChange={(e) => setComparisonMode(e.target.value as any)}
             className="text-xs bg-[#F5F8FD] border border-[#D3DCEE] rounded-lg px-3 py-1.5 text-[#122654] font-medium outline-none"
@@ -160,11 +160,11 @@ export default function AnalysisPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E3E7EF] pb-1">
+      <div className="flex items-center gap-2 border-b border-[#E3E7EF] pb-1 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('pnl')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'pnl'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -177,7 +177,7 @@ export default function AnalysisPage() {
         <button
           type="button"
           onClick={() => setActiveTab('balance_sheet')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'balance_sheet'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -190,7 +190,7 @@ export default function AnalysisPage() {
         <button
           type="button"
           onClick={() => setActiveTab('unusual')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'unusual'
               ? 'border-[#FF7A66] text-[#122654]'
               : 'border-transparent text-[#4A5878] hover:text-[#122654]'
@@ -287,7 +287,7 @@ export default function AnalysisPage() {
 
                   {/* Manual Comment Box (ANL-03) */}
                   <div className="mt-3 flex items-center gap-3">
-                    <input
+                    <input aria-label="Add preparer explanation or variance note"
                       type="text"
                       defaultValue={line.comment}
                       placeholder="Add preparer explanation or variance note..."

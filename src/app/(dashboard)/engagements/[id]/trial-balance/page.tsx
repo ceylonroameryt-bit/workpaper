@@ -730,7 +730,7 @@ export default function TrialBalancePage() {
 
         <div className="relative w-full md:w-64">
           <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
+          <input aria-label="Search lead or nominal"
             type="text"
             placeholder="Search lead or nominal..."
             value={search}
@@ -1144,7 +1144,7 @@ export default function TrialBalancePage() {
                 <label className="block font-semibold text-[#122654] mb-1">
                   Adjustment narrative
                 </label>
-                <input
+                <input aria-label="Adjustment narrative"
                   type="text"
                   required
                   placeholder="e.g. Accrue September electricity invoice"
@@ -1160,7 +1160,7 @@ export default function TrialBalancePage() {
                   <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Debit account
                   </label>
-                  <select
+                  <select aria-label="Debit account"
                     value={adjDebitAccount}
                     onChange={(e) => setAdjDebitAccount(e.target.value)}
                     className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654]"
@@ -1176,7 +1176,7 @@ export default function TrialBalancePage() {
                   <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Debit amount (£)
                   </label>
-                  <input
+                  <input aria-label="Debit amount (£)"
                     type="text"
                     value={adjDebitAmount}
                     onChange={(e) => setAdjDebitAmount(e.target.value)}
@@ -1191,7 +1191,7 @@ export default function TrialBalancePage() {
                   <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Credit account
                   </label>
-                  <select
+                  <select aria-label="Credit account"
                     value={adjCreditAccount}
                     onChange={(e) => setAdjCreditAccount(e.target.value)}
                     className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654]"
@@ -1207,7 +1207,7 @@ export default function TrialBalancePage() {
                   <label className="block text-[11px] font-semibold text-[#122654] mb-1">
                     Credit amount (£)
                   </label>
-                  <input
+                  <input aria-label="Credit amount (£)"
                     type="text"
                     value={adjCreditAmount}
                     onChange={(e) => setAdjCreditAmount(e.target.value)}
@@ -1389,7 +1389,7 @@ export default function TrialBalancePage() {
             <div className="p-3.5 bg-[#F5F8FD] border-b border-[#E3E7EF] flex items-center justify-between gap-3 shrink-0">
               <div className="relative flex-1">
                 <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
+                <input aria-label="Search contact, description, or amount"
                   type="text"
                   placeholder="Search contact, description, or amount..."
                   value={drillSearch}
@@ -1397,7 +1397,7 @@ export default function TrialBalancePage() {
                   className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#D3DCEE] rounded-lg text-[#122654] outline-none"
                 />
               </div>
-              <select
+              <select aria-label="Sort transactions"
                 value={drillSort}
                 onChange={(e) => setDrillSort(e.target.value as any)}
                 className="text-xs bg-white border border-[#D3DCEE] rounded-lg px-2.5 py-1.5 text-[#122654] font-medium outline-none"

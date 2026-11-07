@@ -116,7 +116,8 @@ describe('role rules on save', () => {
   });
 
   it('audit log is append-only and written as yourself', () => {
-    reject((v) => (v.audit_logs = []), actor('part', 'partner'));
+    // A stale or tampered browser copy never removes stored entries
+    expect(mergeFirmState(s, edit(s, (v) => (v.audit_logs = [])), actor('part', 'partner')).audit_logs.length).toBeGreaterThan(0);
     reject((v) => v.audit_logs.push({ id: 'l2', firm_id: 'f1', actor_id: 'part' }), actor('prep', 'preparer'));
     allow((v) => v.audit_logs.push({ id: 'l2', firm_id: 'f1', actor_id: 'prep' }), actor('prep', 'preparer'));
   });

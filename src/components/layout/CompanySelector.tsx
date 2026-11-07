@@ -131,7 +131,7 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
             <div className="p-2.5 border-b border-[#E3E7EF]">
               <div className="relative">
                 <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-2.5 top-1/2 -translate-y-1/2" />
-                <input
+                <input aria-label="Search companies"
                   type="text"
                   placeholder="Search companies..."
                   value={search}
@@ -231,7 +231,7 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
             </div>
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-[#4A5878] absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input aria-label="Search company name or number"
                 type="text"
                 placeholder="Search company name or number..."
                 value={search}

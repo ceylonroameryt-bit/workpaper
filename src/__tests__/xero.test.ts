@@ -176,7 +176,9 @@ describe('Connecting a client to Xero', () => {
   it('says so plainly when Xero is not configured', async () => {
     delete process.env.XERO_CLIENT_ID;
     const res = await connect(get(`/api/v1/integrations/xero/connect?clientId=${CLIENT}`, 'usr_admin'));
-    expect(res.status).toBe(503);
+    // Back to the client page with a reason the page explains, not a raw JSON error
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toContain(`/clients/${CLIENT}?xero=not_configured`);
   });
 
   it('only for a client the user can see', async () => {
