@@ -137,8 +137,10 @@ describe('Step 1 · Any test write appears in the audit log and cannot be edited
       fn(v);
       return v;
     };
-    expect(() => mergeFirmState(full, edit((v) => (v.audit_logs.find((a) => a.id === entry.id)!.action = 'X')), admin)).toThrow(GuardError);
-    expect(() => mergeFirmState(full, edit((v) => (v.audit_logs = v.audit_logs.filter((a) => a.id !== entry.id))), admin)).toThrow(GuardError);
+    // Edits and deletes from the browser are ignored: the stored entry survives unchanged
+    const stored = (s: State) => s.audit_logs.find((a) => a.id === entry.id);
+    expect(stored(mergeFirmState(full, edit((v) => (v.audit_logs.find((a) => a.id === entry.id)!.action = 'X')), admin))!.action).toBe(entry.action);
+    expect(stored(mergeFirmState(full, edit((v) => (v.audit_logs = v.audit_logs.filter((a) => a.id !== entry.id))), admin))).toBeTruthy();
   });
 });
 
@@ -238,13 +240,10 @@ describe('Step 4 · Account mapping, confidence gate and rules library', () => {
     // 710 is Trade receivables in the Blynt chart; the name says bank
     const bank = matchBlyntAccount('Business Current Account', 'Bank', '710')!;
     expect(bank.lead_letter).toBe('B');
-    expect(bank.confidence).toBeLessThan(90); // goes to Check, not Ready
-    expect(bank.reason).toMatch(/check this/);
-
-    // Name agrees with the code: full confidence
-    expect(matchBlyntAccount('Sales Ledger Control', 'Current Asset', '710')).toMatchObject({ blynt_code: '710', confidence: 100 });
-    // Name gives no clue: keep the code, but not Ready
-    expect(matchBlyntAccount('Account XJ-9', '', '710')).toMatchObject({ blynt_code: '710', confidence: 85 });
+    // The code number never decides: no 100% from a coincidental code, and no clue in the name means Check
+    expect(matchBlyntAccount('Sales Ledger Control', 'Current Asset', '710')!.confidence).toBeLessThan(100);
+    expect(matchBlyntAccount('Sales', 'Revenue', '200')).toMatchObject({ blynt_code: '100' });
+    expect(matchBlyntAccount('Account XJ-9', '', '710')!.confidence).toBeLessThan(90);
   });
 
   const eng = 'eng_harlow_fy26';

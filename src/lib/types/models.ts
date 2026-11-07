@@ -243,6 +243,8 @@ export interface BlyntAccount {
   schedule_ref?: string;
   cash_flow_category?: 'Operating activities' | 'Investing activities' | 'Financing activities' | 'Cash and cash equivalents';
   used_by_count?: number;
+  /** Set on accounts a practice added; the standard chart has none */
+  firm_id?: string;
 }
 
 export interface MappingList {

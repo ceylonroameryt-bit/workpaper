@@ -212,8 +212,8 @@ describe('E · the AI action log cannot be rewritten from the browser', () => {
   it('existing rows cannot be edited or deleted', () => {
     db.ai_action_logs.push(row('usr_admin') as any);
     const s = full();
-    expect(() => mergeFirmState(s, edit(s, (v) => (v.ai_action_logs[0].outcome = 'rejected')), admin)).toThrow(GuardError);
-    expect(() => mergeFirmState(s, edit(s, (v) => (v.ai_action_logs = [])), admin)).toThrow(GuardError);
+    expect(mergeFirmState(s, edit(s, (v) => (v.ai_action_logs[0].outcome = 'rejected')), admin).ai_action_logs.find((a) => a.id === 'act_usr_admin')!.outcome).toBe('accepted');
+    expect(mergeFirmState(s, edit(s, (v) => (v.ai_action_logs = [])), admin).ai_action_logs.some((a) => a.id === 'act_usr_admin')).toBe(true);
   });
 
   it('new rows must be recorded as the signed-in user', () => {

@@ -1,4 +1,5 @@
 import { UserRole } from '../types/models';
+import { newAccount } from '../coa';
 
 /**
  * Firm isolation and role rules for the whole-workspace sync (/api/v1/state).
@@ -22,7 +23,7 @@ export class GuardError extends Error {
 }
 
 // Server-managed: a browser save never changes these
-const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'invites', 'uploads', 'xero_connections', 'qbo_connections', 'blynt_accounts', 'templates', 'adjustments'];
+const SERVER_MANAGED = ['firms', 'users', 'memberships', 'credentials', 'invites', 'uploads', 'xero_connections', 'qbo_connections', 'templates', 'adjustments'];
 
 const REVIEWER_UP: UserRole[] = ['reviewer', 'manager', 'partner', 'admin'];
 const PARTNER_UP: UserRole[] = ['partner', 'admin'];
@@ -30,7 +31,7 @@ const MANAGER_UP: UserRole[] = ['manager', 'partner', 'admin'];
 
 const rows = (s: State, k: string): Row[] => (Array.isArray(s?.[k]) ? s[k] : []);
 const ids = (list: Row[], key = 'id') => new Set(list.map((r) => r[key]));
-const keyOf = (k: string, r: Row) => (k === 'view_prefs' ? `${r.user_id}|${r.scope}|${r.key}` : k === 'attachment_links' ? `${r.attachment_id}|${JSON.stringify(r.anchor_json)}` : r.id);
+const keyOf = (k: string, r: Row) => (k === 'blynt_accounts' ? `${r.firm_id ?? ''}|${r.code}` : k === 'view_prefs' ? `${r.user_id}|${r.scope}|${r.key}` : k === 'attachment_links' ? `${r.attachment_id}|${JSON.stringify(r.anchor_json)}` : r.id);
 
 /**
  * Clients a member may see: null means all of the firm's clients (admins and partners, or
@@ -70,7 +71,8 @@ export function firmSlice(state: State, firmId: string, userId?: string): State 
     memberships: members,
     clients,
     engagements,
-    blynt_accounts: rows(state, 'blynt_accounts'),
+    // The standard chart plus the firm's own accounts
+    blynt_accounts: rows(state, 'blynt_accounts').filter((a) => !a.firm_id || a.firm_id === firmId),
     templates: rows(state, 'templates'),
     mapping_lists: lists,
     mapping_rules: rows(state, 'mapping_rules').filter((r) => listIds.has(r.mapping_list_id)),
@@ -221,6 +223,21 @@ export function mergeFirmState(full: State, proposed: State, actor: Actor): Stat
     for (const r of pinned[k]) r.firm_id = actor.firmId;
   }
   for (const k of SERVER_MANAGED) pinned[k] = before[k] ?? [];
+  // Append-only logs: a stale browser copy must not read as an edit, so keep the server's rows and take only new ones
+  for (const k of ['audit_logs', 'ai_action_logs']) {
+    const known = ids(before[k] ?? []);
+    pinned[k] = [...(before[k] ?? []), ...pinned[k].filter((r) => !known.has(r.id))];
+  }
+  // Chart of accounts: existing accounts stay as stored; a new code is rebuilt from its section so only name and code come from the browser
+  const chart = before.blynt_accounts ?? [];
+  const added: Row[] = [];
+  for (const r of pinned.blynt_accounts) {
+    if (chart.some((a) => a.code === r.code) || added.some((a) => a.code === r.code)) continue;
+    const acc = newAccount([...chart, ...added] as any, String(r.code ?? ''), String(r.name ?? ''), actor.firmId);
+    if (typeof acc === 'string') deny(acc);
+    added.push(acc);
+  }
+  pinned.blynt_accounts = [...chart, ...added];
 
   // Records whose ids belong to another firm cannot be claimed
   for (const k of ['clients', 'engagements', 'mapping_lists']) {

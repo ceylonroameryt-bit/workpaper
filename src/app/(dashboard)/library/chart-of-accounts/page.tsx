@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
+import { newAccount } from '@/lib/coa';
 import type { BlyntAccount } from '@/lib/types/models';
 
 export default function ChartOfAccountsPage() {
@@ -48,16 +49,10 @@ export default function ChartOfAccountsPage() {
     e.preventDefault();
     if (!newCode || !newName) return;
 
-    db.blynt_accounts.push({
-      code: newCode,
-      name: newName,
-      type: newType,
-      normal_balance: newType === 'Asset' || newType === 'Cost of Sales' || newType === 'Overhead' ? 'Debit' : 'Credit',
-      lead_letter: newLead,
-      is_control: false,
-      is_system: false,
-      used_by_count: 0,
-    });
+    // The section decides type, lead and statutory line, so the account lands where its code says
+    const acc = newAccount(db.blynt_accounts, newCode, newName, db.firms[0]?.id ?? '');
+    if (typeof acc === 'string') return alert(acc);
+    db.blynt_accounts.push(acc);
 
     setShowAddModal(false);
     setNewCode('');

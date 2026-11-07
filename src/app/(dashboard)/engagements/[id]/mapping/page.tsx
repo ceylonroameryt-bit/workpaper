@@ -32,6 +32,8 @@ import { toPence, asPence, formatPence } from '@/lib/money';
 import { matchBlyntAccount, getStatutoryDetails } from '@/lib/mapping/auto-mapper';
 import { getActor, getCurrentUserId } from '@/lib/session';
 import { engagementSummary } from '@/lib/api';
+import { newAccount, sectionRange } from '@/lib/coa';
+import { STANDARD_CHART } from '@/lib/standard-chart';
 
 function ChartOptions() {
   return (
@@ -45,6 +47,74 @@ function ChartOptions() {
   );
 }
 
+/** Search the chart by code or name; when nothing fits, add a code inside a chosen section. */
+function AccountPicker({ value, label, firmId, onPick }: { value: string; label: string; firmId: string; onPick: (code: string) => void }) {
+  const current = db.blynt_accounts.find((a) => a.code === value);
+  const [text, setText] = useState(current ? `${current.code} ${current.name}` : '');
+  const [creating, setCreating] = useState(false);
+  const [base, setBase] = useState(STANDARD_CHART.find((a) => a.code === value)?.code ?? '');
+  const [code, setCode] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const range = sectionRange(base);
+
+  const pick = (t: string) => {
+    setText(t);
+    const hit = db.blynt_accounts.find((a) => `${a.code} ${a.name}` === t || a.code === t.trim());
+    if (hit && hit.code !== value) onPick(hit.code);
+  };
+  const startCreate = () => {
+    setName(db.blynt_accounts.some((a) => `${a.code} ${a.name}` === text) ? '' : text.replace(/^\d+\s*/, ''));
+    setError('');
+    setCreating(true);
+  };
+  const save = () => {
+    const acc = newAccount(db.blynt_accounts, code, name, firmId);
+    if (typeof acc === 'string') return setError(acc);
+    if (range && (Number(code) < range.from || Number(code) > range.to)) return setError(`Use a code from ${range.from} to ${range.to}.`);
+    db.blynt_accounts.push(acc);
+    setText(`${acc.code} ${acc.name}`);
+    setCreating(false);
+    onPick(acc.code);
+  };
+
+  return (
+    <div className="w-full max-w-[240px] space-y-1.5">
+      <div className="flex gap-1">
+        <input
+          aria-label={label}
+          list="blynt-chart"
+          value={text}
+          placeholder="Search code or name…"
+          onChange={(e) => pick(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && !db.blynt_accounts.some((a) => `${a.code} ${a.name}` === text) && startCreate()}
+          className="min-w-0 flex-1 text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] focus:border-[#122654] rounded-lg bg-white text-[#122654]"
+        />
+        <button type="button" onClick={startCreate} title="Create a new account" aria-label="Create a new account" className="px-2 text-xs font-bold border border-[#D3DCEE] rounded-lg text-[#122654] hover:bg-[#EAF5FC]">
+          +
+        </button>
+      </div>
+      {creating && (
+        <div className="p-2 border border-[#D3DCEE] rounded-lg bg-[#F5F8FD] space-y-1.5 text-[11px]">
+          <select aria-label="Section" value={base} onChange={(e) => { setBase(e.target.value); setCode(''); }} className="w-full py-1 px-1.5 border border-[#D3DCEE] rounded bg-white">
+            <option value="">Section…</option>
+            {STANDARD_CHART.map((a) => (
+              <option key={a.code} value={a.code}>{a.code} {a.name}</option>
+            ))}
+          </select>
+          <input aria-label="New code" value={code} onChange={(e) => setCode(e.target.value)} placeholder={range ? `Code ${range.from}–${range.to}` : 'Pick a section first'} disabled={!range} className="w-full py-1 px-1.5 border border-[#D3DCEE] rounded bg-white" />
+          <input aria-label="New account name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Account name" className="w-full py-1 px-1.5 border border-[#D3DCEE] rounded bg-white" />
+          {error && <p role="alert" className="text-[#B8432F]">{error}</p>}
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setCreating(false)} className="text-[#4A5878]">Cancel</button>
+            <button type="button" onClick={save} disabled={!range} className="px-2 py-0.5 rounded bg-[#122654] text-white font-semibold disabled:opacity-50">Create &amp; map</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AccountMappingPage() {
   const params = useParams();
   const router = useRouter();
@@ -52,6 +122,7 @@ export default function AccountMappingPage() {
   const engagementRow = db.engagements.find((e) => e.id === engagementId);
   const firmId = engagementRow?.firm_id ?? 'firm_blynt_uk';
   const engagementClientId = engagementRow?.client_id ?? null;
+  const clientName = db.clients.find((c) => c.id === engagementClientId)?.name ?? 'this client';
 
   const [mappings, setMappings] = useState<AccountMapping[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -484,7 +555,7 @@ export default function AccountMappingPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto pb-16 animate-in fade-in duration-200">
+    <div className="flex flex-col gap-6 w-full min-w-0 pb-16 animate-in fade-in duration-200">
       {/* Header with Title and v1.1 Breadcrumbs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -768,6 +839,11 @@ export default function AccountMappingPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
+          <datalist id="blynt-chart">
+            {db.blynt_accounts.map((a) => (
+              <option key={a.code} value={`${a.code} ${a.name}`} />
+            ))}
+          </datalist>
           <table className="w-full text-left text-xs text-[#122654]">
             <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
               <tr>
@@ -783,8 +859,8 @@ export default function AccountMappingPage() {
                 <th scope="col" className="p-3 text-right">Balance</th>
                 <th scope="col" className="p-3">Statutory Line &amp; Schedule</th>
                 <th scope="col" className="p-3">Confidence &amp; Gate</th>
-                <th scope="col" className="p-3 min-w-[280px]">AI Reason &amp; Evidence (DAT-03)</th>
-                <th scope="col" className="p-3 min-w-[220px]">Blynt Account (Mapping)</th>
+                <th scope="col" className="p-3">AI Reason &amp; Evidence (DAT-03)</th>
+                <th scope="col" className="p-3">Blynt Account (Mapping)</th>
                 <th scope="col" className="p-3 pr-4 text-right">Action</th>
               </tr>
             </thead>
@@ -907,15 +983,13 @@ export default function AccountMappingPage() {
 
                     {/* Blynt Account Dropdown */}
                     <td className="p-3" onClick={(e) => e.stopPropagation()}>
-                      <select
-                        aria-label={`Select mapping for ${row.source_name}`}
+                      <AccountPicker
+                        key={row.blynt_code || ''}
                         value={row.blynt_code || ''}
-                        onChange={(e) => handleInitiateChangeMapping(row.id, e.target.value)}
-                        className="text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] hover:border-[#122654] focus:border-[#122654] rounded-lg bg-white text-[#122654] shadow-2xs transition-all cursor-pointer w-full max-w-[240px]"
-                      >
-                        <option value="">Select Blynt COA Account…</option>
-                  <ChartOptions />
-                      </select>
+                        label={`Select mapping for ${row.source_name}`}
+                        firmId={firmId}
+                        onPick={(code) => handleInitiateChangeMapping(row.id, code)}
+                      />
                     </td>
 
                     {/* Actions */}
@@ -1041,7 +1115,7 @@ export default function AccountMappingPage() {
                     className="mt-0.5 text-[#0B6B52]"
                   />
                   <div>
-                    <div className="font-bold text-[#0B6B52]">This client only (Harlow Food Group)</div>
+                    <div className="font-bold text-[#0B6B52]">This client only ({clientName})</div>
                     <div className="text-[11px] text-[#4A5878]">Remembered for all future engagements and roll-forward periods for this client.</div>
                   </div>
                 </label>

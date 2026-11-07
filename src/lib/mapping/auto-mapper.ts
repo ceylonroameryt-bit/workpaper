@@ -19,29 +19,9 @@ export function matchBlyntAccount(
   sourceType: string = '',
   sourceCode: string = ''
 ): MappingSuggestion | null {
-  const code = (sourceCode || '').trim();
-  const byName = matchByName(sourceName, sourceType);
-  const codeMatch = db.blynt_accounts.find((ba) => ba.code === code);
-  if (!codeMatch) return strip(byName);
-
-  const fromCode: MappingSuggestion = {
-    blynt_code: codeMatch.code,
-    name: codeMatch.name,
-    confidence: 100,
-    reason: `Code ${code} and the account name both point to ${codeMatch.name}`,
-    lead_letter: codeMatch.lead_letter,
-  };
-  // A client's nominal code only coincides with the Blynt chart by chance, so the name decides
-  if (byName.fallback) {
-    return { ...fromCode, confidence: 85, reason: `Code ${code} matches ${codeMatch.name} in the Blynt chart; the name gives no other clue` };
-  }
-  if (byName.blynt_code === codeMatch.code || byName.lead_letter === codeMatch.lead_letter) return fromCode;
-  // Name and code disagree (e.g. "Business Current Account" on code 1200 = Trade Debtors): follow the name, ask for a check
-  return {
-    ...strip(byName),
-    confidence: Math.min(byName.confidence, 80),
-    reason: `${byName.reason}. Code ${code} is ${codeMatch.name} in the Blynt chart, so check this`,
-  };
+  // A client's nominal code only coincides with the Blynt chart by chance, so only the name and type decide
+  void sourceCode;
+  return strip(matchByName(sourceName, sourceType));
 }
 
 const strip = ({ fallback: _f, ...s }: MappingSuggestion & { fallback?: boolean }): MappingSuggestion => s;
