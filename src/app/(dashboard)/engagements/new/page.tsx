@@ -218,7 +218,7 @@ export default function NewEngagementWizard() {
         <ChevronLeft className="w-4 h-4" /> Back to clients
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] rounded-[16px] overflow-hidden border border-[#E3E7EF] bg-white">
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] rounded-xl overflow-hidden border border-[#E3E7EF] bg-white">
         {/* Step rail */}
         <aside className="bg-[#0B1A3B] text-white px-6 py-8">
           <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF7A66]">New engagement</p>

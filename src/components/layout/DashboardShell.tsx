@@ -25,7 +25,7 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
           aria-modal="true"
           className="lg:hidden fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex"
         >
-          <div className="w-[264px] bg-[#0B1A3B] h-full shadow-2xl flex flex-col">
+          <div className="w-[232px] bg-[#0B1A3B] h-full shadow-2xl flex flex-col">
             <AppSidebar onMobileClose={() => setMobileMenuOpen(false)} />
           </div>
           <div

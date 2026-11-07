@@ -91,7 +91,7 @@ export const PeriodSelector: React.FC = () => {
         </button>
 
         {open && (
-          <div className="absolute left-0 mt-2 w-80 sm:w-96 bg-white border border-[#E3E7EF] rounded-[16px] shadow-2xl p-4 z-50">
+          <div className="absolute left-0 mt-2 w-80 sm:w-96 bg-white border border-[#E3E7EF] rounded-xl shadow-2xl p-4 z-50">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
               <span className="flex items-center gap-2 text-xs font-bold text-[#122654]">
                 <Calendar className="w-4 h-4 text-[#1D4E89]" /> {activeCompany?.name ?? 'Periods'}

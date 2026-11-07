@@ -637,7 +637,7 @@ export default function PracticeSettingsPage() {
           </div>
 
           {/* AI Performance & Confidence Gate Card (DAT-08, DAT-05, RPT-03) */}
-          <div className="bg-[#F5F8FD] border border-[#E3E7EF] rounded-2xl p-5 space-y-4">
+          <div className="bg-[#F5F8FD] border border-[#E3E7EF] rounded-xl p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="text-xs font-bold text-[#122654] flex items-center gap-1.5">
@@ -679,7 +679,7 @@ export default function PracticeSettingsPage() {
 
           {/* Pending Manager Approvals Queue (DAT-09 criteria 5) */}
           {rulesList.some((r) => r.scope === 'practice' && !r.approved_by_manager) && (
-            <div className="border border-amber-300 bg-amber-50/60 rounded-2xl p-5 space-y-3">
+            <div className="border border-amber-300 bg-amber-50/60 rounded-xl p-5 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                 <span>Manager Approval Queue (Practice-Scope Rules Requested by Preparers)</span>
@@ -846,7 +846,7 @@ export default function PracticeSettingsPage() {
             <div className="space-y-5">
               <div>
                 <label className="block text-xs font-bold text-[#122654] mb-2">Practice Logo</label>
-                <div className="border-2 border-dashed border-[#D3DCEE] hover:border-[#122654] rounded-2xl p-6 text-center bg-[#F5F8FD] transition-colors cursor-pointer">
+                <div className="border-2 border-dashed border-[#D3DCEE] hover:border-[#122654] rounded-xl p-6 text-center bg-[#F5F8FD] transition-colors cursor-pointer">
                   <Upload className="w-8 h-8 text-[#7E8DA6] mx-auto mb-2" />
                   <span className="text-xs font-bold text-[#122654] block">Click to upload brand logo</span>
                   <span className="text-[11px] text-[#7E8DA6]">PNG, JPG, or SVG (up to 5MB)</span>
@@ -1039,7 +1039,7 @@ export default function PracticeSettingsPage() {
         >
           <div className="bg-white border border-[#E3E7EF] rounded-[24px] shadow-2xl max-w-lg w-full p-6 sm:p-8 animate-in zoom-in-95">
             <div className="flex items-center gap-3 text-[#122654] mb-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#EAF5FC] text-[#1D4E89] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#EAF5FC] text-[#1D4E89] flex items-center justify-center shrink-0">
                 <Sliders className="w-5 h-5" />
               </div>
               <div>

@@ -238,7 +238,7 @@ export default function ReviewNotesHubPage() {
 
       {/* Completion & Sign-off Mode (REV-05 & ENG-06) */}
       {reviewMode === 'completion' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-6 shadow-xs space-y-6">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl p-6 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E3E7EF] pb-4">
             <div>
               <h2 className="text-base font-bold text-[#122654]">Partner Completion Checklist (REV-05)</h2>
@@ -350,7 +350,7 @@ export default function ReviewNotesHubPage() {
           {/* Unlock Modal in Completion View */}
           {showUnlockModal && (
             <div className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-[#E3E7EF]">
+              <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl border border-[#E3E7EF]">
                 <h3 className="text-base font-bold text-[#122654] mb-2">Unlock Period (ENG-06)</h3>
                 <p className="text-xs text-[#4A5878] mb-4">
                   Unlocking requires partner role and resets approval stamps. Enter reason:
@@ -388,7 +388,7 @@ export default function ReviewNotesHubPage() {
       {reviewMode === 'points' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left List of Notes */}
-        <div className="lg:col-span-5 bg-white border border-[#E3E7EF] rounded-[16px] overflow-hidden flex flex-col shadow-xs">
+        <div className="lg:col-span-5 bg-white border border-[#E3E7EF] rounded-xl overflow-hidden flex flex-col shadow-xs">
           {/* Tabs & Search */}
           <div className="p-4 border-b border-[#E3E7EF] flex flex-col gap-3">
             <Tabs
@@ -460,7 +460,7 @@ export default function ReviewNotesHubPage() {
 
         {/* Right Selected Thread Detail */}
         {selectedNote && (
-          <div className="lg:col-span-7 bg-white border border-[#E3E7EF] rounded-[16px] p-6 flex flex-col gap-5 shadow-xs">
+          <div className="lg:col-span-7 bg-white border border-[#E3E7EF] rounded-xl p-6 flex flex-col gap-5 shadow-xs">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-[#E3E7EF]">
               <div>

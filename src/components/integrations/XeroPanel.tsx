@@ -103,7 +103,7 @@ export function LedgerPanel({ provider, clientId, engagementId, reconnectNeeded 
   };
 
   return (
-    <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
+    <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-5 space-y-4">
       <div className="flex items-center justify-between gap-3 border-b border-[#E3E7EF] pb-3">
         <div className="flex items-center gap-2.5">
           <div className={`w-8 h-8 rounded-full ${P.colour} text-white text-[11px] font-extrabold flex items-center justify-center`} aria-hidden="true">

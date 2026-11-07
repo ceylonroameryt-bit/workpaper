@@ -371,7 +371,7 @@ export default function ClientsPage() {
 
           {filteredClients.length === 0 && view === 'archived' && (
             <div className="p-12 text-center flex flex-col items-center justify-center">
-              <div className="w-12 h-12 rounded-2xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
                 <Archive className="w-6 h-6" />
               </div>
               <h3 className="text-sm font-bold text-[#122654]">No archived clients</h3>
@@ -383,7 +383,7 @@ export default function ClientsPage() {
 
           {filteredClients.length === 0 && view === 'active' && (
             <div className="p-12 text-center flex flex-col items-center justify-center">
-              <div className="w-12 h-12 rounded-2xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
                 <Building2 className="w-6 h-6" />
               </div>
               <h3 className="text-sm font-bold text-[#122654]">No clients found</h3>
@@ -405,7 +405,7 @@ export default function ClientsPage() {
       {/* Archive confirmation */}
       {archiveTarget && (
         <div role="dialog" aria-modal="true" aria-labelledby="archive-title" className="fixed inset-0 z-50 bg-[#0B1A3B]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="blynt-card p-6 bg-white max-w-md w-full rounded-2xl shadow-xl flex flex-col gap-4 border border-[#E3E7EF]">
+          <div className="blynt-card p-6 bg-white max-w-md w-full rounded-xl shadow-xl flex flex-col gap-4 border border-[#E3E7EF]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#EAF5FC] flex items-center justify-center">
@@ -464,7 +464,7 @@ export default function ClientsPage() {
       {/* Confirmation Modal to Delete Company */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-[#0B1A3B]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="blynt-card p-6 bg-white max-w-md w-full rounded-2xl shadow-xl flex flex-col gap-4 border border-[#E3E7EF]">
+          <div className="blynt-card p-6 bg-white max-w-md w-full rounded-xl shadow-xl flex flex-col gap-4 border border-[#E3E7EF]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5 text-[#B42318]">
                 <div className="w-9 h-9 rounded-xl bg-[#FDECEA] flex items-center justify-center">

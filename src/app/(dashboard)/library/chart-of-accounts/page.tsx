@@ -185,7 +185,7 @@ export default function ChartOfAccountsPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4"
         >
-          <div className="bg-white rounded-[16px] border border-[#E3E7EF] shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-xl border border-[#E3E7EF] shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95">
             <h3 className="text-base font-bold text-[#122654] mb-1">
               Add custom firm account
             </h3>

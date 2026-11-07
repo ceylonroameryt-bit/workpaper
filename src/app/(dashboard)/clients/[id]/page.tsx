@@ -55,7 +55,7 @@ export default function ClientRecordPage() {
 
   if (!client) {
     return (
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-8 text-center space-y-3">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-8 text-center space-y-3">
         <h1 className="text-lg font-bold text-[#122654]">Client not found</h1>
         <p className="text-xs text-[#4A5878]">This client doesn&apos;t exist or you don&apos;t have access to it.</p>
         <Link href="/clients" className="inline-block text-xs font-bold text-[#B8432F] hover:underline">Back to clients</Link>
@@ -71,7 +71,7 @@ export default function ClientRecordPage() {
         </div>
       )}
       {/* Top Header */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">{client.name}</h1>
@@ -103,7 +103,7 @@ export default function ClientRecordPage() {
           <XeroPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           <QuickBooksPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           {/* Engagements List */}
-          <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[#E3E7EF] pb-3">
               <h2 className="text-sm font-bold text-[#122654]">Client Engagements (ENG-01)</h2>
               <span className="text-xs text-[#7E8DA6]">{clientEngagements.length} Total</span>

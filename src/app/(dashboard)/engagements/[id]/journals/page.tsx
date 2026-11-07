@@ -378,7 +378,7 @@ function JournalForm({ engagementId, periodStart, periodEnd, source, onClose, on
   const input = 'min-h-[36px] px-2.5 text-xs bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654]';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true" aria-label="New journal">
-      <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-[16px] shadow-xl p-5 space-y-4 text-xs text-[#122654]">
+      <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-xl p-5 space-y-4 text-xs text-[#122654]">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold">{source ? `Propose a journal from ${source}` : 'New journal'}</h2>
           <button type="button" onClick={onClose} aria-label="Close" className="p-1 text-[#4A5878] cursor-pointer">

@@ -122,7 +122,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   return (
     <aside
       aria-label="Sidebar navigation"
-      className="w-full lg:w-[264px] lg:min-h-screen bg-[#0B1A3B] text-white flex flex-col justify-between shrink-0 select-none pb-4"
+      className="w-full lg:w-[232px] lg:min-h-screen bg-[#0B1A3B] text-white flex flex-col justify-between shrink-0 select-none pb-4"
     >
       <div className="flex flex-col">
         {/* Blynt Brand Logo */}
@@ -174,32 +174,26 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               href="/"
               onClick={onMobileClose}
               aria-current={isLinkActive('/', true) ? 'page' : undefined}
-              className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+              className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                 isLinkActive('/', true)
-                  ? 'text-white bg-[#122654] font-semibold'
+                  ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                   : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
-              {isLinkActive('/', true) && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-              )}
               <Home className="w-4 h-4 shrink-0 text-[#FF7A66]" />
-              <span>Practice dashboard</span>
+              <span>Dashboard</span>
             </Link>
 
             <Link
               href="/clients"
               onClick={onMobileClose}
               aria-current={isLinkActive('/clients') ? 'page' : undefined}
-              className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+              className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                 isLinkActive('/clients')
-                  ? 'text-white bg-[#122654] font-semibold'
+                  ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                   : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
-              {isLinkActive('/clients') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-              )}
               <Building2 className="w-4 h-4 shrink-0" />
               <span>Clients</span>
             </Link>
@@ -208,15 +202,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               href="/settings"
               onClick={onMobileClose}
               aria-current={isLinkActive('/settings') ? 'page' : undefined}
-              className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+              className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                 isLinkActive('/settings')
-                  ? 'text-white bg-[#122654] font-semibold'
+                  ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                   : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
-              {isLinkActive('/settings') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-              )}
               <Sliders className="w-4 h-4 shrink-0" />
               <span>Practice settings</span>
             </Link>
@@ -227,7 +218,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         {showEngagementOptions && activeEngagement && (
           <div className="mt-4 flex flex-col animate-in fade-in duration-200">
             <div className="px-5 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#7E8DA6] flex items-center justify-between">
-              <span className="truncate">{activeClient ? activeClient.name : 'Engagement'}</span>
+              <span className="truncate" title={activeClient?.name}>Workpapers</span>
               <span className="text-[9px] text-[#FF7A66] font-mono lowercase shrink-0">active</span>
             </div>
             <nav className="flex flex-col">
@@ -236,15 +227,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(engagementBase, true) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(engagementBase, true)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(engagementBase, true) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <Home className="w-4 h-4 shrink-0" />
                 <span>Overview</span>
               </Link>
@@ -254,15 +242,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/trial-balance`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/trial-balance`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/trial-balance`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/trial-balance`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <Scale className="w-4 h-4 shrink-0" />
                 <span>Trial balance</span>
               </Link>
@@ -272,16 +257,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/mapping`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/mapping`) ? 'page' : undefined}
-                className={`relative flex items-center justify-between px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center justify-between mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/mapping`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  {isLinkActive(`${engagementBase}/mapping`) && (
-                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                  )}
                   <TableProperties className="w-4 h-4 shrink-0" />
                   <span>Mapping</span>
                 </div>
@@ -297,15 +279,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/workpapers`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/workpapers`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/workpapers`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/workpapers`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <FileCheck2 className="w-4 h-4 shrink-0" />
                 <span>Working paper</span>
               </Link>
@@ -315,15 +294,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/journals`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/journals`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/journals`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/journals`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <BookOpen className="w-4 h-4 shrink-0" />
                 <span>Journals</span>
               </Link>
@@ -333,15 +309,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/documents`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/documents`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/documents`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/documents`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <FileSpreadsheet className="w-4 h-4 shrink-0" />
                 <span>Documents</span>
               </Link>
@@ -351,15 +324,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/analysis`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/analysis`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/analysis`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/analysis`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <ArrowUpRight className="w-4 h-4 shrink-0" />
                 <span>Analysis</span>
               </Link>
@@ -369,15 +339,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/disclosures`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/disclosures`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/disclosures`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/disclosures`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <FileCheck2 className="w-4 h-4 shrink-0" />
                 <span>Disclosures & notes</span>
               </Link>
@@ -387,15 +354,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/reports`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/reports`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/reports`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/reports`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <FileDown className="w-4 h-4 shrink-0" />
                 <span>Reports</span>
               </Link>
@@ -405,16 +369,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/review`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/review`) ? 'page' : undefined}
-                className={`relative flex items-center justify-between px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center justify-between mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/review`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  {isLinkActive(`${engagementBase}/review`) && (
-                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                  )}
                   <MessageSquare className="w-4 h-4 shrink-0" />
                   <span>Review</span>
                 </div>
@@ -430,15 +391,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 href={`${engagementBase}/history`}
                 onClick={onMobileClose}
                 aria-current={isLinkActive(`${engagementBase}/history`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isLinkActive(`${engagementBase}/history`)
-                    ? 'text-white bg-[#122654] font-semibold'
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                     : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
                 }`}
               >
-                {isLinkActive(`${engagementBase}/history`) && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-                )}
                 <Lock className="w-4 h-4 shrink-0" />
                 <span>History</span>
               </Link>
@@ -456,15 +414,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               href="/library/templates"
               onClick={onMobileClose}
               aria-current={isLinkActive('/library/templates') ? 'page' : undefined}
-              className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+              className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                 isLinkActive('/library/templates')
-                  ? 'text-white bg-[#122654] font-semibold'
+                  ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                   : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
-              {isLinkActive('/library/templates') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-              )}
               <FileSpreadsheet className="w-4 h-4 shrink-0" />
               <span>Templates</span>
             </Link>
@@ -473,15 +428,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               href="/library/standards"
               onClick={onMobileClose}
               aria-current={isLinkActive('/library/standards') ? 'page' : undefined}
-              className={`relative flex items-center gap-3 px-5 py-2 text-xs font-medium transition-colors ${
+              className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                 isLinkActive('/library/standards')
-                  ? 'text-white bg-[#122654] font-semibold'
+                  ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
                   : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
               }`}
             >
-              {isLinkActive('/library/standards') && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF7A66] rounded-r-full" />
-              )}
               <BookOpen className="w-4 h-4 shrink-0" />
               <span>Standards library</span>
             </Link>

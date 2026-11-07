@@ -295,7 +295,7 @@ export default function PracticeHomePage() {
         <div className="blynt-card p-6 bg-gradient-to-r from-white via-white to-[#F5F8FD] border-[#D3DCEE] shadow-sm relative overflow-hidden">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#E3E7EF]">
             <div className="flex items-start sm:items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#0B1A3B] text-[#FF7A66] flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-[#0B1A3B] text-[#FF7A66] flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
                 <Building2 className="w-6 h-6 text-[#FF7A66]" />
               </div>
               <div className="flex flex-col">

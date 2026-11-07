@@ -154,7 +154,7 @@ export const InactivityHandler: React.FC = () => {
         </div>
 
         {/* Warning Icon */}
-        <div className="w-14 h-14 rounded-2xl bg-[#FFF1EE] text-[#B8432F] border border-[#FF7A66]/30 flex items-center justify-center mx-auto shadow-inner">
+        <div className="w-14 h-14 rounded-xl bg-[#FFF1EE] text-[#B8432F] border border-[#FF7A66]/30 flex items-center justify-center mx-auto shadow-inner">
           <Clock className="w-7 h-7 stroke-[2.2] animate-pulse" />
         </div>
 

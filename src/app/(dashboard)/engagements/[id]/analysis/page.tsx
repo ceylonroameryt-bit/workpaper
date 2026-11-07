@@ -133,7 +133,7 @@ export default function AnalysisPage() {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">AI Financial Analysis &amp; Schedule Review (ANL)</h1>
@@ -232,7 +232,7 @@ export default function AnalysisPage() {
           </div>
 
           {/* Variance Grid with AI Explanation and Manual Commentary */}
-          <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
             <div className="p-4 bg-[#F5F8FD] border-b border-[#E3E7EF] flex items-center justify-between">
               <span className="text-xs font-bold text-[#122654]">
                 Lines Flagged for Review (Movement &gt; 10% and &gt; £1,000)
@@ -308,7 +308,7 @@ export default function AnalysisPage() {
       {activeTab === 'balance_sheet' && (
         <div className="flex flex-col gap-5">
           {/* Going Concern Indicators Alert Card */}
-          <div className="bg-white border-2 border-emerald-500/40 rounded-[16px] p-5 shadow-xs flex items-start gap-3.5">
+          <div className="bg-white border-2 border-emerald-500/40 rounded-xl p-5 shadow-xs flex items-start gap-3.5">
             <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
             <div>
               <h3 className="text-sm font-bold text-[#122654]">Going Concern Health Check (ANL-02)</h3>
@@ -353,7 +353,7 @@ export default function AnalysisPage() {
           </div>
 
           {/* Balance Sheet Movement Grid */}
-          <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#0B1A3B] text-white text-[11px] font-bold uppercase tracking-wider">
                 <tr>
@@ -382,7 +382,7 @@ export default function AnalysisPage() {
 
       {/* TAB 3: Unusual Transactions (AIX-04) */}
       {activeTab === 'unusual' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#E3E7EF] pb-3">
             <div>
               <h3 className="text-sm font-bold text-[#122654]">Unusual Transactions Detector (AIX-04)</h3>

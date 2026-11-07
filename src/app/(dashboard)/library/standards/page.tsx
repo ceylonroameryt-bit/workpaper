@@ -33,7 +33,7 @@ export default function StandardsLibraryPage() {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* Top Banner */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">Accounting Standards Library (STD-01)</h1>
@@ -80,7 +80,7 @@ export default function StandardsLibraryPage() {
       </div>
 
       {/* Selected Standard Requirements Detail */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 space-y-6">
         <div className="border-b border-[#E3E7EF] pb-3 flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-[#122654]">{current.name}</h2>

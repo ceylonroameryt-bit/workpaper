@@ -574,7 +574,7 @@ export default function AccountMappingPage() {
       {/* Confidence Gate Summary Strip (DAT-03, DAT-08) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* READY GATE */}
-        <div className="bg-white border-2 border-emerald-500/30 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border-2 border-emerald-500/30 rounded-xl p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
               <span className="flex items-center gap-1.5">
@@ -603,7 +603,7 @@ export default function AccountMappingPage() {
         </div>
 
         {/* CHECK GATE */}
-        <div className="bg-white border-2 border-amber-500/30 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border-2 border-amber-500/30 rounded-xl p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-xs font-bold text-amber-800">
               <span className="flex items-center gap-1.5">
@@ -625,7 +625,7 @@ export default function AccountMappingPage() {
         </div>
 
         {/* EXCEPTION GATE */}
-        <div className="bg-white border-2 border-red-500/30 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border-2 border-red-500/30 rounded-xl p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-xs font-bold text-red-800">
               <span className="flex items-center gap-1.5">
@@ -647,7 +647,7 @@ export default function AccountMappingPage() {
         </div>
 
         {/* CONFIRMED */}
-        <div className="bg-white border border-[#E3E7EF] rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-xs font-bold text-[#122654]">
               <span className="flex items-center gap-1.5">
@@ -670,7 +670,7 @@ export default function AccountMappingPage() {
 
         {/* UNMAPPED BALANCE (GROUND RULE 2) */}
         <div
-          className={`rounded-2xl p-4 border-2 shadow-xs flex flex-col justify-between ${
+          className={`rounded-xl p-4 border-2 shadow-xs flex flex-col justify-between ${
             isFullyMapped
               ? 'border-emerald-500/50 bg-[#E6F4EF]/60'
               : 'border-red-500/60 bg-[#FDECEA]/60'
@@ -703,7 +703,7 @@ export default function AccountMappingPage() {
 
       {/* Fully Mapped Success Card (DAT-04 UI step 5) */}
       {isFullyMapped && (
-        <div className="p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="p-4 bg-emerald-50 border-2 border-emerald-500 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-3 text-xs text-emerald-900">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
@@ -726,7 +726,7 @@ export default function AccountMappingPage() {
       )}
 
       {/* Main Table Card */}
-      <div className="bg-white border border-[#E3E7EF] rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
         {/* Table Toolbar */}
         <div className="p-4 border-b border-[#E3E7EF] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Gate Filters (DAT-04 UI step 1 & 2) */}
@@ -1013,7 +1013,7 @@ export default function AccountMappingPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
-          <div className="bg-white border border-[#E3E7EF] rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-in zoom-in-95 space-y-5">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-2xl max-w-lg w-full p-6 animate-in zoom-in-95 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#EAF5FC] text-[#1D4E89] flex items-center justify-center">
@@ -1263,7 +1263,7 @@ export default function AccountMappingPage() {
 
       {/* Floating Correction Toast (DAT-05 UI step 1) */}
       {correctionToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#122654] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-3 border border-white/10">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#122654] text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-3 border border-white/10">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{correctionToast.message}</span>
           {correctionToast.undoAction && (

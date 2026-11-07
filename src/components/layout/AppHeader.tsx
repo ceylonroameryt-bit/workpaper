@@ -255,7 +255,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-[#E3E7EF] rounded-[16px] shadow-xl py-2 z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-[#E3E7EF] rounded-xl shadow-xl py-2 z-50">
                 <div className="px-4 py-2 border-b border-[#E3E7EF]">
                   <div className="text-xs font-bold text-[#122654]">{currentUser.name}</div>
                   <div className="text-[11px] text-[#4A5878]">{currentUser.email}</div>
@@ -320,7 +320,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle }) => {
           aria-labelledby="global-search-title"
           className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-start justify-center pt-20 p-4"
         >
-          <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-2xl max-w-xl w-full overflow-hidden animate-in fade-in zoom-in-95">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-2xl max-w-xl w-full overflow-hidden animate-in fade-in zoom-in-95">
             <div className="p-4 border-b border-[#E3E7EF] flex items-center gap-3">
               <Search className="w-4 h-4 text-[#4A5878]" />
               <input aria-label="Search working papers, accounts, clients, or commands"
