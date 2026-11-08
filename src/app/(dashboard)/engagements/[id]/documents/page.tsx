@@ -178,7 +178,7 @@ export default function DocumentsPage() {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* Top Banner with Inbound Email */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">Documents &amp; Permanent File (DOC)</h1>
@@ -258,7 +258,7 @@ export default function DocumentsPage() {
           </div>
 
           {/* Upload Drag & Drop Area */}
-          <div className="border-2 border-dashed border-[#D3DCEE] hover:border-[#FF7A66] rounded-[16px] p-6 text-center bg-white transition-colors cursor-pointer group">
+          <div className="border-2 border-dashed border-[#D3DCEE] hover:border-[#FF7A66] rounded-xl p-6 text-center bg-white transition-colors cursor-pointer group">
             <Upload className="w-7 h-7 mx-auto text-[#7E8DA6] group-hover:text-[#FF7A66] transition-colors mb-2" />
             <div className="text-xs font-bold text-[#122654]">
               Drag and drop invoices, statements, or contracts here, or click to browse
@@ -269,7 +269,7 @@ export default function DocumentsPage() {
           </div>
 
           {/* Documents Table */}
-          <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="bg-[#0B1A3B] text-white text-[11px] font-bold uppercase tracking-wider">
@@ -350,7 +350,7 @@ export default function DocumentsPage() {
         {/* Right Column: AI Document Summary Panel (DOC-04 & DOC-05) */}
         <div className="flex flex-col gap-4">
           {selectedDoc ? (
-            <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 flex flex-col gap-4">
+            <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-5 flex flex-col gap-4">
               <div className="flex items-start justify-between border-b border-[#E3E7EF] pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#FF7A66]" />
@@ -416,7 +416,7 @@ export default function DocumentsPage() {
               )}
             </div>
           ) : (
-            <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 text-center text-[#4A5878]">
+            <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 text-center text-[#4A5878]">
               <FileText className="w-8 h-8 text-[#D3DCEE] mx-auto mb-2" />
               <div className="text-xs font-bold text-[#122654]">Select a Document</div>
               <p className="text-[11px] mt-1 text-[#7E8DA6]">

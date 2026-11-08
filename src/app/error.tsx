@@ -14,7 +14,7 @@ export default function ErrorPage({ error, retry }: { error: Error & { digest?: 
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-6">
-      <div role="alert" className="max-w-md bg-white border border-[#E3E7EF] rounded-[16px] p-8 text-sm text-[#122654]">
+      <div role="alert" className="max-w-md bg-white border border-[#E3E7EF] rounded-xl p-8 text-sm text-[#122654]">
         <h1 className="text-lg font-bold mb-2">Something went wrong on this page</h1>
         <p className="text-[#4A5878] mb-5">
           Nothing you saved has been lost. The problem has been logged{error.digest ? ` (reference ${error.digest})` : ''}.

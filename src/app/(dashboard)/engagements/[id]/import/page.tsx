@@ -473,7 +473,7 @@ export default function ImportDataPage() {
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed border-[#D3DCEE] hover:border-[#FF7A66] rounded-[16px] p-8 text-center bg-[#F5F8FD] hover:bg-[#FFF1EE]/20 transition-colors cursor-pointer flex flex-col items-center justify-center gap-3"
+            className="border-2 border-dashed border-[#D3DCEE] hover:border-[#FF7A66] rounded-xl p-8 text-center bg-[#F5F8FD] hover:bg-[#FFF1EE]/20 transition-colors cursor-pointer flex flex-col items-center justify-center gap-3"
           >
             <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-[#122654]">
               <Upload className="w-6 h-6" />

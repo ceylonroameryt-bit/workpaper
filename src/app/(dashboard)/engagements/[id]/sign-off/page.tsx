@@ -281,7 +281,7 @@ export default function SignOffAndLockPage() {
       {/* 4 Stat Cards matching Page 14 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Papers */}
-        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col justify-between">
+        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-xl flex flex-col justify-between">
           <span className="text-xs font-semibold text-[#4A5878]">Papers</span>
           <span className="text-2xl sm:text-3xl font-extrabold text-[#122654] font-mono mt-2">
             {matrix.length}
@@ -289,7 +289,7 @@ export default function SignOffAndLockPage() {
         </div>
 
         {/* Card 2: Prepared */}
-        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col justify-between">
+        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-xl flex flex-col justify-between">
           <span className="text-xs font-semibold text-[#0B6B52] flex items-center gap-1">
             ✓ Prepared
           </span>
@@ -299,7 +299,7 @@ export default function SignOffAndLockPage() {
         </div>
 
         {/* Card 3: Reviewed */}
-        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col justify-between">
+        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-xl flex flex-col justify-between">
           <span className="text-xs font-semibold text-[#0B6B52] flex items-center gap-1">
             ✓ Reviewed
           </span>
@@ -309,7 +309,7 @@ export default function SignOffAndLockPage() {
         </div>
 
         {/* Card 4: Stale sign-offs */}
-        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col justify-between">
+        <div className="blynt-card p-5 bg-white border border-[#E3E7EF] rounded-xl flex flex-col justify-between">
           <span className="text-xs font-semibold text-[#6B4700] flex items-center gap-1">
             ⚠ Stale sign-offs
           </span>
@@ -326,7 +326,7 @@ export default function SignOffAndLockPage() {
       {/* Main 2-Column Split matching Page 14 */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Sign-off by paper */}
-        <div className="lg:col-span-8 blynt-card p-6 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col gap-4 shadow-2xs">
+        <div className="lg:col-span-8 blynt-card p-6 bg-white border border-[#E3E7EF] rounded-xl flex flex-col gap-4 shadow-2xs">
           <h2 className="text-sm font-bold text-[#122654]">Sign-off by paper</h2>
 
           <div className="overflow-x-auto -mx-6 px-6">
@@ -455,7 +455,7 @@ export default function SignOffAndLockPage() {
         {/* Right Column (4 cols): Before you can lock & Export the file */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           {/* Card 1: Before you can lock */}
-          <div className="blynt-card p-6 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col gap-4 shadow-2xs">
+          <div className="blynt-card p-6 bg-white border border-[#E3E7EF] rounded-xl flex flex-col gap-4 shadow-2xs">
             <h2 className="text-sm font-bold text-[#122654]">Before you can lock</h2>
 
             <div className="flex flex-col divide-y divide-[#E3E7EF]/80 text-xs">
@@ -556,7 +556,7 @@ export default function SignOffAndLockPage() {
           </div>
 
           {/* Card 2: Export the file */}
-          <div className="blynt-card p-6 bg-white border border-[#E3E7EF] rounded-2xl flex flex-col gap-3 shadow-2xs">
+          <div className="blynt-card p-6 bg-white border border-[#E3E7EF] rounded-xl flex flex-col gap-3 shadow-2xs">
             <h2 className="text-sm font-bold text-[#122654]">Export the file</h2>
             <p className="text-xs text-[#4A5878] leading-relaxed">
               PDF bundle with index, every paper, evidence, comments and the activity log.

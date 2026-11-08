@@ -153,7 +153,7 @@ export default function HistoryPage() {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">Activity log &amp; version history</h1>
@@ -257,7 +257,7 @@ export default function HistoryPage() {
           </div>
 
           {/* Activity log table */}
-          <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#0B1A3B] text-white text-[11px] font-bold uppercase tracking-wider">
                 <tr>
@@ -314,7 +314,7 @@ export default function HistoryPage() {
 
       {/* TAB 2: Version History (AUD-02) */}
       {activeTab === 'versions' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E3E7EF] pb-4">
             <div>
               <h2 className="text-base font-bold text-[#122654]">Schedule Version Comparison (AUD-02)</h2>
@@ -401,7 +401,7 @@ export default function HistoryPage() {
 
       {/* TAB 3: AI Action Log (AUD-03) */}
       {activeTab === 'ai_log' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
           <div className="p-4 bg-[#F5F8FD] border-b border-[#E3E7EF] flex items-center justify-between">
             <span className="text-xs font-bold text-[#122654]">
               AI Decision Lineage &amp; Model Accuracy (AUD-03)

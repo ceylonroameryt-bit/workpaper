@@ -1125,7 +1125,7 @@ export default function TrialBalancePage() {
           aria-modal="true"
           className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4"
         >
-          <div className="bg-white rounded-[16px] border border-[#E3E7EF] shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-xl border border-[#E3E7EF] shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
             <h3 className="text-base font-bold text-[#122654] mb-1">
               Propose balanced adjustment
             </h3>
@@ -1239,7 +1239,7 @@ export default function TrialBalancePage() {
       {/* ENG-04 Opening Balance Check Modal */}
       {showOpeningCheckModal && (
         <div className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] shadow-2xl max-w-3xl w-full border border-[#D3DCEE] overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full border border-[#D3DCEE] overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div>
                 <h3 className="text-base font-extrabold text-[#122654] flex items-center gap-2">
@@ -1508,7 +1508,7 @@ export default function TrialBalancePage() {
       {/* Attachment / Receipt Viewer Modal */}
       {selectedReceipt && (
         <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2">
                 <Paperclip className="w-4 h-4 text-[#1D4E89]" />
@@ -1543,7 +1543,7 @@ export default function TrialBalancePage() {
       {/* DAT-02 Upload TB Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] shadow-2xl max-w-2xl w-full border border-[#D3DCEE] overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full border border-[#D3DCEE] overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <div>
                 <h3 className="text-base font-extrabold text-[#122654] flex items-center gap-2">
@@ -1660,7 +1660,7 @@ export default function TrialBalancePage() {
       {/* DAT-01 Connect Ledger Modal */}
       {showLedgerConnectModal && (
         <div className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] shadow-2xl max-w-md w-full border border-[#D3DCEE] overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border border-[#D3DCEE] overflow-hidden">
             <div className="p-4 border-b border-[#E3E7EF] flex items-center justify-between bg-[#F5F8FD]">
               <h3 className="text-base font-extrabold text-[#122654] flex items-center gap-2">
                 <Database className="w-5 h-5 text-[#0B6B52]" />

@@ -87,7 +87,7 @@ export default function ReportsPage() {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* Top Banner */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">Financial Reports &amp; Exports (RPT / MGT / QTR)</h1>
@@ -184,7 +184,7 @@ export default function ReportsPage() {
           {reportLibrary.map((rep) => (
             <div
               key={rep.id}
-              className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col justify-between hover:border-[#122654]/30 transition-all"
+              className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col justify-between hover:border-[#122654]/30 transition-all"
             >
               <div>
                 <div className="flex items-center justify-between">
@@ -218,7 +218,7 @@ export default function ReportsPage() {
 
       {/* TAB 2: Management Accounts Pack (MGT-01) */}
       {activeTab === 'mgt_pack' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div>
               <h2 className="text-base font-bold text-[#122654]">Client Management Accounts Pack (MGT-01)</h2>
@@ -332,7 +332,7 @@ export default function ReportsPage() {
 
       {/* TAB 3: Cash Flow Statement (MGT-04) */}
       {activeTab === 'cash_flow' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div>
               <h2 className="text-base font-bold text-[#122654]">Cash Flow Statement - Indirect Method (MGT-04)</h2>
@@ -419,7 +419,7 @@ export default function ReportsPage() {
 
       {/* TAB 4: 12-Month Forecast (MGT-05) */}
       {activeTab === 'forecast_12m' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 space-y-6">
           <div className="border-b border-[#E3E7EF] pb-4">
             <h2 className="text-base font-bold text-[#122654]">12-Month Cash Flow Forecast (MGT-05)</h2>
             <p className="text-xs text-[#4A5878]">
@@ -518,7 +518,7 @@ export default function ReportsPage() {
 
       {/* TAB 5: Quarterly Insight Pack (QTR-01) */}
       {activeTab === 'quarterly' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-6">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7EF] pb-4">
             <div>
               <h2 className="text-base font-bold text-[#122654]">Quarterly Insight Schedule (QTR-01)</h2>
@@ -560,7 +560,7 @@ export default function ReportsPage() {
 
       {/* TAB 6: Full File Export Bundle (RPT-02) */}
       {activeTab === 'bundle' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-6 space-y-5 max-w-2xl mx-auto">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-6 space-y-5 max-w-2xl mx-auto">
           <div className="flex items-center gap-3 text-[#122654] border-b border-[#E3E7EF] pb-3">
             <FileDown className="w-6 h-6 text-[#FF7A66]" />
             <h2 className="text-base font-bold">Full Working Paper File Export (RPT-02)</h2>

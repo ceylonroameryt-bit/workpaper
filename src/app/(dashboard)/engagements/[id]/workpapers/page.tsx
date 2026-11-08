@@ -229,7 +229,7 @@ export default function WorkingPaperIndexPage() {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* Top Banner / Standard & Version Bar (WPS-01) */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-[#122654]">Working Paper Index (WPS)</h1>
@@ -365,7 +365,7 @@ export default function WorkingPaperIndexPage() {
       {bulkMessage && <p role="status" className="text-xs text-[#122654] bg-[#F5F8FD] border border-[#E3E7EF] rounded-lg px-3 py-2">{bulkMessage}</p>}
 
       {/* Main Working Paper Index Table */}
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -635,7 +635,7 @@ export default function WorkingPaperIndexPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 bg-[#0B1A3B]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
-          <div className="bg-white border border-[#E3E7EF] rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 space-y-4">
+          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF]">
               <div className="flex items-center gap-2 text-[#122654]">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />

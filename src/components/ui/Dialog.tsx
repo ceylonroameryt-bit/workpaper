@@ -79,7 +79,7 @@ export const Dialog: React.FC<DialogProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`w-full ${maxWidthClasses[maxWidth]} bg-white rounded-[16px] border border-[#E3E7EF] shadow-xl overflow-hidden flex flex-col animate-in zoom-in-95`}
+        className={`w-full ${maxWidthClasses[maxWidth]} bg-white rounded-xl border border-[#E3E7EF] shadow-xl overflow-hidden flex flex-col animate-in zoom-in-95`}
       >
         {/* Dialog Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E3E7EF] bg-[#F5F8FD]">

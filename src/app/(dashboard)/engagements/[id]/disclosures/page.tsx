@@ -43,7 +43,7 @@ export default function DisclosuresPage() {
   const prior = engagement?.prior_engagement_id ? db.engagements.find((e) => e.id === engagement.prior_engagement_id) : undefined;
 
   if (!engagement || !client) {
-    return <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-8 text-center text-xs text-[#4A5878]">Engagement not found.</div>;
+    return <div className="bg-white border border-[#E3E7EF] rounded-xl p-8 text-center text-xs text-[#4A5878]">Engagement not found.</div>;
   }
 
   const yearLabel = (iso?: string) => (iso ? formatDate(iso, { year: 'numeric', month: 'short' }) : '');
@@ -81,7 +81,7 @@ export default function DisclosuresPage() {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-      <div className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs">
+      <div className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs">
         <h1 className="text-xl font-bold text-[#122654]">{isCompany ? 'Disclosures, notes & statutory accounts' : 'Accounts & notes'}</h1>
         <p className="text-xs text-[#4A5878] mt-1">
           Built from the confirmed trial balance and the journals in it. {engagement.framework}
@@ -115,7 +115,7 @@ export default function DisclosuresPage() {
       )}
 
       {tab === 'accounts' && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-4 sm:p-6 space-y-5">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-4 sm:p-6 space-y-5">
           {empty ? (
             <p className="text-xs text-[#4A5878]">
               No figures yet. <Link href={`/engagements/${engagementId}/import`} className="font-bold text-[#B8432F] hover:underline">Import the trial balance</Link> and confirm the mapping to see the accounts.
@@ -207,7 +207,7 @@ export default function DisclosuresPage() {
           {[...a.bs.fixed, ...a.bs.current, ...a.bs.creditorsShort, ...a.bs.creditorsLong, ...a.bs.provisions, ...a.pl]
             .filter((l) => l.accounts.length > 0)
             .map((l) => (
-              <div key={l.label} className="bg-white border border-[#E3E7EF] rounded-[16px] p-5 shadow-xs">
+              <div key={l.label} className="bg-white border border-[#E3E7EF] rounded-xl p-5 shadow-xs">
                 <h3 className="text-sm font-bold text-[#122654] border-b border-[#E3E7EF] pb-2 mb-2">{l.label}</h3>
                 <table className="w-full text-xs">
                   <tbody>
@@ -231,7 +231,7 @@ export default function DisclosuresPage() {
       )}
 
       {tab === 'checklist' && isCompany && (
-        <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs overflow-hidden">
+        <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs overflow-hidden">
           <p className="p-4 bg-[#F5F8FD] border-b border-[#E3E7EF] text-xs text-[#4A5878]">
             Confirm each disclosure in the notes before the accounts are approved.
           </p>

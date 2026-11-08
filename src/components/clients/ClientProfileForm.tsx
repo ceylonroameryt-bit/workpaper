@@ -104,7 +104,7 @@ export function ClientProfileForm({ client }: { client: Client }) {
   const changed = result?.filter((p) => p.added.length || p.removed.length || p.kept.length) ?? [];
 
   return (
-    <div className="bg-white border border-[#E3E7EF] rounded-[16px] shadow-xs p-5 space-y-4">
+    <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-5 space-y-4">
       <div className="flex items-center justify-between gap-3 border-b border-[#E3E7EF] pb-3">
         <div>
           <h2 className="text-sm font-bold text-[#122654]">Client profile</h2>

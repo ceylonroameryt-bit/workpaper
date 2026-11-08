@@ -596,7 +596,7 @@ export default function WorkpaperPage() {
       {/* Unreview Modal (REV-02) */}
       {unreviewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-[16px] max-w-md w-full p-6 shadow-xl flex flex-col gap-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl flex flex-col gap-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-base text-[#122654] flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-[#B8432F]" />
@@ -644,7 +644,7 @@ export default function WorkpaperPage() {
       {/* Change Template Modal (WPS-02) */}
       {templateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-[16px] max-w-lg w-full p-6 shadow-xl flex flex-col gap-4">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl flex flex-col gap-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-base text-[#122654] flex items-center gap-2">
                 <Layers className="w-5 h-5 text-[#122654]" />

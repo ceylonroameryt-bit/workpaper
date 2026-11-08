@@ -347,7 +347,7 @@ export default function PracticeReviewNotesPage() {
           {/* Comment Threads grouped by Client */}
           {groupedByClient.length === 0 ? (
             <div className="blynt-card p-12 text-center flex flex-col items-center justify-center bg-white">
-              <div className="w-12 h-12 rounded-2xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F5F8FD] border border-[#E3E7EF] flex items-center justify-center text-[#4A5878] mb-3">
                 <MessageSquare className="w-6 h-6" />
               </div>
               <h3 className="text-sm font-bold text-[#122654]">No review notes or comments found</h3>
@@ -618,7 +618,7 @@ export default function PracticeReviewNotesPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 bg-[#0B1A3B]/60 backdrop-blur-xs flex items-center justify-center p-4"
         >
-          <div className="bg-white rounded-[16px] shadow-2xl border border-[#E3E7EF] max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-xl shadow-2xl border border-[#E3E7EF] max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-[#E3E7EF] mb-4">
               <h2 className="text-base font-bold text-[#122654]">
                 Create new review note or comment

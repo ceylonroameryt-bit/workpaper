@@ -126,7 +126,7 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
         {open && (
           <div
             role="listbox"
-            className="absolute left-0 right-0 top-full mt-2 z-50 bg-white text-[#122654] rounded-[16px] shadow-2xl border border-[#E3E7EF] overflow-hidden animate-in fade-in zoom-in-95"
+            className="absolute left-0 right-0 top-full mt-2 z-50 bg-white text-[#122654] rounded-xl shadow-2xl border border-[#E3E7EF] overflow-hidden animate-in fade-in zoom-in-95"
           >
             <div className="p-2.5 border-b border-[#E3E7EF]">
               <div className="relative">
@@ -222,7 +222,7 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 mt-2 z-50 w-72 sm:w-80 bg-white text-[#122654] rounded-[16px] shadow-2xl border border-[#E3E7EF] overflow-hidden animate-in fade-in zoom-in-95"
+          className="absolute left-0 mt-2 z-50 w-72 sm:w-80 bg-white text-[#122654] rounded-xl shadow-2xl border border-[#E3E7EF] overflow-hidden animate-in fade-in zoom-in-95"
         >
           <div className="p-3 border-b border-[#E3E7EF] bg-[#F5F8FD]">
             <div className="text-[10px] font-bold uppercase tracking-wider text-[#4A5878] mb-2 flex items-center justify-between">
