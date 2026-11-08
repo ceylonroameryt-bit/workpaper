@@ -330,7 +330,7 @@ function JournalForm({ engagementId, periodStart, periodEnd, source, onClose, on
   const [evidence, setEvidence] = useState<{ file_key: string; filename: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const accounts = db.blynt_accounts;
+  const accounts = db.accountsFor(engagementId);
 
   const dr = lines.reduce((a, l) => a + pence(l.debit), 0n);
   const cr = lines.reduce((a, l) => a + pence(l.credit), 0n);

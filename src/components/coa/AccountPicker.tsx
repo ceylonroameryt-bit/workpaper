@@ -4,14 +4,14 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown } from 'lucide-react';
 import { db } from '@/lib/server/db';
-import { CATEGORIES, categoryOf } from '@/lib/coa';
+import { CATEGORIES, accountsForClient, categoryOf } from '@/lib/coa';
 import { NewAccountForm } from '@/components/coa/NewAccountForm';
 
 const MENU_WIDTH = 340;
 const OTHER_GROUP = 'System and clearing';
 
 /** Pick an account from the whole chart, grouped by category; typing filters by code or name. */
-export function AccountPicker({ value, label, firmId, onPick, suggestName = '' }: { value: string; label: string; firmId: string; onPick: (code: string) => void; suggestName?: string }) {
+export function AccountPicker({ value, label, firmId, clientId, onPick, suggestName = '' }: { value: string; label: string; firmId: string; clientId?: string; onPick: (code: string) => void; suggestName?: string }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
@@ -22,11 +22,12 @@ export function AccountPicker({ value, label, firmId, onPick, suggestName = '' }
   const listId = useId();
 
   const current = db.blynt_accounts.find((a) => a.code === value);
+  const visible = () => accountsForClient(db.blynt_accounts, db.clients.find((c) => c.id === clientId));
   const currentText = current ? `${current.code} ${current.name}` : '';
 
   const groups = useMemo(() => {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-    const matches = [...db.blynt_accounts]
+    const matches = [...visible()]
       .sort((a, b) => Number(a.code) - Number(b.code))
       .filter((a) => words.every((w) => `${a.code} ${a.name}`.toLowerCase().includes(w)));
     return [...CATEGORIES.map((c) => c.name), OTHER_GROUP]
@@ -50,7 +51,7 @@ export function AccountPicker({ value, label, firmId, onPick, suggestName = '' }
       ...(flip ? { bottom: window.innerHeight - r.top + 4 } : { top: r.bottom + 4 }),
     });
     setQuery('');
-    setActive(Math.max(0, [...db.blynt_accounts].sort((a, b) => Number(a.code) - Number(b.code)).findIndex((a) => a.code === value)));
+    setActive(Math.max(0, [...visible()].sort((a, b) => Number(a.code) - Number(b.code)).findIndex((a) => a.code === value)));
     setOpen(true);
   };
 
@@ -206,6 +207,7 @@ export function AccountPicker({ value, label, firmId, onPick, suggestName = '' }
               <h3 className="text-base font-bold text-[#122654] mb-4">New account</h3>
               <NewAccountForm
                 firmId={firmId}
+                clientId={clientId}
                 initialName={query.trim().replace(/^\d+\s*/, '') || suggestName}
                 onCancel={() => setCreating(false)}
                 onUseExisting={(code) => {

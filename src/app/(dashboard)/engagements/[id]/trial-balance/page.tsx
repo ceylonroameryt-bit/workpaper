@@ -1154,7 +1154,7 @@ export default function TrialBalancePage() {
                     onChange={(e) => setAdjDebitAccount(e.target.value)}
                     className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654]"
                   >
-                    {db.blynt_accounts.map((b) => (
+                    {db.accountsFor(engagementId).map((b) => (
                       <option key={b.code} value={b.code}>
                         {b.code} - {b.name}
                       </option>
@@ -1185,7 +1185,7 @@ export default function TrialBalancePage() {
                     onChange={(e) => setAdjCreditAccount(e.target.value)}
                     className="w-full min-h-[36px] px-2 bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654]"
                   >
-                    {db.blynt_accounts.map((b) => (
+                    {db.accountsFor(engagementId).map((b) => (
                       <option key={b.code} value={b.code}>
                         {b.code} - {b.name}
                       </option>

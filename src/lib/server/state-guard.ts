@@ -233,7 +233,8 @@ export function mergeFirmState(full: State, proposed: State, actor: Actor): Stat
   const added: Row[] = [];
   for (const r of pinned.blynt_accounts) {
     if (chart.some((a) => a.code === r.code) || added.some((a) => a.code === r.code)) continue;
-    const acc = newAccount([...chart, ...added] as any, String(r.code ?? ''), String(r.name ?? ''), actor.firmId, r.parent_code ? String(r.parent_code) : undefined);
+    if (r.client_id && !pinned.clients.some((c) => c.id === r.client_id)) deny('That client belongs to another firm.');
+    const acc = newAccount([...chart, ...added] as any, String(r.code ?? ''), String(r.name ?? ''), actor.firmId, r.parent_code ? String(r.parent_code) : undefined, r.client_id ? String(r.client_id) : undefined);
     if (typeof acc === 'string') deny(acc);
     added.push(acc);
   }

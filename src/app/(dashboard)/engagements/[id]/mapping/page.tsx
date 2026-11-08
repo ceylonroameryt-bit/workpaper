@@ -23,10 +23,10 @@ import { engagementSummary } from '@/lib/api';
 import { NewAccountForm } from '@/components/coa/NewAccountForm';
 import { AccountPicker } from '@/components/coa/AccountPicker';
 
-function ChartOptions() {
+function ChartOptions({ engagementId }: { engagementId: string }) {
   return (
     <>
-      {db.blynt_accounts.map((a) => (
+      {db.accountsFor(engagementId).map((a) => (
         <option key={a.code} value={a.code}>
           {a.code} {a.name}
         </option>
@@ -50,6 +50,8 @@ export default function AccountMappingPage() {
   const [activeDetailId, setActiveDetailId] = useState<string | null>(null);
   const [typeFilter] = useState('all');
   const [statutoryFilter] = useState('all');
+  const [showStatutory, setShowStatutory] = useState(false);
+  const [showReason, setShowReason] = useState(false);
   const [batchTargetCode, setBatchTargetCode] = useState('');
   const [correctionToast, setCorrectionToast] = useState<{ message: string; undoAction?: () => void } | null>(null);
 
@@ -63,7 +65,7 @@ export default function AccountMappingPage() {
     targetCode: string;
     pattern: string;
   } | null>(null);
-  const [ruleScope, setRuleScope] = useState<'item' | 'supplier' | 'client' | 'practice'>('client');
+  const [ruleScope, setRuleScope] = useState<'client' | 'practice'>('client');
 
   // Load from db
   const reloadData = () => {
@@ -295,7 +297,8 @@ export default function AccountMappingPage() {
     const item = db.account_mappings.find((m) => m.id === mappingId);
     if (!item) return;
 
-    const patternGuess = `*${item.source_name.split(' ')[0]}*`;
+    // The whole ledger name, so a correction never moves a different account
+    const pattern = `name:${item.source_name}`;
 
     setPendingCorrection({
       mappingId,
@@ -303,7 +306,7 @@ export default function AccountMappingPage() {
       sourceName: item.source_name,
       sourceType: item.source_type,
       targetCode: newBlyntCode,
-      pattern: patternGuess,
+      pattern,
     });
     setRuleModalOpen(true);
   };
@@ -317,58 +320,54 @@ export default function AccountMappingPage() {
     const targetAcc = db.blynt_accounts.find((b) => b.code === targetCode);
     const statDetails = getStatutoryDetails(targetCode, sourceName);
 
-    // 1. Create rule in db.learned_rules if scope is supplier, client, or practice (DAT-09)
+    // 1. Create the rule in db.learned_rules (DAT-09)
     let appliedCount = 1;
-    let createdRuleId: string | null = null;
+    const createdRuleId = `rule_${Date.now()}`;
+    const newRule: LearnedRule = {
+      id: createdRuleId,
+      firm_id: firmId,
+      client_id: ruleScope === 'client' ? engagementClientId : null,
+      supplier_name: null,
+      type: 'mapping',
+      scope: ruleScope,
+      pattern: pattern,
+      target_value: targetCode,
+      explanation: `Rule learned from correction on ${sourceName} → ${targetCode} ${targetAcc?.name ?? ''}`,
+      created_by: actor.id,
+      created_by_name: actor.name,
+      created_at: now,
+      times_used: 1,
+      // Practice rules wait for a manager (DAT-09); the server refuses anything else
+      active: ruleScope !== 'practice' || ['manager', 'partner', 'admin'].includes(actor.role),
+      approved_by_manager: ruleScope === 'practice' ? ['manager', 'partner', 'admin'].includes(actor.role) : true,
+    };
+    db.learned_rules.unshift(newRule);
 
-    if (ruleScope !== 'item') {
-      createdRuleId = `rule_${Date.now()}`;
-      const newRule: LearnedRule = {
-        id: createdRuleId,
-        firm_id: firmId,
-        client_id: ruleScope === 'client' ? engagementClientId : null,
-        supplier_name: ruleScope === 'supplier' ? sourceName : null,
-        type: 'mapping',
-        scope: ruleScope,
-        pattern: pattern,
-        target_value: targetCode,
-        explanation: `Rule learned from correction on ${sourceName} → ${targetCode} ${targetAcc?.name ?? ''}`,
-        created_by: actor.id,
-        created_by_name: actor.name,
-        created_at: now,
-        times_used: 1,
-        // Practice rules wait for a manager (DAT-09); the server refuses anything else
-        active: ruleScope !== 'practice' || ['manager', 'partner', 'admin'].includes(actor.role),
-        approved_by_manager: ruleScope === 'practice' ? ['manager', 'partner', 'admin'].includes(actor.role) : true,
-      };
-      db.learned_rules.unshift(newRule);
+    db.logAudit(
+      firmId,
+      actor,
+      'CREATE_LEARNED_RULE',
+      'learned_rules',
+      newRule.id,
+      null,
+      newRule
+    );
 
-      db.logAudit(
-        firmId,
-        actor,
-        'CREATE_LEARNED_RULE',
-        'learned_rules',
-        newRule.id,
-        null,
-        newRule
-      );
-
-      // Apply immediately to matching unconfirmed accounts in the same file (DAT-05 criteria 1)
-      const patternRegex = new RegExp(pattern.replace(/\*/g, '.*'), 'i');
-      db.account_mappings.forEach((m) => {
-        if (m.engagement_id === engagementId && m.id !== mappingId && m.status !== 'confirmed') {
-          if (patternRegex.test(m.source_name)) {
-            m.blynt_code = targetCode;
-            m.status = 'suggested';
-            m.confidence = 95;
-            m.method = 'rule';
-            m.ai_reason = `Applied from newly created rule: ${pattern}`;
-            m.gate = 'ready';
-            appliedCount++;
-          }
+    // Apply immediately to matching unconfirmed accounts in the same file (DAT-05 criteria 1)
+    const sameName = (name: string) => name.trim().toLowerCase() === sourceName.trim().toLowerCase();
+    db.account_mappings.forEach((m) => {
+      if (m.engagement_id === engagementId && m.id !== mappingId && m.status !== 'confirmed') {
+        if (sameName(m.source_name)) {
+          m.blynt_code = targetCode;
+          m.status = 'suggested';
+          m.confidence = 95;
+          m.method = 'rule';
+          m.ai_reason = `Applied from newly created rule: ${sourceName}`;
+          m.gate = 'ready';
+          appliedCount++;
         }
-      });
-    }
+      }
+    });
 
     // 2. Update the target mapping
     const item = db.account_mappings.find((m) => m.id === mappingId);
@@ -418,13 +417,11 @@ export default function AccountMappingPage() {
     // Toast with Undo (DAT-05 UI step 1)
     setCorrectionToast({
       message: `Rule created – applied to ${appliedCount} accounts (scope: ${ruleScope}).`,
-      undoAction: createdRuleId
-        ? () => {
-            db.learned_rules = db.learned_rules.filter((r) => r.id !== createdRuleId);
-            reloadData();
-            setCorrectionToast({ message: 'Rule undone.' });
-          }
-        : undefined,
+      undoAction: () => {
+        db.learned_rules = db.learned_rules.filter((r) => r.id !== createdRuleId);
+        reloadData();
+        setCorrectionToast({ message: 'Rule undone.' });
+      },
     });
     setTimeout(() => setCorrectionToast(null), 4500);
   };
@@ -717,6 +714,22 @@ export default function AccountMappingPage() {
               />
             </div>
 
+            {/* Optional columns */}
+            {([
+              ['statutory line', showStatutory, setShowStatutory],
+              ['AI reason', showReason, setShowReason],
+            ] as const).map(([name, shown, setShown]) => (
+              <button
+                key={name}
+                type="button"
+                aria-pressed={shown}
+                onClick={() => setShown(!shown)}
+                className="min-h-[38px] px-3 text-xs font-semibold text-[#122654] bg-white hover:bg-[#EAF5FC] border border-[#D3DCEE] rounded-xl"
+              >
+                {shown ? 'Hide' : 'Show'} {name}
+              </button>
+            ))}
+
             {/* Batch Remap Toolbar (DAT-04 step 4) */}
             {selectedIds.length > 0 && (
               <div className="flex items-center gap-2 bg-[#EAF5FC] border border-[#B3D7F5] px-3 py-1.5 rounded-xl">
@@ -730,7 +743,7 @@ export default function AccountMappingPage() {
                   className="text-xs font-semibold py-1 px-2 border border-[#D3DCEE] rounded-lg bg-white text-[#122654] max-w-[200px]"
                 >
                   <option value="">Select target COA…</option>
-                  <ChartOptions />
+                  <ChartOptions engagementId={engagementId} />
                 </select>
                 <button
                   type="button"
@@ -771,11 +784,10 @@ export default function AccountMappingPage() {
                 </th>
                 <th scope="col" className="p-3">Ledger Code &amp; Name</th>
                 <th scope="col" className="p-3 text-right">Balance</th>
-                <th scope="col" className="p-3">Statutory Line &amp; Schedule</th>
+                {showStatutory && <th scope="col" className="p-3">Statutory Line &amp; Schedule</th>}
                 <th scope="col" className="p-3">Confidence &amp; Gate</th>
-                <th scope="col" className="p-3">AI Reason &amp; Evidence (DAT-03)</th>
-                <th scope="col" className="p-3">Blynt Account (Mapping)</th>
-                <th scope="col" className="p-3 pr-4 text-right">Action</th>
+                {showReason && <th scope="col" className="p-3">AI Reason &amp; Evidence (DAT-03)</th>}
+                <th scope="col" className="p-3 pr-4">Blynt Account (Mapping)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E3E7EF]">
@@ -843,19 +855,21 @@ export default function AccountMappingPage() {
                     </td>
 
                     {/* Statutory Line & Schedule */}
-                    <td className="p-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-bold text-[10px] bg-[#EAF5FC] text-[#1D4E89] px-1.5 py-0.5 rounded">
-                          {row.schedule_ref || stat.schedule_ref}
-                        </span>
-                        <span className="text-[11px] font-medium text-[#122654] truncate max-w-[200px]" title={row.statutory_line || stat.statutory_line}>
-                          {row.statutory_line || stat.statutory_line}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-[#7E8DA6] mt-0.5">
-                        {row.cash_flow_category || stat.cash_flow_category}
-                      </div>
-                    </td>
+                    {showStatutory && (
+                      <td className="p-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-bold text-[10px] bg-[#EAF5FC] text-[#1D4E89] px-1.5 py-0.5 rounded">
+                            {row.schedule_ref || stat.schedule_ref}
+                          </span>
+                          <span className="text-[11px] font-medium text-[#122654] truncate max-w-[200px]" title={row.statutory_line || stat.statutory_line}>
+                            {row.statutory_line || stat.statutory_line}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-[#7E8DA6] mt-0.5">
+                          {row.cash_flow_category || stat.cash_flow_category}
+                        </div>
+                      </td>
+                    )}
 
                     {/* Confidence & Gate Badge */}
                     <td className="p-3">
@@ -883,52 +897,33 @@ export default function AccountMappingPage() {
                     </td>
 
                     {/* AI Reason & Evidence (hoverable) */}
-                    <td className="p-3">
-                      <div
-                        className="text-[11px] text-[#4A5878] line-clamp-1 group relative cursor-help"
-                        title={`Evidence chain: ${row.evidence_used || 'Client rules > Practice rules > Prior-year mapping > Pattern'}`}
-                      >
-                        <span className="font-medium text-[#122654]">
-                          {row.ai_reason || `Matched nominal name pattern "${row.source_name.split(' ')[0]}"`}
-                        </span>
-                        <div className="text-[10px] text-[#7E8DA6]">
-                          {row.evidence_used || 'Rule > Name pattern > Code range'}
+                    {showReason && (
+                      <td className="p-3">
+                        <div
+                          className="text-[11px] text-[#4A5878] line-clamp-1 group relative cursor-help"
+                          title={`Evidence chain: ${row.evidence_used || 'Client rules > Practice rules > Prior-year mapping > Pattern'}`}
+                        >
+                          <span className="font-medium text-[#122654]">
+                            {row.ai_reason || `Matched nominal name pattern "${row.source_name.split(' ')[0]}"`}
+                          </span>
+                          <div className="text-[10px] text-[#7E8DA6]">
+                            {row.evidence_used || 'Rule > Name pattern > Code range'}
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
+                    )}
 
                     {/* Blynt Account Dropdown */}
-                    <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                    <td className="p-3 pr-4" onClick={(e) => e.stopPropagation()}>
                       <AccountPicker
                         key={row.blynt_code || ''}
                         value={row.blynt_code || ''}
                         label={`Select mapping for ${row.source_name}`}
                         firmId={firmId}
+                        clientId={engagementClientId ?? undefined}
                         suggestName={row.source_name}
                         onPick={(code) => handleInitiateChangeMapping(row.id, code)}
                       />
-                    </td>
-
-                    {/* Actions */}
-                    <td className="p-3 pr-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1.5">
-                        {row.status !== 'confirmed' && row.blynt_code && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const actor = getActor();
-                              row.status = 'confirmed';
-                              row.confirmed_by = actor.id;
-                              row.confirmed_at = new Date().toISOString();
-                              db.logAudit(firmId, actor, 'CONFIRM_MAPPING', 'account_mappings', row.id, null, row);
-                              reloadData();
-                            }}
-                            className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] rounded-lg shadow-2xs"
-                          >
-                            Confirm
-                          </button>
-                        )}
-                      </div>
                     </td>
                   </tr>
                 );
@@ -986,34 +981,6 @@ export default function AccountMappingPage() {
                 Choose Rule Scope:
               </label>
               <div className="space-y-2 text-xs">
-                <label className="flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer hover:bg-gray-50 border-gray-200">
-                  <input
-                    type="radio"
-                    name="ruleScope"
-                    checked={ruleScope === 'item'}
-                    onChange={() => setRuleScope('item')}
-                    className="mt-0.5 text-[#122654]"
-                  />
-                  <div>
-                    <div className="font-bold text-[#122654]">This item only</div>
-                    <div className="text-[11px] text-[#4A5878]">Do not create a reusable rule; apply only to this nominal.</div>
-                  </div>
-                </label>
-
-                <label className="flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer hover:bg-gray-50 border-gray-200">
-                  <input
-                    type="radio"
-                    name="ruleScope"
-                    checked={ruleScope === 'supplier'}
-                    onChange={() => setRuleScope('supplier')}
-                    className="mt-0.5 text-[#122654]"
-                  />
-                  <div>
-                    <div className="font-bold text-[#122654]">This supplier / name pattern ({pendingCorrection.pattern})</div>
-                    <div className="text-[11px] text-[#4A5878]">Apply to all nominals matching this pattern across future uploads.</div>
-                  </div>
-                </label>
-
                 <label className="flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer hover:bg-gray-50 border-emerald-300 bg-emerald-50/30">
                   <input
                     type="radio"

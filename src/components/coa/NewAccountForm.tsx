@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { db } from '@/lib/server/db';
 import { BlyntAccount } from '@/lib/types/models';
-import { CATEGORIES, categoryOf, newAccount, newAccountBase, nextCode, similarAccounts } from '@/lib/coa';
+import { CATEGORIES, accountsForClient, categoryOf, newAccount, newAccountBase, nextCode, similarAccounts } from '@/lib/coa';
 import { matchBlyntAccount } from '@/lib/mapping/auto-mapper';
 
 const field = 'w-full py-1.5 px-2 border border-[#D3DCEE] rounded-lg bg-white text-xs text-[#122654]';
@@ -12,7 +12,7 @@ const field = 'w-full py-1.5 px-2 border border-[#D3DCEE] rounded-lg bg-white te
  * Creates a practice account: the name recommends a category, the code is the next free number
  * in that category's range and cannot leave it. Nothing is created until the user approves it.
  */
-export function NewAccountForm({ firmId, initialName = '', onCreated, onCancel, onUseExisting }: { firmId: string; initialName?: string; onCreated: (acc: BlyntAccount) => void; onCancel: () => void; onUseExisting?: (code: string) => void }) {
+export function NewAccountForm({ firmId, clientId, initialName = '', onCreated, onCancel, onUseExisting }: { firmId: string; clientId?: string; initialName?: string; onCreated: (acc: BlyntAccount) => void; onCancel: () => void; onUseExisting?: (code: string) => void }) {
   const recommend = (n: string) => {
     const rec = newAccountBase(n) ?? (n.trim() ? matchBlyntAccount(n)?.blynt_code : null);
     const cat = (rec && categoryOf(rec)) || CATEGORIES.find((c) => c.other === '499')!;
@@ -26,7 +26,7 @@ export function NewAccountForm({ firmId, initialName = '', onCreated, onCancel, 
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState('');
   const cat = CATEGORIES[catIdx];
-  const similar = similarAccounts(db.blynt_accounts, name);
+  const similar = similarAccounts(accountsForClient(db.blynt_accounts, db.clients.find((c) => c.id === clientId)), name);
 
   const choose = (idx: number, b: string) => {
     setCatIdx(idx);
@@ -43,7 +43,7 @@ export function NewAccountForm({ firmId, initialName = '', onCreated, onCancel, 
   };
   const save = () => {
     if (Number(code) < cat.from || Number(code) > cat.to) return setError(`Use a code from ${cat.from} to ${cat.to} for ${cat.name}.`);
-    const acc = newAccount(db.blynt_accounts, code, name, firmId, base);
+    const acc = newAccount(db.blynt_accounts, code, name, firmId, base, clientId);
     if (typeof acc === 'string') return setError(acc);
     db.blynt_accounts.push(acc);
     onCreated(acc);

@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { newAccount, nextCode, categoryOf, CATEGORIES, newAccountBase, similarAccounts } from '@/lib/coa';
-import { STANDARD_CHART } from '@/lib/standard-chart';
+import { newAccount, nextCode, categoryOf, CATEGORIES, newAccountBase, similarAccounts, accountsForClient } from '@/lib/coa';
+import { matchBlyntAccount, getStatutoryDetails } from '@/lib/mapping/auto-mapper';
+import { db } from '@/lib/server/db';
+import { OWNER_ACCOUNTS, STANDARD_CHART } from '@/lib/standard-chart';
 import { mergeFirmState, firmSlice, GuardError, State } from '@/lib/server/state-guard';
 
 const chart = STANDARD_CHART.map((a) => ({ ...a }));
@@ -37,6 +39,43 @@ describe('practice accounts in the chart', () => {
     expect(similarAccounts(chart, 'Cleaning')).toEqual([]);
   });
 
+  it('shows each client the chart for its business type and its own accounts, leaving the blueprint alone', () => {
+    const own = newAccount(chart, '331', 'Entertainment', 'f1', '330', 'ems') as (typeof chart)[number];
+    const all = [...chart, ...OWNER_ACCOUNTS, own];
+    const codes = (id: string, company_type: string) => accountsForClient(all, { id, company_type }).map((a) => a.code);
+
+    const sole = codes('ems', 'Sole trader');
+    expect(sole).toEqual(expect.arrayContaining(['851', '852', '331', '100']));
+    expect(sole).not.toContain('850');
+    expect(sole).not.toContain('795');
+    expect(sole).not.toContain('853');
+
+    const ltd = codes('other', 'Small company (FRS 102 1A)');
+    expect(ltd).toEqual(expect.arrayContaining(['850', '795']));
+    expect(ltd).not.toContain('851');
+    expect(ltd).not.toContain('331'); // another client's account
+    expect(codes('x', 'Partnership')).toContain('855');
+    expect(codes('x', 'LLP (FRS 102 + LLP SORP)')).toContain('858');
+    expect(accountsForClient(all)).toHaveLength(all.length); // the library still shows everything
+    expect(STANDARD_CHART).toHaveLength(96);
+  });
+
+  it('maps owner accounts by business type only', () => {
+    expect(matchBlyntAccount('Owner A Drawings', 'Equity', '880', 'sole')!.blynt_code).toBe('852');
+    expect(matchBlyntAccount('Owner A Funds Introduced', 'Equity', '881', 'sole')!.blynt_code).toBe('851');
+    expect(matchBlyntAccount('Partners Current Account', 'Equity', '', 'partnership')!.blynt_code).toBe('854');
+    expect(matchBlyntAccount('Drawings', 'Equity', '', 'ltd')!.blynt_code).toBe('890');
+    expect(getStatutoryDetails('852').is_credit_area).toBe(false);
+  });
+
+  it('adds owner accounts on load without replacing a practice account on the same code', () => {
+    const mine = { ...chart[0], code: '851', name: 'My account', is_system: false, firm_id: 'f1' };
+    db.importState({ blynt_accounts: [mine] });
+    expect(db.blynt_accounts.filter((a) => a.code === '851').map((a) => a.name)).toEqual(['My account']);
+    expect(db.blynt_accounts.some((a) => a.code === '852')).toBe(true);
+    db.importState({ blynt_accounts: [] });
+  });
+
   it('the server keeps a firm\'s new account to that firm and refuses a bad one', () => {
     const full: State = { firms: [{ id: 'f1' }, { id: 'f2' }], memberships: [{ firm_id: 'f1', user_id: 'u1', role: 'admin' }], users: [{ id: 'u1' }], blynt_accounts: chart };
     const actor = { id: 'u1', name: 'A', role: 'admin' as const, firmId: 'f1' };
@@ -48,5 +87,8 @@ describe('practice accounts in the chart', () => {
     const bad = JSON.parse(JSON.stringify(firmSlice(full, 'f1', 'u1')));
     bad.blynt_accounts.push({ code: 'zz', name: 'x' });
     expect(() => mergeFirmState(full, bad, actor)).toThrow(GuardError);
+    const foreign = JSON.parse(JSON.stringify(firmSlice(full, 'f1', 'u1')));
+    foreign.blynt_accounts.push({ code: '105', name: 'Online sales', client_id: 'someone_elses' });
+    expect(() => mergeFirmState(full, foreign, actor)).toThrow(GuardError);
   });
 });

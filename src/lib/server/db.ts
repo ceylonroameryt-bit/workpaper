@@ -1,5 +1,6 @@
 import crypto from 'crypto';
-import { STANDARD_CHART } from '@/lib/standard-chart';
+import { OWNER_ACCOUNTS, STANDARD_CHART } from '@/lib/standard-chart';
+import { accountsForClient } from '@/lib/coa';
 import {
   Firm,
   User,
@@ -114,7 +115,16 @@ class Database {
     // The standard chart always comes from the code, so a saved workspace picks up chart
     // updates; accounts the practice added itself are kept
     const standard = new Set(STANDARD_CHART.map((a) => a.code));
-    this.blynt_accounts = [...STANDARD_CHART.map((a) => ({ ...a })), ...this.blynt_accounts.filter((a) => !a.is_system && !standard.has(a.code))];
+    const own = this.blynt_accounts.filter((a) => !a.is_system && !standard.has(a.code));
+    // A code the practice already used for its own account keeps that account
+    const owners = OWNER_ACCOUNTS.filter((a) => !own.some((o) => o.code === a.code));
+    this.blynt_accounts = [...STANDARD_CHART, ...owners].map((a) => ({ ...a })).concat(own);
+  }
+
+  /** The chart as this engagement's client should see it. */
+  accountsFor(engagementId: string) {
+    const clientId = this.engagements.find((e) => e.id === engagementId)?.client_id;
+    return accountsForClient(this.blynt_accounts, this.clients.find((c) => c.id === clientId));
   }
 
   // Working papers for a new engagement: the client's profile, or just a company type
@@ -287,7 +297,7 @@ class Database {
     ];
 
     // Standard Blynt Chart of Accounts
-    this.blynt_accounts = STANDARD_CHART.map((a) => ({ ...a }));
+    this.blynt_accounts = [...STANDARD_CHART, ...OWNER_ACCOUNTS].map((a) => ({ ...a }));
 
     // Clean slate: if demo data is not requested, keep workspace clean and empty
     if (!withDemo) {

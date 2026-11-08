@@ -5,6 +5,7 @@ import { TbSnapshotDiff, UserRole, AccountMapping, Workpaper, Comment, Attachmen
 import { asPence } from '../money';
 import { runGated, learnFromCorrection, recordDecision, GatedResult } from './gate';
 import { matchBlyntAccount } from '../mapping/auto-mapper';
+import { structureForCompanyType } from '../practice-structure';
 import { getStatutoryDetails } from '../mapping/auto-mapper';
 
 const abs = (n: bigint) => (n < 0n ? -n : n);
@@ -183,7 +184,8 @@ export const services = {
         if (prior?.blynt_code) {
           return { value: prior.blynt_code, confidence: 97, reason: `Mapped to ${prior.blynt_code} last year`, evidence: 'Prior-year mapping' };
         }
-        const s = matchBlyntAccount(line.name, line.type || '', line.code);
+        const client = db.clients.find((c) => c.id === eng?.client_id);
+        const s = matchBlyntAccount(line.name, line.type || '', line.code, structureForCompanyType(client?.company_type ?? ''));
         return s ? { value: s.blynt_code, confidence: s.confidence, reason: s.reason, evidence: 'Name pattern > Nominal code range' } : null;
       },
     });

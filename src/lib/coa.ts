@@ -1,5 +1,6 @@
 import { STANDARD_CHART } from './standard-chart';
 import { BlyntAccount } from './types/models';
+import { structureForCompanyType } from './practice-structure';
 
 export interface CoaCategory {
   name: string;
@@ -38,6 +39,16 @@ export function nextCode(existing: { code: string }[], cat: CoaCategory, base = 
   return null;
 }
 
+// Share capital, directors' loans and corporation tax exist only for limited companies
+const COMPANY_ONLY = new Set(['550', '740', '745', '795', '798', '850', '860', '870']);
+
+/** The chart for one client: their business type's accounts plus accounts added for them. No client means the whole chart. */
+export function accountsForClient<T extends BlyntAccount>(accounts: T[], client?: { id: string; company_type?: string }): T[] {
+  if (!client) return accounts;
+  const structure = structureForCompanyType(client.company_type ?? '');
+  return accounts.filter((a) => (!a.client_id || a.client_id === client.id) && (a.structure ? a.structure === structure : structure === 'ltd' || !COMPANY_ONLY.has(a.code)));
+}
+
 /** Expenses the standard chart has no account for, and the standard account a new one sits beside. */
 const NEW_ACCOUNT_BASES: [RegExp, string][] = [
   [/clean|waste/i, '420'],
@@ -62,9 +73,10 @@ export function similarAccounts<T extends { code: string; name: string }>(existi
 /**
  * A practice's own account. It inherits type, lead, statutory line and schedule from a standard
  * account in the same category (the chosen base, else the category's "Other" account).
+ * shortcut: codes stay unique across the practice even for client-only accounts, because reports look an account up by code alone; give each client its own number space if practices run out.
  * Returns an error message when the code is not allowed.
  */
-export function newAccount(existing: BlyntAccount[], code: string, name: string, firmId: string, baseCode?: string): BlyntAccount | string {
+export function newAccount(existing: BlyntAccount[], code: string, name: string, firmId: string, baseCode?: string, clientId?: string): BlyntAccount | string {
   code = code.trim();
   name = name.trim();
   if (!/^\d{1,6}$/.test(code)) return 'The code must be a number.';
@@ -79,5 +91,5 @@ export function newAccount(existing: BlyntAccount[], code: string, name: string,
   if (want !== cat) return want ? `Code ${code} must be within ${want.from}–${want.to} (${want.name}).` : `Code ${baseCode} is not a standard account.`;
   const parent = STANDARD_CHART.find((a) => a.code === baseCode) ?? STANDARD_CHART.find((a) => a.code === cat.other)!;
   const { used_by_count: _u, ...base } = parent;
-  return { ...base, code, name, firm_id: firmId, parent_code: parent.code, is_control: false, is_system: false };
+  return { ...base, code, name, firm_id: firmId, parent_code: parent.code, is_control: false, is_system: false, ...(clientId ? { client_id: clientId } : {}) };
 }
