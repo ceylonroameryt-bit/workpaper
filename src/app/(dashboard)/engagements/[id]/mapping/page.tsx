@@ -904,6 +904,7 @@ export default function AccountMappingPage() {
                         value={row.blynt_code || ''}
                         label={`Select mapping for ${row.source_name}`}
                         firmId={firmId}
+                        suggestName={row.source_name}
                         onPick={(code) => handleInitiateChangeMapping(row.id, code)}
                       />
                     </td>

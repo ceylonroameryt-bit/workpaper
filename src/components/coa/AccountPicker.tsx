@@ -11,7 +11,7 @@ const MENU_WIDTH = 340;
 const OTHER_GROUP = 'System and clearing';
 
 /** Pick an account from the whole chart, grouped by category; typing filters by code or name. */
-export function AccountPicker({ value, label, firmId, onPick }: { value: string; label: string; firmId: string; onPick: (code: string) => void }) {
+export function AccountPicker({ value, label, firmId, onPick, suggestName = '' }: { value: string; label: string; firmId: string; onPick: (code: string) => void; suggestName?: string }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
@@ -206,8 +206,13 @@ export function AccountPicker({ value, label, firmId, onPick }: { value: string;
               <h3 className="text-base font-bold text-[#122654] mb-4">New account</h3>
               <NewAccountForm
                 firmId={firmId}
-                initialName={query.trim().replace(/^\d+\s*/, '')}
+                initialName={query.trim().replace(/^\d+\s*/, '') || suggestName}
                 onCancel={() => setCreating(false)}
+                onUseExisting={(code) => {
+                  setCreating(false);
+                  close();
+                  if (code !== value) onPick(code);
+                }}
                 onCreated={(acc) => {
                   setCreating(false);
                   close();

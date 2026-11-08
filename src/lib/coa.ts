@@ -38,6 +38,27 @@ export function nextCode(existing: { code: string }[], cat: CoaCategory, base = 
   return null;
 }
 
+/** Expenses the standard chart has no account for, and the standard account a new one sits beside. */
+const NEW_ACCOUNT_BASES: [RegExp, string][] = [
+  [/clean|waste/i, '420'],
+  [/entertain/i, '330'],
+];
+export const newAccountBase = (name: string) => NEW_ACCOUNT_BASES.find(([pattern]) => pattern.test(name))?.[1] ?? null;
+
+const GENERIC_WORDS = new Set(['and', 'the', 'for', 'other', 'cost', 'costs', 'expense', 'expenses', 'fee', 'fees', 'charge', 'charges', 'account', 'accounts', 'business', 'general']);
+const nameWords = (s: string) => s.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !GENERIC_WORDS.has(w));
+
+/** Existing accounts sharing a meaningful word with the name, closest first: possible duplicates. */
+export function similarAccounts<T extends { code: string; name: string }>(existing: T[], name: string, limit = 3): T[] {
+  const wanted = new Set(nameWords(name));
+  return existing
+    .map((account) => ({ account, shared: nameWords(account.name).filter((w) => wanted.has(w)).length }))
+    .filter((m) => m.shared > 0)
+    .sort((a, b) => b.shared - a.shared || Number(a.account.code) - Number(b.account.code))
+    .slice(0, limit)
+    .map((m) => m.account);
+}
+
 /**
  * A practice's own account. It inherits type, lead, statutory line and schedule from a standard
  * account in the same category (the chosen base, else the category's "Other" account).
@@ -48,8 +69,11 @@ export function newAccount(existing: BlyntAccount[], code: string, name: string,
   name = name.trim();
   if (!/^\d{1,6}$/.test(code)) return 'The code must be a number.';
   if (!name) return 'Give the account a name.';
-  if (existing.some((a) => a.code === code)) return `Code ${code} is already in the chart.`;
   const cat = categoryOf(code);
+  if (existing.some((a) => a.code === code)) {
+    const free = cat && nextCode(existing, cat, code);
+    return `Code ${code} is already in the chart.${free ? ` Next free: ${free}.` : ''}`;
+  }
   if (!cat) return `Code ${code} is outside every category of the chart.`;
   const want = baseCode ? categoryOf(baseCode) : cat;
   if (want !== cat) return want ? `Code ${code} must be within ${want.from}–${want.to} (${want.name}).` : `Code ${baseCode} is not a standard account.`;

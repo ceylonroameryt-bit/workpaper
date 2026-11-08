@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { newAccount, nextCode, categoryOf, CATEGORIES } from '@/lib/coa';
+import { newAccount, nextCode, categoryOf, CATEGORIES, newAccountBase, similarAccounts } from '@/lib/coa';
 import { STANDARD_CHART } from '@/lib/standard-chart';
 import { mergeFirmState, firmSlice, GuardError, State } from '@/lib/server/state-guard';
 
@@ -19,6 +19,22 @@ describe('practice accounts in the chart', () => {
     expect(newAccount(chart, '950', 'System', 'f1')).toMatch(/outside/);
     expect(newAccount(chart, '110', 'Dup', 'f1')).toMatch(/already/);
     expect(newAccount(chart, 'abc', 'x', 'f1')).toMatch(/number/);
+  });
+
+  it('recommends a code for an expense the chart lacks, skips used codes and spots duplicates', () => {
+    const rec = (name: string, codes = chart) => {
+      const base = newAccountBase(name)!;
+      return nextCode(codes, categoryOf(base)!, base);
+    };
+    const with421 = [...chart, { ...chart[0], code: '421', name: 'Cleaning and waste removal' }];
+    const with331 = [...chart, { ...chart[0], code: '331', name: 'Entertainment - 100% business' }];
+    expect(rec('Cleaning & Waste Removal')).toBe('421');
+    expect(rec('Cleaning', with421)).toBe('422');
+    expect(rec('Entertainment-100% business')).toBe('331');
+    expect(rec('Entertainment - client', with331)).toBe('332');
+    expect(newAccount(chart, '420', 'Dup', 'f1')).toMatch(/Next free: 421/);
+    expect(similarAccounts(with421, 'Cleaning')[0].code).toBe('421');
+    expect(similarAccounts(chart, 'Cleaning')).toEqual([]);
   });
 
   it('the server keeps a firm\'s new account to that firm and refuses a bad one', () => {
