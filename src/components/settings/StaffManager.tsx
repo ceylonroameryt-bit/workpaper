@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, Loader2, Pencil, Search, ShieldCheck, ShieldOff, X } from 'lucide-react';
 import { db } from '@/lib/server/db';
 
-interface StaffRow {
+export interface StaffRow {
   id: string;
   name: string;
   email: string;
@@ -18,7 +18,7 @@ interface StaffRow {
   last_login_at: string | null;
 }
 
-const ROLES: [string, string][] = [
+export const ROLES: [string, string][] = [
   ['readonly', 'Can view assigned client files but not change anything'],
   ['preparer', 'Prepares working papers on assigned clients'],
   ['reviewer', 'Reviews and signs off prepared papers'],
@@ -26,7 +26,7 @@ const ROLES: [string, string][] = [
   ['partner', 'Approves files; sees every client'],
   ['admin', 'Manages staff, settings and every client'],
 ];
-const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
+export const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
 
 /** "4 hours ago", "3 months ago" */
 function ago(iso: string | null): string {
@@ -176,7 +176,7 @@ export function StaffManager({ currentUserId }: { currentUserId: string }) {
   );
 }
 
-function StaffEditor({ person, isSelf, onClose, onSaved }: { person: StaffRow; isSelf: boolean; onClose: () => void; onSaved: () => void }) {
+export function StaffEditor({ person, isSelf, onClose, onSaved }: { person: StaffRow; isSelf: boolean; onClose: () => void; onSaved: (saved: StaffRow) => void }) {
   const [name, setName] = useState(person.name);
   const [role, setRole] = useState(person.role);
   const [allClients, setAllClients] = useState(person.access === 'all');
@@ -215,7 +215,7 @@ function StaffEditor({ person, isSelf, onClose, onSaved }: { person: StaffRow; i
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) setError(body.error || 'Could not save. Try again.');
-      else onSaved();
+      else onSaved(body);
     } catch {
       setError('Could not reach the server. Try again.');
     } finally {

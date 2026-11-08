@@ -1,12 +1,16 @@
 import crypto from 'crypto';
 import { mentionsIn } from '../mentions';
 import { db } from './db';
-import { TbSnapshotDiff, UserRole, AccountMapping, Workpaper, Comment, Attachment, BlyntAccount } from '../types/models';
+import { TbSnapshotDiff, UserRole, AccountMapping, Workpaper, Comment, Attachment, BlyntAccount, AnchorJson } from '../types/models';
 import { asPence } from '../money';
 import { runGated, learnFromCorrection, recordDecision, GatedResult } from './gate';
 import { matchBlyntAccount } from '../mapping/auto-mapper';
 import { structureForCompanyType } from '../practice-structure';
 import { getStatutoryDetails } from '../mapping/auto-mapper';
+import { aiExtractionService } from './extraction';
+import { invoicePlatformIntegration, PushedInvoicePayload } from './invoice-platform';
+import { rollForwardService } from './roll-forward';
+import { schedulesService } from './schedules-service';
 
 const abs = (n: bigint) => (n < 0n ? -n : n);
 
@@ -554,57 +558,233 @@ export const services = {
     return comment;
   },
 
-  // 7. Attachments with SHA-256 Checksum
+  // 7. Attachments & Document Store (DOC-01, DOC-02, DOC-03, DOC-06)
+  getAttachments(engagementId: string) {
+    return db.attachments.filter((a) => a.engagement_id === engagementId && !a.deleted_at);
+  },
+
+  getDeletedAttachments(engagementId: string) {
+    return db.attachments.filter((a) => a.engagement_id === engagementId && !!a.deleted_at);
+  },
+
   uploadAttachment(
     firmId: string,
     actor: { id: string; name: string; role: UserRole },
     engagementId: string,
     workpaperId: string | null,
-    file: { filename: string; mime: string; size: number; content: string | Buffer; category: any; is_permanent?: boolean }
+    file: {
+      filename: string;
+      mime: string;
+      size: number;
+      content: string | Buffer;
+      category?: any;
+      is_permanent?: boolean;
+      folder?: 'current' | 'permanent';
+    }
   ) {
-    const hash = crypto.createHash('sha256').update(file.content).digest('hex');
-    const attachment: Attachment = {
-      id: `att_${Date.now()}`,
-      engagement_id: engagementId,
-      workpaper_id: workpaperId,
-      file_key: `uploads/${engagementId}/${file.filename}`,
-      filename: file.filename,
-      mime: file.mime,
-      size: file.size,
-      sha256: hash,
-      category: file.category || 'Other',
-      is_permanent: !!file.is_permanent,
-      uploaded_by: actor.id,
-      uploaded_by_name: actor.name,
-      uploaded_at: new Date().toISOString(),
-    };
+    if (file.size > 50 * 1024 * 1024) {
+      throw new ServiceError('File exceeds maximum size of 50 MB.', 400);
+    }
 
-    db.attachments.push(attachment);
-    db.logAudit(firmId, actor, 'UPLOAD_ATTACHMENT', 'attachments', attachment.id, null, {
+    const hash = crypto.createHash('sha256').update(file.content).digest('hex');
+
+    // Duplicate check (DOC-01): detect if identical file hash already exists in engagement
+    const existingDuplicate = db.attachments.find(
+      (a) => a.engagement_id === engagementId && a.sha256 === hash && !a.deleted_at
+    );
+
+    // AI Tagging suggestion (DOC-03)
+    const contentSample = typeof file.content === 'string' ? file.content.slice(0, 1000) : file.content.toString('utf-8', 0, 1000);
+    const tagSuggestion = aiExtractionService.suggestDocumentType(firmId, file.filename, file.mime, contentSample);
+    const category = file.category || tagSuggestion.category;
+    const isPermanent = !!file.is_permanent || file.folder === 'permanent';
+
+    // Versioning check (DOC-02): if same filename exists in folder, create new version
+    const existingFile = db.attachments.find(
+      (a) => a.engagement_id === engagementId && a.filename === file.filename && !a.deleted_at
+    );
+
+    let attachment: Attachment;
+
+    if (existingFile) {
+      // Archive old version
+      const currentVer = existingFile.version || 1;
+      const historyList = existingFile.versions || [];
+      historyList.push({
+        version: currentVer,
+        file_key: existingFile.file_key,
+        filename: existingFile.filename,
+        uploaded_at: existingFile.uploaded_at,
+        uploaded_by: existingFile.uploaded_by_name || existingFile.uploaded_by,
+        size: existingFile.size,
+      });
+
+      existingFile.version = currentVer + 1;
+      existingFile.versions = historyList;
+      existingFile.size = file.size;
+      existingFile.sha256 = hash;
+      existingFile.uploaded_at = new Date().toISOString();
+      existingFile.uploaded_by = actor.id;
+      existingFile.uploaded_by_name = actor.name;
+      attachment = existingFile;
+    } else {
+      attachment = {
+        id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        engagement_id: engagementId,
+        workpaper_id: workpaperId,
+        file_key: `uploads/${engagementId}/${file.filename}`,
+        filename: file.filename,
+        mime: file.mime,
+        size: file.size,
+        sha256: hash,
+        category,
+        is_permanent: isPermanent,
+        folder: isPermanent ? 'permanent' : 'current',
+        ai_tag: `${category} (${tagSuggestion.gate})`,
+        ai_tag_confidence: tagSuggestion.confidence,
+        ai_tag_gate: tagSuggestion.gate,
+        version: 1,
+        versions: [],
+        uploaded_by: actor.id,
+        uploaded_by_name: actor.name,
+        uploaded_at: new Date().toISOString(),
+        links: [],
+      };
+      db.attachments.push(attachment);
+    }
+
+    db.logAudit(firmId, actor, existingFile ? 'UPLOAD_DOCUMENT_VERSION' : 'UPLOAD_ATTACHMENT', 'attachments', attachment.id, null, {
       filename: attachment.filename,
       sha256: attachment.sha256,
       size: attachment.size,
+      version: attachment.version,
+      is_duplicate: !!existingDuplicate,
     });
+
+    (attachment as any).is_duplicate = !!existingDuplicate;
     return attachment;
   },
 
   deleteAttachment(
     firmId: string,
     actor: { id: string; name: string; role: UserRole },
-    attachmentId: string
+    attachmentId: string,
+    reason?: string
   ) {
-    const idx = db.attachments.findIndex((a) => a.id === attachmentId);
-    if (idx === -1) throw new ServiceError('Attachment not found', 404);
-    const att = db.attachments[idx];
+    const att = db.attachments.find((a) => a.id === attachmentId);
+    if (!att) throw new ServiceError('Attachment not found', 404);
 
-    // Rule: delete only by uploader before sign-off
-    if (att.uploaded_by !== actor.id && actor.role !== 'admin') {
-      throw new ServiceError('Only the original uploader or an admin can delete an attachment', 403);
+    // Rule: delete only by uploader before sign-off, or admin/manager
+    if (att.uploaded_by !== actor.id && !['admin', 'manager', 'partner'].includes(actor.role)) {
+      throw new ServiceError('Only the original uploader, manager or admin can delete an attachment', 403);
     }
 
-    db.attachments.splice(idx, 1);
-    db.logAudit(firmId, actor, 'DELETE_ATTACHMENT', 'attachments', attachmentId, att, null);
-    return { success: true };
+    // Soft delete to 30-day bin (DOC-01)
+    att.deleted_at = new Date().toISOString();
+    db.logAudit(firmId, actor, 'DELETE_ATTACHMENT_TO_BIN', 'attachments', attachmentId, att, { reason });
+    return { success: true, message: 'Document moved to bin for 30 days' };
+  },
+
+  // DOC-06: Evidence linking to schedule lines, journals and checklist items
+  linkEvidence(
+    firmId: string,
+    actor: { id: string; name: string; role: UserRole },
+    attachmentId: string,
+    anchor: AnchorJson
+  ) {
+    const att = db.attachments.find((a) => a.id === attachmentId);
+    if (!att) throw new ServiceError('Attachment not found', 404);
+
+    if (!att.links) att.links = [];
+    att.links.push({
+      attachment_id: att.id,
+      anchor_json: anchor,
+    });
+
+    db.logAudit(firmId, actor, 'LINK_EVIDENCE', 'attachments', att.id, null, { anchor });
+    return att;
+  },
+
+  unlinkEvidence(
+    firmId: string,
+    actor: { id: string; name: string; role: UserRole },
+    attachmentId: string,
+    anchorRowOrId: string
+  ) {
+    const att = db.attachments.find((a) => a.id === attachmentId);
+    if (!att) throw new ServiceError('Attachment not found', 404);
+
+    // Rule: Removing a document that supports a reviewed schedule requires unreview (REV-02)
+    if (att.workpaper_id) {
+      const wp = db.workpapers.find((w) => w.id === att.workpaper_id);
+      if (wp && ['reviewed', 'signed_off', 'prepared'].includes(wp.status)) {
+        throw new ServiceError('Removing supporting evidence from a reviewed schedule requires Unreview first.', 400);
+      }
+    }
+
+    att.links = (att.links || []).filter((l: any) => l.anchor_json?.row !== anchorRowOrId && l.anchor_json?.id !== anchorRowOrId);
+    db.logAudit(firmId, actor, 'UNLINK_EVIDENCE', 'attachments', att.id, null, { anchorRowOrId });
+    return att;
+  },
+
+  // DOC-06: Missing evidence scanner
+  findMissingEvidence(engagementId: string) {
+    const missing: Array<{
+      workpaper_id: string;
+      ref: string;
+      item_id: string;
+      description: string;
+      type: 'schedule_line' | 'addition' | 'disposal' | 'checklist' | 'journal';
+      flag: 'evidence missing';
+    }> = [];
+
+    const wps = db.workpapers.filter((w) => w.engagement_id === engagementId);
+    for (const wp of wps) {
+      const data = wp.data_json || {};
+      if (Array.isArray(data.additions)) {
+        for (const add of data.additions) {
+          if (!add.attachment_id && add.has_evidence === false) {
+            missing.push({
+              workpaper_id: wp.id,
+              ref: wp.ref,
+              item_id: add.id,
+              description: add.desc || add.description || 'Addition missing invoice evidence',
+              type: 'addition',
+              flag: 'evidence missing',
+            });
+          }
+        }
+      }
+      if (Array.isArray(data.disposals)) {
+        for (const disp of data.disposals) {
+          if (!disp.attachment_id && (disp.has_evidence === false || !disp.has_evidence)) {
+            missing.push({
+              workpaper_id: wp.id,
+              ref: wp.ref,
+              item_id: disp.id,
+              description: disp.desc || disp.description || 'Disposal missing proceeds evidence',
+              type: 'disposal',
+              flag: 'evidence missing',
+            });
+          }
+        }
+      }
+      if (Array.isArray(data.checklist)) {
+        for (const item of data.checklist) {
+          if (item.requires_evidence && !item.attachment_id) {
+            missing.push({
+              workpaper_id: wp.id,
+              ref: wp.ref,
+              item_id: item.id,
+              description: item.text || item.description || 'Checklist item missing evidence',
+              type: 'checklist',
+              flag: 'evidence missing',
+            });
+          }
+        }
+      }
+    }
+    return missing;
   },
 
   // 8. Sign-off and Lock Engagement Blocker Checker
@@ -905,5 +1085,137 @@ export const services = {
           : null,
       };
     });
+  },
+
+  // ==========================================
+  // STAGE C: STEPS 8 - 12 SERVICE METHODS
+  // ==========================================
+
+  // Step 8: Document Extraction & Schedule Fill (DOC-04, DOC-05)
+  extractDocument(
+    firmId: string,
+    actor: { id: string; name: string; role: UserRole },
+    attachmentId: string,
+    overrideCategory?: any
+  ) {
+    const attachment = db.attachments.find((a) => a.id === attachmentId);
+    if (!attachment) throw new ServiceError('Document not found', 404);
+    const result = aiExtractionService.extract(firmId, attachment, overrideCategory);
+    attachment.category = result.category;
+    attachment.ai_summary = result.summary;
+    attachment.extracted_data = result.data;
+    db.logAudit(firmId, actor, 'EXTRACT_DOCUMENT', 'attachments', attachment.id, null, {
+      category: result.category,
+      bulletsCount: result.summary.bullets.length,
+    });
+    return { attachment, summary: result.summary, data: result.data };
+  },
+
+  fillScheduleFromDocument(
+    firmId: string,
+    actor: { id: string; name: string; role: UserRole },
+    attachmentId: string,
+    targetWorkpaperId: string
+  ) {
+    return aiExtractionService.fillScheduleFromDocument(firmId, actor, attachmentId, targetWorkpaperId);
+  },
+
+  confirmAiValue(
+    firmId: string,
+    actor: { id: string; name: string; role: UserRole },
+    workpaperId: string,
+    gateItemId: string
+  ) {
+    const wp = db.workpapers.find((w) => w.id === workpaperId);
+    if (!wp) throw new ServiceError('Workpaper not found', 404);
+    const wpData = { ...wp.data_json };
+    const items: any[] = wpData.confidence_gate_items || [];
+    const item = items.find((i) => i.id === gateItemId);
+    if (!item) throw new ServiceError('AI value gate item not found', 404);
+
+    item.confirmed = true;
+    item.confirmed_by = actor.id;
+    item.confirmed_at = new Date().toISOString();
+    wpData.values_to_confirm_count = items.filter((i) => !i.confirmed).length;
+    wp.data_json = wpData;
+    wp.updated_at = new Date().toISOString();
+
+    db.logAudit(firmId, actor, 'CONFIRM_AI_VALUE', 'workpapers', wp.id, null, { gateItemId, field: item.field });
+    return { workpaper: wp, confirmedItem: item };
+  },
+
+  // Step 9: Everyday Schedules (REC-07, REC-08, REC-09, REC-06)
+  reviewDebtorsRecoverability(firmId: string, engagementId: string, threshold = 90) {
+    return schedulesService.reviewDebtorsRecoverability(firmId, engagementId, threshold);
+  },
+
+  proposeBadDebtJournal(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string, amountPence: bigint) {
+    return schedulesService.proposeBadDebtProvisionJournal(firmId, actor, engagementId, amountPence);
+  },
+
+  searchUnrecordedLiabilities(firmId: string, engagementId: string, windowDays = 60) {
+    return schedulesService.searchUnrecordedLiabilities(firmId, engagementId, windowDays);
+  },
+
+  accrueUnrecordedLiability(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string, item: any) {
+    return schedulesService.accrueUnrecordedLiability(firmId, actor, engagementId, item);
+  },
+
+  createAutoReversingJournal(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string, type: 'prepayment' | 'accrual', items: any[]) {
+    return schedulesService.createAutoReversingJournal(firmId, actor, engagementId, type, items);
+  },
+
+  calculateVatFlatRateSurplus(grossPence: bigint, flatRatePct: number, isFirstYear: boolean, vatCollectedPence: bigint) {
+    return schedulesService.calculateVatFlatRateSurplus(grossPence, flatRatePct, isFirstYear, vatCollectedPence);
+  },
+
+  proposeFlatRateSurplusJournal(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string, surplusPence: bigint) {
+    return schedulesService.proposeFlatRateSurplusJournal(firmId, actor, engagementId, surplusPence);
+  },
+
+  // Step 10: Long-life Schedules & Roll Forward (REC-03, REC-10, REC-04, REC-11, REC-12, REC-17, ENG-03, ENG-04, ENG-07)
+  proposeDepreciationJournal(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string) {
+    return schedulesService.proposeDepreciationJournal(firmId, actor, engagementId);
+  },
+
+  proposeTaxJournals(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string, options: { ctChargePence: bigint; deferredTaxMovementPence?: bigint }) {
+    return schedulesService.proposeTaxJournals(firmId, actor, engagementId, options);
+  },
+
+  previewRollForward(engagementId: string) {
+    return rollForwardService.previewRollForward(engagementId);
+  },
+
+  executeRollForward(firmId: string, actor: { id: string; name: string; role: UserRole }, priorEngagementId: string, options: any) {
+    return rollForwardService.executeRollForward(firmId, actor, priorEngagementId, options);
+  },
+
+  checkOpeningBalances(firmId: string, engagementId: string) {
+    return rollForwardService.checkOpeningBalancesAgainstLedger(firmId, engagementId);
+  },
+
+  importPriorYearAccounts(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string, attachmentId: string) {
+    return rollForwardService.importPriorYearSchedules(firmId, actor, engagementId, attachmentId);
+  },
+
+  // Step 12: Invoice Platform Integration (INT-01, INT-03, AIX-02, INT-04)
+  pushInvoiceFromPlatform(firmId: string, actor: { id: string; name: string; role: UserRole }, payload: PushedInvoicePayload) {
+    return invoicePlatformIntegration.pushFixedAssetInvoice(firmId, actor, payload);
+  },
+
+  handlePushedInvoiceDecision(firmId: string, actor: { id: string; name: string; role: UserRole }, workpaperId: string, additionId: string, decision: 'accept' | 'reject', classId?: string, reason?: string) {
+    return invoicePlatformIntegration.handleProposedAdditionDecision(firmId, actor, workpaperId, additionId, decision, classId, reason);
+  },
+
+  detectCapitalItemsInExpenses(firmId: string, engagementId: string, threshold = 50000n) {
+    return invoicePlatformIntegration.detectCapitalItemsInExpenses(firmId, engagementId, threshold);
+  },
+
+  capitaliseExpenseItem(firmId: string, actor: { id: string; name: string; role: UserRole }, engagementId: string, transactionId: string, targetClassId = 'c1') {
+    return invoicePlatformIntegration.capitaliseExpenseTransaction(firmId, actor, engagementId, transactionId, targetClassId);
+  },
+
+  reconcileBankWithOpenBanking(firmId: string, actor: { id: string; name: string; role: UserRole }, workpaperId: string) {
+    return invoicePlatformIntegration.reconcileBankWithOpenBankingFeed(firmId, actor, workpaperId);
   },
 };

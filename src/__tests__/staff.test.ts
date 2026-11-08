@@ -10,6 +10,8 @@ vi.mock('@/lib/server/store', () => ({
 
 import { db } from '../lib/server/db';
 import { listStaff, updateStaff } from '../lib/server/staff';
+import { updateClientProfile } from '../lib/server/client-profile';
+import { acceptInvite, cancelInvite, createInvite } from '../lib/server/invites';
 import { createSessionToken, SESSION_COOKIE, hashPassword } from '../lib/server/auth';
 import { getActorFromRequest } from '../lib/server/api-helpers';
 import { POST as login } from '../app/api/v1/auth/login/route';
@@ -69,6 +71,61 @@ describe('staff management', () => {
 
     updateStaff(admin, user.id, { status: 'active' });
     expect(getActorFromRequest(session).id).toBe(user.id);
+  });
+});
+
+describe('which clients staff work on', () => {
+  const clientOf = (i: number) => db.clients.filter((c) => c.firm_id === FIRM)[i];
+  const profile = (actor: any, id: string, extra: object) => updateClientProfile(actor, id, { company_type: clientOf(0).company_type, ...extra });
+
+  it('ticking someone with limited access gives them the client; unticking takes it away', () => {
+    const m = member();
+    const client = clientOf(0);
+    m.client_ids = [];
+    profile(admin, client.id, { team_user_ids: [m.user_id] });
+    expect(m.client_ids).toEqual([client.id]);
+    profile(admin, client.id, { team_user_ids: [] });
+    expect(m.client_ids).toEqual([]);
+  });
+
+  it('someone who can see every client is not limited by being ticked', () => {
+    const m = member();
+    delete m.client_ids;
+    profile(admin, clientOf(0).id, { team_user_ids: [m.user_id] });
+    expect(m.client_ids).toBeUndefined();
+  });
+
+  it('only an admin or partner can give access by ticking', () => {
+    const m = member();
+    m.client_ids = [];
+    const manager = { id: 'usr_mgr', name: 'M', role: 'manager' as const, firmId: FIRM };
+    profile(manager, clientOf(0).id, { team_user_ids: [m.user_id] });
+    expect(m.client_ids).toEqual([]);
+  });
+
+  it('choosing clients on a person updates those clients’ teams', () => {
+    const m = member();
+    const [a, b] = [clientOf(0), clientOf(1)];
+    m.client_ids = [a.id];
+    a.team_user_ids = [m.user_id];
+    updateStaff(admin, m.user_id, { client_ids: [b.id] });
+    expect(a.team_user_ids).not.toContain(m.user_id);
+    expect(b.team_user_ids).toContain(m.user_id);
+  });
+
+  it('an invited person joins the ticked client when they accept, and an invitation can be cancelled', () => {
+    const client = clientOf(0);
+    const { invite, token } = createInvite(admin, { email: 'new.person@example.com', name: 'New Person', role: 'preparer', client_ids: [] });
+    profile(admin, client.id, { team_invite_ids: [invite.id] });
+    const user = acceptInvite(token, 'Long-Unique-Passphrase-42!');
+    expect(client.team_user_ids).toContain(user.id);
+    expect(db.memberships.find((m) => m.user_id === user.id)!.client_ids).toEqual([client.id]);
+
+    const other = createInvite(admin, { email: 'other.person@example.com', name: 'Other Person', role: 'preparer' });
+    const preparer = { id: member().user_id, name: 'P', role: 'preparer' as const, firmId: FIRM };
+    expect(() => cancelInvite(preparer, other.invite.id)).toThrow(/admin or partner/);
+    cancelInvite(admin, other.invite.id);
+    expect(db.invites.some((i) => i.id === other.invite.id)).toBe(false);
   });
 });
 

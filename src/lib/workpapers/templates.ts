@@ -1081,6 +1081,31 @@ export function blankPaperData(t: TemplateDef): Record<string, any> {
     };
   }
 
+  if (t.kind === 'tax') {
+    if (t.ref === 'T-30') {
+      return {
+        ...base,
+        fixed_asset_nbv_p: '0',
+        tax_written_down_value_p: '0',
+        taxable_timing_differences_p: '0',
+        tax_rate_pct: 25.0,
+        deferred_tax_provision_p: '0',
+        movement_p: '0',
+      };
+    }
+    return {
+      ...base,
+      prior_year_liability_p: '0',
+      payments_made_p: '0',
+      over_under_provision_p: '0',
+      current_year_charge_p: '0',
+      closing_liability_p: '0',
+      charge_source: 'enter', // 'enter' | 'tax_software' | 'estimate'
+      taxable_profit_p: '0',
+      payments: [],
+    };
+  }
+
   if (t.kind === 'lines') {
     return { ...base, lines: [] };
   }

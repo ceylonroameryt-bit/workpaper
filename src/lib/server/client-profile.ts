@@ -5,6 +5,7 @@ import { toPence } from '../money';
 import { PACKS, packForClient } from '../workpapers/templates';
 import { companyNumberError, structureForCompanyType, structureFields, UK_POSTCODE, UK_VAT } from '../practice-structure';
 import { Client, CompanyType, PracticeDefaults } from '../types/models';
+import { syncTeamAccess } from './staff';
 
 /**
  * Client profile (Build Order step 2) and the practice defaults. A client's answers decide which
@@ -94,6 +95,7 @@ export function updateClientProfile(actor: Actor & { clientIds?: string[] | null
     signoff_levels: 'signoff_levels' in d ? d.signoff_levels ?? undefined : client.signoff_levels,
     team_user_ids: Array.isArray(d.team_user_ids) ? d.team_user_ids.filter((u: string) => firmUsers.has(u)) : client.team_user_ids,
   });
+  syncTeamAccess(actor, client.id, before.team_user_ids ?? [], client.team_user_ids ?? [], d.team_invite_ids);
 
   const papers = db.engagements
     .filter((e) => e.client_id === client.id && e.status !== 'locked')

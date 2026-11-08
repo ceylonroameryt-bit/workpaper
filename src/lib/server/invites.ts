@@ -50,6 +50,7 @@ export function createInvite(
     name,
     role: data.role,
     client_ids: clientIds,
+    team_client_ids: clientIds,
     token_hash: sha256(token),
     invited_by: actor.id,
     created_at: now.toISOString(),
@@ -96,9 +97,21 @@ export function acceptInvite(token: string, password: string) {
   db.users.push(user);
   db.memberships.push({ user_id: user.id, firm_id: invite.firm_id, role: invite.role, ...(invite.client_ids ? { client_ids: invite.client_ids } : {}) });
   db.credentials.push({ user_id: user.id, password_hash: hashPassword(password) });
+  for (const c of db.clients) {
+    if (c.firm_id === invite.firm_id && invite.team_client_ids?.includes(c.id)) c.team_user_ids = [...(c.team_user_ids ?? []), user.id];
+  }
   invite.accepted_at = new Date().toISOString();
   db.logAudit(invite.firm_id, { id: user.id, name: user.name, role: invite.role }, 'ACCEPT_INVITE', 'invites', invite.id, { accepted_at: null }, { accepted_at: invite.accepted_at, user_id: user.id });
   return user;
+}
+
+/** Withdraws an invitation nobody has accepted yet. */
+export function cancelInvite(actor: Actor, inviteId: string) {
+  if (!canSetUpPractice(actor, db.firms.find((f) => f.id === actor.firmId))) throw new ServiceError('Only an admin or partner can cancel invitations.', 403, 'FORBIDDEN');
+  const invite = db.invites.find((i) => i.id === inviteId && i.firm_id === actor.firmId && !i.accepted_at);
+  if (!invite) throw new ServiceError('Invitation not found', 404, 'NOT_FOUND');
+  db.invites = db.invites.filter((i) => i !== invite);
+  db.logAudit(actor.firmId, actor, 'CANCEL_INVITE', 'invites', invite.id, { email: invite.email }, null);
 }
 
 /** Changes which clients a non-partner member may see. */

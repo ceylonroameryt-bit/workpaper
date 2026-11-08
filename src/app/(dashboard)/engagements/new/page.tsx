@@ -10,6 +10,7 @@ import { packForClient } from '@/lib/workpapers/templates';
 import { useCompany } from '@/context/CompanyContext';
 import { companyNumberError, structureFields, structureForCompanyType, UK_POSTCODE, UK_VAT } from '@/lib/practice-structure';
 import { Frequency, FREQUENCY_MONTHS, periodStart as startOf } from '@/lib/periods';
+import { TeamManager } from '@/components/settings/TeamManager';
 
 /**
  * New engagement wizard (ENG-01), in the same adaptive style as practice set-up: each answer
@@ -107,11 +108,10 @@ export default function NewEngagementWizard() {
   const [yearEnd, setYearEnd] = useState('2026-03-31');
   const [frequency, setFrequency] = useState<Frequency>('year_end');
   const [periodStart, setPeriodStart] = useState(startOf('2026-03-31', 12));
-  const firmId = db.memberships[0]?.firm_id;
-  const firmUsers = db.users.filter((u) => db.memberships.some((m) => m.user_id === u.id && m.firm_id === firmId));
-  const roleOf = (userId: string) => db.memberships.find((m) => m.user_id === userId)?.role;
   const [team, setTeam] = useState<string[]>(existing?.team_user_ids ?? []);
-  const toggleTeam = (id: string) => setTeam(team.includes(id) ? team.filter((x) => x !== id) : [...team, id]);
+  // Invitations ticked for this client; null until the Team step has loaded them
+  const [invited, setInvited] = useState<string[] | null>(null);
+  const assigned = team.length + (invited?.length ?? 0);
   const [source, setSource] = useState<Source>('csv');
 
   const isNew = clientId === NEW_CLIENT;
@@ -135,6 +135,7 @@ export default function NewEngagementWizard() {
     setPayroll(c?.payroll ?? true);
     setDetails(detailsOf(c));
     setTeam(c?.team_user_ids ?? []);
+    setInvited(null);
   };
   const setEnd = (end: string, f = frequency) => {
     setYearEnd(end);
@@ -153,7 +154,7 @@ export default function NewEngagementWizard() {
       yearEnd && periodStart && periodStart !== startOf(yearEnd, FREQUENCY_MONTHS[frequency]) ? 'This is a short or long period: the start date was changed by hand.' : '',
       prior ? 'Last year’s locked file is linked, so closing balances roll forward.' : 'First year for this client: no prior file to roll forward.',
     ].filter(Boolean),
-    [team.length ? `${team.length} ${team.length === 1 ? 'person is' : 'people are'} assigned to ${clientName || 'this client'}.` : 'No one assigned yet. Partners and admins see every client.'],
+    [assigned ? `${assigned} ${assigned === 1 ? 'person is' : 'people are'} assigned to ${clientName || 'this client'}.` : 'No one assigned yet. Partners and admins see every client.'],
     [source === 'csv' ? 'You’ll upload the trial balance after creating.' : `You’ll sign in to ${sourceName} after creating, and choose the client’s organisation.`],
   ];
 
@@ -175,7 +176,7 @@ export default function NewEngagementWizard() {
     if (isNew) id = (await api('/api/v1/clients', 'POST', { name: clientName, company_no: '', company_type: type, year_end: yearEnd, data_source: 'csv' })).id;
     // The profile saves the details and decides the papers; the engagement is then created from it
     try {
-      await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll, team_user_ids: team });
+      await api(`/api/v1/clients/${encodeURIComponent(id)}`, 'PATCH', { ...details, company_type: type, year_end: yearEnd, vat_registered: vat, payroll, team_user_ids: team, ...(invited ? { team_invite_ids: invited } : {}) });
     } catch (e) {
       // Don't leave a half-made client behind when its details are refused
       if (isNew) await api(`/api/v1/clients/${encodeURIComponent(id)}/archive`, 'POST', { archived: true, reason: 'Set-up cancelled' }).catch(() => {});
@@ -353,23 +354,8 @@ export default function NewEngagementWizard() {
             {step === 2 && (
               <>
                 <h1 className="text-[28px] font-extrabold tracking-tight mt-1 text-[#122654]">Team</h1>
-                <p className="text-sm text-[#4A5878] mt-1">Who works on this client. Optional: you can change it later on the client page.</p>
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="group" aria-label="Team">
-                  {firmUsers.map((u) => (
-                    <button
-                      key={u.id}
-                      type="button"
-                      role="checkbox"
-                      aria-checked={team.includes(u.id)}
-                      onClick={() => toggleTeam(u.id)}
-                      className={`relative text-left px-3.5 py-3 rounded-[10px] border cursor-pointer ${team.includes(u.id) ? 'bg-[#EEF2F9] border-[#1D4E89] ring-1 ring-[#1D4E89]' : 'bg-white border-[#D3DCEE] hover:border-[#A6B4D0]'}`}
-                    >
-                      {team.includes(u.id) && <Check className="absolute top-2.5 right-2.5 w-3.5 h-3.5 text-[#1D4E89]" />}
-                      <span className="block text-sm font-semibold text-[#122654] pr-4">{u.name}</span>
-                      <span className="block text-[11px] text-[#4A5878] mt-0.5 capitalize">{roleOf(u.id)}</span>
-                    </button>
-                  ))}
-                </div>
+                <p className="text-sm text-[#4A5878] mt-1">Tick who works on this client. Optional: you can change it later on the client page.</p>
+                <TeamManager clientId={isNew ? undefined : clientId} clientName={clientName} team={team} setTeam={setTeam} invited={invited} setInvited={setInvited} />
               </>
             )}
 
