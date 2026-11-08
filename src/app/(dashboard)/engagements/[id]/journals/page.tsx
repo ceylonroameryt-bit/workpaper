@@ -9,6 +9,7 @@ import { TEMPLATES } from '@/lib/workpapers/templates';
 import { getActor } from '@/lib/session';
 import { Adjustment } from '@/lib/types/models';
 import { registerTotals } from '@/lib/workpapers/engine';
+import { ukDate } from '@/lib/dates';
 
 /**
  * Journals (JNL-01, JNL-02, JNL-04): the register of every journal, its effect on profit and net
@@ -251,7 +252,7 @@ export default function JournalsPage() {
                     )}
                   </td>
                   <td className="py-2.5 px-3 font-mono font-bold">{j.ref}</td>
-                  <td className="py-2.5 px-3 whitespace-nowrap">{j.date ?? j.created_at.slice(0, 10)}</td>
+                  <td className="py-2.5 px-3 whitespace-nowrap">{ukDate(j.date ?? j.created_at.slice(0, 10))}</td>
                   <td className="py-2.5 px-3">{TYPES.find((t) => t[0] === j.type)?.[1] ?? 'Adjusting'}</td>
                   <td className="py-2.5 px-3 max-w-[280px]">
                     <span className="block">{j.narrative}</span>

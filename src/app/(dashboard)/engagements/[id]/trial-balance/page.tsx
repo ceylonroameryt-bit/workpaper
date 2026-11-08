@@ -32,6 +32,7 @@ import { db } from '@/lib/server/db';
 import { toPence, asPence, formatPence, calculateVariance } from '@/lib/money';
 import { StatusBadge } from '@/components/ui/StatusPill';
 import { sameDayLastYear } from '@/lib/periods';
+import { ukDate, ukTime } from '@/lib/dates';
 
 const dateIn = (iso: string, month: 'long' | 'short') => (iso ? new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month, year: 'numeric', timeZone: 'UTC' }) : '');
 const longDate = (iso: string) => dateIn(iso, 'long');
@@ -348,7 +349,7 @@ export default function TrialBalancePage() {
     setTimeout(() => {
       setIsRefreshing(false);
       setShowChangeBanner(true);
-      setLastRefreshedAt(new Date().toLocaleTimeString());
+      setLastRefreshedAt(ukTime(new Date()));
       const actor = getActor();
       db.logAudit(
         firmId,
@@ -1287,7 +1288,7 @@ export default function TrialBalancePage() {
                   </h3>
                 </div>
                 <div className="text-xs text-white/70 mt-1 flex items-center gap-3">
-                  <span>Period snapshot: {snapshot?.created_at ? new Date(snapshot.created_at).toLocaleDateString() : 'Current Period'}</span>
+                  <span>Period snapshot: {snapshot?.created_at ? ukDate(snapshot.created_at) :'Current Period'}</span>
                   <span>•</span>
                   <span>{accountTransactions.length} transaction{accountTransactions.length === 1 ? '' : 's'}</span>
                 </div>
@@ -1365,7 +1366,7 @@ export default function TrialBalancePage() {
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-[#122654]">{tx.contact}</span>
                             <span className="text-[10px] bg-[#EEF2F6] text-[#4A5878] px-2 py-0.5 rounded font-mono">
-                              {tx.date}
+                              {ukDate(tx.date)}
                             </span>
                           </div>
                           <p className="text-xs text-[#4A5878] mt-0.5 leading-relaxed">{tx.description}</p>

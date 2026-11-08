@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { db } from '@/lib/server/db';
 import { AuditLogItem } from '@/lib/types';
+import { ukDate } from '@/lib/dates';
 
 export default function AuditLogsPage() {
   // The practice's own activity log, newest first
@@ -395,7 +396,7 @@ export default function AuditLogsPage() {
                     {/* Timestamp */}
                     <td className="px-4 py-3 font-mono-numbers whitespace-nowrap text-[#4A5878]">
                       <div className="text-[#122654] font-medium">{log.timestamp.split(' ')[1]}</div>
-                      <div className="text-[11px]">{log.timestamp.split(' ')[0]}</div>
+                      <div className="text-[11px]">{ukDate(log.timestamp.split(' ')[0])}</div>
                     </td>
 
                     {/* Actor */}
@@ -530,7 +531,7 @@ export default function AuditLogsPage() {
                     Timestamp
                   </span>
                   <span className="font-mono-numbers font-semibold text-[#122654]">
-                    {selectedLogForDetails.timestamp}
+                    {ukDate(selectedLogForDetails.timestamp.split(' ')[0])} {selectedLogForDetails.timestamp.split(' ')[1]}
                   </span>
                   <span className="text-[11px] text-[#0B6B52] block">Verified Timestamp</span>
                 </div>

@@ -9,6 +9,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { formatPence } from '@/lib/money';
+import { ukDate } from '@/lib/dates';
 
 export default function AnalysisPage() {
 
@@ -392,7 +393,7 @@ export default function AnalysisPage() {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-[#122654]">{tx.date}</span>
+                    <span className="font-mono text-xs font-bold text-[#122654]">{ukDate(tx.date)}</span>
                     <span className="text-xs font-bold text-[#122654]">{tx.contact}</span>
                     <span className="font-mono text-xs font-bold bg-white px-2 py-0.5 rounded border border-gray-200">
                       {tx.amount}

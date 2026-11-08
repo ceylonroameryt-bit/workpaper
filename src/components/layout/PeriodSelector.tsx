@@ -8,6 +8,7 @@ import { db } from '@/lib/server/db';
 import { getCurrentUserId } from '@/lib/session';
 import { periodLabel } from '@/lib/periods';
 import { ChangePeriodDialog } from '@/components/layout/ChangePeriodDialog';
+import { ukDate } from '@/lib/dates';
 
 /**
  * Period selector (ENG-02): the active client's engagements, newest first. Choosing one opens
@@ -120,7 +121,7 @@ export const PeriodSelector: React.FC = () => {
                       <span>
                         <span className="block text-xs font-semibold text-[#122654]">{periodLabel(e)}</span>
                         <span className="block text-[11px] text-[#4A5878]">
-                          {e.period_start} to {e.period_end} · {e.status === 'locked' ? 'Locked' : e.status}
+                          {ukDate(e.period_start)} to {ukDate(e.period_end)} · {e.status === 'locked' ? 'Locked' : e.status}
                         </span>
                       </span>
                       {on && <Check className="w-3.5 h-3.5 text-[#1D4E89] shrink-0" />}
