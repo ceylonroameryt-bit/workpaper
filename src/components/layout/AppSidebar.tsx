@@ -249,21 +249,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 )}
               </Link>
 
-              {/* 4. Working paper */}
-              <Link
-                href={`${engagementBase}/workpapers`}
-                onClick={onMobileClose}
-                aria-current={isLinkActive(`${engagementBase}/workpapers`) ? 'page' : undefined}
-                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-                  isLinkActive(`${engagementBase}/workpapers`)
-                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
-                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
-                }`}
-              >
-                <FileCheck2 className="w-4 h-4 shrink-0" />
-                <span>Working paper</span>
-              </Link>
-
               {/* 5. Journals */}
               <Link
                 href={`${engagementBase}/journals`}

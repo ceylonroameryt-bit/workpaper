@@ -498,7 +498,7 @@ export default function WorkpaperPage() {
     { id: 'evidence', label: 'Evidence', state: attachments.length ? 'done' : 'todo', extra: String(attachments.length) },
     {
       id: 'signoff',
-      label: 'Conclude and sign off',
+      label: 'Conclusion',
       state: latestSignoff('partner') || latestSignoff('reviewer') ? 'done' : latestSignoff('preparer') || conclusionText.trim() ? 'progress' : 'todo',
     },
   ];
@@ -729,9 +729,37 @@ export default function WorkpaperPage() {
               )}
             </div>
             <p className="text-[11px] text-[#4A5878] mt-1">
-              Template v{workpaper.template_version} · Preparer {latestSignoff('preparer')?.user_name ?? '—'} · Reviewer{' '}
-              {latestSignoff('reviewer')?.user_name ?? '—'} · {savedAt ? '✓ Saved' : `Updated ${fmtDateTime(workpaper.updated_at)}`}
+              Template v{workpaper.template_version} · {savedAt ? '✓ Saved' : `Updated ${fmtDateTime(workpaper.updated_at)}`}
             </p>
+            {/* A blocked tick stays clickable so it can say why it cannot be ticked yet */}
+            <div role="group" aria-label="Sign-offs" className="flex items-center gap-2 flex-wrap mt-2">
+              {ROLE_ORDER.slice(0, levelsFor(workpaper)).map((role) => {
+                const so = latestSignoff(role);
+                const blocked = canSign(role);
+                return (
+                  <label
+                    key={role}
+                    title={so ? `${ROLE_LABEL[role]}: ${so.user_name}, ${fmtDateTime(so.signed_at)}` : blocked ?? `Tick to sign as ${ROLE_LABEL[role].toLowerCase()}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] border text-xs font-bold ${
+                      so
+                        ? 'bg-[#E6F4EF] border-[#0B6B52]/30 text-[#0B6B52]'
+                        : blocked
+                        ? 'bg-[#F5F8FD] border-[#D3DCEE] text-[#4A5878] cursor-not-allowed'
+                        : 'bg-white border-[#122654] text-[#122654] cursor-pointer'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={Boolean(so)}
+                      disabled={Boolean(so) || signing}
+                      onChange={() => (blocked ? setMessage({ kind: 'error', text: `${ROLE_LABEL[role]}: ${blocked}` }) : sign(role))}
+                    />
+                    {ROLE_LABEL[role]}
+                    {so && <span className="font-normal">{so.user_name} · {fmtDateTime(so.signed_at)}</span>}
+                  </label>
+                );
+              })}
+            </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {/* Collapse / Expand Panel Toggles */}
@@ -1497,7 +1525,7 @@ export default function WorkpaperPage() {
 
           </fieldset>
 
-          <Section id="signoff" num={4} title="Conclude and sign off" state={stateOf('signoff')}>
+          <Section id="signoff" num={4} title="Conclusion" state={stateOf('signoff')}>
             <fieldset id="conclusion" disabled={readOnly} className="min-w-0 border-0 p-0 m-0 scroll-mt-24">
             {botDraft && !isLocked && (
               <div className="p-3 mb-3 rounded-[12px] bg-[#FFF1EE] border border-[#FF7A66]/40 text-xs">
@@ -1563,38 +1591,6 @@ export default function WorkpaperPage() {
               />
             </details>
             </fieldset>
-
-            <p className="text-[11px] text-[#4A5878] mt-4 pt-4 mb-3 border-t border-[#E3E7EF]">
-              Signing as <strong>{actor.name}</strong> ({actor.role}). {levelsFor(workpaper)} sign-off level{levelsFor(workpaper) === 1 ? '' : 's'} for this file, in order; one person signs one level. A reviewed schedule is read-only until it is unreviewed.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {ROLE_ORDER.slice(0, levelsFor(workpaper)).map((role) => {
-                const so = latestSignoff(role);
-                const blocked = canSign(role);
-                return (
-                  <div key={role} className="p-3 rounded-[10px] bg-[#F5F8FD] border border-[#E3E7EF] text-xs flex flex-col">
-                    <div className="font-bold text-[#122654]">{ROLE_LABEL[role]}</div>
-                    {so ? (
-                      <div className="text-[11px] text-[#0B6B52] mt-1">
-                        ✓ {so.user_name} · {fmtDateTime(so.signed_at)}
-                      </div>
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          disabled={Boolean(blocked) || signing}
-                          onClick={() => sign(role)}
-                          className="mt-2 min-h-[36px] bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold rounded-[8px] disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                          {role === 'preparer' ? 'Mark as prepared' : `Sign as ${ROLE_LABEL[role].toLowerCase()}`}
-                        </button>
-                        {blocked && <div className="text-[10px] text-[#A23A27] mt-1.5">{blocked}</div>}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </Section>
         </div>
 

@@ -198,7 +198,10 @@ export function checkRules(before: State, after: State, actor: Actor) {
 
   // Archiving or deleting a workflow on a client year is for managers and above too
   const ewf = changed(rows(before, 'engagement_workflows'), rows(after, 'engagement_workflows'), 'engagement_workflows');
-  if ((ewf.removed.length || ewf.updated.length) && !MANAGER_UP.includes(actor.role)) deny('Only a manager or above can archive or delete a workflow.');
+  // Adding working papers to a workflow is everyday work, so it is the one change open to everyone
+  const addsPapersOnly = ({ before: b, after: a }: { before: any; after: any }) =>
+    Array.isArray(a.refs) && same({ ...b, refs: 0 }, { ...a, refs: 0 }) && b.refs.every((r: string) => a.refs.includes(r));
+  if ((ewf.removed.length || ewf.updated.some((u) => !addsPapersOnly(u))) && !MANAGER_UP.includes(actor.role)) deny('Only a manager or above can archive or delete a workflow.');
 
   // DAT-09: a practice rule only runs once a manager or above has approved it
   const rules = changed(rows(before, 'learned_rules'), rows(after, 'learned_rules'), 'learned_rules');

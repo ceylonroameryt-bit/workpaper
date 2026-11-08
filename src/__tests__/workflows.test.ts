@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { db } from '@/lib/server/db';
-import { addWorkflow, allWorkflowsOf, archiveWorkflow, deleteWorkflow, restoreWorkflow, workflowOptions, workflowProgress, workflowsOf } from '@/lib/workflows';
+import { addPaperToWorkflow, addWorkflow, allWorkflowsOf, archiveWorkflow, deleteWorkflow, restoreWorkflow, workflowOptions, workflowProgress, workflowsOf } from '@/lib/workflows';
 import { mergeFirmState, firmSlice, GuardError, State } from '@/lib/server/state-guard';
 
 const admin = { id: 'u1', name: 'A', role: 'admin' as const };
@@ -62,6 +62,25 @@ describe('workflows', () => {
     expect(workflowsOf(eng.id)).toHaveLength(1);
   });
 
+  it('adds a paper to the default workflow and to a saved workflow only', () => {
+    const eng = open();
+    db.workpapers = db.workpapers.filter((w) => !(w.engagement_id === eng.id && ['Z-30', 'Z-40'].includes(w.ref)));
+    expect(addPaperToWorkflow(eng.id, 'default', 'Z-30', admin)).toBeNull();
+    expect(allWorkflowsOf(eng.id)[0].refs).toContain('Z-30');
+
+    const tax = addWorkflow(eng.id, 'Tax only', ['T-10'], admin) as { id: string };
+    expect(addPaperToWorkflow(eng.id, tax.id, 'Z-40', admin)).toBeNull();
+    const byId = (id: string) => allWorkflowsOf(eng.id).find((w) => w.id === id)!;
+    expect(byId(tax.id).refs).toEqual(['T-10', 'Z-40']);
+    expect(byId('default').refs).not.toContain('Z-40');
+    expect(db.workpapers.some((w) => w.engagement_id === eng.id && w.ref === 'Z-40')).toBe(true);
+
+    // A paper already in the year's file joins without being recreated
+    expect(addPaperToWorkflow(eng.id, tax.id, 'Z-30', admin)).toBeNull();
+    expect(db.workpapers.filter((w) => w.engagement_id === eng.id && w.ref === 'Z-30')).toHaveLength(1);
+    expect(addPaperToWorkflow(eng.id, tax.id, 'NOPE-1', admin)).toMatch(/not available/);
+  });
+
   it('cannot be added to a locked year', () => {
     const locked = db.engagements.find((e) => e.status === 'locked');
     if (locked) expect(addWorkflow(locked.id, 'Nope', ['A-10'], admin)).toMatch(/locked/);
@@ -97,5 +116,11 @@ describe('workflows', () => {
     expect(() => mergeFirmState(full, archived, preparer)).toThrow(GuardError);
     expect(() => mergeFirmState(full, deleted, preparer)).toThrow(GuardError);
     expect(mergeFirmState(full, archived, { ...admin, firmId: 'f1' }).engagement_workflows[0].archived_at).toBe('now');
+
+    // A preparer may add a paper to a workflow, but not take one off or rename it
+    const withRefs = (refs: string[], name = row.name) => ({ ...view(), engagement_workflows: [{ ...row, name, refs }] });
+    expect(mergeFirmState(full, withRefs(['T-10', 'Z-30']), preparer).engagement_workflows[0].refs).toEqual(['T-10', 'Z-30']);
+    expect(() => mergeFirmState(full, withRefs([]), preparer)).toThrow(GuardError);
+    expect(() => mergeFirmState(full, withRefs(['T-10', 'Z-30'], 'Renamed'), preparer)).toThrow(GuardError);
   });
 });

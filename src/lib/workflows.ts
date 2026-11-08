@@ -81,6 +81,20 @@ export const restoreWorkflow = (engagementId: string, workflowId: string, actor:
 /** Removes the workflow from the year. Its working papers stay. */
 export const deleteWorkflow = (engagementId: string, workflowId: string, actor: Actor) => change(engagementId, workflowId, actor, 'DELETE_WORKFLOW');
 
+/** Puts a working paper on a workflow, creating it when the year lacks it. Returns the reason when it cannot. */
+export function addPaperToWorkflow(engagementId: string, workflowId: string, ref: string, actor: Actor): string | null {
+  const eng = db.engagements.find((e) => e.id === engagementId);
+  if (!eng) return 'Engagement not found.';
+  if (eng.status === 'locked') return 'This year is locked. Unlock it before adding a working paper.';
+  const inFile = db.workpapers.some((w) => w.engagement_id === engagementId && w.ref === ref);
+  if (!inFile && !db.addWorkpaper(engagementId, ref)) return 'That working paper is not available.';
+  // A year still on its automatic default workflow has no row: that workflow lists every paper in the file
+  const row = db.engagement_workflows.find((w) => w.engagement_id === engagementId && w.id === workflowId);
+  if (row && !row.refs.includes(ref)) row.refs.push(ref);
+  db.logAudit(eng.firm_id, actor, 'ADD_WORKFLOW_PAPER', 'engagement_workflows', workflowId, null, { ref });
+  return null;
+}
+
 export interface WorkflowProgress {
   total: number;
   signedOff: number;
