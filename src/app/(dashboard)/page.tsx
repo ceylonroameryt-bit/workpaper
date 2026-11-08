@@ -290,6 +290,130 @@ export default function PracticeHomePage() {
         </div>
       )}
 
+      {/* Only show metrics and detailed engagement dashboard when a company is active */}
+      {activeCompany && companyEng && (
+        <>
+          {/* 4 Metric Cards (Page 1 Spec) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: 12 in progress */}
+        <Link
+          href="/clients"
+          className="blynt-card p-5 hover:border-[#122654]/40 hover:shadow-sm transition-all group"
+        >
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
+            <span>In progress</span>
+            <Clock className="w-4 h-4 text-[#122654]" />
+          </div>
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
+            {engagementsInProgress.length}
+          </div>
+          <div className="text-[11px] text-[#4A5878] mt-2 flex items-center justify-between">
+            <span>Active engagements</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#4A5878] group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Card 2: 7 review notes for you */}
+        <Link
+          href="/clients"
+          className="blynt-card p-5 hover:border-[#FF7A66]/50 hover:shadow-sm transition-all group"
+        >
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
+            <span>Review notes for you</span>
+            <MessageSquare className="w-4 h-4 text-[#FF7A66]" />
+          </div>
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
+            {openReviewNotes.length}
+          </div>
+          <div className="text-[11px] text-[#A23A27] font-semibold mt-2 flex items-center justify-between">
+            <span>Open notes</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#A23A27] group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Card 3: 18 accounts to map */}
+        <Link
+          href="/clients"
+          className="blynt-card p-5 hover:border-[#122654]/40 hover:shadow-sm transition-all group"
+        >
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
+            <span>Accounts to map</span>
+            <TableProperties className="w-4 h-4 text-[#1D4E89]" />
+          </div>
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
+            {accountsToMap.length}
+          </div>
+          <div className="text-[11px] text-[#0B6B52] font-semibold mt-2 flex items-center justify-between">
+            <span>Awaiting confirmation</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#0B6B52] group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Card 4: 2 ready for sign-off */}
+        <Link
+          href="/clients"
+          className="blynt-card p-5 hover:border-[#0B6B52]/40 hover:shadow-sm transition-all group"
+        >
+          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
+            <span>Ready for sign-off</span>
+            <CheckCircle2 className="w-4 h-4 text-[#0B6B52]" />
+          </div>
+          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
+            {readyForSignoff.length}
+          </div>
+          <div className="text-[11px] text-[#0B6B52] mt-2 flex items-center justify-between">
+            <span>Papers prepared</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#0B6B52] group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
+      </div>
+
+      {/* Engagements by stage (mockup screen 2) */}
+      <div className="blynt-card p-5">
+        <h2 className="text-sm font-bold text-[#122654] mb-4">Engagements by stage</h2>
+        {(() => {
+          const stages = [
+            { key: 'planning', label: 'Planning', color: '#F5B544' },
+            { key: 'fieldwork', label: 'Fieldwork', color: '#FF7A66' },
+            { key: 'review', label: 'Review', color: '#3B82F6' },
+            { key: 'locked', label: 'Sign-off', color: '#0B6B52' },
+          ] as const;
+          const counts = stages.map((st) => db.engagements.filter((e) => e.status === st.key).length);
+          const total = counts.reduce((x, y) => x + y, 0);
+          let acc = 0;
+          const stops = stages.map((st, i) => {
+            const from = total ? (acc / total) * 100 : 0;
+            acc += counts[i];
+            return `${st.color} ${from}% ${total ? (acc / total) * 100 : 0}%`;
+          });
+          return (
+            <div className="flex items-center gap-8">
+              <div
+                className="relative w-28 h-28 rounded-full shrink-0"
+                style={{ background: total ? `conic-gradient(${stops.join(',')})` : '#E3E7EF' }}
+                aria-hidden="true"
+              >
+                <div className="absolute inset-4 rounded-full bg-white flex flex-col items-center justify-center">
+                  <span className="text-2xl font-extrabold font-mono-numbers">{total}</span>
+                  <span className="text-[10px] text-[#4A5878]">Total</span>
+                </div>
+              </div>
+              <ul className="flex flex-col gap-2 text-xs flex-1">
+                {stages.map((st, i) => (
+                  <li key={st.key} className="flex items-center justify-between gap-4">
+                    <span className="flex items-center gap-2 text-[#4A5878]">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ background: st.color }} />
+                      {st.label}
+                    </span>
+                    <span className="font-bold font-mono-numbers">{counts[i]}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Active Selected Company Command Center */}
       {activeCompany && companyEng && (
         <div className="blynt-card p-6 bg-gradient-to-r from-white via-white to-[#F5F8FD] border-[#D3DCEE] shadow-sm relative overflow-hidden">
@@ -478,84 +602,6 @@ export default function PracticeHomePage() {
           </div>
         </div>
       )}
-
-      {/* Only show metrics and detailed engagement dashboard when a company is active */}
-      {activeCompany && companyEng && (
-        <>
-          {/* 4 Metric Cards (Page 1 Spec) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: 12 in progress */}
-        <Link
-          href="/clients"
-          className="blynt-card p-5 hover:border-[#122654]/40 hover:shadow-sm transition-all group"
-        >
-          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
-            <span>In progress</span>
-            <Clock className="w-4 h-4 text-[#122654]" />
-          </div>
-          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
-            {engagementsInProgress.length}
-          </div>
-          <div className="text-[11px] text-[#4A5878] mt-2 flex items-center justify-between">
-            <span>Active engagements</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#4A5878] group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </Link>
-
-        {/* Card 2: 7 review notes for you */}
-        <Link
-          href="/clients"
-          className="blynt-card p-5 hover:border-[#FF7A66]/50 hover:shadow-sm transition-all group"
-        >
-          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
-            <span>Review notes for you</span>
-            <MessageSquare className="w-4 h-4 text-[#FF7A66]" />
-          </div>
-          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
-            {openReviewNotes.length}
-          </div>
-          <div className="text-[11px] text-[#A23A27] font-semibold mt-2 flex items-center justify-between">
-            <span>Open notes</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#A23A27] group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </Link>
-
-        {/* Card 3: 18 accounts to map */}
-        <Link
-          href="/clients"
-          className="blynt-card p-5 hover:border-[#122654]/40 hover:shadow-sm transition-all group"
-        >
-          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
-            <span>Accounts to map</span>
-            <TableProperties className="w-4 h-4 text-[#1D4E89]" />
-          </div>
-          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
-            {accountsToMap.length}
-          </div>
-          <div className="text-[11px] text-[#0B6B52] font-semibold mt-2 flex items-center justify-between">
-            <span>Awaiting confirmation</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#0B6B52] group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </Link>
-
-        {/* Card 4: 2 ready for sign-off */}
-        <Link
-          href="/clients"
-          className="blynt-card p-5 hover:border-[#0B6B52]/40 hover:shadow-sm transition-all group"
-        >
-          <div className="flex items-center justify-between text-[#4A5878] text-xs font-semibold mb-2">
-            <span>Ready for sign-off</span>
-            <CheckCircle2 className="w-4 h-4 text-[#0B6B52]" />
-          </div>
-          <div className="text-3xl font-extrabold text-[#122654] font-mono-numbers">
-            {readyForSignoff.length}
-          </div>
-          <div className="text-[11px] text-[#0B6B52] mt-2 flex items-center justify-between">
-            <span>Papers prepared</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#0B6B52] group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </Link>
-      </div>
 
       {/* Main Grid: Left Column (Next actions + Engagements table) | Right Rail (Deadlines, Bot, Activity) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

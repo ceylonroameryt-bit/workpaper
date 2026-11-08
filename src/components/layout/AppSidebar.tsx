@@ -16,7 +16,6 @@ import {
   BookOpen,
   Settings,
   ArrowUpRight,
-  Plus,
   ChevronDown,
   Sliders,
   Globe,
@@ -25,7 +24,6 @@ import { BlyntLogo } from '@/components/ui/BlyntLogo';
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
-import { CompanySelector } from './CompanySelector';
 
 /** Locale indicator badge shown in the sidebar footer */
 const LocaleFooterBadge: React.FC = () => {
@@ -80,9 +78,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const activeYearEnd = activeEngagement
     ? formatDate(activeEngagement.period_end, { day: 'numeric', month: 'short', year: 'numeric' })
     : '';
-  const activeStage = activeEngagement
-    ? activeEngagement.status.charAt(0).toUpperCase() + activeEngagement.status.slice(1)
-    : '';
 
   // Calculate live counts from data
   const practiceReviewNotesCount = db.comments.filter(
@@ -134,34 +129,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           >
             <BlyntLogo variant="full" theme="dark" size="md" />
           </Link>
-        </div>
-
-        {/* Coral 'New engagement (N)' Action Button */}
-        <div className="px-4 py-2">
-          <Link
-            href="/engagements/new"
-            onClick={onMobileClose}
-            className="w-full min-h-[44px] bg-[#FF7A66] hover:bg-[#ff9485] text-[#0B1A3B] font-bold text-sm px-4 rounded-[10px] flex items-center justify-between shadow-sm transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-3 focus-visible:ring-white"
-          >
-            <span className="flex items-center gap-2">
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              New engagement
-            </span>
-            <kbd className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#0B1A3B]/15 text-[#0B1A3B]">
-              N
-            </kbd>
-          </Link>
-        </div>
-
-        {/* Active Company Selector & Engagement Context */}
-        <div className="px-4 py-2.5 flex flex-col gap-2">
-          <CompanySelector variant="sidebar" onAddNewCompany={() => router.push('/engagements/new')} />
-          {showEngagementOptions && activeEngagement && (
-            <div className="px-2 py-1.5 bg-[#122654]/60 rounded-[10px] text-[10px] text-[#A6B4D0] flex items-center justify-between border border-white/5">
-              <span>{openReviewNotesCount} review notes open</span>
-              <span className="text-[#FF7A66] font-semibold">{activeStage}</span>
-            </div>
-          )}
         </div>
 
         {/* Group: PRACTICE */}
