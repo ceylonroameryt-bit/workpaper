@@ -12,10 +12,7 @@
     "reset-workspace": "node scripts/reset-workspace.mjs"
   },
   "dependencies": {
-    "@neon/config": "^1.9.3",
-    "@neon/env": "^1.6.4",
     "@tailwindcss/postcss": "^4.3.3",
-    "@vercel/functions": "^3.10.3",
     "ag-grid-community": "^36.2.0",
     "ag-grid-react": "^36.2.0",
     "autoprefixer": "^10.6.1",

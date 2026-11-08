@@ -4,24 +4,17 @@ import { db } from '@/lib/server/db';
 import { services } from '@/lib/server/services';
 import { getActor } from '@/lib/session';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
-  MessageSquare,
   CheckCircle2,
-  Clock,
-  ArrowRight,
   ExternalLink,
   Send,
   Check,
   Search,
-  Filter,
   AlertCircle,
-  FileSpreadsheet,
   ChevronRight,
-  UserCheck,
-  Tag,
   Lock,
 } from 'lucide-react';
 import { useCompany } from '@/context/CompanyContext';
@@ -30,7 +23,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { Tabs } from '@/components/ui/Tabs';
 import { Avatar } from '@/components/ui/Avatar';
 import { getReviewNotes, engagementSummary } from '@/lib/api';
-import { ReviewNoteItem, UserProfile } from '@/lib/types';
+import { ReviewNoteItem } from '@/lib/types';
 
 function parseAuthor(author: any) {
   if (!author) return { name: 'Team member', title: 'Team member', avatar: '' };
@@ -44,7 +37,6 @@ function parseAuthor(author: any) {
 
 export default function ReviewNotesHubPage() {
   const params = useParams();
-  const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
   const { activeEngagement, refreshCompanyData } = useCompany();
 
@@ -132,9 +124,6 @@ export default function ReviewNotesHubPage() {
 
   // File Completion Checks (REV-05)
   const isLocked = activeEngagement?.status === 'locked';
-  const applicableWorkpapers = db.workpapers.filter((w) => w.engagement_id === engagementId);
-  const unreviewedCount = applicableWorkpapers.filter((w) => w.status !== 'signed_off').length;
-  const openBlockersCount = openCount + unreviewedCount;
 
   const handleApproveAndLock = () => {
     if (openCount > 0) {

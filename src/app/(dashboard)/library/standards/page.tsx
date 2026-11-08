@@ -1,16 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  BookOpen,
   CheckCircle2,
   Sparkles,
-  ChevronRight,
-  ShieldCheck,
-  Search,
-  ExternalLink,
-  Calendar,
-  AlertCircle,
 } from 'lucide-react';
 import { STANDARDS, requiredSchedules } from '@/lib/standards';
 import { templateFor } from '@/lib/workpapers/templates';

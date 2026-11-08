@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { db } from '../lib/server/db';
 import { services, ServiceError } from '../lib/server/services';
-import { toPence, asPence, formatPence, sumPence, calculateVariance } from '../lib/money';
+import { toPence, asPence, formatPence } from '../lib/money';
 import { Workpaper } from '../lib/types/models';
 import crypto from 'crypto';
 
@@ -9,7 +9,6 @@ describe('Blynt Workpapers - Ground Rules & Acceptance Criteria', () => {
   const firmId = 'firm_blynt_uk';
   const preparer = { id: 'usr_test_preparer', name: 'Test Preparer', role: 'preparer' as const };
   const reviewer = { id: 'usr_test_reviewer', name: 'Test Reviewer', role: 'reviewer' as const };
-  const partner = { id: 'usr_test_partner', name: 'Test Partner', role: 'partner' as const };
 
   beforeEach(() => {
     // Re-seed DB with demo dataset for acceptance tests
@@ -179,7 +178,6 @@ describe('Blynt Workpapers - Ground Rules & Acceptance Criteria', () => {
     expect(f10.comments.length).toBeGreaterThan(0);
     expect(f10.attachments.length).toBeGreaterThan(0);
 
-    const initialTemplateId = f10.workpaper.template_id;
     const res = services.changeTemplate(firmId, reviewer, 'wp_f10', 'tpl_f10_simple');
 
     expect(res.success).toBe(true);

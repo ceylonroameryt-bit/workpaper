@@ -14,19 +14,16 @@ import {
   TbLine,
   AccountMapping,
   Adjustment,
-  AdjustmentLine,
   Template,
   Workpaper,
   Procedure,
   Comment,
-  CommentReply,
   Attachment,
   AttachmentLink,
   Signoff,
   ViewPrefs,
   AuditLog,
   AiLineage,
-  CompanyType,
   LearnedRule,
   AiActionLogItem,
   AiReviewFinding,
@@ -36,7 +33,6 @@ import {
   LedgerTransaction,
   Invite,
 } from '../types/models';
-import { toPence, sumPence } from '../money';
 import type { XeroConnection as XeroConnectionRecord } from './xero';
 import type { QboConnection as QboConnectionRecord } from './quickbooks';
 import { packFor, packForClient, templateFor, blankPaperData } from '../workpapers/templates';

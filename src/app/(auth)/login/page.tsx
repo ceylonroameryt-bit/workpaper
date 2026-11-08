@@ -3,12 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  ShieldCheck,
-  Sparkles,
   Eye,
   EyeOff,
   AlertCircle,
-  ArrowRight,
   Clock,
 } from 'lucide-react';
 import { AuthBrandPanel } from '@/components/layout/AuthBrandPanel';

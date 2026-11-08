@@ -1,34 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Calendar,
-  CheckCircle2,
-  Clock,
-  ExternalLink,
   Plus,
-  Search,
-  Users,
-  ShieldCheck,
-  FileSpreadsheet,
-  AlertCircle,
-  FolderOpen,
   ArrowRight,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { QuickBooksPanel, XeroPanel } from '@/components/integrations/XeroPanel';
-import { useCompany } from '@/context/CompanyContext';
 import { ClientProfileForm } from '@/components/clients/ClientProfileForm';
 import { Client } from '@/lib/types/models';
 import { useLocale } from '@/context/LocaleContext';
 
 export default function ClientRecordPage() {
   const params = useParams();
-  const router = useRouter();
   const clientId = (params?.id as string) || '';
-  const { clients, activeEngagement, addCompany } = useCompany();
   const { formatDate } = useLocale();
 
   const client = db.clients.find((c) => c.id === clientId);

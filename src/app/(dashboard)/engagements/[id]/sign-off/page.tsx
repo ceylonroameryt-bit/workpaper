@@ -1,26 +1,18 @@
 'use client';
 
 import { db } from '@/lib/server/db';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
   Lock,
-  Unlock,
   CheckCircle2,
   AlertCircle,
-  Clock,
-  ArrowRight,
-  ExternalLink,
   Download,
-  ChevronRight,
   Check,
   AlertTriangle,
-  FileArchive,
-  X,
 } from 'lucide-react';
 import { Dialog } from '@/components/ui/Dialog';
-import { engagementSummary } from '@/lib/api';
 import { useCompany } from '@/context/CompanyContext';
 
 interface MatrixRow {
@@ -35,14 +27,12 @@ interface MatrixRow {
 
 export default function SignOffAndLockPage() {
   const params = useParams();
-  const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
   const { activeCompany } = useCompany();
 
   const [blockersData, setBlockersData] = useState<any>(null);
   const [matrix, setMatrix] = useState<MatrixRow[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
-  const [reportDate, setReportDate] = useState('2026-09-30');
   const [isExporting, setIsExporting] = useState(false);
   const [exportResult, setExportResult] = useState<any>(null);
 

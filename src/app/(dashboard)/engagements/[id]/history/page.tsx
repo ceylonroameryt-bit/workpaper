@@ -1,30 +1,18 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useMemo } from 'react';
 import {
   History,
   Download,
-  Filter,
   Search,
-  CheckCircle2,
-  Lock,
-  Unlock,
   Sparkles,
-  ArrowRight,
   GitCompare,
-  RotateCcw,
-  Clock,
-  ShieldCheck,
-  FileSpreadsheet,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 
 export default function HistoryPage() {
-  const params = useParams();
-  const engagementId = (params?.id as string) || 'eng_harlow_fy26';
   const { activeEngagement } = useCompany();
   const { formatDate } = useLocale();
 

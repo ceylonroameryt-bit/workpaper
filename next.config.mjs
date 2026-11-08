@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
-  // Self-contained server for the AWS container image (Dockerfile); ignored by Vercel.
+  // Self-contained server for the AWS container image (Dockerfile).
   output: 'standalone',
 };
 

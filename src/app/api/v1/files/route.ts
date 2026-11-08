@@ -5,7 +5,7 @@ import { saveFile, syncIn, syncOut } from '@/lib/server/store';
 
 export const dynamic = 'force-dynamic';
 
-// Vercel functions accept request bodies up to 4.5 MB
+// Lambda function URLs accept request bodies up to 6 MB; 4 MB leaves headroom
 const MAX_FILE_BYTES = 4 * 1024 * 1024;
 
 /** Upload one file as the raw request body. Returns its storage key and fingerprint. */

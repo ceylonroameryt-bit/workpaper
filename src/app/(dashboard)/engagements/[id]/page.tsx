@@ -2,7 +2,7 @@
 
 import { getActor } from '@/lib/session';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import {
@@ -15,8 +15,6 @@ import {
   ArrowRight,
   ExternalLink,
   Table2,
-  SlidersHorizontal,
-  MessageSquare,
   Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';

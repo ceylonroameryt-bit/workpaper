@@ -1,32 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useState } from 'react';
 import {
   FileDown,
   Download,
   FileSpreadsheet,
-  FileText,
   BarChart3,
   Calendar,
   Sparkles,
   CheckCircle2,
-  Sliders,
   TrendingUp,
-  TrendingDown,
-  Printer,
-  ChevronRight,
-  ExternalLink,
 } from 'lucide-react';
-import { useCompany } from '@/context/CompanyContext';
-import { useLocale } from '@/context/LocaleContext';
-import { formatPence } from '@/lib/money';
 
 export default function ReportsPage() {
-  const params = useParams();
-  const engagementId = (params?.id as string) || 'eng_harlow_fy26';
-  const { activeEngagement, activeCompany } = useCompany();
-  const { formatDate } = useLocale();
 
   const [activeTab, setActiveTab] = useState<'library' | 'mgt_pack' | 'cash_flow' | 'forecast_12m' | 'quarterly' | 'bundle'>('library');
   const [plainEnglish, setPlainEnglish] = useState(false);

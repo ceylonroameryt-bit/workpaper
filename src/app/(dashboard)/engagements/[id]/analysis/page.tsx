@@ -1,30 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useState } from 'react';
 import {
   TrendingUp,
-  TrendingDown,
   Sparkles,
-  AlertTriangle,
   Scale,
-  BarChart3,
-  MessageSquare,
   ShieldAlert,
-  ArrowRight,
   CheckCircle2,
-  Lock,
-  ExternalLink,
 } from 'lucide-react';
-import { useCompany } from '@/context/CompanyContext';
-import { useLocale } from '@/context/LocaleContext';
-import { formatPence, toPence } from '@/lib/money';
+import { formatPence } from '@/lib/money';
 
 export default function AnalysisPage() {
-  const params = useParams();
-  const engagementId = (params?.id as string) || 'eng_harlow_fy26';
-  const { activeEngagement } = useCompany();
-  const { formatDate } = useLocale();
 
   const [activeTab, setActiveTab] = useState<'pnl' | 'balance_sheet' | 'unusual'>('pnl');
   const [comparisonMode, setComparisonMode] = useState<'py' | 'budget' | 'both'>('py');

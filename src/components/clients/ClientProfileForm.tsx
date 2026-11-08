@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AlertCircle, CheckCircle2, Loader2, Save } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';

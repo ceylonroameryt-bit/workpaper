@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { Clock, ShieldAlert, LogOut, CheckCircle2 } from 'lucide-react';
+import { Clock, LogOut, CheckCircle2 } from 'lucide-react';
 import { signOut } from '@/lib/session';
 import { useCompany } from '@/context/CompanyContext';
 

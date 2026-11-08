@@ -20,7 +20,7 @@ import {
   MFA_COOKIE,
 } from '../lib/server/auth';
 import { createInvite, acceptInvite } from '../lib/server/invites';
-import { firmSlice, mergeFirmState, GuardError, State, Actor } from '../lib/server/state-guard';
+import { firmSlice, mergeFirmState, State, Actor } from '../lib/server/state-guard';
 import { requireEngagementAccess } from '../lib/server/api-helpers';
 import { runGated, learnFromCorrection, accuracy } from '../lib/server/gate';
 import { POST as login } from '../app/api/v1/auth/login/route';

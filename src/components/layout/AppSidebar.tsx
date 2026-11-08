@@ -14,9 +14,7 @@ import {
   Lock,
   FileSpreadsheet,
   BookOpen,
-  Settings,
   ArrowUpRight,
-  ChevronDown,
   Sliders,
   Globe,
 } from 'lucide-react';
@@ -53,7 +51,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   onMobileClose,
 }) => {
   const { activeCompany, activeEngagement: contextEngagement } = useCompany();
-  const { formatDate } = useLocale();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -75,14 +72,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   // Show engagement nav whenever we're on an engagement route OR a company is selected
   const showEngagementOptions = Boolean(activeEngagement);
 
-  const activeYearEnd = activeEngagement
-    ? formatDate(activeEngagement.period_end, { day: 'numeric', month: 'short', year: 'numeric' })
-    : '';
 
   // Calculate live counts from data
-  const practiceReviewNotesCount = db.comments.filter(
-    (c) => c.type === 'review_note' && c.status === 'open'
-  ).length;
 
   const openReviewNotesCount = db.comments.filter(
     (c) => c.type === 'review_note' && c.status === 'open' && (activeEngagement ? c.workpaper_id?.includes(activeEngagement.id) : true)

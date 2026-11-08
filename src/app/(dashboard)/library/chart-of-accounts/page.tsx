@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
-  BookOpen,
   Plus,
   Search,
-  CheckCircle2,
   Lock,
   ArrowRight,
 } from 'lucide-react';
