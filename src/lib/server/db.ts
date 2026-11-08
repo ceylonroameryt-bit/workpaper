@@ -32,11 +32,13 @@ import {
   DisclosureChecklistItem,
   StatutoryNoteItem,
   LedgerTransaction,
+  WorkflowTemplate,
+  EngagementWorkflow,
   Invite,
 } from '../types/models';
 import type { XeroConnection as XeroConnectionRecord } from './xero';
 import type { QboConnection as QboConnectionRecord } from './quickbooks';
-import { packFor, packForClient, templateFor, blankPaperData } from '../workpapers/templates';
+import { packFor, packForClient, templateFor, blankPaperData, TemplateDef } from '../workpapers/templates';
 import { getStatutoryDetails } from '../mapping/auto-mapper';
 
 export interface ServerSession {
@@ -74,6 +76,8 @@ class Database {
   ai_review_findings: AiReviewFinding[] = [];
   schedule_versions: ScheduleVersion[] = [];
   checklist_items: DisclosureChecklistItem[] = [];
+  workflow_templates: WorkflowTemplate[] = [];
+  engagement_workflows: EngagementWorkflow[] = [];
   statutory_notes: StatutoryNoteItem[] = [];
   transactions: LedgerTransaction[] = [];
   invites: Invite[] = []; // Server-only, like credentials
@@ -98,7 +102,7 @@ class Database {
     'adjustments', 'templates', 'workpapers', 'procedures', 'comments', 'attachments',
     'attachment_links', 'signoffs', 'view_prefs', 'audit_logs', 'ai_lineage', 'credentials',
     'learned_rules', 'ai_action_logs', 'ai_review_findings', 'schedule_versions', 'checklist_items', 'statutory_notes',
-    'transactions', 'invites', 'uploads', 'xero_connections', 'qbo_connections',
+    'workflow_templates', 'engagement_workflows', 'transactions', 'invites', 'uploads', 'xero_connections', 'qbo_connections',
   ] as const;
 
   exportState(): Record<string, unknown[]> {
@@ -133,8 +137,8 @@ class Database {
     for (const ref of refs) this.addWorkpaper(engagementId, ref);
   }
 
-  addWorkpaper(engagementId: string, ref: string) {
-    const t = templateFor(ref);
+  addWorkpaper(engagementId: string, ref: string, custom?: TemplateDef) {
+    const t = custom ?? templateFor(ref);
     if (!t) return null;
     const wpId = `wp_${engagementId}_${ref.replace('-', '').toLowerCase()}`;
     const existing = this.workpapers.find((w) => w.id === wpId);
@@ -149,6 +153,7 @@ class Database {
       data_json: blankPaperData(t),
       status: 'not_started',
       rolled_from_workpaper_id: null,
+      ...(custom ? { custom_template: custom } : {}),
       created_at: now,
       updated_at: now,
     };
@@ -190,6 +195,8 @@ class Database {
     this.ai_review_findings = [];
     this.schedule_versions = [];
     this.checklist_items = [];
+    this.workflow_templates = [];
+    this.engagement_workflows = [];
     this.statutory_notes = [];
     this.transactions = [];
   }
@@ -269,6 +276,8 @@ class Database {
     this.ai_review_findings = [];
     this.schedule_versions = [];
     this.checklist_items = [];
+    this.workflow_templates = [];
+    this.engagement_workflows = [];
     this.statutory_notes = [];
     this.transactions = [];
     this.invites = [];

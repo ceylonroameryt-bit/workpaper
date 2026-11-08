@@ -11,6 +11,7 @@ import { useCompany } from '@/context/CompanyContext';
 import { companyNumberError, structureFields, structureForCompanyType, UK_POSTCODE, UK_VAT } from '@/lib/practice-structure';
 import { Frequency, FREQUENCY_MONTHS, periodStart as startOf } from '@/lib/periods';
 import { TeamManager } from '@/components/settings/TeamManager';
+import { ukDate } from '@/lib/dates';
 
 /**
  * New engagement wizard (ENG-01), in the same adaptive style as practice set-up: each answer
@@ -150,7 +151,7 @@ export default function NewEngagementWizard() {
       payroll ? 'Payroll and PAYE/NIC (P-20) is included.' : 'No payroll paper (P-20): the client runs no payroll.',
     ],
     [
-      periodStart && yearEnd ? `A ${FREQUENCIES.find((f) => f[0] === frequency)?.[1].toLowerCase()} file covering ${periodStart} to ${yearEnd}.` : '',
+      periodStart && yearEnd ? `A ${FREQUENCIES.find((f) => f[0] === frequency)?.[1].toLowerCase()} file covering ${ukDate(periodStart)} to ${ukDate(yearEnd)}.` : '',
       yearEnd && periodStart && periodStart !== startOf(yearEnd, FREQUENCY_MONTHS[frequency]) ? 'This is a short or long period: the start date was changed by hand.' : '',
       prior ? 'Last year’s locked file is linked, so closing balances roll forward.' : 'First year for this client: no prior file to roll forward.',
     ].filter(Boolean),

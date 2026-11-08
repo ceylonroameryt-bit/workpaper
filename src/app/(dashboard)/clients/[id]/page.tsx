@@ -2,13 +2,12 @@
 
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Plus,
-  ArrowRight,
-} from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { QuickBooksPanel, XeroPanel } from '@/components/integrations/XeroPanel';
+import { WorkflowCards } from '@/components/workflow/WorkflowCards';
 import { ClientProfileForm } from '@/components/clients/ClientProfileForm';
+import { ClientWorkpapers } from '@/components/clients/ClientWorkpapers';
 import { Client } from '@/lib/types/models';
 import { useLocale } from '@/context/LocaleContext';
 
@@ -86,45 +85,10 @@ export default function ClientRecordPage() {
 
       <div>
         <div className="space-y-6">
+          <WorkflowCards engagementIds={[...clientEngagements].sort((a, b) => b.period_end.localeCompare(a.period_end)).map((e) => e.id)} />
           <XeroPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           <QuickBooksPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
-          {/* Engagements List */}
-          <div className="bg-white border border-[#E3E7EF] rounded-xl shadow-xs p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E3E7EF] pb-3">
-              <h2 className="text-sm font-bold text-[#122654]">Client Engagements (ENG-01)</h2>
-              <span className="text-xs text-[#7E8DA6]">{clientEngagements.length} Total</span>
-            </div>
-
-            <div className="space-y-3">
-              {clientEngagements.map((eng) => (
-                <div
-                  key={eng.id}
-                  className="p-4 rounded-xl border border-[#E3E7EF] hover:border-[#122654]/40 bg-[#F5F8FD]/50 flex items-center justify-between transition-colors"
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-xs text-[#1D4E89] bg-[#EAF5FC] px-2 py-0.5 rounded">
-                        {eng.id}
-                      </span>
-                      <span className="text-xs font-bold text-[#122654]">
-                        Year-End Accounts: {formatDate(eng.period_end, { year: 'numeric', month: 'short' })}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-[#4A5878] mt-1">
-                      Period: {formatDate(eng.period_start)} to {formatDate(eng.period_end)} • Framework: {eng.framework}
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/engagements/${eng.id}`}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#122654] hover:bg-[#1D4E89] text-white text-xs font-semibold rounded-lg shadow-2xs transition-colors"
-                  >
-                    Open Engagement <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ClientWorkpapers clientId={client.id} />
 
           <ClientProfileForm key={client.id} client={client as Client} />
         </div>

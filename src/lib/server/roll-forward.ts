@@ -311,6 +311,12 @@ export class RollForwardService {
               agrees_to_penny: true,
             });
           }
+        } else if (t.kind === 'statutory') {
+          // People carry forward. Someone who resigned stays only if they still hold shares
+          const officers = (pyData.officers || [])
+            .filter((o: any) => !o.resigned || o.is_shareholder)
+            .map((o: any) => (o.resigned ? { ...o, is_director: false, is_secretary: false, appointed: '', resigned: '' } : o));
+          newData = { ...newData, officers };
         } else if (t.kind === 'lines') {
           // Share capital (E-10), Reserves (E-20), Provisions (Q-10), Investments (G-10)
           const pyLines = pyData.lines || [];

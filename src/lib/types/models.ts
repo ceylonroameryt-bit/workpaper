@@ -3,6 +3,8 @@
  * Exactly matches the database schema & ground rules.
  */
 
+import type { TemplateDef } from '../workpapers/templates';
+
 export type UserRole = 'readonly' | 'preparer' | 'reviewer' | 'manager' | 'partner' | 'admin';
 
 export type StatusKey =
@@ -296,6 +298,7 @@ export interface TbLine {
   source_type: string;
   debit_p: string; // stored as string for exact bigint serialization
   credit_p: string;
+  comparative_p?: string; // net balance a year earlier, debit positive, when the ledger gave one
 }
 
 export interface AccountMapping {
@@ -380,6 +383,7 @@ export interface Workpaper {
   data_json: Record<string, any>;
   status: StatusKey;
   rolled_from_workpaper_id: string | null;
+  custom_template?: TemplateDef | null; // set on a paper the practice defined for this engagement
   // WPS-03: unticked papers move to the N/A list with the reason; absent = applicable
   applicable?: boolean;
   na_reason?: string | null;
@@ -508,6 +512,27 @@ export interface Attachment {
 export interface AttachmentLink {
   attachment_id: string;
   anchor_json: AnchorJson;
+}
+
+/** A named set of working papers a practice can add to a client year. Built-in ones live in code; these are the practice's own. */
+export interface WorkflowTemplate {
+  id: string;
+  firm_id: string;
+  name: string;
+  refs: string[];
+  created_by: string;
+  created_at: string;
+}
+
+/** A workflow added to one engagement. Its papers are the engagement's papers whose reference is in `refs`. */
+export interface EngagementWorkflow {
+  id: string;
+  engagement_id: string;
+  name: string;
+  refs: string[];
+  created_at: string;
+  /** Set when a manager archived it: hidden from the cards and menu, and restorable */
+  archived_at?: string | null;
 }
 
 export interface Signoff {

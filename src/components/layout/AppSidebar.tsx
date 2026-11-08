@@ -17,9 +17,11 @@ import {
   ArrowUpRight,
   Sliders,
   Globe,
+  ListChecks,
 } from 'lucide-react';
 import { BlyntLogo } from '@/components/ui/BlyntLogo';
 import { db } from '@/lib/server/db';
+import { workflowsOf } from '@/lib/workflows';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 
@@ -71,6 +73,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
   // Show engagement nav whenever we're on an engagement route OR a company is selected
   const showEngagementOptions = Boolean(activeEngagement);
+  const workflows = activeEngagement ? workflowsOf(activeEngagement.id) : [];
 
 
   // Calculate live counts from data
@@ -193,6 +196,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               >
                 <Home className="w-4 h-4 shrink-0" />
                 <span>Overview</span>
+              </Link>
+
+              <Link
+                href={`${engagementBase}/workflow`}
+                onClick={onMobileClose}
+                aria-current={isLinkActive(`${engagementBase}/workflow`) ? 'page' : undefined}
+                className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+                  isLinkActive(`${engagementBase}/workflow`)
+                    ? 'text-white bg-[#1E3A73] font-semibold shadow-sm'
+                    : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
+                }`}
+              >
+                <ListChecks className="w-4 h-4 shrink-0" />
+                <span>Workflow</span>
               </Link>
 
               {/* 2. Trial balance */}
@@ -359,6 +376,33 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 <span>History</span>
               </Link>
             </nav>
+
+            {/* The client year's workflows, as in the workflow cards */}
+            {workflows.length > 0 && (
+              <div className="mt-3">
+                <div className="px-5 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#7E8DA6]">Workflows</div>
+                <nav className="flex flex-col" aria-label="Workflows">
+                  {workflows.map((wf) => {
+                    const href = `${engagementBase}/workflows/${wf.id}`;
+                    const initials = wf.name.split(/[\s-]+/).filter((w) => /^[A-Za-z]/.test(w)).map((w) => w[0].toUpperCase()).slice(0, 3).join('');
+                    return (
+                      <Link
+                        key={wf.id}
+                        href={href}
+                        onClick={onMobileClose}
+                        aria-current={isLinkActive(href) ? 'page' : undefined}
+                        className={`relative flex items-center gap-3 mx-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+                          isLinkActive(href) ? 'text-white bg-[#1E3A73] font-semibold shadow-sm' : 'text-[#A6B4D0] hover:text-white hover:bg-[#122654]/50'
+                        }`}
+                      >
+                        <span className="w-6 h-6 shrink-0 rounded-md bg-[#122654] border border-white/10 text-[9px] font-bold flex items-center justify-center" aria-hidden="true">{initials}</span>
+                        <span className="truncate" title={wf.name}>{wf.name}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+            )}
           </div>
         )}
 

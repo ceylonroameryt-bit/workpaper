@@ -1,3 +1,4 @@
+import { sameDayLastYear } from '../periods';
 import crypto from 'crypto';
 import { db } from './db';
 import { secret } from './auth';
@@ -21,6 +22,7 @@ const API = 'https://api.xero.com/api.xro/2.0';
 // Granular scopes: apps created on or after 2 March 2026 can't request the old broad ones
 // (accounting.transactions, accounting.reports.read). accounting.journals.read needs Xero's
 // approval, so it is left out until the journals drill-down (DAT-07) uses it.
+// accounting.payments.read lets us gather payments; credit notes and transfers come with the invoice and bank scopes.
 export const XERO_SCOPES = [
   'openid',
   'profile',
@@ -32,6 +34,7 @@ export const XERO_SCOPES = [
   'accounting.invoices.read',
   'accounting.banktransactions.read',
   'accounting.manualjournals.read',
+  'accounting.payments.read',
 ];
 
 export interface XeroConnection {
@@ -180,6 +183,7 @@ interface XeroAccount {
   Code?: string;
   Name: string;
   Type: string;
+  SystemAccount?: string; // 'DEBTORS' and 'CREDITORS' mark the trade control accounts
 }
 
 interface XeroCell {
@@ -210,9 +214,9 @@ const XERO_TYPES: Record<string, string> = {
   REVENUE: 'Revenue',
   SALES: 'Revenue',
   OTHERINCOME: 'Other Income',
-  DIRECTCOSTS: 'Cost of Sales',
+  DIRECTCOSTS: 'Direct Costs',
   EXPENSE: 'Expense',
-  OVERHEADS: 'Expense',
+  OVERHEADS: 'Overhead',
   DEPRECIATN: 'Expense',
   SUPERANNUATIONEXPENSE: 'Expense',
   WAGESEXPENSE: 'Expense',
@@ -260,6 +264,26 @@ export function parseTrialBalance(report: unknown, accounts: XeroAccount[]): TbL
   return lines.filter((l) => Number(l.debit) !== 0 || Number(l.credit) !== 0);
 }
 
+/**
+ * Adds each account's balance a year earlier. An account with only a prior balance stays on the
+ * report, in the place Xero lists it.
+ */
+export function withComparatives(current: TbLineInput[], prior: TbLineInput[]): TbLineInput[] {
+  const key = (l: TbLineInput) => l.external_id ?? l.code;
+  const net = (l: TbLineInput) => (Number(l.debit) - Number(l.credit)).toFixed(2);
+  const inCurrent = (l: TbLineInput) => current.some((c) => key(c) === key(l));
+  const out: TbLineInput[] = current.map((l) => {
+    const was = prior.find((p) => key(p) === key(l));
+    return { ...l, comparative: was ? net(was) : '0.00' };
+  });
+  prior.forEach((p, i) => {
+    if (inCurrent(p)) return;
+    const next = prior.slice(i + 1).find(inCurrent);
+    out.splice(next ? out.findIndex((l) => key(l) === key(next)) : out.length, 0, { ...p, debit: '0.00', credit: '0.00', comparative: net(p) });
+  });
+  return out;
+}
+
 // ── Transactions for the drill-down (DAT-07) ──
 
 interface XeroLine {
@@ -283,6 +307,16 @@ interface XeroDoc {
   BankAccount?: { Code?: string };
   LineItems?: XeroLine[];
   JournalLines?: XeroLine[];
+  LineAmountTypes?: string; // 'Inclusive' means LineAmount already contains the tax
+  CreditNoteID?: string;
+  PaymentID?: string;
+  PaymentType?: string;
+  Amount?: number;
+  Account?: { Code?: string };
+  Invoice?: { InvoiceID?: string; Contact?: { Name?: string } };
+  BankTransferID?: string;
+  FromBankAccount?: { Code?: string };
+  ToBankAccount?: { Code?: string };
 }
 
 const pence = (n: number | undefined) => BigInt(Math.round((n ?? 0) * 100));
@@ -296,14 +330,25 @@ export function xeroDeepLink(shortCode: string | null, path: string): string {
 }
 
 /**
- * Posted invoices, bills, bank transactions and manual journals in the period, one row per
- * account line, signed debit-positive. Drafts, voids and deletions are not in the ledger.
- * shortcut: payments, credit notes and transfers aren't pulled (they need the Journals scope,
- * which Xero must approve); add them once accounting.journals.read is granted.
+ * What the ledger posted in the period, one row per account line, signed debit-positive, as in
+ * Xero's Account Transactions report: invoices and bills (with the debtors or creditors side),
+ * credit notes, bank transactions, payments, bank transfers and manual journals. Drafts, voids
+ * and deletions are not in the ledger.
+ * shortcut: overpayments, prepayments and Xero's own journals (depreciation, year-end) aren't
+ * pulled; the last need accounting.journals.read, which Xero must approve for the app.
  */
-export function parseTransactions(engagementId: string, shortCode: string | null, docs: { invoices: XeroDoc[]; bank: XeroDoc[]; journals: XeroDoc[] }, names: Map<string, string>): LedgerTransaction[] {
+export interface XeroDocs {
+  invoices: XeroDoc[];
+  bank: XeroDoc[];
+  journals: XeroDoc[];
+  creditNotes?: XeroDoc[];
+  payments?: XeroDoc[];
+  transfers?: XeroDoc[];
+}
+
+export function parseTransactions(engagementId: string, shortCode: string | null, docs: XeroDocs, names: Map<string, string>, control: { debtors?: string; creditors?: string } = {}): LedgerTransaction[] {
   const rows: LedgerTransaction[] = [];
-  const add = (doc: XeroDoc, id: string, path: string, code: string | undefined, net: bigint, vat: bigint, description: string) => {
+  const add = (doc: XeroDoc, id: string, path: string | undefined, code: string | undefined, net: bigint, vat: bigint, description: string) => {
     if (!code) return;
     rows.push({
       id: `tx_${engagementId}_${id}_${rows.length}`,
@@ -311,35 +356,62 @@ export function parseTransactions(engagementId: string, shortCode: string | null
       account_code: code,
       account_name: names.get(code) ?? code,
       date: docDate(doc),
-      contact: doc.Contact?.Name ?? '',
+      contact: doc.Contact?.Name ?? doc.Invoice?.Contact?.Name ?? '',
       description,
       amount_p: net.toString(),
       vat_p: vat.toString(),
       gross_p: (net + vat).toString(),
       source: 'Xero',
       external_id: id,
-      external_url: xeroDeepLink(shortCode, path),
+      ...(path ? { external_url: xeroDeepLink(shortCode, path) } : {}),
     });
   };
-  for (const inv of docs.invoices) {
-    if (!['AUTHORISED', 'PAID'].includes(inv.Status ?? '') || !inv.InvoiceID) continue;
-    const sales = inv.Type === 'ACCREC';
-    const sign = sales ? -1n : 1n; // sales credit income; bills debit costs
-    const path = `/${sales ? 'AccountsReceivable' : 'AccountsPayable'}/View.aspx?InvoiceID=${inv.InvoiceID}`;
-    for (const l of inv.LineItems ?? []) add(inv, inv.InvoiceID, path, l.AccountCode, sign * pence(l.LineAmount), sign * pence(l.TaxAmount), l.Description || inv.Reference || '');
-  }
-  for (const bt of docs.bank) {
-    if (!['AUTHORISED', 'PAID'].includes(bt.Status ?? '') || !bt.BankTransactionID) continue;
-    const sign = bt.Type?.startsWith('SPEND') ? 1n : -1n; // spend money debits the line, receive credits it
-    const path = `/Bank/ViewTransaction.aspx?bankTransactionID=${bt.BankTransactionID}`;
+  // Tax-inclusive documents carry the tax inside LineAmount
+  const lineNet = (doc: XeroDoc, l: XeroLine) => (doc.LineAmountTypes === 'Inclusive' ? pence(l.LineAmount) - pence(l.TaxAmount) : pence(l.LineAmount));
+  // The lines, then the other side of the entry (debtors, creditors or the bank) for what they total
+  const post = (doc: XeroDoc, id: string, path: string, sign: bigint, otherSide: string | undefined, label: string) => {
     let gross = 0n;
-    for (const l of bt.LineItems ?? []) {
-      const net = sign * pence(l.LineAmount);
+    for (const l of doc.LineItems ?? []) {
+      const net = sign * lineNet(doc, l);
       const vat = sign * pence(l.TaxAmount);
       gross += net + vat;
-      add(bt, bt.BankTransactionID, path, l.AccountCode, net, vat, l.Description || bt.Reference || '');
+      add(doc, id, path, l.AccountCode, net, vat, l.Description || doc.Reference || '');
     }
-    add(bt, bt.BankTransactionID, path, bt.BankAccount?.Code, -gross, 0n, bt.Reference || bt.Contact?.Name || 'Bank transaction');
+    add(doc, id, path, otherSide, -gross, 0n, doc.Reference || doc.Contact?.Name || label);
+  };
+  const live = (doc: XeroDoc) => ['AUTHORISED', 'PAID'].includes(doc.Status ?? '');
+
+  for (const inv of docs.invoices) {
+    if (!live(inv) || !inv.InvoiceID) continue;
+    const sales = inv.Type === 'ACCREC';
+    // sales credit income and debit debtors; bills debit costs and credit creditors
+    post(inv, inv.InvoiceID, `/${sales ? 'AccountsReceivable' : 'AccountsPayable'}/View.aspx?InvoiceID=${inv.InvoiceID}`, sales ? -1n : 1n, sales ? control.debtors : control.creditors, 'Invoice');
+  }
+  for (const cn of docs.creditNotes ?? []) {
+    if (!live(cn) || !cn.CreditNoteID) continue;
+    const sales = cn.Type === 'ACCRECCREDIT';
+    post(cn, cn.CreditNoteID, `/${sales ? 'AccountsReceivable' : 'AccountsPayable'}/ViewCreditNote.aspx?creditNoteID=${cn.CreditNoteID}`, sales ? 1n : -1n, sales ? control.debtors : control.creditors, 'Credit note');
+  }
+  for (const bt of docs.bank) {
+    if (!live(bt) || !bt.BankTransactionID) continue;
+    // spend money debits the line and credits the bank; receive money the other way round
+    post(bt, bt.BankTransactionID, `/Bank/ViewTransaction.aspx?bankTransactionID=${bt.BankTransactionID}`, bt.Type?.startsWith('SPEND') ? 1n : -1n, bt.BankAccount?.Code, 'Bank transaction');
+  }
+  for (const p of docs.payments ?? []) {
+    const sales = p.PaymentType === 'ACCRECPAYMENT';
+    // Only payments of invoices and bills; applying an overpayment or credit moves no money
+    if (p.Status !== 'AUTHORISED' || !p.PaymentID || (!sales && p.PaymentType !== 'ACCPAYPAYMENT')) continue;
+    const amount = pence(p.Amount);
+    const path = p.Invoice?.InvoiceID ? `/${sales ? 'AccountsReceivable' : 'AccountsPayable'}/View.aspx?InvoiceID=${p.Invoice.InvoiceID}` : undefined;
+    const description = p.Reference || 'Payment';
+    add(p, p.PaymentID, path, p.Account?.Code, sales ? amount : -amount, 0n, description);
+    add(p, p.PaymentID, path, sales ? control.debtors : control.creditors, sales ? -amount : amount, 0n, description);
+  }
+  for (const t of docs.transfers ?? []) {
+    if (!t.BankTransferID) continue;
+    const amount = pence(t.Amount);
+    add(t, t.BankTransferID, undefined, t.ToBankAccount?.Code, amount, 0n, 'Bank transfer');
+    add(t, t.BankTransferID, undefined, t.FromBankAccount?.Code, -amount, 0n, 'Bank transfer');
   }
   for (const mj of docs.journals) {
     if (mj.Status !== 'POSTED' || !mj.ManualJournalID) continue;
@@ -353,12 +425,17 @@ export function parseTransactions(engagementId: string, shortCode: string | null
 async function allPages(endpoint: string, key: string, token: string, tenantId: string, from: string, to: string): Promise<XeroDoc[]> {
   const dt = (d: string) => `DateTime(${d.replaceAll('-', ', ')})`;
   const where = encodeURIComponent(`Date >= ${dt(from)} && Date <= ${dt(to)}`);
+  const idOf = (d: XeroDoc) => d.InvoiceID ?? d.CreditNoteID ?? d.BankTransactionID ?? d.PaymentID ?? d.BankTransferID ?? d.ManualJournalID ?? JSON.stringify(d);
   const out: XeroDoc[] = [];
+  const seen = new Set<string>();
   for (let page = 1; page <= 50; page++) {
     const body = await xeroGet<Record<string, XeroDoc[]>>(`${API}/${endpoint}?where=${where}&page=${page}`, token, tenantId);
     const items = body[key] ?? [];
-    out.push(...items);
-    if (items.length < 100) break;
+    // Some endpoints ignore the page number and send everything again: stop when nothing is new
+    const fresh = items.filter((d) => !seen.has(idOf(d)));
+    fresh.forEach((d) => seen.add(idOf(d)));
+    out.push(...fresh);
+    if (items.length < 100 || !fresh.length) break;
   }
   return out;
 }
@@ -428,24 +505,35 @@ export async function pullTrialBalance(actor: Actor, engagementId: string): Prom
   if (!conn) throw new ServiceError('This client is not connected to Xero yet.', 409, 'XERO_NOT_CONNECTED');
 
   const token = await accessTokenFor(conn);
-  const [accounts, report] = await Promise.all([
+  const [accounts, report, priorReport] = await Promise.all([
     xeroGet<{ Accounts: XeroAccount[] }>(`${API}/Accounts`, token, conn.tenant_id),
     xeroGet<unknown>(`${API}/Reports/TrialBalance?date=${eng.period_end}`, token, conn.tenant_id),
+    // Comparatives are a nicety: the import still goes ahead without them
+    xeroGet<unknown>(`${API}/Reports/TrialBalance?date=${sameDayLastYear(eng.period_end)}`, token, conn.tenant_id).catch(() => null),
   ]);
-  const lines = parseTrialBalance(report, accounts.Accounts ?? []);
+  const current = parseTrialBalance(report, accounts.Accounts ?? []);
+  const lines = priorReport ? withComparatives(current, parseTrialBalance(priorReport, accounts.Accounts ?? [])) : current;
   const out = importTrialBalance(actor, engagementId, lines, 'xero');
   if (out.status >= 400) return out;
 
-  const [invoices, bank, journals] = await Promise.all([
-    allPages('Invoices', 'Invoices', token, conn.tenant_id, eng.period_start, eng.period_end),
-    allPages('BankTransactions', 'BankTransactions', token, conn.tenant_id, eng.period_start, eng.period_end),
-    allPages('ManualJournals', 'ManualJournals', token, conn.tenant_id, eng.period_start, eng.period_end),
-  ]);
+  const page = (endpoint: string) => allPages(endpoint, endpoint, token, conn.tenant_id, eng.period_start, eng.period_end);
+  const [invoices, bank, journals] = await Promise.all([page('Invoices'), page('BankTransactions'), page('ManualJournals')]);
+  // The rest are gathered in a second round (Xero allows five calls at once), and one that fails,
+  // e.g. a connection made before payments were requested, doesn't stop the pull
+  const notGathered: string[] = [];
+  const extra = (label: string, endpoint: string) =>
+    page(endpoint).catch(() => {
+      notGathered.push(label);
+      return [] as XeroDoc[];
+    });
+  const [creditNotes, payments, transfers] = await Promise.all([extra('credit notes', 'CreditNotes'), extra('payments', 'Payments'), extra('bank transfers', 'BankTransfers')]);
   const names = new Map((accounts.Accounts ?? []).filter((a) => a.Code).map((a) => [a.Code!, a.Name]));
-  const tx = parseTransactions(engagementId, conn.short_code, { invoices, bank, journals }, names);
+  const systemAccount = (name: string) => (accounts.Accounts ?? []).find((a) => a.SystemAccount === name)?.Code;
+  const tx = parseTransactions(engagementId, conn.short_code, { invoices, bank, journals, creditNotes, payments, transfers }, names, { debtors: systemAccount('DEBTORS'), creditors: systemAccount('CREDITORS') });
   // Replace this engagement's Xero transactions so a re-pull never doubles them up
   db.transactions = [...db.transactions.filter((t) => !(t.engagement_id === engagementId && t.source === 'Xero')), ...tx];
   out.body.transactionCount = tx.length;
+  if (notGathered.length) out.body.notGathered = notGathered;
   conn.last_synced_at = new Date().toISOString();
   return out;
 }

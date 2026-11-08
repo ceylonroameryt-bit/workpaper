@@ -94,6 +94,8 @@ export function firmSlice(state: State, firmId: string, userId?: string): State 
     ai_review_findings: rows(state, 'ai_review_findings').filter((f) => engIds.has(f.engagement_id)),
     schedule_versions: rows(state, 'schedule_versions').filter((v) => wpIds.has(v.workpaper_id)),
     checklist_items: rows(state, 'checklist_items').filter((c) => engIds.has(c.engagement_id)),
+    workflow_templates: rows(state, 'workflow_templates').filter((t) => t.firm_id === firmId),
+    engagement_workflows: rows(state, 'engagement_workflows').filter((w) => engIds.has(w.engagement_id)),
     statutory_notes: rows(state, 'statutory_notes').filter((n) => engIds.has(n.engagement_id)),
     transactions: rows(state, 'transactions').filter((t) => engIds.has(t.engagement_id)),
   };
@@ -154,7 +156,7 @@ export function checkRules(before: State, after: State, actor: Actor) {
   const archivedClients = new Set(rows(before, 'clients').filter((c) => c.archived_at).map((c) => c.id));
   for (const e of rows(before, 'engagements')) if (archivedClients.has(e.client_id)) stillLocked.add(e.id);
   const wpEng = new Map([...rows(before, 'workpapers'), ...rows(after, 'workpapers')].map((w) => [w.id, w.engagement_id]));
-  for (const k of ['workpapers', 'adjustments', 'account_mappings', 'tb_snapshots', 'signoffs', 'procedures', 'comments', 'transactions']) {
+  for (const k of ['workpapers', 'adjustments', 'account_mappings', 'tb_snapshots', 'signoffs', 'procedures', 'comments', 'transactions', 'engagement_workflows']) {
     const c = changed(rows(before, k), rows(after, k), k);
     for (const r of [...c.added, ...c.updated.map((u) => u.after), ...c.removed]) {
       const engId = r.engagement_id ?? wpEng.get(r.workpaper_id);
@@ -190,6 +192,14 @@ export function checkRules(before: State, after: State, actor: Actor) {
     }
   }
 
+  // Practice-wide workflow templates are for managers and above to create, change or remove
+  const wft = changed(rows(before, 'workflow_templates'), rows(after, 'workflow_templates'), 'workflow_templates');
+  if ((wft.added.length || wft.updated.length || wft.removed.length) && !MANAGER_UP.includes(actor.role)) deny('Only a manager or above can create or change a workflow.');
+
+  // Archiving or deleting a workflow on a client year is for managers and above too
+  const ewf = changed(rows(before, 'engagement_workflows'), rows(after, 'engagement_workflows'), 'engagement_workflows');
+  if ((ewf.removed.length || ewf.updated.length) && !MANAGER_UP.includes(actor.role)) deny('Only a manager or above can archive or delete a workflow.');
+
   // DAT-09: a practice rule only runs once a manager or above has approved it
   const rules = changed(rows(before, 'learned_rules'), rows(after, 'learned_rules'), 'learned_rules');
   for (const r of [...rules.added, ...rules.updated.map((u) => u.after)]) {
@@ -219,7 +229,7 @@ export function mergeFirmState(full: State, proposed: State, actor: Actor): Stat
   // Pin firm ownership on top-level records and drop anything that points outside the firm
   const pinned: State = {};
   for (const k of Object.keys(before)) pinned[k] = rows(proposed, k).map((r) => ({ ...r }));
-  for (const k of ['clients', 'engagements', 'mapping_lists', 'audit_logs']) {
+  for (const k of ['clients', 'engagements', 'mapping_lists', 'workflow_templates', 'audit_logs']) {
     for (const r of pinned[k]) r.firm_id = actor.firmId;
   }
   for (const k of SERVER_MANAGED) pinned[k] = before[k] ?? [];
@@ -241,7 +251,7 @@ export function mergeFirmState(full: State, proposed: State, actor: Actor): Stat
   pinned.blynt_accounts = [...chart, ...added];
 
   // Records whose ids belong to another firm cannot be claimed
-  for (const k of ['clients', 'engagements', 'mapping_lists']) {
+  for (const k of ['clients', 'engagements', 'mapping_lists', 'workflow_templates']) {
     const mine = ids(before[k]);
     const taken = new Set(rows(full, k).filter((r) => !mine.has(r.id)).map((r) => r.id));
     if (pinned[k].some((r) => taken.has(r.id))) deny('That record belongs to another firm.');

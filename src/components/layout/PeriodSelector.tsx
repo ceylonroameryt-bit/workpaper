@@ -7,6 +7,8 @@ import { useCompany } from '@/context/CompanyContext';
 import { db } from '@/lib/server/db';
 import { getCurrentUserId } from '@/lib/session';
 import { periodLabel } from '@/lib/periods';
+import { ChangePeriodDialog } from '@/components/layout/ChangePeriodDialog';
+import { ukDate } from '@/lib/dates';
 
 /**
  * Period selector (ENG-02): the active client's engagements, newest first. Choosing one opens
@@ -19,6 +21,7 @@ export const PeriodSelector: React.FC = () => {
   const pathname = usePathname() || '';
   const [open, setOpen] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [changing, setChanging] = useState(false);
   const [unlockReason, setUnlockReason] = useState('');
   const [unlockError, setUnlockError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -118,7 +121,7 @@ export const PeriodSelector: React.FC = () => {
                       <span>
                         <span className="block text-xs font-semibold text-[#122654]">{periodLabel(e)}</span>
                         <span className="block text-[11px] text-[#4A5878]">
-                          {e.period_start} to {e.period_end} · {e.status === 'locked' ? 'Locked' : e.status}
+                          {ukDate(e.period_start)} to {ukDate(e.period_end)} · {e.status === 'locked' ? 'Locked' : e.status}
                         </span>
                       </span>
                       {on && <Check className="w-3.5 h-3.5 text-[#1D4E89] shrink-0" />}
@@ -129,7 +132,19 @@ export const PeriodSelector: React.FC = () => {
               {!periods.length && <li className="px-2.5 py-2 text-xs text-[#4A5878]">No engagements for this client yet.</li>}
             </ul>
 
-            <div className="mt-2 pt-3 border-t border-[#E3E7EF]">
+            <div className="mt-2 pt-3 border-t border-[#E3E7EF] flex flex-wrap items-center justify-between gap-2">
+              {activeEngagement && !isLocked && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    setChanging(true);
+                  }}
+                  className="text-xs font-semibold text-[#1D4E89] hover:underline cursor-pointer"
+                >
+                  Change period
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -144,6 +159,17 @@ export const PeriodSelector: React.FC = () => {
           </div>
         )}
       </div>
+
+      {changing && activeEngagement && (
+        <ChangePeriodDialog
+          engagement={activeEngagement}
+          onClose={() => setChanging(false)}
+          onSaved={() => {
+            setChanging(false);
+            refreshCompanyData();
+          }}
+        />
+      )}
 
       {/* Unlock Confirmation Modal (ENG-06) */}
       {showUnlockModal && (

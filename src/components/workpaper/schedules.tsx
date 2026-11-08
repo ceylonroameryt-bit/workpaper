@@ -6,6 +6,7 @@ import { asPence, formatPence } from '@/lib/money';
 import type { Attachment } from '@/lib/types/models';
 import type { PaperResult } from '@/lib/workpapers/engine';
 import { MoneyInput, TextInput, RowFiles, AddOption, fmtTb } from './parts';
+import { ukDate } from '@/lib/dates';
 
 export interface ScheduleProps {
   data: Record<string, any>;
@@ -643,7 +644,7 @@ export function AssetsSchedule({ data, result, locked, save, filesFor, attachTo,
                       {prop.vendor} • {prop.description}
                     </div>
                     <div className="text-[11px] text-[#4A5878] font-mono mt-0.5">
-                      Inv #{prop.invoice_number} • Date: {prop.date} • Amount: {formatPence(BigInt(prop.amount_p))}
+                      Inv #{prop.invoice_number} • Date: {ukDate(prop.date)} • Amount: {formatPence(BigInt(prop.amount_p))}
                     </div>
                   </div>
 

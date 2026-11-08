@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
   AlertTriangle,
   CheckCircle2,
   Lock,
+  Plus,
   ChevronDown,
   ChevronRight,
   Search,
@@ -17,7 +18,8 @@ import {
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
 import { formatPence } from '@/lib/money';
-import { templateFor } from '@/lib/workpapers/templates';
+import { TEMPLATES, packFor, templateOf } from '@/lib/workpapers/templates';
+import { CustomPaperDialog } from '@/components/workpaper/CustomPaperDialog';
 import { evaluatePaper, paperStatus } from '@/lib/workpapers/engine';
 import { getActor } from '@/lib/session';
 
@@ -44,8 +46,18 @@ interface ScheduleItem {
   };
 }
 
+const SECTIONS = [
+  { id: 'leads', label: 'Lead schedules (WPS-04)' },
+  { id: 'balance_sheet', label: 'Balance sheet' },
+  { id: 'pnl', label: 'Profit and loss' },
+  { id: 'tax', label: 'Taxation' },
+  { id: 'disclosures', label: 'Disclosures & notes (STD-04)' },
+  { id: 'completion', label: 'Completion (REV-05)' },
+] as const;
+
 const SECTION_OF = (ref: string): ScheduleItem['section'] =>
-  ref === 'A-10' ? 'leads' : ref === 'Z-10' ? 'completion' : ref === 'Z-20' || ref.startsWith('R') ? 'disclosures' : ref.startsWith('T') ? 'tax' : ref.startsWith('I') || ref.startsWith('P') ? 'pnl' : 'balance_sheet';
+  ref === 'A-10' ? 'leads' : ['Z-10', 'Z-30', 'Z-40'].includes(ref) ? 'completion' : ref === 'Z-20' || ref.startsWith('R') ? 'disclosures' : ref.startsWith('T') ? 'tax' : ref.startsWith('I') || ref.startsWith('P') ? 'pnl' : 'balance_sheet';
+const customSection = (leads: { code: string }[]): ScheduleItem['section'] => (!leads.length ? 'completion' : Number(leads[0].code) < 600 ? 'pnl' : 'balance_sheet');
 const initials = (name: string) => name.split(' ').map((n) => n[0]).join('').slice(0, 3).toUpperCase();
 
 /** One index row per paper: TB balance, schedule, difference and status from the engine (WPS-02, WPS-04). */
@@ -53,7 +65,7 @@ function buildSchedules(engagementId: string): ScheduleItem[] {
   return db.workpapers
     .filter((w) => w.engagement_id === engagementId)
     .map((wp) => {
-      const t = templateFor(wp.ref);
+      const t = templateOf(wp);
       const r = evaluatePaper(wp);
       const sign = t?.creditArea ? -1n : 1n;
       const tb = sign * (r?.leads.reduce((a, l) => a + l.final, 0n) ?? 0n);
@@ -68,10 +80,10 @@ function buildSchedules(engagementId: string): ScheduleItem[] {
         code: t?.recRef ?? wp.ref,
         ref: wp.ref,
         title: t?.title ?? wp.ref,
-        section: SECTION_OF(wp.ref),
+        section: wp.custom_template ? customSection(wp.custom_template.leads) : SECTION_OF(wp.ref),
         templateName: wp.data_json.active_template_title || 'Default template',
         tbBalancePence: tb,
-        scheduleBalancePence: tb + sign * diff,
+        scheduleBalancePence: tb + diff,
         differencePence: diff,
         priorYearPence: prior,
         status: ['not_started', 'in_progress', 'unreconciled', 'reconciled', 'prepared', 'reviewed', 'approved'].includes(status) ? status : 'in_progress',
@@ -101,6 +113,7 @@ export default function WorkingPaperIndexPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedScheduleIds, setSelectedScheduleIds] = useState<Set<string>>(new Set());
   const [collapsedNa, setCollapsedNa] = useState<boolean>(true);
+  const [creatingPaper, setCreatingPaper] = useState(false);
 
   // Rows come from this engagement's papers (created from the client's standard and profile)
   const [rev, setRev] = useState(0);
@@ -126,7 +139,6 @@ export default function WorkingPaperIndexPage() {
   };
   const schedules = useMemo(() => buildSchedules(engagementId), [engagementId, rev]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [sectionFilter, setSectionFilter] = useState<'all' | 'leads' | 'balance_sheet' | 'pnl' | 'tax' | 'disclosures' | 'completion'>('all');
   const [pendingUntick, setPendingUntick] = useState<ScheduleItem | null>(null);
   const [untickReason, setUntickReason] = useState<string>('');
 
@@ -179,7 +191,6 @@ export default function WorkingPaperIndexPage() {
         s.ref.toLowerCase().includes(searchQuery.toLowerCase());
       if (!matchSearch) return false;
 
-      if (sectionFilter !== 'all' && s.section !== sectionFilter) return false;
       if (statusFilter !== 'all' && s.status !== statusFilter) return false;
 
       if (flagFilter === 'ai_warning' && !s.flags.aiWarning) return false;
@@ -188,7 +199,31 @@ export default function WorkingPaperIndexPage() {
 
       return true;
     });
-  }, [applicableSchedules, searchQuery, sectionFilter, statusFilter, flagFilter]);
+  }, [applicableSchedules, searchQuery, statusFilter, flagFilter]);
+
+  const engagement = db.engagements.find((e) => e.id === engagementId);
+  const isLocked = engagement?.status === 'locked';
+
+  // Standard papers not in this file yet. Only those that suit the client's type of business are offered
+  // (a sole trader is not offered share capital); "Show all" lists the rest. Narrowed by the same search.
+  const clientType = db.clients.find((c) => c.id === engagement?.client_id)?.company_type;
+  const suited = new Set(packFor(clientType));
+  const [showAllPapers, setShowAllPapers] = useState(false);
+  const notInFileAll = TEMPLATES.filter((t) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      !schedules.some((s) => s.ref === t.ref) &&
+      (t.title.toLowerCase().includes(q) || t.ref.toLowerCase().includes(q))
+    );
+  });
+  const notInFile = showAllPapers ? notInFileAll : notInFileAll.filter((t) => suited.has(t.ref));
+  const hiddenCount = notInFileAll.length - notInFileAll.filter((t) => suited.has(t.ref)).length;
+
+  const addPaper = (ref: string) => {
+    const wp = db.addWorkpaper(engagementId, ref);
+    if (engagement) db.logAudit(engagement.firm_id, getActor(), 'ADD_WORKPAPER', 'workpapers', wp?.id ?? ref, null, { ref });
+    setRev((r) => r + 1);
+  };
 
   // Statistics
   const totalApplicable = applicableSchedules.length;
@@ -283,32 +318,6 @@ export default function WorkingPaperIndexPage() {
         </div>
       </div>
 
-      {/* Standard Sections Navigation (WPS-01) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-[#E3E7EF]">
-        {[
-          { id: 'all', label: 'All schedules' },
-          { id: 'leads', label: 'Lead schedules (WPS-04)' },
-          { id: 'balance_sheet', label: 'Balance sheet' },
-          { id: 'pnl', label: 'Profit and loss' },
-          { id: 'tax', label: 'Taxation' },
-          { id: 'disclosures', label: 'Disclosures & notes (STD-04)' },
-          { id: 'completion', label: 'Completion (REV-05)' },
-        ].map((sec) => (
-          <button
-            key={sec.id}
-            type="button"
-            onClick={() => setSectionFilter(sec.id as any)}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-xl transition-all shrink-0 cursor-pointer ${
-              sectionFilter === sec.id
-                ? 'bg-[#122654] text-white shadow-xs'
-                : 'text-[#4A5878] hover:bg-[#F5F8FD] hover:text-[#122654]'
-            }`}
-          >
-            {sec.label}
-          </button>
-        ))}
-      </div>
-
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-[14px] border border-[#E3E7EF] shadow-2xs">
         <div className="flex flex-wrap items-center gap-2.5">
@@ -348,6 +357,17 @@ export default function WorkingPaperIndexPage() {
             <option value="changed">Changed after review/reconcile</option>
           </select>
         </div>
+
+        {!isLocked && (
+          <button
+            type="button"
+            onClick={() => setCreatingPaper(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#D3DCEE] hover:border-[#A6B4D0] text-[#122654] text-xs font-bold rounded-lg cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Custom working paper</span>
+          </button>
+        )}
 
         {/* REV-01: bulk review, one server sign-off per schedule, each checked and logged */}
         {selectedScheduleIds.size > 0 && ['reviewer', 'manager', 'partner', 'admin'].includes(getActor().role) && (
@@ -404,13 +424,28 @@ export default function WorkingPaperIndexPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E3E7EF] text-xs text-[#122654]">
-              {filteredApplicable.map((schedule) => {
+              {[...filteredApplicable]
+                .sort(
+                  (a, b) =>
+                    SECTIONS.findIndex((x) => x.id === a.section) - SECTIONS.findIndex((x) => x.id === b.section) ||
+                    a.ref.localeCompare(b.ref, undefined, { numeric: true })
+                )
+                .map((schedule, i, list) => {
                 const isSelected = selectedScheduleIds.has(schedule.id);
                 const hasDiff = schedule.differencePence !== 0n;
+                const startsSection = i === 0 || list[i - 1].section !== schedule.section;
 
                 return (
+                  <React.Fragment key={schedule.id}>
+                  {startsSection && (
+                    <tr className="bg-[#F5F8FD]">
+                      <th scope="colgroup" colSpan={11} className="py-2 px-4 text-left text-[11px] font-bold uppercase tracking-wider text-[#4A5878]">
+                        {SECTIONS.find((x) => x.id === schedule.section)?.label}
+                        <span className="ml-2 font-normal normal-case tracking-normal text-[#7E8DA6]">{list.filter((x) => x.section === schedule.section).length}</span>
+                      </th>
+                    </tr>
+                  )}
                   <tr
-                    key={schedule.id}
                     className={`hover:bg-[#F5F8FD]/80 transition-colors ${
                       isSelected ? 'bg-purple-50/40' : ''
                     }`}
@@ -560,11 +595,38 @@ export default function WorkingPaperIndexPage() {
                       </Link>
                     </td>
                   </tr>
+                  </React.Fragment>
                 );
               })}
             </tbody>
           </table>
         </div>
+
+        {(notInFile.length > 0 || hiddenCount > 0) && (
+          <div className="border-t border-[#E3E7EF] px-5 py-3">
+            <h2 className="text-xs font-bold text-[#4A5878] pb-1.5">
+              {showAllPapers ? 'Not in this file' : `Not in this file${clientType ? `, for a ${clientType}` : ''}`} ({notInFile.length})
+            </h2>
+            <ul className="grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+              {notInFile.map((t) => (
+                <li key={t.ref} className="flex items-center gap-3 py-1.5 border-b border-[#E3E7EF] text-xs text-[#4A5878]">
+                  <span className="font-mono font-bold w-10 shrink-0">{t.ref}</span>
+                  <span className="flex-1 min-w-0">{t.title}</span>
+                  {!isLocked && (
+                    <button type="button" onClick={() => addPaper(t.ref)} aria-label={`Add ${t.ref} ${t.title}`} className="inline-flex items-center gap-1 font-bold text-[#1D4E89] hover:underline cursor-pointer">
+                      <Plus className="w-3 h-3" /> Add
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {hiddenCount > 0 && (
+              <button type="button" onClick={() => setShowAllPapers((v) => !v)} className="mt-2 text-xs font-semibold text-[#1D4E89] hover:underline cursor-pointer">
+                {showAllPapers ? 'Show only papers for this type of business' : `Show all standard papers (${hiddenCount} more)`}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Collapsed Not Applicable Section (WPS-03) */}
         {naSchedules.length > 0 && (
@@ -627,6 +689,19 @@ export default function WorkingPaperIndexPage() {
           </div>
         )}
       </div>
+
+      {creatingPaper && engagement && (
+        <CustomPaperDialog
+          engagementId={engagementId}
+          firmId={engagement.firm_id}
+          clientId={engagement.client_id}
+          onClose={() => setCreatingPaper(false)}
+          onCreated={() => {
+            setCreatingPaper(false);
+            setRev((r) => r + 1);
+          }}
+        />
+      )}
 
       {/* Untick Schedule Dialog with Manager Approval Notice (WPS-03) */}
       {pendingUntick && (

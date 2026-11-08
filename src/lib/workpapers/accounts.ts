@@ -12,6 +12,8 @@ export interface AccountsLine {
   amount: bigint; // shown sign: income, liabilities and capital are positive
   prior: bigint | null;
   accounts: { code: string; name: string; amount: bigint }[];
+  /** Every account with a figure this year or last, for the analytical reviews */
+  review: { code: string; name: string; amount: bigint; prior: bigint | null }[];
 }
 
 export interface Accounts {
@@ -82,12 +84,14 @@ export function buildAccounts(engagementId: string): Accounts {
     const section = sectionOf(code, label);
     const sign = CREDIT_SHOWN.includes(section) ? -1n : 1n;
     const key = `${section}|${label}`;
-    if (!groups.has(key)) groups.set(key, { section, order: Number(code), line: { label, amount: 0n, prior: prev ? 0n : null, accounts: [] } });
+    if (!groups.has(key)) groups.set(key, { section, order: Number(code), line: { label, amount: 0n, prior: prev ? 0n : null, accounts: [], review: [] } });
     const g = groups.get(key)!;
     const amount = (cur.by.get(code) ?? 0n) * sign;
     g.line.amount += amount;
     if (prev) g.line.prior = (g.line.prior ?? 0n) + (prev.by.get(code) ?? 0n) * sign;
     if (amount !== 0n) g.line.accounts.push({ code, name: acc?.name ?? code, amount });
+    const priorAmount = prev ? (prev.by.get(code) ?? 0n) * sign : null;
+    if (amount !== 0n || (priorAmount ?? 0n) !== 0n) g.line.review.push({ code, name: acc?.name ?? code, amount, prior: priorAmount });
   }
 
   const nonZero = (l: AccountsLine) => l.amount !== 0n || (l.prior ?? 0n) !== 0n;

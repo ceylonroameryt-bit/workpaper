@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Clock,
-  MessageSquare,
+  Check,
+  Clock,  MessageSquare,
   TableProperties,
   CheckCircle2,
   Calendar,
@@ -17,11 +17,10 @@ import {
   Upload,
   Send,
   Building2,
-  FileCheck2,
   Lock,
-  FileSpreadsheet,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
+import { WorkflowCards } from '@/components/workflow/WorkflowCards';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 import { CompanySelector } from '@/components/layout/CompanySelector';
@@ -36,13 +35,6 @@ export default function PracticeHomePage() {
 
   // Scoped metrics for active selected company
   const companyEng = activeEngagement;
-  const companyMaps = companyEng ? db.account_mappings.filter((m) => m.engagement_id === companyEng.id) : [];
-  const companyUnmapped = companyMaps.filter((m) => m.status !== 'confirmed').length;
-  const companyPapers = companyEng ? db.workpapers.filter((w) => w.engagement_id === companyEng.id) : [];
-  const companyPrepared = companyPapers.filter((w) => w.status === 'prepared' || w.status === 'signed_off').length;
-  const companyNotes = companyEng
-    ? db.comments.filter((c) => c.type === 'review_note' && c.status === 'open' && companyPapers.some((p) => p.id === c.workpaper_id)).length
-    : 0;
 
   // All figures and counts strictly derived from live data (Ground Rule 2)
   const engagementsInProgress = db.engagements.filter((e) => e.status !== 'locked');
@@ -449,150 +441,10 @@ export default function PracticeHomePage() {
             </div>
           </div>
 
-          {/* Company-Specific 6 Modules / Options Grid */}
           <div className="mt-5">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#4A5878] mb-3 flex items-center justify-between">
-              <span>Working Paper Modules for {activeCompany.name}</span>
-              <span className="text-[#FF7A66] font-bold">Statutory Workflow</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {/* 1 Import Data */}
-              <Link
-                href={`/engagements/${companyEng.id}/import`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#122654] hover:shadow-sm transition-all group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#EAF5FC] text-[#1D4E89] flex items-center justify-center mb-2">
-                    <Upload className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
-                    1. Import TB
-                  </div>
-                  <p className="text-[10px] text-[#4A5878] mt-0.5 line-clamp-1">
-                    Upload trial balance
-                  </p>
-                </div>
-                <div className="text-[10px] font-semibold text-[#1D4E89] mt-2 flex items-center gap-1">
-                  <span>Open</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
-
-              {/* 2 Account Mapping */}
-              <Link
-                href={`/engagements/${companyEng.id}/mapping`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#FF7A66] hover:shadow-sm transition-all group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#FFF1EE] text-[#A23A27] flex items-center justify-center mb-2">
-                    <TableProperties className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
-                    2. Map Accounts
-                  </div>
-                  <p className="text-[10px] text-[#4A5878] mt-0.5">
-                    {companyUnmapped > 0 ? (
-                      <span className="text-[#B8432F] font-bold">{companyUnmapped} unmapped</span>
-                    ) : (
-                      'All mapped'
-                    )}
-                  </p>
-                </div>
-                <div className="text-[10px] font-semibold text-[#A23A27] mt-2 flex items-center gap-1">
-                  <span>Review</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
-
-              {/* 3 Trial Balance & Leads */}
-              <Link
-                href={`/engagements/${companyEng.id}/trial-balance`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#122654] hover:shadow-sm transition-all group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#F5F8FD] text-[#122654] flex items-center justify-center mb-2">
-                    <FileSpreadsheet className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
-                    3. Trial Balance
-                  </div>
-                  <p className="text-[10px] text-[#4A5878] mt-0.5 line-clamp-1">
-                    Lead schedules A–Z
-                  </p>
-                </div>
-                <div className="text-[10px] font-semibold text-[#122654] mt-2 flex items-center gap-1">
-                  <span>View</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
-
-              {/* 4 Working Papers Index (WPS) */}
-              <Link
-                href={`/engagements/${companyEng.id}/workpapers`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#0B6B52] hover:shadow-sm transition-all group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#E6F4EF] text-[#0B6B52] flex items-center justify-center mb-2">
-                    <FileCheck2 className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
-                    4. Workpapers
-                  </div>
-                  <p className="text-[10px] text-[#4A5878] mt-0.5">
-                    {companyPrepared}/{companyPapers.length} prepared
-                  </p>
-                </div>
-                <div className="text-[10px] font-semibold text-[#0B6B52] mt-2 flex items-center gap-1">
-                  <span>F-10 / B-10</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
-
-              {/* 5 Sign-off & Lock */}
-              <Link
-                href={`/engagements/${companyEng.id}/sign-off`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#122654] hover:shadow-sm transition-all group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#F5F8FD] text-[#122654] flex items-center justify-center mb-2">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
-                    5. Sign-off &amp; Lock
-                  </div>
-                  <p className="text-[10px] text-[#4A5878] mt-0.5 line-clamp-1">
-                    Partner lock status
-                  </p>
-                </div>
-                <div className="text-[10px] font-semibold text-[#122654] mt-2 flex items-center gap-1">
-                  <span>Sign</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
-
-              {/* Review Notes */}
-              <Link
-                href={`/engagements/${companyEng.id}/review`}
-                className="p-3 rounded-xl bg-white border border-[#E3E7EF] hover:border-[#FF7A66] hover:shadow-sm transition-all group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-8 h-8 rounded-lg bg-[#FFF4DB] text-[#6B4700] flex items-center justify-center mb-2">
-                    <MessageSquare className="w-4 h-4" />
-                  </div>
-                  <div className="text-xs font-bold text-[#122654] group-hover:text-[#B8432F] transition-colors">
-                    Review Notes
-                  </div>
-                  <p className="text-[10px] text-[#4A5878] mt-0.5">
-                    {companyNotes > 0 ? `${companyNotes} open notes` : 'No open notes'}
-                  </p>
-                </div>
-                <div className="text-[10px] font-semibold text-[#6B4700] mt-2 flex items-center gap-1">
-                  <span>Review</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
-            </div>
+            <WorkflowCards
+              engagementIds={db.engagements.filter((e) => e.client_id === companyEng.client_id).sort((x, y) => y.period_end.localeCompare(x.period_end)).map((e) => e.id)}
+            />
           </div>
         </div>
       )}

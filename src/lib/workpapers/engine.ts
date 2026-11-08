@@ -1,7 +1,8 @@
 import { db } from '../server/db';
 import { asPence, formatPence } from '../money';
-import { TemplateDef, blankPaperData, templateFor } from './templates';
+import { TemplateDef, blankPaperData, templateFor, templateOf } from './templates';
 import { JOURNAL_IN_TB, type Workpaper } from '../types/models';
+import { analyticalReview, analyticalRows } from './analytical';
 
 /**
  * Calculations for every working paper: lead figures from the Blynt chart,
@@ -33,6 +34,7 @@ export interface Anchor {
 }
 
 export interface PaperResult {
+  engagementId: string;
   template: TemplateDef;
   leads: LeadFigure[];
   checks: PaperCheck[];
@@ -90,7 +92,7 @@ export function linkedFiles(workpaperId: string, rowId: string) {
 }
 
 export function evaluatePaper(wp: Workpaper): PaperResult | null {
-  const t = templateFor(wp.ref);
+  const t = templateOf(wp);
   if (!t) return null;
   const data = wp.data_json as Record<string, any>;
   const leads = leadFigures(wp.engagement_id, t);
@@ -535,11 +537,42 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
         }.${t.materiality && totals.materiality ? ` Materiality is set at ${formatPence(totals.materiality)}.` : ''}`;
   }
 
+  if (t.kind === 'analytical') {
+    const review = analyticalReview(wp.engagement_id, t.analyticalView ?? 'pl', data);
+    const comments: Record<string, string> = data.comments ?? {};
+    const rows = analyticalRows(review);
+    const significant = rows.filter((r) => r.significant);
+    const missing = significant.filter((r) => !comments[r.key]?.trim());
+    rows.forEach((r) => anchors.push({ id: r.key, label: r.name }));
+    checks.push({ id: 'figures', label: 'There are confirmed figures to review', detail: rows.length ? `${rows.length} lines with figures.` : 'Import the trial balance and confirm the mappings.', passed: rows.length > 0 });
+    checks.push({ id: 'all_mapped', label: 'Every balance is confirmed to an account', detail: review.unmappedPence === 0n ? 'Nothing unconfirmed.' : `${formatPence(review.unmappedPence)} is not confirmed yet, so these figures may change.`, passed: review.unmappedPence === 0n });
+    checks.push({ id: 'explained', label: 'Flagged variances explained', detail: missing.length ? `${missing.length} of ${significant.length} still need an explanation.` : `${significant.length} flagged, all explained.`, passed: missing.length === 0 });
+    draft = rows.length && review.hasPrior && !missing.length ? `Figures were compared with the prior year. ${significant.length ? `${significant.length} flagged variance(s) were explained.` : 'No variance reached the flag settings.'}` : '';
+  }
+
+  if (t.kind === 'statutory') {
+    const officers: any[] = data.officers ?? [];
+    const directors = officers.filter((o) => o.is_director && !o.resigned);
+    const holders = officers.filter((o) => o.is_shareholder);
+    const noShares = holders.filter((o) => !(Number(o.shares) > 0));
+    const badDates = officers.filter((o) => o.appointed && o.resigned && o.resigned < o.appointed);
+    const unnamed = officers.filter((o) => !o.surname?.trim());
+    const shares = holders.reduce((sum, o) => sum + BigInt(/^\d+$/.test(o.shares ?? '') ? o.shares : 0), 0n);
+    totals.shares = shares;
+    officers.forEach((o) => anchors.push({ id: o.id, label: [o.first_name, o.surname].filter(Boolean).join(' ') || 'Person' }));
+    checks.push({ id: 'director', label: 'At least one director in office', detail: `${directors.length} director(s) in office.`, passed: directors.length > 0 });
+    checks.push({ id: 'shareholder', label: 'At least one shareholder recorded', detail: `${holders.length} shareholder(s).`, passed: holders.length > 0 });
+    checks.push({ id: 'shares', label: 'Every shareholder has a number of shares', detail: noShares.length ? `${noShares.length} shareholder(s) have no shares entered.` : 'All entered.', passed: noShares.length === 0 });
+    checks.push({ id: 'names', label: 'Everyone has a surname', detail: unnamed.length ? `${unnamed.length} row(s) have no surname.` : 'All named.', passed: unnamed.length === 0 });
+    checks.push({ id: 'dates', label: 'Resignation dates follow appointment dates', detail: badDates.length ? `${badDates.length} row(s) to correct.` : 'No conflicts.', passed: badDates.length === 0 });
+    draft = directors.length && holders.length ? `${directors.length} director(s) in office and ${holders.length} shareholder(s) holding ${shares.toLocaleString('en-GB')} shares are recorded.` : '';
+  }
+
   // Explanations entered by the preparer clear a failing check for sign-off purposes
   const explanations: Record<string, string> = data.explanations ?? {};
   for (const c of checks) if (!c.passed && explanations[c.id]?.trim()) c.explanation = explanations[c.id];
 
-  return { template: t, leads, checks, anchors, draftConclusion: draft, totals };
+  return { engagementId: wp.engagement_id, template: t, leads, checks, anchors, draftConclusion: draft, totals };
 }
 
 // Statuses the engine works out; anything else (prepared, signed off, stale…) is set by people
@@ -558,7 +591,7 @@ export function toleranceFor(engagementId: string): bigint {
  */
 export function paperStatus(wp: Workpaper): Workpaper['status'] {
   if (!COMPUTED.includes(wp.status)) return wp.status;
-  const t = templateFor(wp.ref);
+  const t = templateOf(wp);
   if (!t) return wp.status;
   const started = JSON.stringify(wp.data_json) !== JSON.stringify(blankPaperData(t));
   if (!started) return 'not_started';

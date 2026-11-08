@@ -11,8 +11,6 @@ import {
   MessageSquare,
   History,
   Plus,
-  PanelLeftClose,
-  PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
   FileText,
@@ -32,7 +30,7 @@ import { getActor } from '@/lib/session';
 import { StatusBadge } from '@/components/ui/StatusPill';
 import { evaluatePaper, levelsFor, linkedFiles, paperStatus } from '@/lib/workpapers/engine';
 import { diffData } from '@/lib/workpapers/diff';
-import { TEMPLATES, templateFor } from '@/lib/workpapers/templates';
+import { TEMPLATES, templateFor, templateOf } from '@/lib/workpapers/templates';
 import type { Attachment, AttachmentCategory } from '@/lib/types/models';
 import {
   Section,
@@ -64,6 +62,7 @@ import {
   LoansSchedule,
   TaxSchedule,
 } from '@/components/workpaper/schedules';
+import { AnalyticalSchedule, StatutorySchedule } from '@/components/workpaper/review-schedules';
 
 const ROLE_ORDER = ['preparer', 'reviewer', 'partner'] as const;
 type SignRole = (typeof ROLE_ORDER)[number];
@@ -105,30 +104,17 @@ export default function WorkpaperPage() {
   const fileInput = useRef<HTMLInputElement | null>(null);
   const pendingRow = useRef<string | null>(null);
 
-  const [showPaperNav, setShowPaperNav] = useState(true);
   const [showComments, setShowComments] = useState(true);
 
   // Sync panel visibility preferences with localStorage
   useEffect(() => {
     try {
-      const navStored = localStorage.getItem('blynt_wp_show_nav');
-      if (navStored !== null) setShowPaperNav(navStored === 'true');
       const commentsStored = localStorage.getItem('blynt_wp_show_comments');
       if (commentsStored !== null) setShowComments(commentsStored === 'true');
     } catch {
       // ignore
     }
   }, []);
-
-  const togglePaperNav = () => {
-    setShowPaperNav((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem('blynt_wp_show_nav', String(next));
-      } catch {}
-      return next;
-    });
-  };
 
   const toggleComments = () => {
     setShowComments((prev) => {
@@ -500,25 +486,24 @@ export default function WorkpaperPage() {
   };
 
   const anyScheduleInput = JSON.stringify(data).match(/"[1-9]\d*"/) !== null || attachments.length > 0;
+  const outstanding = openChecks.length + pending.length;
   const states: { id: string; label: string; state: SectionState; extra?: string }[] = [
-    { id: 'objective', label: 'Objective', state: data.objective?.trim() ? 'done' : 'todo' },
-    { id: 'leads', label: 'Lead figures', state: result.leads.length === 0 ? 'done' : leadsAgreed ? 'done' : 'attention' },
-    { id: 'schedule', label: 'Schedule', state: openChecks.length === 0 ? 'done' : anyScheduleInput ? 'progress' : 'todo' },
-    { id: 'checks', label: 'Checks', state: openChecks.length ? 'attention' : 'done' },
+    { id: 'figures', label: 'Figures', state: !leadsAgreed ? 'attention' : openChecks.length === 0 ? 'done' : anyScheduleInput ? 'progress' : 'todo' },
     {
-      id: 'procedures',
-      label: 'Procedures',
-      state: pending.length === 0 ? 'done' : pending.length < procedures.length ? 'progress' : 'todo',
-      extra: `${procedures.length - pending.length}/${procedures.length}`,
+      id: 'checks',
+      label: 'Checks',
+      state: openChecks.length ? 'attention' : pending.length === 0 ? 'done' : pending.length < procedures.length ? 'progress' : 'todo',
+      extra: outstanding ? `${outstanding} to do` : undefined,
     },
     { id: 'evidence', label: 'Evidence', state: attachments.length ? 'done' : 'todo', extra: String(attachments.length) },
-    { id: 'conclusion', label: 'Conclusion', state: conclusionText.trim() ? 'done' : 'todo' },
     {
       id: 'signoff',
-      label: 'Sign-off',
-      state: latestSignoff('partner') || latestSignoff('reviewer') ? 'done' : latestSignoff('preparer') ? 'progress' : 'todo',
+      label: 'Conclude and sign off',
+      state: latestSignoff('partner') || latestSignoff('reviewer') ? 'done' : latestSignoff('preparer') || conclusionText.trim() ? 'progress' : 'todo',
     },
   ];
+  // Accounts with nothing on them this year or last only add noise to the lead table
+  const shownLeads = result.leads.filter((l) => l.mapped || l.final !== 0n || (l.prior ?? 0n) !== 0n);
   const stateOf = (id: string) => states.find((s) => s.id === id)!.state;
 
   // Latest data for this paper; writes build on it so quick edits never overwrite each other
@@ -567,7 +552,6 @@ export default function WorkpaperPage() {
     .sort((a, b) => b.at.localeCompare(a.at))
     .slice(0, 60);
 
-  const areas = Array.from(new Set(papers.map((p) => p.ref.charAt(0))));
   const missingRefs = TEMPLATES.filter((tp) => !papers.some((p) => p.ref === tp.ref));
   const botDraft = !data.conclusion?.bot_dismissed && !conclusionText.trim() ? result.draftConclusion : '';
 
@@ -754,19 +738,6 @@ export default function WorkpaperPage() {
             <div className="inline-flex items-center bg-[#F5F8FD] p-0.5 rounded-[8px] border border-[#D3DCEE]">
               <button
                 type="button"
-                onClick={togglePaperNav}
-                className={`min-h-[32px] px-2.5 inline-flex items-center gap-1.5 text-xs font-bold rounded-[6px] transition-colors ${
-                  showPaperNav
-                    ? 'bg-white text-[#122654] shadow-sm'
-                    : 'text-[#4A5878] hover:text-[#122654] hover:bg-white/60'
-                }`}
-                title={showPaperNav ? 'Hide paper index (collapse left)' : 'Show paper index'}
-              >
-                {showPaperNav ? <PanelLeftClose className="w-3.5 h-3.5 text-[#FF7A66]" /> : <PanelLeftOpen className="w-3.5 h-3.5 text-[#4A5878]" />}
-                <span>{showPaperNav ? 'Hide index' : 'Papers'}</span>
-              </button>
-              <button
-                type="button"
                 onClick={toggleComments}
                 className={`min-h-[32px] px-2.5 inline-flex items-center gap-1.5 text-xs font-bold rounded-[6px] transition-colors ${
                   showComments
@@ -903,16 +874,10 @@ export default function WorkpaperPage() {
 
       <div
         className={`grid gap-5 transition-all ${
-          showPaperNav && showComments
-            ? 'grid-cols-1 xl:grid-cols-[200px_minmax(0,1fr)_320px]'
-            : showPaperNav && !showComments
-            ? 'grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)]'
-            : !showPaperNav && showComments
-            ? 'grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px]'
-            : 'grid-cols-1'
+          showComments ? 'grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px]' : 'grid-cols-1'
         }`}
       >
-        {/* Paper navigator: a compact picker on smaller screens, the full list on wide ones */}
+        {/* On smaller screens, where the previous and next buttons are harder to use */}
         <label className="xl:hidden flex items-center gap-2 text-xs">
           <span className="font-bold text-[#122654] whitespace-nowrap">Jump to paper</span>
           <select
@@ -933,7 +898,7 @@ export default function WorkpaperPage() {
           >
             {papers.map((p) => (
               <option key={p.id} value={p.id}>
-                {STATUS_SYMBOL[p.status] ?? '○'} {p.ref} {templateFor(p.ref)?.title}
+                {STATUS_SYMBOL[p.status] ?? '○'} {p.ref} {templateOf(p)?.title}
               </option>
             ))}
             {!isLocked && missingRefs.length > 0 && (
@@ -947,70 +912,6 @@ export default function WorkpaperPage() {
             )}
           </select>
         </label>
-        {showPaperNav && (
-          <aside className="hidden xl:block blynt-card p-3 h-fit xl:sticky xl:top-20 text-xs">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#E3E7EF]">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#7E8DA6]">Papers Index</span>
-              <button
-                type="button"
-                onClick={togglePaperNav}
-                className="p-1 text-[#7E8DA6] hover:text-[#122654] hover:bg-[#F5F8FD] rounded-[6px] transition-colors"
-                title="Hide paper index"
-                aria-label="Hide paper index"
-              >
-                <PanelLeftClose className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            {areas.map((a) => (
-              <div key={a} className="mb-2">
-                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#7E8DA6]">
-                  {a} {templateFor(papers.find((p) => p.ref.startsWith(a))!.ref)?.areaName}
-                </div>
-                {papers
-                  .filter((p) => p.ref.startsWith(a))
-                  .map((p) => (
-                    <Link
-                      key={p.id}
-                      href={`/engagements/${engagementId}/workpapers/${p.id}`}
-                      className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded-[8px] ${
-                        p.id === workpaper.id ? 'bg-[#122654] text-white font-bold' : 'text-[#122654] hover:bg-[#F5F8FD]'
-                      }`}
-                    >
-                      <span className="truncate">
-                        <span className="font-mono">{p.ref}</span> {templateFor(p.ref)?.title}
-                      </span>
-                      <span aria-hidden>{STATUS_SYMBOL[p.status] ?? '○'}</span>
-                    </Link>
-                  ))}
-              </div>
-            ))}
-            <div className="px-2 pt-2 border-t border-[#E3E7EF] text-[10px] text-[#4A5878]">All {papers.length} papers</div>
-            {!isLocked && missingRefs.length > 0 && (
-              <label className="flex flex-col gap-1 px-2 pt-2">
-                <span className="text-[10px] font-bold text-[#4A5878]">Add a paper</span>
-                <select
-                  aria-label="Add a paper"
-                  value=""
-                  onChange={(e) => {
-                    const wp = db.addWorkpaper(engagement.id, e.target.value);
-                    if (wp) {
-                      db.logAudit(engagement.firm_id, actor, 'ADD_WORKPAPER', 'workpapers', wp.id, null, { ref: wp.ref });
-                      router.push(`/engagements/${engagementId}/workpapers/${wp.id}`);
-                    }
-                  }}
-                  className="min-h-[32px] px-1.5 border border-[#D3DCEE] rounded-[8px] bg-white"
-                >
-                  <option value="">Choose…</option>
-                  {missingRefs.map((tp) => (
-                    <option key={tp.ref} value={tp.ref}>
-                      {tp.ref} {tp.title}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-          </aside>
-        )}
 
         {/* Main column */}
         <div className="flex flex-col gap-5 min-w-0">
@@ -1064,7 +965,10 @@ export default function WorkpaperPage() {
             </div>
           )}
           <fieldset disabled={readOnly} className="flex flex-col gap-5 min-w-0 border-0 p-0 m-0">
-          <Section id="objective" num={1} title="Objective" state={stateOf('objective')}>
+          <Section id="figures" num={1} title="Figures" state={stateOf('figures')} stateLabel={leadsAgreed ? undefined : 'Not mapped yet'}>
+            <details className="mb-4 text-xs">
+              <summary className="font-semibold text-[#4A5878] hover:text-[#122654] cursor-pointer">Objective and assertions</summary>
+              <div className="mt-2">
             <textarea
               aria-label="Objective"
               disabled={isLocked}
@@ -1099,17 +1003,20 @@ export default function WorkpaperPage() {
                 }}
               />
             </div>
-          </Section>
+              </div>
+            </details>
 
-          <Section
-            id="leads"
-            num={2}
-            title="Lead figures from the Blynt chart"
-            state={stateOf('leads')}
-            stateLabel={result.leads.length === 0 ? 'No lead accounts' : leadsAgreed ? 'From TB' : 'Not mapped yet'}
-          >
-            {result.leads.length === 0 ? (
-              <p className="text-xs text-[#4A5878]">This paper has no trial balance lead accounts.</p>
+            {shownLeads.length === 0 ? (
+              <p className="text-xs text-[#4A5878]">
+                {result.leads.length === 0 ? (
+                  'This paper has no trial balance lead accounts.'
+                ) : (
+                  <>
+                    None of this paper&apos;s accounts has a balance yet.{' '}
+                    <Link href={`/engagements/${engagementId}/mapping`} className="font-bold text-[#B8432F] hover:underline">Map accounts</Link>
+                  </>
+                )}
+              </p>
             ) : (
               <>
                 <div className="overflow-x-auto">
@@ -1124,7 +1031,7 @@ export default function WorkpaperPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E3E7EF] font-mono">
-                      {result.leads.map((l) => (
+                      {shownLeads.map((l) => (
                         <tr key={l.code} className={l.mapped ? '' : 'text-[#7E8DA6]'}>
                           <td className="p-2 font-sans">
                             <span className="font-mono font-bold">{l.code.padEnd(4, 'x')}</span> {l.label}
@@ -1140,7 +1047,8 @@ export default function WorkpaperPage() {
                   </table>
                 </div>
                 <p className="text-[10px] text-[#4A5878] mt-2">
-                  Brackets are credits. Figures come from confirmed account mappings plus approved adjustments — they are never typed.{' '}
+                  Brackets are credits. Figures come from confirmed mappings plus approved adjustments.{' '}
+                  {result.leads.length > shownLeads.length && `${result.leads.length - shownLeads.length} other accounts have no balance and are hidden. `}
                   {!leadsAgreed && (
                     <Link href={`/engagements/${engagementId}/mapping`} className="font-bold text-[#B8432F] hover:underline">
                       Map accounts
@@ -1149,9 +1057,9 @@ export default function WorkpaperPage() {
                 </p>
               </>
             )}
-          </Section>
 
-          <Section id="schedule" num={3} title="Schedule" state={stateOf('schedule')}>
+            <div id="schedule" className="mt-5 pt-4 border-t border-[#E3E7EF] scroll-mt-24">
+            <h3 className="text-xs font-bold text-[#122654] mb-3">Schedule</h3>
             {/* AI Extraction Confidence Gate Items (DOC-05 / DAT-08) */}
             {data.confidence_gate_items && data.confidence_gate_items.length > 0 && (
               <div className="mb-4 p-4 rounded-[12px] bg-[#F5F8FD] border border-[#7C3AED]/30 flex flex-col gap-3">
@@ -1248,6 +1156,8 @@ export default function WorkpaperPage() {
             {t.kind === 'loans' && <LoansSchedule {...scheduleProps} />}
             {t.kind === 'checklist' && <ChecklistSchedule {...scheduleProps} />}
             {t.kind === 'tax' && <TaxSchedule {...scheduleProps} />}
+            {t.kind === 'analytical' && <AnalyticalSchedule {...scheduleProps} />}
+            {t.kind === 'statutory' && <StatutorySchedule {...scheduleProps} />}
             <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#4A5878] flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-bold">Tickmarks:</span>
               {tickLibrary.map((tk) => (
@@ -1278,14 +1188,15 @@ export default function WorkpaperPage() {
                 }}
               />
             </div>
+            </div>
           </Section>
 
           <Section
             id="checks"
-            num={4}
-            title="Checks"
+            num={2}
+            title="Checks and procedures"
             state={stateOf('checks')}
-            stateLabel={openChecks.length ? `${openChecks.length} open` : 'All clear'}
+            stateLabel={outstanding ? `${outstanding} to do` : 'All clear'}
           >
             <ul className="flex flex-col gap-2">
               {result.checks.map((c) => (
@@ -1330,15 +1241,11 @@ export default function WorkpaperPage() {
                 </li>
               ))}
             </ul>
-          </Section>
 
-          <Section
-            id="procedures"
-            num={5}
-            title="Procedures"
-            state={stateOf('procedures')}
-            stateLabel={`${procedures.length - pending.length} of ${procedures.length}`}
-          >
+            <div id="procedures" className="mt-5 pt-4 border-t border-[#E3E7EF] scroll-mt-24">
+            <h3 className="text-xs font-bold text-[#122654] mb-2">
+              Procedures <span className="font-normal text-[#4A5878]">{procedures.length - pending.length} of {procedures.length} done</span>
+            </h3>
             <ul className="flex flex-col gap-1">
               {procedures.map((p) => (
                 <li key={p.id} className="rounded-[8px] hover:bg-[#F5F8FD]">
@@ -1425,9 +1332,10 @@ export default function WorkpaperPage() {
                 </button>
               </div>
             )}
+            </div>
           </Section>
 
-          <Section id="evidence" num={6} title="Evidence" state={stateOf('evidence')} stateLabel={`${attachments.length} file${attachments.length === 1 ? '' : 's'}`}>
+          <Section id="evidence" num={3} title="Evidence" state={stateOf('evidence')} stateLabel={`${attachments.length} file${attachments.length === 1 ? '' : 's'}`}>
             {!isLocked && (
               <div
                 onDragOver={(e) => {
@@ -1587,7 +1495,10 @@ export default function WorkpaperPage() {
             )}
           </Section>
 
-          <Section id="conclusion" num={7} title="Conclusion" state={stateOf('conclusion')} stateLabel={conclusionText.trim() ? 'Written' : 'Not written'}>
+          </fieldset>
+
+          <Section id="signoff" num={4} title="Conclude and sign off" state={stateOf('signoff')}>
+            <fieldset id="conclusion" disabled={readOnly} className="min-w-0 border-0 p-0 m-0 scroll-mt-24">
             {botDraft && !isLocked && (
               <div className="p-3 mb-3 rounded-[12px] bg-[#FFF1EE] border border-[#FF7A66]/40 text-xs">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#A23A27]">
@@ -1635,10 +1546,8 @@ export default function WorkpaperPage() {
             />
             
             {/* Preparer notes box (REC-01) */}
-            <div className="mt-3 pt-3 border-t border-[#E3E7EF]">
-              <label className="text-[11px] font-semibold text-[#122654] block mb-1" htmlFor="preparer-notes">
-                Preparer notes (REC-01)
-              </label>
+            <details open={Boolean(data.preparer_notes)} className="mt-3 text-xs">
+              <summary className="font-semibold text-[#4A5878] hover:text-[#122654] cursor-pointer mb-1">Preparer notes</summary>
               <textarea
                 id="preparer-notes"
                 disabled={isLocked}
@@ -1652,13 +1561,10 @@ export default function WorkpaperPage() {
                 placeholder="Internal working notes for manager review..."
                 className="w-full p-2.5 text-xs bg-white border border-[#D3DCEE] rounded-[8px] text-[#122654] outline-none focus:border-[#FF7A66] disabled:bg-[#F5F8FD]"
               />
-            </div>
-          </Section>
+            </details>
+            </fieldset>
 
-          </fieldset>
-
-          <Section id="signoff" num={8} title="Sign-off" state={stateOf('signoff')}>
-            <p className="text-[11px] text-[#4A5878] mb-3">
+            <p className="text-[11px] text-[#4A5878] mt-4 pt-4 mb-3 border-t border-[#E3E7EF]">
               Signing as <strong>{actor.name}</strong> ({actor.role}). {levelsFor(workpaper)} sign-off level{levelsFor(workpaper) === 1 ? '' : 's'} for this file, in order; one person signs one level. A reviewed schedule is read-only until it is unreviewed.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

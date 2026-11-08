@@ -18,6 +18,7 @@ import { db } from '@/lib/server/db';
 import { getActor } from '@/lib/session';
 import { Comment, CommentReply } from '@/lib/types/models';
 import { useCompany } from '@/context/CompanyContext';
+import { ukTime } from '@/lib/dates';
 
 export default function PracticeReviewNotesPage() {
   const { clients, activeCompanyId } = useCompany();
@@ -483,7 +484,7 @@ export default function PracticeReviewNotesPage() {
                                 <div key={rep.id} className="p-3 rounded-[10px] bg-[#F5F8FD] border border-[#E3E7EF] text-xs flex flex-col gap-1">
                                   <div className="flex items-center justify-between text-[11px] text-[#4A5878]">
                                     <span className="font-bold text-[#122654]">{rep.created_by_name}</span>
-                                    <span>{new Date(rep.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <span>{ukTime(rep.created_at)}</span>
                                   </div>
                                   <p className="text-[#122654] leading-relaxed">{rep.body}</p>
                                 </div>
