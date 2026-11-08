@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, Loader2, Pencil, Search, ShieldCheck, ShieldOff, X } from 'lucide-react';
 import { db } from '@/lib/server/db';
 

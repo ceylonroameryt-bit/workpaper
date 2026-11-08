@@ -2,7 +2,7 @@
 
 import { TEMPLATES } from '@/lib/workpapers/templates';
 
-import { getActor, getCurrentUserId } from '@/lib/session';
+import { getActor } from '@/lib/session';
 
 import { engagementSummary } from '@/lib/api';
 
@@ -16,16 +16,10 @@ import {
   Scale,
   Plus,
   ArrowRight,
-  Filter,
   RefreshCw,
   Search,
   Check,
-  ChevronRight,
-  FileCheck2,
-  Lock,
-  Unlock,
   ShieldCheck,
-  SlidersHorizontal,
   X,
   Upload,
   Download,
@@ -33,14 +27,10 @@ import {
   Paperclip,
   Database,
   Sparkles,
-  FileDown,
-  Eye,
-  CheckCheck,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { toPence, asPence, formatPence, calculateVariance } from '@/lib/money';
 import { StatusBadge } from '@/components/ui/StatusPill';
-import { LedgerTransaction } from '@/lib/types';
 
 export default function TrialBalancePage() {
   const params = useParams();
@@ -81,7 +71,6 @@ export default function TrialBalancePage() {
   // DAT-02 Upload TB Modal State
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadFileName, setUploadFileName] = useState<string | null>(null);
-  const [uploadBalancingError, setUploadBalancingError] = useState<string | null>(null);
   const [uploadSuccessToast, setUploadSuccessToast] = useState<string | null>(null);
 
   // ENG-04 Opening Balance Check against Ledger

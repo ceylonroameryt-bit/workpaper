@@ -3,27 +3,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  ArrowRight,
   Check,
   CheckCircle2,
   Sparkles,
   Upload,
   Plus,
   FileText,
-  Layers,
   Search,
   X,
-  ChevronRight,
-  Sliders,
-  Edit3,
-  Copy,
-  Save,
-  CheckSquare,
-  Square,
-  ShieldAlert,
 } from 'lucide-react';
 import { TEMPLATES, PACKS, TemplateDef } from '@/lib/workpapers/templates';
-import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
 
 const COMPANY_TYPES = [
@@ -196,7 +185,7 @@ export default function TemplatesCatalogPage() {
 
   // Firm templates list
   const [firmTemplates, setFirmTemplates] = useState<TemplateDef[]>(INITIAL_FIRM_TEMPLATES);
-  const [draftTemplates, setDraftTemplates] = useState<TemplateDef[]>(INITIAL_DRAFTS);
+  const [draftTemplates] = useState<TemplateDef[]>(INITIAL_DRAFTS);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);

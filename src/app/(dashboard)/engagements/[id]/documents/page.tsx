@@ -1,29 +1,18 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Folder,
   FolderOpen,
   Upload,
   FileText,
   Sparkles,
-  Link as LinkIcon,
   Copy,
   Check,
   Search,
-  Filter,
-  Eye,
-  AlertTriangle,
-  Clock,
-  Tag,
-  ArrowRight,
   ShieldCheck,
-  ChevronRight,
   X,
 } from 'lucide-react';
-import { db } from '@/lib/server/db';
-import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 
 interface DocumentItem {
@@ -46,7 +35,6 @@ export default function DocumentsPage() {
   const params = useParams();
   const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
-  const { activeEngagement, activeCompany } = useCompany();
   const { formatDate } = useLocale();
 
   const [activeFolder, setActiveFolder] = useState<'current' | 'permanent'>('current');
@@ -59,7 +47,7 @@ export default function DocumentsPage() {
   const engagementEmail = `docs+${engagementId}@blynt-inbox.co.uk`;
 
   // Seed documents matching DOC-01 through DOC-06
-  const [documents, setDocuments] = useState<DocumentItem[]>([
+  const [documents] = useState<DocumentItem[]>([
     {
       id: 'doc_001',
       filename: 'Unit_4_Commercial_Lease_Agreement_2025.pdf',

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { AlertCircle, Check, Paperclip, Plus, RotateCcw, Trash2, X } from 'lucide-react';
 import { db } from '@/lib/server/db';

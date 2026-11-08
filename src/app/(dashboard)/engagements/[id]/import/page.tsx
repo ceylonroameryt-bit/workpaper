@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -8,18 +8,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   FileSpreadsheet,
-  RefreshCw,
   ArrowRight,
-  Database,
-  ShieldCheck,
-  Check,
-  X,
-  FileDown,
   Trash2,
-  Download,
-  FileText,
   AlertCircle,
-  Sparkles,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { LedgerPanel } from '@/components/integrations/XeroPanel';

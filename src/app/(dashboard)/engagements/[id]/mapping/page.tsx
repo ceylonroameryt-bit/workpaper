@@ -1,36 +1,25 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
   Check,
   Search,
-  Filter,
   CheckCircle2,
   AlertTriangle,
   Sparkles,
   ArrowRight,
-  MessageSquare,
   Lock,
   Unlock,
-  ChevronRight,
   X,
-  FileCheck2,
   Pencil,
-  ShieldCheck,
-  RotateCcw,
-  SlidersHorizontal,
-  Info,
-  BookOpen,
-  Tag,
-  Zap,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
-import { AccountMapping, BlyntAccount, LearnedRule, AiActionLogItem } from '@/lib/types/models';
-import { toPence, asPence, formatPence } from '@/lib/money';
-import { matchBlyntAccount, getStatutoryDetails } from '@/lib/mapping/auto-mapper';
-import { getActor, getCurrentUserId } from '@/lib/session';
+import { AccountMapping, LearnedRule } from '@/lib/types/models';
+import { asPence, formatPence } from '@/lib/money';
+import { getStatutoryDetails } from '@/lib/mapping/auto-mapper';
+import { getActor } from '@/lib/session';
 import { engagementSummary } from '@/lib/api';
 import { NewAccountForm } from '@/components/coa/NewAccountForm';
 
@@ -93,7 +82,6 @@ function AccountPicker({ value, label, firmId, onPick }: { value: string; label:
 
 export default function AccountMappingPage() {
   const params = useParams();
-  const router = useRouter();
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
   const engagementRow = db.engagements.find((e) => e.id === engagementId);
   const firmId = engagementRow?.firm_id ?? 'firm_blynt_uk';
@@ -105,9 +93,8 @@ export default function AccountMappingPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'ready' | 'check' | 'exception' | 'confirmed'>('all');
   const [search, setSearch] = useState('');
   const [activeDetailId, setActiveDetailId] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [statutoryFilter, setStatutoryFilter] = useState('all');
-  const [isRunningAi, setIsRunningAi] = useState(false);
+  const [typeFilter] = useState('all');
+  const [statutoryFilter] = useState('all');
   const [batchTargetCode, setBatchTargetCode] = useState('');
   const [correctionToast, setCorrectionToast] = useState<{ message: string; undoAction?: () => void } | null>(null);
 

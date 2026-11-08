@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Building2, ChevronDown, Check, Plus, Search, Sparkles } from 'lucide-react';
+import { Building2, ChevronDown, Check, Plus, Search } from 'lucide-react';
 import { useCompany } from '@/context/CompanyContext';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -15,7 +15,7 @@ export const CompanySelector: React.FC<CompanySelectorProps> = ({
   variant = 'header',
   onAddNewCompany,
 }) => {
-  const { clients, engagements, activeCompany, activeEngagement, setActiveCompanyId } = useCompany();
+  const { clients, engagements, activeCompany, setActiveCompanyId } = useCompany();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef<HTMLDivElement | null>(null);

@@ -3,8 +3,6 @@ node_modules
 .next
 dist
 .env*
-.vercel
-.neon
 .claude
 .workspace_state.json
 *.pdf

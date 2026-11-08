@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -20,14 +20,10 @@ import {
   ThumbsDown,
   CheckCircle2,
   AlertTriangle,
-  ShieldAlert,
   Layers,
-  FileCheck,
   X,
   Download,
-  Lock,
   Unlock,
-  Check,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { services } from '@/lib/server/services';
@@ -37,7 +33,7 @@ import { StatusBadge } from '@/components/ui/StatusPill';
 import { evaluatePaper, levelsFor, linkedFiles, paperStatus } from '@/lib/workpapers/engine';
 import { diffData } from '@/lib/workpapers/diff';
 import { TEMPLATES, templateFor } from '@/lib/workpapers/templates';
-import type { Attachment, AttachmentCategory, AiReviewFinding } from '@/lib/types/models';
+import type { Attachment, AttachmentCategory } from '@/lib/types/models';
 import {
   Section,
   StatePill,
@@ -92,7 +88,6 @@ export default function WorkpaperPage() {
   const [noteBody, setNoteBody] = useState('');
   const [noteType, setNoteType] = useState<'review_note' | 'comment' | 'client_query'>('review_note');
   const [noteAnchor, setNoteAnchor] = useState('paper');
-  const [carryForwardNote, setCarryForwardNote] = useState(false);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [conclusionDraft, setConclusionDraft] = useState<string | null>(null);
   const [explainDrafts, setExplainDrafts] = useState<Record<string, string>>({});

@@ -1,9 +1,7 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
-import { Layers, CheckCircle2, ArrowRight, BookOpen, Plus } from 'lucide-react';
-import { db } from '@/lib/server/db';
+import { BookOpen } from 'lucide-react';
 import { CompanyType } from '@/lib/types/models';
 
 export default function MappingListsPage() {

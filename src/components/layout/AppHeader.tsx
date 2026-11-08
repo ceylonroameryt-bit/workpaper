@@ -10,7 +10,6 @@ import {
   Search,
   Sparkles,
   Command,
-  User,
   LogOut,
   X,
   Sliders,
@@ -19,7 +18,6 @@ import {
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { getCurrentUserId, signOut } from '@/lib/session';
-import { UserRole } from '@/lib/types/models';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 import { CompanySelector } from './CompanySelector';

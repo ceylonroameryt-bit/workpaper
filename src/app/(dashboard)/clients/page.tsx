@@ -1,18 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Search,
-  Filter,
   Plus,
-  RefreshCw,
   AlertCircle,
   ArrowUpRight,
-  Database,
   Building2,
-  Calendar,
   Trash2,
   AlertTriangle,
   X,
@@ -20,7 +16,7 @@ import {
   ArchiveRestore,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
-import { CompanyType, DataSource, Client } from '@/lib/types/models';
+import { Client } from '@/lib/types/models';
 import { useCompany } from '@/context/CompanyContext';
 
 export default function ClientsPage() {

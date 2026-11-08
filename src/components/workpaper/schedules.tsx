@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Trash2, AlertTriangle, Check, ShieldAlert, Sparkles, Building2, User, Clock, ArrowRight, RefreshCw, FileText, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, ShieldAlert, Sparkles, Building2, User, RefreshCw, FileText } from 'lucide-react';
 import { asPence, formatPence } from '@/lib/money';
 import type { Attachment } from '@/lib/types/models';
 import type { PaperResult } from '@/lib/workpapers/engine';

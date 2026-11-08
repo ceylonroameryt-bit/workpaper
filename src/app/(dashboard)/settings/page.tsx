@@ -7,31 +7,20 @@ import {
   Users,
   Palette,
   Sparkles,
-  Lock,
-  Check,
   Save,
   Upload,
-  BookOpen,
   CheckCircle2,
   AlertCircle,
-  Clock,
-  RotateCcw,
   X,
   Plus,
-  HelpCircle,
-  Mail,
-  Building2,
   Trash2,
   FileText,
-  AlertTriangle,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { StaffManager } from '@/components/settings/StaffManager';
 import { getCurrentUserId } from '@/lib/session';
-import { useCompany } from '@/context/CompanyContext';
 
 export default function PracticeSettingsPage() {
-  const { refreshCompanyData } = useCompany();
 
   const [activeTab, setActiveTab] = useState<'defaults' | 'roles' | 'rules' | 'branding' | 'security'>('defaults');
   const [savedToast, setSavedToast] = useState<string | null>(null);
@@ -61,11 +50,9 @@ export default function PracticeSettingsPage() {
   // ADM-02 Practice Defaults
   const [signOffLevels, setSignOffLevels] = useState<'3' | '2'>('3');
   const [reconciliationTolerance, setReconciliationTolerance] = useState('1.00');
-  const [materialityThreshold, setMaterialityThreshold] = useState('5000.00');
   const [reviewThreshold, setReviewThreshold] = useState('500.00');
   const [capitalisationThreshold, setCapitalisationThreshold] = useState('500.00');
   const [aiReadyThreshold, setAiReadyThreshold] = useState('90');
-  const [aiCheckThreshold, setAiCheckThreshold] = useState('70');
   const [deadlineAlertDays, setDeadlineAlertDays] = useState('30');
 
   // Confirmation modal for ADM-02
@@ -188,13 +175,10 @@ export default function PracticeSettingsPage() {
   const [brandAccent, setBrandAccent] = useState('#FF7A66');
   const [brandFont, setBrandFont] = useState('Inter');
   const [footerDisclaimer, setFooterDisclaimer] = useState('Prepared by Blynt Practice & Co LLP under FRS 102 Section 1A. Registered in England & Wales.');
-  const [logoUploaded, setLogoUploaded] = useState(true);
 
   // ADM-03 Security & Data
-  const [hostingRegion, setHostingRegion] = useState('UK (London, eu-west-2)');
-  const [mfaEnforced, setMfaEnforced] = useState(true);
-  const [retentionYears, setRetentionYears] = useState('7');
-  const [aiTrainingOptIn, setAiTrainingOptIn] = useState(false);
+  const [hostingRegion] = useState('EU (Stockholm, eu-north-1)');
+  const [retentionYears] = useState('7');
 
   const triggerSaveNotification = (msg: string) => {
     setSavedToast(msg);

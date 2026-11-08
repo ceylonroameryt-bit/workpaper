@@ -1,7 +1,7 @@
 export * from './models';
 
 // UI-level helpers and legacy compatibility mapped to models
-import { UserRole, CompanyType } from './models';
+import { UserRole } from './models';
 
 export type Framework = 'FRS 102' | 'FRS 105' | 'IFRS' | 'Charities SORP' | 'LLP SORP' | 'ISA (UK)';
 

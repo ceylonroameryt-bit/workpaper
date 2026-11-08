@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { db } from '@/lib/server/db';
 import { BlyntAccount } from '@/lib/types/models';
 import { CATEGORIES, accountsIn, categoryOf, newAccount, nextCode } from '@/lib/coa';

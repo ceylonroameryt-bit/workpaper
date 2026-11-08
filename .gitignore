@@ -29,8 +29,6 @@ out/
 build/
 .claude/
 
-.vercel
 .env*
-.neon
 *.tsbuildinfo
 .workspace_state.json

@@ -1,11 +1,10 @@
 import fs from 'fs';
 import { Pool } from 'pg';
-import { attachDatabasePool } from '@vercel/functions';
 import { db } from './db';
 import { ensureCredentials } from './credentials';
 
 /**
- * Postgres persistence for the workspace (Neon Lakebase Postgres over the pooled DATABASE_URL).
+ * Postgres persistence for the workspace (Amazon RDS PostgreSQL via DATABASE_URL).
  * The whole workspace is stored as one versioned JSONB row. Without DATABASE_URL
  * (local dev) everything stays in memory, as before.
  */
@@ -21,15 +20,11 @@ export const hasDatabase = () => Boolean(process.env.DATABASE_URL);
 
 import path from 'path';
 
-const isServerless = Boolean(
-  process.env.VERCEL ||
-  process.env.AWS_LAMBDA_FUNCTION_NAME ||
-  process.env.LAMBDA_TASK_ROOT
-);
+const isServerless = Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
 
 // Fallback when no database is configured (local dev): keep state in this server process,
 // mirrored to local workspace state file so all worker threads and server restarts retain accounts.
-// On serverless / Vercel platforms, route exclusively to writable /tmp scratch directory or remain safely in-memory.
+// On AWS Lambda only /tmp is writable.
 const localFile: string | undefined = (() => {
   if (process.env.LOCAL_STATE_FILE) return process.env.LOCAL_STATE_FILE;
   if (process.env.DATABASE_URL) return undefined;
@@ -49,15 +44,13 @@ function loadLocalFile(): StoredState {
   }
 }
 
-// One pool per server instance. On Vercel Fluid compute, attachDatabasePool closes idle
-// clients before the instance is suspended so connections are not leaked.
+// One small pool per server instance, reused across requests.
 let pool: Pool | null = null;
 let schemaReady: Promise<unknown> | null = null;
 
 function getPool() {
   if (!pool) {
     pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-    attachDatabasePool(pool);
   }
   return pool;
 }

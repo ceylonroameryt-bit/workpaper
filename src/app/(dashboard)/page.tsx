@@ -12,21 +12,16 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  Search,
-  Filter,
   Plus,
   ArrowUpRight,
-  AlertTriangle,
   Upload,
   Send,
   Building2,
-  Layers,
   FileCheck2,
   Lock,
   FileSpreadsheet,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
-import { StatusBadge } from '@/components/ui/StatusPill';
 import { useCompany } from '@/context/CompanyContext';
 import { useLocale } from '@/context/LocaleContext';
 import { CompanySelector } from '@/components/layout/CompanySelector';
@@ -38,7 +33,6 @@ export default function PracticeHomePage() {
 
   const [botPrompt, setBotPrompt] = useState('');
   const [botAnswer, setBotAnswer] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'company' | 'portfolio'>('company');
 
   // Scoped metrics for active selected company
   const companyEng = activeEngagement;
