@@ -177,6 +177,8 @@ export interface Invite {
   name: string;
   role: UserRole;
   client_ids?: string[];
+  /** Clients whose team the person joins when they accept */
+  team_client_ids?: string[];
   token_hash: string;
   invited_by: string;
   created_at: string;
@@ -441,7 +443,38 @@ export type AttachmentCategory =
   | 'Valuation'
   | 'Confirmation'
   | 'From client'
+  | 'Lease agreement'
+  | 'Payroll report'
+  | 'VAT return'
+  | 'Stock count'
+  | 'Prior-year accounts'
+  | 'Loan agreement'
   | 'Other';
+
+export interface DocumentBullet {
+  text: string;
+  clause?: string;
+  page?: number;
+  confidence?: number;
+  gate?: 'ready' | 'check';
+}
+
+export interface AiDocumentSummary {
+  bullets: DocumentBullet[];
+  is_edited?: boolean;
+  original_summary?: DocumentBullet[];
+  edited_by?: string;
+  edited_at?: string;
+}
+
+export interface AttachmentVersion {
+  version: number;
+  file_key: string;
+  filename: string;
+  uploaded_at: string;
+  uploaded_by: string;
+  size: number;
+}
 
 export interface Attachment {
   id: string;
@@ -454,6 +487,18 @@ export interface Attachment {
   sha256: string;
   category: AttachmentCategory;
   is_permanent: boolean;
+  folder?: 'current' | 'permanent';
+  ai_tag?: string;
+  ai_tag_confidence?: number;
+  ai_tag_gate?: 'ready' | 'check' | 'exception';
+  expiry_date?: string;
+  expires_in_days?: number;
+  version?: number;
+  versions?: AttachmentVersion[];
+  ai_summary?: AiDocumentSummary;
+  extracted_data?: Record<string, any>;
+  linked_schedule_ref?: string;
+  deleted_at?: string | null;
   uploaded_by: string;
   uploaded_by_name: string;
   uploaded_at: string;

@@ -441,6 +441,61 @@ export function evaluatePaper(wp: Workpaper): PaperResult | null {
     } Maturity analysis: <1yr ${formatPence(within1y)}, 1-5yrs ${formatPence(within1to5y)}, >5yrs ${formatPence(over5y)}.`;
   }
 
+  if (t.kind === 'tax') {
+    if (wp.ref === 'T-30' || t.ref === 'T-30') {
+      const nbv = asPence(data.fixed_asset_nbv_p ?? '0');
+      const twdv = asPence(data.tax_written_down_value_p ?? '0');
+      const timingDiff = nbv - twdv;
+      const ratePct = Number(data.tax_rate_pct || 25);
+      const rateBp = BigInt(Math.round(ratePct * 100));
+      const provision = (timingDiff * rateBp) / 10000n;
+      totals.nbv = nbv;
+      totals.twdv = twdv;
+      totals.timing_difference = timingDiff;
+      totals.provision = provision;
+      totals.difference = provision - (tbShown ?? 0n);
+
+      anchors.push({ id: 'timing_diff', label: 'Timing differences on fixed assets' });
+      anchors.push({ id: 'provision', label: 'Deferred tax provision c/f' });
+
+      checks.push(tie('deferred_tax_tb', 'Deferred tax provision agrees to trial balance', provision, tbShown, 'Deferred tax (TB 840)'));
+      draft = `Deferred tax provision of ${formatPence(provision)} calculated at ${ratePct}% on net timing differences of ${formatPence(timingDiff)} ${
+        provision === (tbShown ?? 0n) ? 'agrees to the trial balance.' : 'differs from the trial balance.'
+      }`;
+    } else {
+      // T-10 Corporation Tax
+      const pyLiab = asPence(data.prior_year_liability_p ?? '0');
+      const paid = asPence(data.payments_made_p ?? '0');
+      const overUnder = asPence(data.over_under_provision_p ?? '0');
+      const cyCharge = asPence(data.current_year_charge_p ?? '0');
+      const closingLiab = (pyLiab - paid - overUnder) + cyCharge;
+
+      totals.prior_year_liability = pyLiab;
+      totals.payments_made = paid;
+      totals.over_under_provision = overUnder;
+      totals.current_year_charge = cyCharge;
+      totals.closing_liability = closingLiab;
+      totals.difference = closingLiab - (tbShown ?? 0n);
+
+      anchors.push({ id: 'current_year_charge', label: 'Corporation tax charge for year' });
+      anchors.push({ id: 'closing_liability', label: 'Corporation tax liability c/f' });
+
+      checks.push(tie('ct_liability_tb', 'Corporation tax liability agrees to trial balance', closingLiab, tbShown, 'CT liability (TB 795)'));
+      if (data.charge_source === 'estimate') {
+        checks.push({
+          id: 'ct_estimate',
+          label: 'Current year charge is estimated',
+          detail: 'Charge calculated from estimated profit and central rates. Replace with final computation once available.',
+          passed: true,
+          explanation: 'Estimated charge based on trial balance net profit.',
+        });
+      }
+      draft = `Corporation tax liability of ${formatPence(closingLiab)} (including current year charge of ${formatPence(cyCharge)}) ${
+        closingLiab === (tbShown ?? 0n) ? 'agrees to the trial balance.' : 'differs from the trial balance.'
+      }`;
+    }
+  }
+
   if (t.kind === 'checklist') {
     const items: any[] = data.items ?? [];
     const unanswered = items.filter((i) => !i.answer);

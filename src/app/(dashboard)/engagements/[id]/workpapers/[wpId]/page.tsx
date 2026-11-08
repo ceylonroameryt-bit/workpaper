@@ -62,6 +62,7 @@ import {
   LeasesSchedule,
   DlaSchedule,
   LoansSchedule,
+  TaxSchedule,
 } from '@/components/workpaper/schedules';
 
 const ROLE_ORDER = ['preparer', 'reviewer', 'partner'] as const;
@@ -1151,6 +1152,92 @@ export default function WorkpaperPage() {
           </Section>
 
           <Section id="schedule" num={3} title="Schedule" state={stateOf('schedule')}>
+            {/* AI Extraction Confidence Gate Items (DOC-05 / DAT-08) */}
+            {data.confidence_gate_items && data.confidence_gate_items.length > 0 && (
+              <div className="mb-4 p-4 rounded-[12px] bg-[#F5F8FD] border border-[#7C3AED]/30 flex flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#7C3AED]" />
+                    <span className="font-bold text-xs text-[#122654]">
+                      AI Extracted Figures (DOC-05 / Confidence Gate DAT-08)
+                    </span>
+                    <span className="text-[10px] bg-purple-100 text-purple-800 font-mono font-bold px-2 py-0.5 rounded-full">
+                      {data.confidence_gate_items.filter((i: any) => !i.confirmed).length} pending confirmation
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-[#4A5878]">
+                    Values retain AI badges until confirmed by the preparer (ENG-06 audit trail)
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {data.confidence_gate_items.map((item: any) => (
+                    <div
+                      key={item.field_key}
+                      className={`p-3 rounded-[10px] border flex flex-col justify-between gap-2 text-xs ${
+                        item.confirmed
+                          ? 'bg-[#E6F4EF]/50 border-[#0B6B52]/30'
+                          : item.status === 'ready'
+                          ? 'bg-white border-[#7C3AED]/30'
+                          : 'bg-[#FFF4DB] border-[#C58B00]/40'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-[#122654]">{item.field_label}</span>
+                          <span
+                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase ${
+                              item.confirmed
+                                ? 'bg-[#0B6B52] text-white'
+                                : item.status === 'ready'
+                                ? 'bg-purple-100 text-purple-800'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {item.confirmed ? 'Confirmed' : `${Math.round(item.confidence * 100)}% Conf.`}
+                          </span>
+                        </div>
+                        <div className="font-mono font-bold text-sm text-[#122654] mt-1">{item.extracted_value}</div>
+                        <div className="text-[10px] text-[#7E8DA6] mt-0.5 truncate">
+                          Source: {item.source_document_name} (p. {item.source_page || 1})
+                        </div>
+                      </div>
+
+                      <div className="pt-1 border-t border-[#E3E7EF]/60 flex items-center justify-between">
+                        {item.confirmed ? (
+                          <span className="text-[10px] font-bold text-[#0B6B52] flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Confirmed by {item.confirmed_by}
+                          </span>
+                        ) : !isLocked ? (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await fetch(`/api/v1/workpapers/${workpaper.id}/confirm-value`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ field_key: item.field_key, actor_name: actor.name }),
+                                });
+                              } catch {}
+                              const updatedGate = (live().confidence_gate_items ?? []).map((g: any) =>
+                                g.field_key === item.field_key
+                                  ? { ...g, confirmed: true, confirmed_by: actor.name, confirmed_at: new Date().toISOString() }
+                                  : g
+                              );
+                              saveData({ confidence_gate_items: updatedGate });
+                            }}
+                            className="px-2.5 py-1 bg-[#122654] hover:bg-[#1D4E89] text-white text-[11px] font-bold rounded-[6px] transition-colors cursor-pointer"
+                          >
+                            Confirm Value
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {t.kind === 'reconciliation' && <ReconciliationSchedule {...scheduleProps} />}
             {t.kind === 'assets' && <AssetsSchedule {...scheduleProps} />}
             {t.kind === 'lines' && <LinesSchedule {...scheduleProps} />}
@@ -1160,6 +1247,7 @@ export default function WorkpaperPage() {
             {t.kind === 'dla' && <DlaSchedule {...scheduleProps} />}
             {t.kind === 'loans' && <LoansSchedule {...scheduleProps} />}
             {t.kind === 'checklist' && <ChecklistSchedule {...scheduleProps} />}
+            {t.kind === 'tax' && <TaxSchedule {...scheduleProps} />}
             <div className="mt-4 pt-3 border-t border-[#E3E7EF] text-[10px] text-[#4A5878] flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-bold">Tickmarks:</span>
               {tickLibrary.map((tk) => (

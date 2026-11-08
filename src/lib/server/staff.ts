@@ -37,6 +37,32 @@ export function listStaff(actor: Actor) {
     });
 }
 
+const toggled = (list: string[], id: string, on: boolean) => (on ? [...new Set([...list, id])] : list.filter((x) => x !== id));
+
+/**
+ * A client's team and who can open the client stay together: adding someone with limited access
+ * gives them this client, and taking them off removes it. Only an admin or partner can change
+ * access, so anyone else's edit changes the team alone.
+ */
+export function syncTeamAccess(actor: Actor, clientId: string, before: string[], after: string[], inviteIds?: unknown) {
+  if (!canSetUpPractice(actor, db.firms.find((f) => f.id === actor.firmId))) return;
+  for (const m of db.memberships) {
+    if (m.firm_id !== actor.firmId || !m.client_ids || ['partner', 'admin'].includes(m.role)) continue;
+    const on = after.includes(m.user_id);
+    if (on === before.includes(m.user_id)) continue;
+    const was = { client_ids: m.client_ids };
+    m.client_ids = toggled(m.client_ids, clientId, on);
+    db.logAudit(actor.firmId, actor, 'SET_CLIENT_ACCESS', 'memberships', m.user_id, was, { client_ids: m.client_ids });
+  }
+  if (!Array.isArray(inviteIds)) return;
+  for (const i of db.invites) {
+    if (i.firm_id !== actor.firmId || i.accepted_at) continue;
+    const on = inviteIds.includes(i.id);
+    i.team_client_ids = toggled(i.team_client_ids ?? [], clientId, on);
+    if (i.client_ids) i.client_ids = toggled(i.client_ids, clientId, on);
+  }
+}
+
 export function updateStaff(actor: Actor, userId: string, d: { name?: unknown; role?: unknown; status?: unknown; client_ids?: unknown }) {
   if (!canSetUpPractice(actor, db.firms.find((f) => f.id === actor.firmId))) throw new ServiceError('Only an admin or partner can change staff.', 403, 'FORBIDDEN');
   const m = db.memberships.find((x) => x.user_id === userId && x.firm_id === actor.firmId);
@@ -55,8 +81,15 @@ export function updateStaff(actor: Actor, userId: string, d: { name?: unknown; r
   if (d.status !== undefined) m.status = d.status as 'active' | 'deactivated';
   if (d.client_ids === null) delete m.client_ids;
   else if (Array.isArray(d.client_ids)) {
-    const firmClients = new Set(db.clients.filter((c) => c.firm_id === actor.firmId).map((c) => c.id));
-    m.client_ids = [...new Set(d.client_ids as string[])].filter((id) => firmClients.has(id));
+    const firmClients = db.clients.filter((c) => c.firm_id === actor.firmId);
+    const previous = m.client_ids;
+    const next = [...new Set(d.client_ids as string[])].filter((id) => firmClients.some((c) => c.id === id));
+    m.client_ids = next;
+    for (const c of firmClients) {
+      // Adding a client puts them on its team; without access they can't stay on one
+      if (!next.includes(c.id)) c.team_user_ids = c.team_user_ids?.filter((u) => u !== userId);
+      else if (!previous?.includes(c.id)) c.team_user_ids = toggled(c.team_user_ids ?? [], userId, true);
+    }
   }
   db.logAudit(actor.firmId, actor, 'UPDATE_STAFF', 'memberships', userId, before, {
     name: user.name,

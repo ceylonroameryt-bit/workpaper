@@ -884,9 +884,149 @@ class Database {
       sha256: dellSha,
       category: 'Invoice',
       is_permanent: false,
+      folder: 'current',
+      ai_tag: 'Invoice (ready)',
+      ai_tag_confidence: 96,
+      ai_tag_gate: 'ready',
+      version: 1,
       uploaded_by: 'usr_test_preparer',
       uploaded_by_name: 'Test Preparer',
       uploaded_at: '2026-10-23T10:15:00Z',
+    });
+
+    const leaseSha = crypto.createHash('sha256').update('LEASE_AGREEMENT_UNIT_4_CONTENT').digest('hex');
+    this.attachments.push({
+      id: 'att_lease_unit4',
+      engagement_id: engId,
+      workpaper_id: 'wp_eng_harlow_fy26_l10',
+      file_key: 'uploads/harlow_fy26/Unit_4_Commercial_Lease_Agreement_2025.pdf',
+      filename: 'Unit_4_Commercial_Lease_Agreement_2025.pdf',
+      mime: 'application/pdf',
+      size: 2450000,
+      sha256: leaseSha,
+      category: 'Lease agreement',
+      is_permanent: true,
+      folder: 'permanent',
+      ai_tag: 'Lease agreement (ready)',
+      ai_tag_confidence: 98,
+      ai_tag_gate: 'ready',
+      version: 1,
+      expiry_date: '2030-03-31',
+      expires_in_days: 1250,
+      linked_schedule_ref: 'REC-04',
+      uploaded_by: 'usr_test_reviewer',
+      uploaded_by_name: 'Test Reviewer',
+      uploaded_at: '2026-02-10T10:15:00Z',
+      ai_summary: {
+        bullets: [
+          { text: 'Lessor: Grosvenor Estates PLC; Lessee: Harlow & Finch Fine Goods Ltd (Cl. 1.1, p. 2)', page: 2, clause: 'Cl. 1.1', confidence: 98, gate: 'ready' },
+          { text: 'Premises: Unit 4, St. Peter’s Wharf Industrial Park, London (Cl. 1.3, p. 2)', page: 2, clause: 'Cl. 1.3', confidence: 96, gate: 'ready' },
+          { text: 'Term: 5 years commencing 1 April 2025 expiring 31 March 2030 (Cl. 2.1, p. 4)', page: 4, clause: 'Cl. 2.1', confidence: 95, gate: 'ready' },
+          { text: 'Annual Rent: £10,200 payable quarterly in advance at £2,550/qtr (Cl. 3.1, p. 5)', page: 5, clause: 'Cl. 3.1', confidence: 96, gate: 'ready' },
+          { text: 'Rent-Free Period: 3 months from commencement (Cl. 3.4, p. 6)', page: 6, clause: 'Cl. 3.4', confidence: 92, gate: 'ready' },
+          { text: 'Break Option: Tenant break option at 3 years on 6 months written notice (Cl. 7.2, p. 11)', page: 11, clause: 'Cl. 7.2', confidence: 89, gate: 'check' },
+        ],
+      },
+    });
+
+    const bankSha = crypto.createHash('sha256').update('BARCLAYS_STMT_SEP2026_CONTENT').digest('hex');
+    this.attachments.push({
+      id: 'att_bank_sep26',
+      engagement_id: engId,
+      workpaper_id: b10Id,
+      file_key: 'uploads/harlow_fy26/Barclays_Bank_Statement_Sep2026.pdf',
+      filename: 'Barclays_Bank_Statement_Sep2026.pdf',
+      mime: 'application/pdf',
+      size: 890000,
+      sha256: bankSha,
+      category: 'Statement',
+      is_permanent: false,
+      folder: 'current',
+      ai_tag: 'Bank statement (ready)',
+      ai_tag_confidence: 96,
+      ai_tag_gate: 'ready',
+      version: 1,
+      linked_schedule_ref: 'REC-02',
+      uploaded_by: 'usr_test_preparer',
+      uploaded_by_name: 'Test Preparer',
+      uploaded_at: '2026-10-02T14:20:00Z',
+      ai_summary: {
+        bullets: [
+          { text: 'Account: Barclays Operating Current 20-45-78 98451230', page: 1, clause: 'Header', confidence: 98, gate: 'ready' },
+          { text: 'Statement Period: Month ended 30 September 2026', page: 1, clause: 'Period', confidence: 97, gate: 'ready' },
+          { text: 'Closing Balance at 30 Sep 2026: £118,402.17 in funds', page: 2, clause: 'Balance', confidence: 96, gate: 'ready' },
+          { text: 'Total debits £398,410.50; Total credits £450,230.12 across 142 items', page: 2, clause: 'Totals', confidence: 94, gate: 'ready' },
+        ],
+      },
+    });
+
+    const p32Sha = crypto.createHash('sha256').update('P32_M12_CONTENT').digest('hex');
+    this.attachments.push({
+      id: 'att_p32_m12',
+      engagement_id: engId,
+      workpaper_id: 'wp_eng_harlow_fy26_p20',
+      file_key: 'uploads/harlow_fy26/P32_Employer_Payment_Summary_Month12.pdf',
+      filename: 'P32_Employer_Payment_Summary_Month12.pdf',
+      mime: 'application/pdf',
+      size: 430000,
+      sha256: p32Sha,
+      category: 'Payroll report',
+      is_permanent: false,
+      folder: 'current',
+      ai_tag: 'Payroll report (ready)',
+      ai_tag_confidence: 95,
+      ai_tag_gate: 'ready',
+      version: 1,
+      linked_schedule_ref: 'REC-05',
+      uploaded_by: 'usr_test_preparer',
+      uploaded_by_name: 'Test Preparer',
+      uploaded_at: '2026-10-03T11:00:00Z',
+    });
+
+    const vatSha = crypto.createHash('sha256').update('VAT100_Q4_CONTENT').digest('hex');
+    this.attachments.push({
+      id: 'att_vat100_q4',
+      engagement_id: engId,
+      workpaper_id: 'wp_eng_harlow_fy26_t20',
+      file_key: 'uploads/harlow_fy26/HMRC_VAT100_Return_Q4_Sep2026.pdf',
+      filename: 'HMRC_VAT100_Return_Q4_Sep2026.pdf',
+      mime: 'application/pdf',
+      size: 310000,
+      sha256: vatSha,
+      category: 'VAT return',
+      is_permanent: false,
+      folder: 'current',
+      ai_tag: 'VAT return (ready)',
+      ai_tag_confidence: 97,
+      ai_tag_gate: 'ready',
+      version: 1,
+      linked_schedule_ref: 'REC-06',
+      uploaded_by: 'usr_test_preparer',
+      uploaded_by_name: 'Test Preparer',
+      uploaded_at: '2026-10-04T09:45:00Z',
+    });
+
+    const pyAccountsSha = crypto.createHash('sha256').update('PY_ACCOUNTS_2025_CONTENT').digest('hex');
+    this.attachments.push({
+      id: 'att_prior_accounts',
+      engagement_id: engId,
+      workpaper_id: null,
+      file_key: 'uploads/harlow_fy26/Prior_Year_Signed_Accounts_2025.pdf',
+      filename: 'Prior_Year_Signed_Accounts_2025.pdf',
+      mime: 'application/pdf',
+      size: 1820000,
+      sha256: pyAccountsSha,
+      category: 'Prior-year accounts',
+      is_permanent: true,
+      folder: 'permanent',
+      ai_tag: 'Prior-year accounts (ready)',
+      ai_tag_confidence: 99,
+      ai_tag_gate: 'ready',
+      version: 1,
+      linked_schedule_ref: 'ENG-07',
+      uploaded_by: 'usr_test_reviewer',
+      uploaded_by_name: 'Test Reviewer',
+      uploaded_at: '2025-11-20T14:00:00Z',
     });
 
     // Comments & Pins
@@ -1776,6 +1916,50 @@ class Database {
         gross_p: '-4200000',
         source: 'Xero',
         external_id: 'xero_tx_7820',
+      },
+      // 420 Office Expenses - Potential Capital Item for AIX-02 Detector
+      {
+        id: 'tx_420_laptop',
+        engagement_id: harlowEngId,
+        account_code: '420',
+        account_name: 'Office & IT Consumables',
+        date: '2026-08-20',
+        contact: 'Apple Store Regent Street',
+        description: 'MacBook Pro 16-inch M3 Max (Engineering Laptop)',
+        amount_p: '240000', // £2,400.00 Dr
+        vat_p: '48000',
+        gross_p: '288000',
+        source: 'Xero',
+        external_id: 'xero_tx_420_apple',
+      },
+      // Post Period-End Bank Payments for Unrecorded Liabilities Search (REC-08)
+      {
+        id: 'tx_post_edf',
+        engagement_id: harlowEngId,
+        account_code: '1010',
+        account_name: 'Barclays Operating Account',
+        date: '2026-10-14',
+        contact: 'EDF Energy PLC',
+        description: 'Commercial electricity usage Sep 2026',
+        amount_p: '-145000', // -£1,450.00 Cr
+        vat_p: '29000',
+        gross_p: '-174000',
+        source: 'Xero',
+        external_id: 'xero_tx_post_edf',
+      },
+      {
+        id: 'tx_post_bt',
+        engagement_id: harlowEngId,
+        account_code: '1010',
+        account_name: 'Barclays Operating Account',
+        date: '2026-10-08',
+        contact: 'BT Business Broadband',
+        description: 'Fibre broadband quarter ended Sep 2026',
+        amount_p: '-28000', // -£280.00 Cr
+        vat_p: '5600',
+        gross_p: '-33600',
+        source: 'Xero',
+        external_id: 'xero_tx_post_bt',
       }
     );
 
