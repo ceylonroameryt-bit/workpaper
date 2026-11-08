@@ -49,7 +49,8 @@ export function verifyPassword(password: string, stored: string | undefined): bo
 export interface SessionPayload {
   uid: string;
   exp: number; // unix seconds
-  mfa?: 'pending'; // set only on the short-lived challenge issued between password and MFA code
+  mfa?: 'pending' | 'trusted'; // 'pending': between password and MFA code; 'trusted': a remembered device. Neither is a session
+  v?: number; // trusted devices only: must equal the credential's mfa_trust_version
 }
 
 const b64 = (s: string | Buffer) => Buffer.from(s).toString('base64url');
@@ -79,6 +80,23 @@ export function verifyChallengeToken(token: string | undefined | null): SessionP
   const payload = verifyToken(token);
   return payload?.mfa === 'pending' ? payload : null;
 }
+
+// "Remember this device": skips only the code, and only the login route ever receives it
+export const TRUSTED_COOKIE = 'blynt_trusted';
+export const TRUSTED_TTL_SECONDS = 60 * 60 * 24 * 30;
+
+export function createTrustedToken(uid: string, version: number): string {
+  const body = b64(JSON.stringify({ uid, exp: Math.floor(Date.now() / 1000) + TRUSTED_TTL_SECONDS, mfa: 'trusted', v: version }));
+  return `${body}.${sign(body)}`;
+}
+
+export function verifyTrustedToken(token: string | undefined | null): SessionPayload | null {
+  const payload = verifyToken(token);
+  return payload?.mfa === 'trusted' ? payload : null;
+}
+
+export const trustedCookie = (token: string) =>
+  `${TRUSTED_COOKIE}=${token}; Path=/api/v1/auth/login; HttpOnly; SameSite=Lax; Max-Age=${TRUSTED_TTL_SECONDS}${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
 
 export const challengeCookie = (token: string) =>
   `${MFA_COOKIE}=${token}; Path=/api/v1/auth/mfa; HttpOnly; SameSite=Lax; Max-Age=${MFA_TTL_SECONDS}${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;

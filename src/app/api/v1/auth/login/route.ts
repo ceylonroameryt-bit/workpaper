@@ -8,6 +8,9 @@ import {
   createChallengeToken,
   challengeCookie,
   mfaRequired,
+  readCookie,
+  TRUSTED_COOKIE,
+  verifyTrustedToken,
   isLockedOut,
   recordFailure,
   clearFailures,
@@ -39,13 +42,19 @@ export async function POST(req: Request) {
     if (membership.status === 'deactivated') return jsonResponse({ error: 'Your account has been deactivated. Ask your practice admin.', code: 'DEACTIVATED' }, 403);
 
     // ADM-01: when MFA is switched on, password alone never signs in; the MFA endpoints finish it
+    // A device remembered for this user and credential version skips only the code
+    let method = 'password';
     if (mfaRequired()) {
-      const step = user.mfa_enabled && cred?.mfa_secret ? 'verify' : 'setup';
-      return jsonResponse({ mfa: step }, 200, { 'Set-Cookie': challengeCookie(createChallengeToken(user.id)) });
+      const enrolled = Boolean(user.mfa_enabled && cred?.mfa_secret);
+      const trusted = enrolled ? verifyTrustedToken(readCookie(req, TRUSTED_COOKIE)) : null;
+      if (trusted?.uid !== user.id || trusted.v !== (cred?.mfa_trust_version ?? 0)) {
+        return jsonResponse({ mfa: enrolled ? 'verify' : 'setup' }, 200, { 'Set-Cookie': challengeCookie(createChallengeToken(user.id)) });
+      }
+      method = 'password+trusted_device';
     }
 
     db.logAudit(membership.firm_id, { id: user.id, name: user.name, role: membership.role }, 'LOGIN', 'users', user.id, null, {
-      method: 'password',
+      method,
     });
     await syncOut();
 

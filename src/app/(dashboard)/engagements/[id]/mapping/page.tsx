@@ -22,6 +22,7 @@ import { getStatutoryDetails } from '@/lib/mapping/auto-mapper';
 import { getActor } from '@/lib/session';
 import { engagementSummary } from '@/lib/api';
 import { NewAccountForm } from '@/components/coa/NewAccountForm';
+import { AccountPicker } from '@/components/coa/AccountPicker';
 
 function ChartOptions() {
   return (
@@ -32,51 +33,6 @@ function ChartOptions() {
         </option>
       ))}
     </>
-  );
-}
-
-/** Search the chart by code or name; when nothing fits, create a practice account. */
-function AccountPicker({ value, label, firmId, onPick }: { value: string; label: string; firmId: string; onPick: (code: string) => void }) {
-  const current = db.blynt_accounts.find((a) => a.code === value);
-  const [text, setText] = useState(current ? `${current.code} ${current.name}` : '');
-  const [creating, setCreating] = useState(false);
-  const known = (t: string) => db.blynt_accounts.find((a) => `${a.code} ${a.name}` === t || a.code === t.trim());
-
-  const pick = (t: string) => {
-    setText(t);
-    const hit = known(t);
-    if (hit && hit.code !== value) onPick(hit.code);
-  };
-
-  return (
-    <div className="w-full max-w-[260px] space-y-1.5">
-      <div className="flex gap-1">
-        <input
-          aria-label={label}
-          list="blynt-chart"
-          value={text}
-          placeholder="Search code or name…"
-          onChange={(e) => pick(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && !known(text) && setCreating(true)}
-          className="min-w-0 flex-1 text-xs font-semibold py-1.5 px-2 border border-[#D3DCEE] focus:border-[#122654] rounded-lg bg-white text-[#122654]"
-        />
-        <button type="button" onClick={() => setCreating(true)} title="Create a new account" aria-label="Create a new account" className="px-2 text-xs font-bold border border-[#D3DCEE] rounded-lg text-[#122654] hover:bg-[#EAF5FC]">
-          +
-        </button>
-      </div>
-      {creating && (
-        <NewAccountForm
-          firmId={firmId}
-          initialName={known(text) ? '' : text.replace(/^\d+\s*/, '')}
-          onCancel={() => setCreating(false)}
-          onCreated={(acc) => {
-            setText(`${acc.code} ${acc.name}`);
-            setCreating(false);
-            onPick(acc.code);
-          }}
-        />
-      )}
-    </div>
   );
 }
 
@@ -802,11 +758,6 @@ export default function AccountMappingPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <datalist id="blynt-chart">
-            {db.blynt_accounts.map((a) => (
-              <option key={a.code} value={`${a.code} ${a.name}`} />
-            ))}
-          </datalist>
           <table className="w-full text-left text-xs text-[#122654]">
             <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
               <tr>
@@ -1170,37 +1121,15 @@ export default function AccountMappingPage() {
                 </div>
               </div>
 
-              {/* Select target */}
-              <div>
-                <label className="block text-xs font-bold text-[#122654] mb-1.5">
-                  Assigned Blynt COA Account:
-                </label>
-                <select
-                  aria-label="Assigned Blynt COA"
-                  value={pickCode}
-                  onChange={(e) => setPickCode(e.target.value)}
-                  className="w-full text-xs font-semibold p-2.5 border border-[#D3DCEE] rounded-xl bg-white text-[#122654] outline-none focus:ring-1 focus:ring-[#1D4E89]"
-                >
-                  <option value="">Select Blynt COA Account…</option>
-                  {db.blynt_accounts.map((a) => (
-                    <option key={a.code} value={a.code}>
-                      {a.code} {a.name} ({a.type})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* AI Alternatives */}
+              {(detailMapping.ai_alternatives ?? []).length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[#A23A27] mb-2">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>✦ AI Suggested Alternatives</span>
                 </div>
                 <div className="space-y-2">
-                  {(detailMapping.ai_alternatives || [
-                    { blynt_code: '6000', name: 'Office Rent & Administration', reason: 'Common administrative overhead classification', confidence: 75 },
-                    { blynt_code: '2100', name: 'Accruals and deferred income', reason: 'Potential balance sheet contra provision', confidence: 60 },
-                  ]).map((alt) => (
+                  {(detailMapping.ai_alternatives ?? []).filter((alt) => db.blynt_accounts.some((a) => a.code === alt.blynt_code)).map((alt) => (
                     <button
                       key={alt.blynt_code}
                       type="button"
@@ -1222,6 +1151,7 @@ export default function AccountMappingPage() {
                   ))}
                 </div>
               </div>
+              )}
             </div>
 
             <div className="p-4 border-t border-[#E3E7EF] flex items-center justify-between">
@@ -1234,7 +1164,7 @@ export default function AccountMappingPage() {
               </button>
               <button
                 type="button"
-                disabled={!pickCode}
+                disabled={!pickCode || pickCode === detailMapping.blynt_code}
                 onClick={() => {
                   handleInitiateChangeMapping(detailMapping.id, pickCode);
                   setActiveDetailId(null);
