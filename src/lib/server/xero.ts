@@ -1,3 +1,4 @@
+import { sameDayLastYear } from '../periods';
 import crypto from 'crypto';
 import { db } from './db';
 import { secret } from './auth';
@@ -210,9 +211,9 @@ const XERO_TYPES: Record<string, string> = {
   REVENUE: 'Revenue',
   SALES: 'Revenue',
   OTHERINCOME: 'Other Income',
-  DIRECTCOSTS: 'Cost of Sales',
+  DIRECTCOSTS: 'Direct Costs',
   EXPENSE: 'Expense',
-  OVERHEADS: 'Expense',
+  OVERHEADS: 'Overhead',
   DEPRECIATN: 'Expense',
   SUPERANNUATIONEXPENSE: 'Expense',
   WAGESEXPENSE: 'Expense',
@@ -258,6 +259,26 @@ export function parseTrialBalance(report: unknown, accounts: XeroAccount[]): TbL
   };
   walk(rows);
   return lines.filter((l) => Number(l.debit) !== 0 || Number(l.credit) !== 0);
+}
+
+/**
+ * Adds each account's balance a year earlier. An account with only a prior balance stays on the
+ * report, in the place Xero lists it.
+ */
+export function withComparatives(current: TbLineInput[], prior: TbLineInput[]): TbLineInput[] {
+  const key = (l: TbLineInput) => l.external_id ?? l.code;
+  const net = (l: TbLineInput) => (Number(l.debit) - Number(l.credit)).toFixed(2);
+  const inCurrent = (l: TbLineInput) => current.some((c) => key(c) === key(l));
+  const out: TbLineInput[] = current.map((l) => {
+    const was = prior.find((p) => key(p) === key(l));
+    return { ...l, comparative: was ? net(was) : '0.00' };
+  });
+  prior.forEach((p, i) => {
+    if (inCurrent(p)) return;
+    const next = prior.slice(i + 1).find(inCurrent);
+    out.splice(next ? out.findIndex((l) => key(l) === key(next)) : out.length, 0, { ...p, debit: '0.00', credit: '0.00', comparative: net(p) });
+  });
+  return out;
 }
 
 // ── Transactions for the drill-down (DAT-07) ──
@@ -428,11 +449,14 @@ export async function pullTrialBalance(actor: Actor, engagementId: string): Prom
   if (!conn) throw new ServiceError('This client is not connected to Xero yet.', 409, 'XERO_NOT_CONNECTED');
 
   const token = await accessTokenFor(conn);
-  const [accounts, report] = await Promise.all([
+  const [accounts, report, priorReport] = await Promise.all([
     xeroGet<{ Accounts: XeroAccount[] }>(`${API}/Accounts`, token, conn.tenant_id),
     xeroGet<unknown>(`${API}/Reports/TrialBalance?date=${eng.period_end}`, token, conn.tenant_id),
+    // Comparatives are a nicety: the import still goes ahead without them
+    xeroGet<unknown>(`${API}/Reports/TrialBalance?date=${sameDayLastYear(eng.period_end)}`, token, conn.tenant_id).catch(() => null),
   ]);
-  const lines = parseTrialBalance(report, accounts.Accounts ?? []);
+  const current = parseTrialBalance(report, accounts.Accounts ?? []);
+  const lines = priorReport ? withComparatives(current, parseTrialBalance(priorReport, accounts.Accounts ?? [])) : current;
   const out = importTrialBalance(actor, engagementId, lines, 'xero');
   if (out.status >= 400) return out;
 

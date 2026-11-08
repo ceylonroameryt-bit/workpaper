@@ -16,6 +16,7 @@ export interface TbLineInput {
   type?: string;
   debit?: string | number | null;
   credit?: string | number | null;
+  comparative?: string | number | null; // net balance a year earlier, debit positive
   external_id?: string; // the account's id in the ledger it came from
 }
 
@@ -61,7 +62,7 @@ export function importTrialBalance(
       const name = typeof l?.name === 'string' ? l.name.trim() : '';
       if (name.length > 200) problems.push(`Line ${row}: the account name is over 200 characters.`);
       if (!name) problems.push(`Line ${row} has no account name.`);
-      for (const side of ['debit', 'credit'] as const) {
+      for (const side of ['debit', 'credit', 'comparative'] as const) {
         if (!isAmount(l?.[side])) problems.push(`Line ${row} ${side} "${String(l[side])}" is not an amount.`);
       }
       let code = typeof l?.code === 'string' || typeof l?.code === 'number' ? String(l.code).trim() : '';
@@ -147,7 +148,10 @@ export function importTrialBalance(
         source_type: line.type,
         debit_p: debitP.toString(),
         credit_p: creditP.toString(),
+        ...(l.comparative != null ? { comparative_p: toPence(l.comparative).toString() } : {}),
       });
+      // An account with only last year's balance is shown on the report but has nothing to map
+      if (netBalance === 0n && l.comparative != null) return;
       db.account_mappings.push(services.buildMapping(actor.firmId, engagementId, `map_${snapshot.id}_${idx + 1}`, line, netBalance));
     });
 

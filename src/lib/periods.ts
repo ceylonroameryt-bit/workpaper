@@ -25,3 +25,6 @@ export function periodLabel(e: { period_start: string; period_end: string; frequ
   const name = e.period_start === standard ? NAME[f] : e.period_start < standard ? 'Long period' : 'Short period';
   return `${name} ended ${fmt(e.period_end)}`;
 }
+
+/** The same date a year earlier; 29 February falls back to the 28th. */
+export const sameDayLastYear = (d: string) => `${Number(d.slice(0, 4)) - 1}${d.slice(4).replace('-02-29', '-02-28')}`;

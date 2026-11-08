@@ -31,6 +31,11 @@ import {
 import { db } from '@/lib/server/db';
 import { toPence, asPence, formatPence, calculateVariance } from '@/lib/money';
 import { StatusBadge } from '@/components/ui/StatusPill';
+import { sameDayLastYear } from '@/lib/periods';
+
+const dateIn = (iso: string, month: 'long' | 'short') => (iso ? new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month, year: 'numeric', timeZone: 'UTC' }) : '');
+const longDate = (iso: string) => dateIn(iso, 'long');
+const shortDate = (iso: string) => dateIn(iso, 'short');
 
 export default function TrialBalancePage() {
   const params = useParams();
@@ -38,7 +43,7 @@ export default function TrialBalancePage() {
   const engagementId = (params?.id as string) || 'eng_harlow_fy26';
   const firmId = db.engagements.find((e) => e.id === engagementId)?.firm_id ?? 'firm_blynt_uk';
 
-  const [viewMode, setViewMode] = useState<'leads' | 'accounts'>('leads');
+  const [viewMode, setViewMode] = useState<'leads' | 'accounts'>('accounts');
   const [compareMode, setCompareMode] = useState<'py' | 'refresh'>('py');
   const [search, setSearch] = useState('');
   const [varianceThreshold] = useState(20); // 20% firm threshold
@@ -151,7 +156,7 @@ export default function TrialBalancePage() {
   const isLockedByUnmapped = unmappedBalancePence !== 0n;
 
   // Active snapshot
-  const snapshot = db.tb_snapshots.find((s) => s.engagement_id === engagementId);
+  const snapshot = db.tb_snapshots.filter((s) => s.engagement_id === engagementId).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
 
   // Lead schedules: grouped by the same Blynt codes each working paper uses (Ground rule 2)
   const leadSchedules = useMemo(() => {
@@ -247,15 +252,49 @@ export default function TrialBalancePage() {
     return mappings.reduce((sum, m) => sum + (asPence(m.balance_p) < 0n ? -asPence(m.balance_p) : 0n), 0n);
   }, [tbLines, mappings]);
 
-  const filteredAccounts = useMemo(() => {
-    return mappings.filter((m) => {
-      const matchSearch =
-        m.source_code.toLowerCase().includes(search.toLowerCase()) ||
-        m.source_name.toLowerCase().includes(search.toLowerCase()) ||
-        (m.blynt_code || '').toLowerCase().includes(search.toLowerCase());
-      return matchSearch;
+  const engagement = db.engagements.find((e) => e.id === engagementId);
+  const periodEnd = engagement?.period_end ?? '';
+  const priorEngagement = db.engagements.find((e) => e.id === engagement?.prior_engagement_id);
+  const comparativeDate = priorEngagement?.period_end ?? (periodEnd && sameDayLastYear(periodEnd));
+
+  // The report as the ledger gave it: every account in the ledger's own order
+  const tbRows = useMemo(() => {
+    const priorOf = (code: string) => {
+      const m = priorEngagement && db.account_mappings.find((p) => p.engagement_id === priorEngagement.id && p.source_code === code);
+      return m ? asPence(m.balance_p) : null;
+    };
+    if (tbLines.length > 0) {
+      return tbLines.map((l) => ({
+        code: l.source_code,
+        name: l.source_name,
+        type: l.source_type,
+        debit: asPence(l.debit_p),
+        credit: asPence(l.credit_p),
+        comparative: l.comparative_p !== undefined ? asPence(l.comparative_p) : priorOf(l.source_code),
+      }));
+    }
+    return mappings.map((m) => {
+      const bal = asPence(m.balance_p);
+      return { code: m.source_code, name: m.source_name, type: m.source_type, debit: bal > 0n ? bal : 0n, credit: bal < 0n ? -bal : 0n, comparative: priorOf(m.source_code) };
     });
-  }, [mappings, search]);
+  }, [tbLines, mappings, priorEngagement]);
+  const showComparative = tbRows.some((r) => r.comparative !== null);
+
+  const filteredRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return tbRows.filter((r) => `${r.code} ${r.name} ${r.type}`.toLowerCase().includes(q));
+  }, [tbRows, search]);
+
+  // Amounts as on the ledger's report: no currency sign, brackets for credits, a dash for nil
+  const plainAmount = (p: bigint) => (p === 0n ? '-' : formatPence(p, { accountingFormat: true, symbol: '' }));
+  const amountCell = (r: { code: string; name: string }, p: bigint) =>
+    p === 0n ? (
+      '-'
+    ) : (
+      <button type="button" onClick={() => setDrillAccount({ code: r.code, name: r.name })} className="hover:underline hover:text-[#1D4E89] cursor-pointer" title="See the transactions behind this figure">
+        {plainAmount(p)}
+      </button>
+    );
 
   // Overall totals strictly summed via BigInt (Ground rule 1 & 2)
   const totalDraftPence = leadSchedules.reduce((sum, l) => sum + l.draftPence, 0n);
@@ -668,6 +707,17 @@ export default function TrialBalancePage() {
           <div className="flex bg-[#F5F8FD] p-1 rounded-[10px] border border-[#D3DCEE]">
             <button
               type="button"
+              onClick={() => setViewMode('accounts')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
+                viewMode === 'accounts'
+                  ? 'bg-white text-[#122654] shadow-xs'
+                  : 'text-[#4A5878] hover:text-[#122654]'
+              }`}
+            >
+              Trial balance
+            </button>
+            <button
+              type="button"
               onClick={() => setViewMode('leads')}
               className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
                 viewMode === 'leads'
@@ -676,17 +726,6 @@ export default function TrialBalancePage() {
               }`}
             >
               Lead schedules
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('accounts')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
-                viewMode === 'accounts'
-                  ? 'bg-white text-[#122654] shadow-xs'
-                  : 'text-[#4A5878] hover:text-[#122654]'
-              }`}
-            >
-              All accounts
             </button>
           </div>
 
@@ -891,146 +930,45 @@ export default function TrialBalancePage() {
               </tbody>
             </table>
           ) : (
-            <table className="w-full text-left text-xs text-[#122654]">
-              <caption className="sr-only">All nominal accounts trial balance</caption>
-              <thead className="bg-[#F5F8FD] text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#E3E7EF]">
-                <tr>
-                  <th scope="col" className="p-3 pl-6">Account Code</th>
-                  <th scope="col" className="p-3">Account Name</th>
-                  <th scope="col" className="p-3">Blynt COA Mapping</th>
-                  <th scope="col" className="p-3 text-right">Debit</th>
-                  <th scope="col" className="p-3 text-right">Credit</th>
-                  <th scope="col" className="p-3 text-right">Net Balance</th>
-                  <th scope="col" className="p-3 text-right">Prior Year</th>
-                  <th scope="col" className="p-3 pr-6 text-right">Mapping Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E3E7EF]">
-                {filteredAccounts.map((m) => {
-                  const tbLine = tbLines.find((l) => l.source_code === m.source_code);
-                  const bal = asPence(m.balance_p);
-                  const debit = tbLine ? asPence(tbLine.debit_p) : (bal > 0n ? bal : 0n);
-                  const credit = tbLine ? asPence(tbLine.credit_p) : (bal < 0n ? -bal : 0n);
+            <div className="p-6">
+              <h2 className="text-xl font-extrabold text-[#122654]">Trial Balance</h2>
+              <p className="text-sm text-[#122654] mt-1">{engagementSummary(engagementId).clientName}</p>
+              <p className="text-sm text-[#122654]">As at {longDate(periodEnd)}</p>
 
-                  const priorId = db.engagements.find((e) => e.id === engagementId)?.prior_engagement_id;
-                  const priorMap = priorId
-                    ? db.account_mappings.find((pm) => pm.engagement_id === priorId && pm.source_code === m.source_code)
-                    : null;
-                  const priorPence = priorMap ? asPence(priorMap.balance_p) : null;
-                  const blyntAcc = m.blynt_code ? db.blynt_accounts.find((b) => b.code === m.blynt_code) : null;
-
-                  return (
-                    <tr key={m.id} className="hover:bg-[#F5F8FD] transition-colors">
-                      <td className="p-3 pl-6 font-mono font-bold text-[#122654]">
-                        {m.source_code || '—'}
-                      </td>
-                      <td className="p-3 font-semibold text-[#122654]">
-                        {m.source_name}
-                      </td>
-                      <td className="p-3">
-                        {m.blynt_code ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-[#EEF2F6] text-[#122654] border border-[#D3DCEE]">
-                            <span className="font-bold">{m.blynt_code}</span>
-                            <span className="text-[#4A5878]">({blyntAcc?.name || 'Mapped'})</span>
-                          </span>
-                        ) : (
-                          <span className="text-[#B8432F] font-semibold text-[11px]">Unmapped</span>
-                        )}
-                      </td>
-                      <td className="p-3 text-right font-mono-numbers">
-                        {debit > 0n ? (
-                          <button
-                            type="button"
-                            onClick={() => setDrillAccount({ code: m.source_code, name: m.source_name })}
-                            className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
-                            title="Drill down to transactions (DAT-07)"
-                          >
-                            {formatPence(debit, { accountingFormat: true })}
-                          </button>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                      <td className="p-3 text-right font-mono-numbers">
-                        {credit > 0n ? (
-                          <button
-                            type="button"
-                            onClick={() => setDrillAccount({ code: m.source_code, name: m.source_name })}
-                            className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
-                            title="Drill down to transactions (DAT-07)"
-                          >
-                            {formatPence(credit, { accountingFormat: true })}
-                          </button>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                      <td className="p-3 text-right font-mono-numbers font-bold text-[#122654]">
-                        <button
-                          type="button"
-                          onClick={() => setDrillAccount({ code: m.source_code, name: m.source_name })}
-                          className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
-                          title="Drill down to transactions (DAT-07)"
-                        >
-                          {formatPence(bal, { accountingFormat: true })}
-                        </button>
-                      </td>
-                      <td className="p-3 text-right font-mono-numbers text-[#4A5878]">
-                        {priorPence !== null ? (
-                          <button
-                            type="button"
-                            onClick={() => setDrillAccount({ code: m.source_code, name: `${m.source_name} (Prior Year)` })}
-                            className="underline decoration-dotted hover:decoration-solid hover:text-[#1D4E89] cursor-pointer"
-                            title="Drill down to prior-year transactions (DAT-07)"
-                          >
-                            {formatPence(priorPence, { accountingFormat: true })}
-                          </button>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                      <td className="p-3 pr-6 text-right">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
-                            m.status === 'confirmed'
-                              ? 'bg-[#E6F4EA] text-[#0B6B52]'
-                              : m.status === 'needs_you'
-                              ? 'bg-[#FDE8E8] text-[#9B1C1C]'
-                              : 'bg-[#FFF4DB] text-[#6B4700]'
-                          }`}
-                        >
-                          {m.status === 'confirmed' ? '✓ Confirmed' : m.status === 'needs_you' ? 'Action needed' : 'Suggested'}
-                        </span>
-                      </td>
+              <table className="w-full text-left text-xs text-[#122654] mt-5">
+                <caption className="sr-only">Trial balance</caption>
+                <thead className="text-[#4A5878] uppercase text-[10px] font-bold tracking-wider border-b border-[#D3DCEE] align-bottom">
+                  <tr>
+                    <th scope="col" className="py-2 pr-3">Account Code</th>
+                    <th scope="col" className="py-2 pr-3">Account</th>
+                    <th scope="col" className="py-2 pr-3">Account Type</th>
+                    <th scope="col" className="py-2 pl-3 text-right">Debit - Year to Date</th>
+                    <th scope="col" className="py-2 pl-3 text-right">Credit - Year to Date</th>
+                    {showComparative && <th scope="col" className="py-2 pl-3 text-right whitespace-nowrap">{shortDate(comparativeDate)}</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E3E7EF]">
+                  {filteredRows.map((r) => (
+                    <tr key={r.code || r.name} className="hover:bg-[#F5F8FD] transition-colors">
+                      <td className="py-2 pr-3 font-mono">{r.code.startsWith('ACC-') ? '' : r.code}</td>
+                      <td className="py-2 pr-3">{r.name}</td>
+                      <td className="py-2 pr-3">{r.type === 'General' ? '' : r.type}</td>
+                      <td className="py-2 pl-3 text-right font-mono-numbers">{amountCell(r, r.debit)}</td>
+                      <td className="py-2 pl-3 text-right font-mono-numbers">{amountCell(r, r.credit)}</td>
+                      {showComparative && <td className="py-2 pl-3 text-right font-mono-numbers">{plainAmount(r.comparative ?? 0n)}</td>}
                     </tr>
-                  );
-                })}
-
-                {/* Total Row */}
-                <tr className="bg-[#F5F8FD] font-bold border-t-2 border-[#122654]">
-                  <td className="p-4 pl-6" colSpan={3}>
-                    Total Nominal Accounts ({filteredAccounts.length})
-                  </td>
-                  <td className="p-4 text-right font-mono-numbers text-[#122654]">
-                    {formatPence(totalTbDebits, { accountingFormat: true })}
-                  </td>
-                  <td className="p-4 text-right font-mono-numbers text-[#122654]">
-                    {formatPence(totalTbCredits, { accountingFormat: true })}
-                  </td>
-                  <td className="p-4 text-right font-mono-numbers text-sm text-[#0B6B52]">
-                    {formatPence(totalTbDebits - totalTbCredits, { accountingFormat: true })}
-                  </td>
-                  <td className="p-4 text-right font-mono-numbers text-[#4A5878]">
-                    —
-                  </td>
-                  <td className="p-4 pr-6 text-right">
-                    <span className="text-[11px] text-[#0B6B52] font-semibold">
-                      Balanced £0.00
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="font-bold border-t-2 border-[#122654]">
+                    <td className="py-2.5 pr-3" colSpan={3}>Total</td>
+                    <td className="py-2.5 pl-3 text-right font-mono-numbers">{plainAmount(totalTbDebits)}</td>
+                    <td className="py-2.5 pl-3 text-right font-mono-numbers">{plainAmount(totalTbCredits)}</td>
+                    {showComparative && <td className="py-2.5 pl-3 text-right font-mono-numbers">{plainAmount(tbRows.reduce((sum, r) => sum + (r.comparative ?? 0n), 0n))}</td>}
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           )}
         </div>
       </div>

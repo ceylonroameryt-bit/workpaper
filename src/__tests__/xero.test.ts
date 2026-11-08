@@ -9,6 +9,8 @@ vi.mock('@/lib/server/store', () => ({
 }));
 
 import { db } from '../lib/server/db';
+import { importTrialBalance } from '../lib/server/tb-import';
+import { sameDayLastYear } from '../lib/periods';
 import { createSessionToken, SESSION_COOKIE } from '../lib/server/auth';
 import {
   XERO_SCOPES,
@@ -18,6 +20,7 @@ import {
   encryptToken,
   decryptToken,
   parseTrialBalance,
+  withComparatives,
 } from '../lib/server/xero';
 import { GET as connect } from '../app/api/v1/integrations/xero/connect/route';
 import { GET as callback } from '../app/api/v1/integrations/xero/callback/route';
@@ -169,6 +172,41 @@ describe('Xero client', () => {
       { code: '090', name: 'Business Bank Account', type: 'Bank', debit: '20000.00', credit: '0.00', external_id: 'acc-090' },
       { code: '970', name: 'Owner A Funds Introduced', type: 'Equity', debit: '0.00', credit: '10000.00', external_id: 'acc-970' },
     ]);
+  });
+});
+
+describe('Last year on the trial balance', () => {
+  const line = (code: string, debit: string, credit: string) => ({ code, name: code, type: 'Overhead', debit, credit, external_id: code });
+
+  it('adds comparatives and keeps prior-only accounts in the ledger’s order', () => {
+    const out = withComparatives(
+      [line('200', '0.00', '100.00'), line('401', '100.00', '0.00')],
+      [line('200', '0.00', '90.00'), line('325', '60.00', '0.00'), line('401', '30.00', '0.00')]
+    );
+    expect(out.map((l) => [l.code, l.debit, l.credit, l.comparative])).toEqual([
+      ['200', '0.00', '100.00', '-90.00'],
+      ['325', '0.00', '0.00', '60.00'],
+      ['401', '100.00', '0.00', '30.00'],
+    ]);
+  });
+
+  it('a prior-only account is reported but needs no mapping', () => {
+    const lines = [
+      { code: '200', name: 'Sales', type: 'Revenue', debit: '0.00', credit: '100.00', comparative: '-90.00' },
+      { code: '325', name: 'Direct Expenses', type: 'Direct Costs', debit: '0.00', credit: '0.00', comparative: '60.00' },
+      { code: '090', name: 'Bank', type: 'Bank', debit: '100.00', credit: '0.00', comparative: '30.00' },
+    ];
+    const eng = db.engagements[0];
+    const out = importTrialBalance({ id: 'usr_admin', name: 'A', role: 'admin', firmId: eng.firm_id }, eng.id, lines, 'xero');
+    expect(out.status).toBe(201);
+    const rows = db.tb_lines.filter((l) => l.snapshot_id === out.body.snapshot.id);
+    expect(rows.map((l) => l.comparative_p)).toEqual(['-9000', '6000', '3000']);
+    expect(db.account_mappings.filter((m) => m.engagement_id === eng.id).map((m) => m.source_code)).toEqual(['200', '090']);
+  });
+
+  it('works out last year’s date', () => {
+    expect(sameDayLastYear('2026-04-05')).toBe('2025-04-05');
+    expect(sameDayLastYear('2024-02-29')).toBe('2023-02-28');
   });
 });
 

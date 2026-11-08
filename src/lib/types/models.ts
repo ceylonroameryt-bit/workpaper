@@ -296,6 +296,7 @@ export interface TbLine {
   source_type: string;
   debit_p: string; // stored as string for exact bigint serialization
   credit_p: string;
+  comparative_p?: string; // net balance a year earlier, debit positive, when the ledger gave one
 }
 
 export interface AccountMapping {
