@@ -99,3 +99,22 @@ export const STANDARD_CHART: BlyntAccount[] = [
   { code: "930", name: "Payment clearing", type: "System", normal_balance: "Mixed", lead_letter: "S", is_control: true, is_system: true, statutory_line: "Clearing - must be zero", schedule_ref: "REC-16", cash_flow_category: "Operating activities" },
   { code: "999", name: "System balancing account", type: "System", normal_balance: "Mixed", lead_letter: "S", is_control: true, is_system: true, statutory_line: "System balance - must be zero", schedule_ref: "REC-16", cash_flow_category: "Operating activities" },
 ];
+
+const OWNER_LINES = { sole: "Proprietor's capital account", partnership: "Partners' capital and current accounts", llp: "Members' interests" } as const;
+
+const owner = (code: string, name: string, structure: keyof typeof OWNER_LINES, normal_balance: 'Debit' | 'Credit' = 'Credit'): BlyntAccount => ({
+  code, name, structure, normal_balance, type: 'Equity', lead_letter: 'Z', is_control: false, is_system: true,
+  statutory_line: OWNER_LINES[structure], schedule_ref: 'REC-12', cash_flow_category: 'Financing activities',
+});
+
+/** Add-ons for businesses without shares. Kept apart so the 96 Blynt accounts above stay exactly as published. */
+export const OWNER_ACCOUNTS: BlyntAccount[] = [
+  owner('851', "Proprietor's capital", 'sole'),
+  owner('852', 'Drawings', 'sole', 'Debit'),
+  owner('853', "Partners' capital", 'partnership'),
+  owner('854', "Partners' current accounts", 'partnership'),
+  owner('855', "Partners' drawings", 'partnership', 'Debit'),
+  owner('856', "Members' capital", 'llp'),
+  owner('857', "Members' current accounts", 'llp'),
+  owner('858', "Members' drawings", 'llp', 'Debit'),
+];

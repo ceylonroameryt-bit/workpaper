@@ -63,4 +63,29 @@ describe('account selection menu', () => {
     expect(input.value).toBe('200 Purchases');
     expect(onPick).not.toHaveBeenCalled();
   });
+
+  it('pre-fills the ledger name and can use a similar existing account instead', () => {
+    const onPick = vi.fn();
+    render(<AccountPicker value="100" label="Account" firmId="firm_blynt_uk" suggestName="Repairs" onPick={onPick} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Create a new account' }));
+    const dialog = screen.getByRole('dialog', { name: 'New account' });
+    expect((within(dialog).getByPlaceholderText('e.g. Website hosting') as HTMLInputElement).value).toBe('Repairs');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Use 420 Repairs and maintenance' }));
+    expect(onPick).toHaveBeenCalledWith('420');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('creates a new account in a dialog with the typed name, closing the menu', () => {
+    const { input } = setup();
+    fireEvent.click(input);
+    fireEvent.change(input, { target: { value: 'website hosting' } });
+    fireEvent.click(screen.getByRole('button', { name: /Create .website hosting/ }));
+
+    const dialog = screen.getByRole('dialog', { name: 'New account' });
+    expect(screen.queryByRole('listbox')).toBeNull();
+    expect((within(dialog).getByPlaceholderText('e.g. Website hosting') as HTMLInputElement).value).toBe('website hosting');
+
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
 });

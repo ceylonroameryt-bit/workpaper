@@ -247,6 +247,10 @@ export interface BlyntAccount {
   firm_id?: string;
   /** The standard account a practice account is classified like */
   parent_code?: string;
+  /** Set when a practice account was added for one client; only that client sees it */
+  client_id?: string;
+  /** Set on owner accounts that only one type of business uses */
+  structure?: 'sole' | 'partnership' | 'llp';
 }
 
 export interface MappingList {

@@ -1,4 +1,5 @@
-import { STANDARD_CHART } from '@/lib/standard-chart';
+import { OWNER_ACCOUNTS, STANDARD_CHART } from '@/lib/standard-chart';
+import type { Structure } from '@/lib/practice-structure';
 
 export interface MappingSuggestion {
   blynt_code: string;
@@ -15,11 +16,26 @@ export interface MappingSuggestion {
 export function matchBlyntAccount(
   sourceName: string,
   sourceType: string = '',
-  sourceCode: string = ''
+  sourceCode: string = '',
+  structure?: Structure
 ): MappingSuggestion | null {
   // A client's nominal code only coincides with the Blynt chart by chance, so only the name and type decide
   void sourceCode;
-  return strip(matchByName(sourceName, sourceType));
+  return matchOwnerAccount(sourceName, structure) ?? strip(matchByName(sourceName, sourceType));
+}
+
+/** Capital, current and drawings accounts of a business without shares. */
+function matchOwnerAccount(name: string, structure?: Structure): MappingSuggestion | null {
+  const owned = OWNER_ACCOUNTS.filter((a) => a.structure === structure);
+  const pick = (pattern: RegExp) => owned.find((a) => pattern.test(a.name));
+  const acc = /drawing/i.test(name)
+    ? pick(/drawing/i)
+    : /(partner|member)\S*\s+current/i.test(name)
+      ? pick(/current/i)
+      : /funds introduced|capital (account|introduced)|(owner|proprietor|partner|member)\S*\s+capital|^\s*capital\s*$/i.test(name)
+        ? pick(/capital/i)
+        : undefined;
+  return acc ? { blynt_code: acc.code, name: acc.name, confidence: 96, reason: `${acc.name} for this type of business`, lead_letter: acc.lead_letter } : null;
 }
 
 const strip = ({ fallback: _f, ...s }: MappingSuggestion & { fallback?: boolean }): MappingSuggestion => s;
@@ -465,7 +481,7 @@ export function getStatutoryDetails(
 
   // The standard chart carries each account's statutory line, schedule and cash flow category.
   // REC-01 is the schedule framework, not a schedule, so income and expense lines leave it blank.
-  const acct = STANDARD_CHART.find((a) => a.code === code);
+  const acct = [...STANDARD_CHART, ...OWNER_ACCOUNTS].find((a) => a.code === code);
   if (acct?.statutory_line && acct.cash_flow_category) {
     return {
       statutory_line: acct.statutory_line,
