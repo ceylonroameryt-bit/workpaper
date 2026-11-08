@@ -15,6 +15,8 @@ interface Status {
 
 interface PullResult {
   lineCount: number;
+  transactionCount?: number;
+  notGathered?: string[];
   changes: { account_code: string; account_name: string; diff_p: string; direction: string }[];
   mapping: { by_rule: number; ready: number; check: number; exception: number };
 }
@@ -201,6 +203,12 @@ export function LedgerPanel({ provider, clientId, engagementId, reconnectNeeded 
             {result.lineCount} accounts pulled from {P.name}. {result.mapping.by_rule} mapped by your rules, {result.mapping.ready} ready to confirm,{' '}
             {result.mapping.check} to check, {result.mapping.exception} to map by hand.
           </p>
+          {result.transactionCount !== undefined && <p>{result.transactionCount.toLocaleString('en-GB')} transactions gathered for the drill-down.</p>}
+          {result.notGathered?.length ? (
+            <p className="text-[#6B4700]">
+              Could not gather {result.notGathered.join(', ')}. Disconnect and reconnect {P.name} for this client to allow it, then pull again.
+            </p>
+          ) : null}
           {result.changes.length > 0 ? (
             <div>
               <p className="font-semibold mb-1">Changed since the last pull</p>

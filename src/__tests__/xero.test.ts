@@ -39,6 +39,9 @@ const post = (url: string, body: unknown, method = 'POST', uid = 'usr_admin') =>
 const ACCOUNTS = {
   Accounts: [
     { AccountID: 'acc-090', Code: '090', Name: 'Business Bank Account', Type: 'BANK', Class: 'ASSET' },
+    { AccountID: 'acc-091', Code: '091', Name: 'Savings', Type: 'BANK', Class: 'ASSET' },
+    { AccountID: 'acc-610', Code: '610', Name: 'Accounts Receivable', Type: 'CURRENT', Class: 'ASSET', SystemAccount: 'DEBTORS' },
+    { AccountID: 'acc-800', Code: '800', Name: 'Accounts Payable', Type: 'CURRLIAB', Class: 'LIABILITY', SystemAccount: 'CREDITORS' },
     { AccountID: 'acc-200', Code: '200', Name: 'Sales', Type: 'REVENUE', Class: 'REVENUE' },
     { AccountID: 'acc-429', Code: '429', Name: 'General Expenses', Type: 'EXPENSE', Class: 'EXPENSE' },
     { AccountID: 'acc-970', Code: '970', Name: 'Owner A Funds Introduced', Type: 'EQUITY', Class: 'EQUITY' },
@@ -85,13 +88,28 @@ const BANK_TXS = [
   { BankTransactionID: 'bt-1', Type: 'SPEND', Status: 'AUTHORISED', Date: '/Date(1780000000000+0000)/', Contact: { Name: 'Stationers' }, BankAccount: { Code: '090' },
     LineItems: [{ AccountCode: '429', Description: 'Paper', LineAmount: 30, TaxAmount: 6 }] },
 ];
+const CREDIT_NOTES = [
+  { CreditNoteID: 'cn-1', Type: 'ACCRECCREDIT', Status: 'AUTHORISED', DateString: '2026-06-01T00:00:00', Contact: { Name: 'Acme Ltd' },
+    LineItems: [{ AccountCode: '200', Description: 'Refund', LineAmount: 100, TaxAmount: 20 }] },
+  { CreditNoteID: 'cn-2', Type: 'ACCRECCREDIT', Status: 'VOIDED', DateString: '2026-06-02T00:00:00', Contact: { Name: 'Void Ltd' },
+    LineItems: [{ AccountCode: '200', LineAmount: 5, TaxAmount: 0 }] },
+];
+const PAYMENTS = [
+  { PaymentID: 'pay-1', PaymentType: 'ACCRECPAYMENT', Status: 'AUTHORISED', DateString: '2026-06-10T00:00:00', Amount: 1200, Account: { Code: '090' }, Reference: 'Receipt', Invoice: { InvoiceID: 'inv-1', Contact: { Name: 'Acme Ltd' } } },
+  { PaymentID: 'pay-2', PaymentType: 'ARCREDITPAYMENT', Status: 'AUTHORISED', DateString: '2026-06-11T00:00:00', Amount: 50, Account: { Code: '090' } },
+  { PaymentID: 'pay-3', PaymentType: 'ACCPAYPAYMENT', Status: 'DELETED', DateString: '2026-06-12T00:00:00', Amount: 70, Account: { Code: '090' } },
+];
+const TRANSFERS = [{ BankTransferID: 'bx-1', DateString: '2026-06-15T00:00:00', Amount: 500, FromBankAccount: { Code: '090' }, ToBankAccount: { Code: '091' } }];
+const INCLUSIVE = [{ InvoiceID: 'inv-3', Type: 'ACCREC', Status: 'AUTHORISED', LineAmountTypes: 'Inclusive', DateString: '2026-06-20T00:00:00', Contact: { Name: 'Gross Ltd' },
+  LineItems: [{ AccountCode: '200', LineAmount: 120, TaxAmount: 20 }] }];
+
 const JOURNALS = [
   { ManualJournalID: 'mj-1', Status: 'POSTED', DateString: '2026-09-30T00:00:00', Narration: 'Year-end accrual',
     JournalLines: [{ AccountCode: '429', LineAmount: 75, Description: 'Accrual' }, { AccountCode: '970', LineAmount: -75 }] },
 ];
 
 /** A fake Xero: answers the token, connections and accounting endpoints and records each call. */
-function fakeXero(opts: { tb?: () => unknown; tokenError?: string } = {}) {
+function fakeXero(opts: { tb?: () => unknown; tokenError?: string; noExtras?: boolean; transfers?: unknown[]; invoices?: unknown[] } = {}) {
   const calls: { url: string; init?: RequestInit }[] = [];
   let tokenCount = 0;
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -109,7 +127,11 @@ function fakeXero(opts: { tb?: () => unknown; tokenError?: string } = {}) {
     if (url.startsWith('https://api.xero.com/api.xro/2.0/Reports/TrialBalance')) return json((opts.tb ?? trialBalance)());
     // One page of each document type; page 2 is empty
     const page2 = url.includes('page=2');
-    if (url.startsWith('https://api.xero.com/api.xro/2.0/Invoices')) return json({ Invoices: page2 ? [] : INVOICES });
+    if (url.startsWith('https://api.xero.com/api.xro/2.0/Invoices')) return json({ Invoices: page2 ? [] : opts.invoices ?? INVOICES });
+    if (!opts.noExtras && url.startsWith('https://api.xero.com/api.xro/2.0/CreditNotes')) return json({ CreditNotes: page2 ? [] : CREDIT_NOTES });
+    if (!opts.noExtras && url.startsWith('https://api.xero.com/api.xro/2.0/Payments')) return json({ Payments: page2 ? [] : PAYMENTS });
+    // Transfers ignore the page number, as Xero may
+    if (!opts.noExtras && url.startsWith('https://api.xero.com/api.xro/2.0/BankTransfers')) return json({ BankTransfers: opts.transfers ?? TRANSFERS });
     if (url.startsWith('https://api.xero.com/api.xro/2.0/BankTransactions')) return json({ BankTransactions: page2 ? [] : BANK_TXS });
     if (url.startsWith('https://api.xero.com/api.xro/2.0/ManualJournals')) return json({ ManualJournals: page2 ? [] : JOURNALS });
     return json({ error: 'unexpected' }, 404);
@@ -145,6 +167,7 @@ describe('Xero client', () => {
     expect(scopes.every((s) => !s.endsWith('accounting.transactions') && !s.endsWith('accounting.settings'))).toBe(true); // read-only
     // Retired for apps created on or after 2 March 2026 (Xero returns invalid_scope)
     for (const retired of ['accounting.transactions', 'accounting.transactions.read', 'accounting.reports.read']) expect(scopes).not.toContain(retired);
+    expect(scopes).toContain('accounting.payments.read');
     // Needs Xero's approval, so not requested until we use it
     expect(scopes).not.toContain('accounting.journals.read');
     expect(scopes).toContain('accounting.reports.trialbalance.read');
@@ -314,6 +337,50 @@ describe('Pulling the trial balance from Xero', () => {
     fakeXero();
     await sync(post('/api/v1/integrations/xero/sync', { engagementId: ENG }));
     expect(db.transactions.filter((x) => x.engagement_id === ENG && x.source === 'Xero')).toHaveLength(tx.length);
+  });
+
+  it('gathers credit notes, payments and transfers with the debtors, creditors and bank sides', async () => {
+    await connected();
+    fakeXero({ invoices: [...INVOICES, ...INCLUSIVE] });
+    const res = await sync(post('/api/v1/integrations/xero/sync', { engagementId: ENG }));
+    const body = await res.json();
+    expect(body.notGathered).toBeUndefined();
+    const tx = db.transactions.filter((x) => x.engagement_id === ENG && x.source === 'Xero');
+    const of = (id: string) => tx.filter((x) => x.external_id === id).map((x) => [x.account_code, x.amount_p, x.vat_p]);
+    // The invoice debits debtors with the gross
+    expect(of('inv-1')).toEqual([['200', '-100000', '-20000'], ['610', '120000', '0']]);
+    // A tax-inclusive line is split into net and tax, and still totals the gross
+    expect(of('inv-3')).toEqual([['200', '-10000', '-2000'], ['610', '12000', '0']]);
+    // A sales credit note reverses it; voided ones are not in the ledger
+    expect(of('cn-1')).toEqual([['200', '10000', '2000'], ['610', '-12000', '0']]);
+    expect(of('cn-2')).toEqual([]);
+    // Payments of invoices only: bank in, debtors out. Credit-note refunds and deleted payments are skipped
+    expect(of('pay-1')).toEqual([['090', '120000', '0'], ['610', '-120000', '0']]);
+    expect(of('pay-2')).toEqual([]);
+    expect(of('pay-3')).toEqual([]);
+    expect(tx.find((x) => x.external_id === 'pay-1')!.contact).toBe('Acme Ltd');
+    expect(of('bx-1')).toEqual([['091', '50000', '0'], ['090', '-50000', '0']]);
+    // Every document nets to nil, so each account's drill-down ties
+    for (const id of new Set(tx.map((x) => x.external_id))) {
+      expect(tx.filter((x) => x.external_id === id).reduce((sum, x) => sum + BigInt(x.amount_p) + BigInt(x.vat_p), 0n)).toBe(0n);
+    }
+  });
+
+  it('carries on and says what it could not gather, e.g. a connection made before payments were requested', async () => {
+    await connected();
+    fakeXero({ noExtras: true });
+    const res = await sync(post('/api/v1/integrations/xero/sync', { engagementId: ENG }));
+    expect(res.status).toBe(201);
+    expect((await res.json()).notGathered).toEqual(['credit notes', 'payments', 'bank transfers']);
+    expect(db.transactions.some((x) => x.external_id === 'inv-1')).toBe(true);
+  });
+
+  it('an endpoint that ignores the page number does not repeat its rows', async () => {
+    await connected();
+    const many = Array.from({ length: 100 }, (_, i) => ({ BankTransferID: `bx-${i}`, DateString: '2026-06-15T00:00:00', Amount: 1, FromBankAccount: { Code: '090' }, ToBankAccount: { Code: '091' } }));
+    fakeXero({ transfers: many });
+    await sync(post('/api/v1/integrations/xero/sync', { engagementId: ENG }));
+    expect(db.transactions.filter((x) => x.external_id?.startsWith('bx-') && x.account_code === '091')).toHaveLength(100);
   });
 
   it('a late posting in Xero shows up on the next pull', async () => {
