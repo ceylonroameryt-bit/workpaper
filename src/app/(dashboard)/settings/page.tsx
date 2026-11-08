@@ -19,6 +19,7 @@ import {
 import { db } from '@/lib/server/db';
 import { StaffManager } from '@/components/settings/StaffManager';
 import { getCurrentUserId } from '@/lib/session';
+import { BackupCodesCard } from '@/components/settings/BackupCodes';
 
 export default function PracticeSettingsPage() {
 
@@ -988,6 +989,8 @@ export default function PracticeSettingsPage() {
                 Enforced ✓
               </span>
             </div>
+
+            <BackupCodesCard />
 
             <div className="flex items-center justify-between p-4 bg-[#F5F8FD] rounded-xl border border-[#E3E7EF]">
               <div>

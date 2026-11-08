@@ -67,3 +67,16 @@ export const verifyTotp = (secret: string, code: string, atMs = Date.now()) => t
 
 export const otpauthUri = (secret: string, email: string) =>
   `otpauth://totp/${encodeURIComponent(`Blynt Workpapers:${email}`)}?secret=${secret}&issuer=${encodeURIComponent('Blynt Workpapers')}`;
+
+const BACKUP_ALPHABET = 'abcdefghijklmnopqrstuvwxyz234567';
+const hashBackupCode = (code: string) => crypto.createHash('sha256').update(code.toLowerCase().replace(/[\s-]/g, '')).digest('hex');
+
+/** Ten one-time codes for when the authenticator is unavailable. Only the hashes are kept. */
+export function generateBackupCodes(): { codes: string[]; hashes: string[] } {
+  const part = () => Array.from({ length: 4 }, () => BACKUP_ALPHABET[crypto.randomInt(BACKUP_ALPHABET.length)]).join('');
+  const codes = Array.from({ length: 10 }, () => `${part()}-${part()}`);
+  return { codes, hashes: codes.map(hashBackupCode) };
+}
+
+/** Position of the matching stored hash, or -1. */
+export const backupCodeIndex = (hashes: string[] | undefined, code: string) => (hashes ?? []).indexOf(hashBackupCode(code));

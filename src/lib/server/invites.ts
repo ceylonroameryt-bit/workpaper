@@ -145,6 +145,8 @@ export function resetPassword(token: string, password: string) {
   cred.password_hash = hashPassword(password);
   delete cred.reset_token_hash;
   delete cred.reset_expires_at;
+  // A reset may follow a compromise, so remembered devices must prove themselves again
+  cred.mfa_trust_version = (cred.mfa_trust_version ?? 0) + 1;
   const member = db.memberships.find((m) => m.user_id === cred.user_id);
   if (member && user) db.logAudit(member.firm_id, { id: user.id, name: user.name, role: member.role }, 'RESET_PASSWORD', 'users', user.id, null, { reset: true });
   return { email: user?.email ?? '' };

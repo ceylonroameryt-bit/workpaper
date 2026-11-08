@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AlertCircle, KeyRound } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { AuthBrandPanel } from '@/components/layout/AuthBrandPanel';
+import { BackupCodesList } from '@/components/settings/BackupCodes';
 
 export default function MfaVerificationPage() {
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
@@ -12,6 +13,10 @@ export default function MfaVerificationPage() {
   const [enrolment, setEnrolment] = useState<{ secret: string; otpauth: string } | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [remember, setRemember] = useState(false);
+  const [useBackup, setUseBackup] = useState(false);
+  const [backupInput, setBackupInput] = useState('');
+  const [newCodes, setNewCodes] = useState<string[] | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -68,6 +73,11 @@ export default function MfaVerificationPage() {
     }
   };
 
+  const goToApp = () => {
+    const from = new URLSearchParams(window.location.search).get('from');
+    window.location.href = from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
+  };
+
   const triggerVerification = async (code: string) => {
     if (isVerifying) return;
     setIsVerifying(true);
@@ -76,16 +86,18 @@ export default function MfaVerificationPage() {
       const res = await fetch('/api/v1/auth/mfa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, remember }),
       });
+      const body = await res.json().catch(() => ({}));
       if (res.ok) {
-        const from = new URLSearchParams(window.location.search).get('from');
-        window.location.href = from && from.startsWith('/') && !from.startsWith('//') ? from : '/';
+        // First set-up: the codes are shown once, so stay here until they are saved
+        if (body.backup_codes?.length) setNewCodes(body.backup_codes);
+        else goToApp();
         return;
       }
-      const body = await res.json().catch(() => ({}));
       setErrorMessage(body.error || 'Verification failed. Please try again.');
       setDigits(['', '', '', '', '', '']);
+      setBackupInput('');
       inputRefs.current[0]?.focus();
     } catch {
       setErrorMessage('Could not reach the server. Please try again.');
@@ -96,6 +108,11 @@ export default function MfaVerificationPage() {
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (useBackup) {
+      if (!backupInput.trim()) return setErrorMessage('Enter one of your backup codes.');
+      triggerVerification(backupInput);
+      return;
+    }
     const code = digits.join('');
     if (code.length < 6) {
       setErrorMessage('Please enter all 6 verification digits.');
@@ -103,6 +120,30 @@ export default function MfaVerificationPage() {
     }
     triggerVerification(code);
   };
+
+  if (newCodes) {
+    return (
+      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F5F8FD] text-[#122654]">
+        <AuthBrandPanel />
+        <div className="lg:col-span-6 xl:col-span-7 bg-white p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-center">
+          <div className="max-w-[420px] w-full">
+            <h2 className="text-2xl font-bold tracking-tight text-[#122654]">Save your backup codes</h2>
+            <p className="text-xs text-[#4A5878] mt-1.5 mb-6">
+              If you lose your phone, each code signs you in once. Keep them somewhere safe. They won&apos;t be shown again.
+            </p>
+            <BackupCodesList codes={newCodes} />
+            <button
+              type="button"
+              onClick={goToApp}
+              className="w-full min-h-[44px] mt-4 bg-[#122654] hover:bg-[#0B1A3B] text-white font-bold text-xs rounded-[10px] shadow-sm cursor-pointer"
+            >
+              I&apos;ve saved these codes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F5F8FD] text-[#122654]">
@@ -117,7 +158,9 @@ export default function MfaVerificationPage() {
             <p className="text-xs text-[#4A5878] mt-1.5">
               {step === 'setup'
                 ? 'Two-factor sign-in is required. Scan the QR code with your authenticator app (Google Authenticator, Microsoft Authenticator or 1Password), then enter the 6-digit code it shows.'
-                : 'Enter the 6-digit code from your authenticator app.'}
+                : useBackup
+                  ? 'Enter one of the backup codes you saved. Each code works once.'
+                  : 'Enter the 6-digit code from your authenticator app.'}
             </p>
           </div>
 
@@ -158,6 +201,25 @@ export default function MfaVerificationPage() {
           )}
 
           <form onSubmit={handleManualSubmit} className="flex flex-col gap-4">
+            {useBackup ? (
+              <div>
+                <label htmlFor="backup-code" className="block text-xs font-semibold text-[#122654] mb-1.5">Backup code</label>
+                <input
+                  id="backup-code"
+                  type="text"
+                  autoComplete="off"
+                  autoFocus
+                  spellCheck={false}
+                  placeholder="xxxx-xxxx"
+                  value={backupInput}
+                  onChange={(e) => {
+                    setErrorMessage('');
+                    setBackupInput(e.target.value);
+                  }}
+                  className="w-full min-h-[44px] px-3.5 font-mono text-sm bg-[#F5F8FD] border border-[#D3DCEE] rounded-[10px] text-[#122654] outline-none focus:border-[#FF7A66] focus:ring-2 focus:ring-[#FF7A66]/20"
+                />
+              </div>
+            ) : (
             <div>
               <label className="block text-xs font-semibold text-[#122654] mb-1.5">6-digit security code</label>
               <div className="flex items-center justify-between gap-2" onPaste={handlePaste}>
@@ -180,6 +242,17 @@ export default function MfaVerificationPage() {
                 ))}
               </div>
             </div>
+            )}
+
+            <label className="flex items-center gap-2 text-xs text-[#122654] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="w-4 h-4 rounded border-[#D3DCEE]"
+              />
+              <span>Remember this device for 30 days</span>
+            </label>
 
             <button
               type="submit"
@@ -188,6 +261,19 @@ export default function MfaVerificationPage() {
             >
               {isVerifying ? 'Verifying…' : 'Verify & continue'}
             </button>
+
+            {step === 'verify' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setUseBackup(!useBackup);
+                  setErrorMessage('');
+                }}
+                className="text-xs font-semibold text-[#B8432F] hover:underline self-center cursor-pointer"
+              >
+                {useBackup ? 'Use your authenticator app instead' : 'Use a backup code instead'}
+              </button>
+            )}
           </form>
 
           <div className="mt-8 pt-6 border-t border-[#E3E7EF] text-center text-xs text-[#4A5878]">
