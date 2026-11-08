@@ -13,7 +13,6 @@ import {
   Lock,
   Unlock,
   X,
-  Pencil,
 } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { AccountMapping, LearnedRule } from '@/lib/types/models';
@@ -69,7 +68,8 @@ export default function AccountMappingPage() {
   // Load from db
   const reloadData = () => {
     const list = db.account_mappings.filter((m) => m.engagement_id === engagementId);
-    setMappings([...list]);
+    // Ledger code order, as on the trial balance (numeric, so 200 comes before 1000)
+    setMappings([...list].sort((a, b) => a.source_code.localeCompare(b.source_code, undefined, { numeric: true })));
   };
 
   useEffect(() => {
@@ -802,6 +802,8 @@ export default function AccountMappingPage() {
                       activeDetailId === row.id ? 'bg-[#EAF5FC]/50' : ''
                     } ${isSignMismatch ? 'bg-amber-50/20' : ''}`}
                     onClick={() => setActiveDetailId(row.id)}
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && e.target === e.currentTarget && setActiveDetailId(row.id)}
                   >
                     <td className="p-3 pl-4" onClick={(e) => e.stopPropagation()}>
                       <input
@@ -925,15 +927,6 @@ export default function AccountMappingPage() {
                             Confirm
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => setActiveDetailId(row.id)}
-                          className="px-2 py-1 text-[11px] font-semibold text-[#122654] hover:bg-[#EAF5FC] border border-[#D3DCEE] hover:border-[#122654] rounded-lg flex items-center gap-1 transition-colors"
-                          title="Open account facts, evidence and rules"
-                        >
-                          <Pencil className="w-3 h-3 text-[#4A5878]" />
-                          <span>Rule</span>
-                        </button>
                       </div>
                     </td>
                   </tr>

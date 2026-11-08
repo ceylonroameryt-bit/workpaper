@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { db } from '@/lib/server/db';
 import { BlyntAccount } from '@/lib/types/models';
-import { CATEGORIES, accountsIn, categoryOf, newAccount, nextCode } from '@/lib/coa';
+import { CATEGORIES, categoryOf, newAccount, nextCode } from '@/lib/coa';
 import { matchBlyntAccount } from '@/lib/mapping/auto-mapper';
 
 const field = 'w-full py-1.5 px-2 border border-[#D3DCEE] rounded-lg bg-white text-xs text-[#122654]';
@@ -59,14 +59,6 @@ export function NewAccountForm({ firmId, initialName = '', onCreated, onCancel }
         <select value={catIdx} onChange={(e) => { setTouched(true); choose(Number(e.target.value), CATEGORIES[Number(e.target.value)].other); }} className={field}>
           {CATEGORIES.map((c, i) => (
             <option key={c.name} value={i}>{c.from}–{c.to} {c.name}</option>
-          ))}
-        </select>
-      </label>
-      <label className="block space-y-1">
-        <span className="font-semibold">Classify like</span>
-        <select value={base} onChange={(e) => { setTouched(true); choose(catIdx, e.target.value); }} className={field}>
-          {accountsIn(cat).map((a) => (
-            <option key={a.code} value={a.code}>{a.code === cat.other ? `Other: ${a.code} ${a.name}` : `${a.code} ${a.name}`}</option>
           ))}
         </select>
       </label>

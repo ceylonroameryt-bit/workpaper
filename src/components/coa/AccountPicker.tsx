@@ -59,6 +59,11 @@ export function AccountPicker({ value, label, firmId, onPick }: { value: string;
     setQuery('');
   };
 
+  const startCreating = () => {
+    setOpen(false); // keeps the query, which pre-fills the new account's name
+    setCreating(true);
+  };
+
   const choose = (code: string) => {
     close();
     inputRef.current?.blur();
@@ -102,7 +107,7 @@ export function AccountPicker({ value, label, firmId, onPick }: { value: string;
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (flat[active]) choose(flat[active].code);
-      else if (query.trim()) setCreating(true);
+      else if (query.trim()) startCreating();
     } else if (e.key === 'Escape') {
       close();
     }
@@ -135,7 +140,7 @@ export function AccountPicker({ value, label, firmId, onPick }: { value: string;
           />
           <ChevronDown aria-hidden="true" className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#4A5878] pointer-events-none transition-transform ${open ? 'rotate-180' : ''}`} />
         </div>
-        <button type="button" onClick={() => setCreating(true)} title="Create a new account" aria-label="Create a new account" className="px-2 text-xs font-bold border border-[#D3DCEE] rounded-lg text-[#122654] hover:bg-[#EAF5FC]">
+        <button type="button" onClick={startCreating} title="Create a new account" aria-label="Create a new account" className="px-2 text-xs font-bold border border-[#D3DCEE] rounded-lg text-[#122654] hover:bg-[#EAF5FC]">
           +
         </button>
       </div>
@@ -178,7 +183,7 @@ export function AccountPicker({ value, label, firmId, onPick }: { value: string;
             {flat.length === 0 && (
               <div className="px-3 py-2 text-[#4A5878]">
                 No account matches.{' '}
-                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setCreating(true)} className="font-bold text-[#B8432F] hover:underline">
+                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={startCreating} className="font-bold text-[#B8432F] hover:underline">
                   Create “{query.trim()}”
                 </button>
               </div>
@@ -187,18 +192,32 @@ export function AccountPicker({ value, label, firmId, onPick }: { value: string;
           document.body
         )}
 
-      {creating && (
-        <NewAccountForm
-          firmId={firmId}
-          initialName={query.trim().replace(/^\d+\s*/, '')}
-          onCancel={() => setCreating(false)}
-          onCreated={(acc) => {
-            setCreating(false);
-            close();
-            onPick(acc.code);
-          }}
-        />
-      )}
+      {creating &&
+        createPortal(
+          // A dialog, not inline: the table cell is too narrow to show full account names
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="New account"
+            onKeyDown={(e) => e.key === 'Escape' && setCreating(false)}
+            className="fixed inset-0 z-50 bg-[#0B1A3B]/40 backdrop-blur-xs flex items-center justify-center p-4"
+          >
+            <div className="bg-white rounded-xl border border-[#E3E7EF] shadow-2xl max-w-md w-full p-6">
+              <h3 className="text-base font-bold text-[#122654] mb-4">New account</h3>
+              <NewAccountForm
+                firmId={firmId}
+                initialName={query.trim().replace(/^\d+\s*/, '')}
+                onCancel={() => setCreating(false)}
+                onCreated={(acc) => {
+                  setCreating(false);
+                  close();
+                  onPick(acc.code);
+                }}
+              />
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
