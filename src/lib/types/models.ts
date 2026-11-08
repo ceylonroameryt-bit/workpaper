@@ -514,6 +514,27 @@ export interface AttachmentLink {
   anchor_json: AnchorJson;
 }
 
+/** A named set of working papers a practice can add to a client year. Built-in ones live in code; these are the practice's own. */
+export interface WorkflowTemplate {
+  id: string;
+  firm_id: string;
+  name: string;
+  refs: string[];
+  created_by: string;
+  created_at: string;
+}
+
+/** A workflow added to one engagement. Its papers are the engagement's papers whose reference is in `refs`. */
+export interface EngagementWorkflow {
+  id: string;
+  engagement_id: string;
+  name: string;
+  refs: string[];
+  created_at: string;
+  /** Set when a manager archived it: hidden from the cards and menu, and restorable */
+  archived_at?: string | null;
+}
+
 export interface Signoff {
   id: string;
   workpaper_id: string;

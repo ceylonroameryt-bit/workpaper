@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { QuickBooksPanel, XeroPanel } from '@/components/integrations/XeroPanel';
+import { WorkflowCards } from '@/components/workflow/WorkflowCards';
 import { ClientProfileForm } from '@/components/clients/ClientProfileForm';
 import { ClientWorkpapers } from '@/components/clients/ClientWorkpapers';
 import { Client } from '@/lib/types/models';
@@ -84,6 +85,7 @@ export default function ClientRecordPage() {
 
       <div>
         <div className="space-y-6">
+          <WorkflowCards engagementIds={[...clientEngagements].sort((a, b) => b.period_end.localeCompare(a.period_end)).map((e) => e.id)} />
           <XeroPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           <QuickBooksPanel clientId={client.id} engagementId={latestEngagement?.id} reconnectNeeded={Boolean(client.reconnect_needed)} />
           <ClientWorkpapers clientId={client.id} />

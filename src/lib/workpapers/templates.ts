@@ -18,7 +18,9 @@ export type ScheduleKind =
   | 'leases'
   | 'dla'
   | 'loans'
-  | 'tax';
+  | 'tax'
+  | 'analytical'
+  | 'statutory';
 
 export interface LeadDef {
   code: string; // Blynt chart code, matched by prefix (e.g. "4" covers 400-499)
@@ -55,6 +57,8 @@ export interface TemplateDef {
   kind: ScheduleKind;
   /** For 'lines': the columns of each line. */
   columns?: LineColumn[];
+  /** For 'analytical': which statement is reviewed. */
+  analyticalView?: 'pl' | 'bs';
   /** For 'checklist': the questions. */
   questions?: string[];
   /** For 'checklist': whether to show the materiality calculator (A-10). */
@@ -910,32 +914,90 @@ export const TEMPLATES: TemplateDef[] = [
       'Ensure figures cited in notes match the approved working paper schedules.',
     ],
   },
+  // R-20 Statutory information (companies only)
+  {
+    ref: 'R-20',
+    area: 'R',
+    areaName: 'Related parties',
+    title: 'Statutory information (directors, secretaries and shareholders)',
+    version: 1,
+    summary: 'Directors, secretaries, shareholders and their shares.',
+    objective: 'Record who the directors, secretaries and shareholders were during the period, and agree them to Companies House.',
+    assertions: ['Completeness', 'Accuracy'],
+    leads: [],
+    kind: 'statutory',
+    procedures: [
+      'Agree directors and secretaries, with appointment and resignation dates, to the Companies House register.',
+      'Agree shareholders and shareholdings to the latest confirmation statement and the statutory registers.',
+    ],
+    rollsForward: true,
+  },
+
+  // Z-30 P&L analytical review
+  {
+    ref: 'Z-30',
+    area: 'Z',
+    areaName: 'Completion',
+    title: 'P&L analytical review',
+    version: 1,
+    summary: 'Income and costs against the prior year, with significant movements explained.',
+    objective: 'Compare income and costs with the prior year and explain significant movements.',
+    assertions: ['Completeness', 'Accuracy', 'Classification'],
+    leads: [],
+    kind: 'analytical',
+    analyticalView: 'pl',
+    procedures: [
+      'Review each significant movement and obtain an explanation from the client where needed.',
+      'Consider whether margins and cost levels are consistent with what is known about the business.',
+    ],
+    allTypes: true,
+  },
+
+  // Z-40 Balance sheet analytical review
+  {
+    ref: 'Z-40',
+    area: 'Z',
+    areaName: 'Completion',
+    title: 'Balance sheet analytical review',
+    version: 1,
+    summary: 'Assets, liabilities and capital against the prior year, with significant movements explained.',
+    objective: 'Compare assets, liabilities and capital with the prior year and explain significant movements.',
+    assertions: ['Existence', 'Completeness', 'Classification'],
+    leads: [],
+    kind: 'analytical',
+    analyticalView: 'bs',
+    procedures: [
+      'Review each significant movement and agree the explanation to the working papers for that area.',
+      'Consider whether the balance sheet is consistent with the profit and loss account and known events.',
+    ],
+    allTypes: true,
+  },
 ];
 
 /** Standard packs assigned by company type and accounting framework */
 export const PACKS: Record<string, string[]> = {
-  'Sole trader': ['A-10', 'B-10', 'C-10', 'K-10', 'I-10', 'P-10', 'Z-10'],
-  'Partnership': ['A-10', 'B-10', 'C-10', 'F-10', 'K-10', 'E-10', 'I-10', 'P-10', 'Z-10'],
+  'Sole trader': ['A-10', 'B-10', 'C-10', 'K-10', 'I-10', 'P-10', 'Z-10', 'Z-30', 'Z-40'],
+  'Partnership': ['A-10', 'B-10', 'C-10', 'F-10', 'K-10', 'E-10', 'I-10', 'P-10', 'Z-10', 'Z-30', 'Z-40'],
   'LLP (FRS 102 + LLP SORP)': [
-    'A-10', 'B-10', 'C-10', 'C-20', 'F-10', 'K-10', 'K-20', 'E-10', 'E-20', 'I-10', 'P-10', 'P-20', 'T-10', 'T-20', 'T-30', 'Z-10'
+    'A-10', 'B-10', 'C-10', 'C-20', 'F-10', 'K-10', 'K-20', 'E-10', 'E-20', 'I-10', 'P-10', 'P-20', 'T-10', 'T-20', 'T-30', 'Z-10', 'Z-30', 'Z-40'
   ],
   'Micro-entity (FRS 105)': [
-    'A-10', 'B-10', 'C-10', 'C-20', 'D-10', 'D-20', 'E-10', 'F-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'P-10', 'P-20', 'S-10', 'T-10', 'T-20', 'Z-10'
+    'A-10', 'B-10', 'C-10', 'C-20', 'D-10', 'D-20', 'E-10', 'F-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'P-10', 'P-20', 'S-10', 'T-10', 'T-20', 'Z-10', 'Z-30', 'Z-40', 'R-20'
   ],
   'Small company (FRS 102 1A)': [
-    'A-10', 'B-10', 'C-10', 'C-20', 'C-30', 'D-10', 'D-20', 'E-10', 'E-20', 'F-10', 'G-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'L-30', 'P-10', 'P-20', 'Q-10', 'Q-20', 'R-10', 'S-10', 'T-10', 'T-20', 'T-30', 'Z-10', 'Z-20'
+    'A-10', 'B-10', 'C-10', 'C-20', 'C-30', 'D-10', 'D-20', 'E-10', 'E-20', 'F-10', 'G-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'L-30', 'P-10', 'P-20', 'Q-10', 'Q-20', 'R-10', 'S-10', 'T-10', 'T-20', 'T-30', 'Z-10', 'Z-20', 'Z-30', 'Z-40', 'R-20'
   ],
   'Medium/large (FRS 102)': [
-    'A-10', 'B-10', 'C-10', 'C-20', 'C-30', 'D-10', 'D-20', 'E-10', 'E-20', 'F-10', 'G-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'L-30', 'P-10', 'P-20', 'Q-10', 'Q-20', 'R-10', 'S-10', 'T-10', 'T-20', 'T-30', 'Z-10'
+    'A-10', 'B-10', 'C-10', 'C-20', 'C-30', 'D-10', 'D-20', 'E-10', 'E-20', 'F-10', 'G-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'L-30', 'P-10', 'P-20', 'Q-10', 'Q-20', 'R-10', 'S-10', 'T-10', 'T-20', 'T-30', 'Z-10', 'Z-30', 'Z-40', 'R-20'
   ],
   'IFRS company/group': [
-    'A-10', 'B-10', 'C-10', 'C-20', 'C-30', 'D-10', 'D-20', 'E-10', 'E-20', 'F-10', 'G-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'L-30', 'P-10', 'P-20', 'Q-10', 'Q-20', 'R-10', 'S-10', 'T-10', 'T-20', 'T-30', 'Z-10'
+    'A-10', 'B-10', 'C-10', 'C-20', 'C-30', 'D-10', 'D-20', 'E-10', 'E-20', 'F-10', 'G-10', 'I-10', 'K-10', 'K-20', 'L-10', 'L-20', 'L-30', 'P-10', 'P-20', 'Q-10', 'Q-20', 'R-10', 'S-10', 'T-10', 'T-20', 'T-30', 'Z-10', 'Z-30', 'Z-40', 'R-20'
   ],
   'Charity (SORP)': [
-    'A-10', 'B-10', 'C-10', 'F-10', 'K-10', 'E-10', 'I-10', 'P-10', 'Z-10'
+    'A-10', 'B-10', 'C-10', 'F-10', 'K-10', 'E-10', 'I-10', 'P-10', 'Z-10', 'Z-30', 'Z-40'
   ],
   'Academy trust': [
-    'A-10', 'B-10', 'C-10', 'F-10', 'K-10', 'E-10', 'I-10', 'P-10', 'Z-10'
+    'A-10', 'B-10', 'C-10', 'F-10', 'K-10', 'E-10', 'I-10', 'P-10', 'Z-10', 'Z-30', 'Z-40'
   ],
 };
 
@@ -1008,6 +1070,9 @@ export function blankPaperData(t: TemplateDef): Record<string, any> {
     values_to_confirm_count: 0,
     confidence_gate_items: [] as any[],
   };
+
+  if (t.kind === 'analytical') return { ...base, threshold_pct: 10, threshold_p: '100000', comments: {} };
+  if (t.kind === 'statutory') return { ...base, officers: [] };
 
   if (t.kind === 'reconciliation') {
     return {

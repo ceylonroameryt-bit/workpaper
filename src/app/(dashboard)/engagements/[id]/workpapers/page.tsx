@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
@@ -18,7 +18,7 @@ import {
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
 import { formatPence } from '@/lib/money';
-import { TEMPLATES, templateOf } from '@/lib/workpapers/templates';
+import { TEMPLATES, packFor, templateOf } from '@/lib/workpapers/templates';
 import { CustomPaperDialog } from '@/components/workpaper/CustomPaperDialog';
 import { evaluatePaper, paperStatus } from '@/lib/workpapers/engine';
 import { getActor } from '@/lib/session';
@@ -46,8 +46,17 @@ interface ScheduleItem {
   };
 }
 
+const SECTIONS = [
+  { id: 'leads', label: 'Lead schedules (WPS-04)' },
+  { id: 'balance_sheet', label: 'Balance sheet' },
+  { id: 'pnl', label: 'Profit and loss' },
+  { id: 'tax', label: 'Taxation' },
+  { id: 'disclosures', label: 'Disclosures & notes (STD-04)' },
+  { id: 'completion', label: 'Completion (REV-05)' },
+] as const;
+
 const SECTION_OF = (ref: string): ScheduleItem['section'] =>
-  ref === 'A-10' ? 'leads' : ref === 'Z-10' ? 'completion' : ref === 'Z-20' || ref.startsWith('R') ? 'disclosures' : ref.startsWith('T') ? 'tax' : ref.startsWith('I') || ref.startsWith('P') ? 'pnl' : 'balance_sheet';
+  ref === 'A-10' ? 'leads' : ['Z-10', 'Z-30', 'Z-40'].includes(ref) ? 'completion' : ref === 'Z-20' || ref.startsWith('R') ? 'disclosures' : ref.startsWith('T') ? 'tax' : ref.startsWith('I') || ref.startsWith('P') ? 'pnl' : 'balance_sheet';
 const customSection = (leads: { code: string }[]): ScheduleItem['section'] => (!leads.length ? 'completion' : Number(leads[0].code) < 600 ? 'pnl' : 'balance_sheet');
 const initials = (name: string) => name.split(' ').map((n) => n[0]).join('').slice(0, 3).toUpperCase();
 
@@ -130,7 +139,6 @@ export default function WorkingPaperIndexPage() {
   };
   const schedules = useMemo(() => buildSchedules(engagementId), [engagementId, rev]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [sectionFilter, setSectionFilter] = useState<'all' | 'leads' | 'balance_sheet' | 'pnl' | 'tax' | 'disclosures' | 'completion'>('all');
   const [pendingUntick, setPendingUntick] = useState<ScheduleItem | null>(null);
   const [untickReason, setUntickReason] = useState<string>('');
 
@@ -183,7 +191,6 @@ export default function WorkingPaperIndexPage() {
         s.ref.toLowerCase().includes(searchQuery.toLowerCase());
       if (!matchSearch) return false;
 
-      if (sectionFilter !== 'all' && s.section !== sectionFilter) return false;
       if (statusFilter !== 'all' && s.status !== statusFilter) return false;
 
       if (flagFilter === 'ai_warning' && !s.flags.aiWarning) return false;
@@ -192,20 +199,25 @@ export default function WorkingPaperIndexPage() {
 
       return true;
     });
-  }, [applicableSchedules, searchQuery, sectionFilter, statusFilter, flagFilter]);
+  }, [applicableSchedules, searchQuery, statusFilter, flagFilter]);
 
   const engagement = db.engagements.find((e) => e.id === engagementId);
   const isLocked = engagement?.status === 'locked';
 
-  // Every standard paper not in this file yet, narrowed by the same search and section
-  const notInFile = TEMPLATES.filter((t) => {
+  // Standard papers not in this file yet. Only those that suit the client's type of business are offered
+  // (a sole trader is not offered share capital); "Show all" lists the rest. Narrowed by the same search.
+  const clientType = db.clients.find((c) => c.id === engagement?.client_id)?.company_type;
+  const suited = new Set(packFor(clientType));
+  const [showAllPapers, setShowAllPapers] = useState(false);
+  const notInFileAll = TEMPLATES.filter((t) => {
     const q = searchQuery.toLowerCase();
     return (
       !schedules.some((s) => s.ref === t.ref) &&
-      (sectionFilter === 'all' || SECTION_OF(t.ref) === sectionFilter) &&
       (t.title.toLowerCase().includes(q) || t.ref.toLowerCase().includes(q))
     );
   });
+  const notInFile = showAllPapers ? notInFileAll : notInFileAll.filter((t) => suited.has(t.ref));
+  const hiddenCount = notInFileAll.length - notInFileAll.filter((t) => suited.has(t.ref)).length;
 
   const addPaper = (ref: string) => {
     const wp = db.addWorkpaper(engagementId, ref);
@@ -304,32 +316,6 @@ export default function WorkingPaperIndexPage() {
             </>
           )}
         </div>
-      </div>
-
-      {/* Standard Sections Navigation (WPS-01) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-[#E3E7EF]">
-        {[
-          { id: 'all', label: 'All schedules' },
-          { id: 'leads', label: 'Lead schedules (WPS-04)' },
-          { id: 'balance_sheet', label: 'Balance sheet' },
-          { id: 'pnl', label: 'Profit and loss' },
-          { id: 'tax', label: 'Taxation' },
-          { id: 'disclosures', label: 'Disclosures & notes (STD-04)' },
-          { id: 'completion', label: 'Completion (REV-05)' },
-        ].map((sec) => (
-          <button
-            key={sec.id}
-            type="button"
-            onClick={() => setSectionFilter(sec.id as any)}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-xl transition-all shrink-0 cursor-pointer ${
-              sectionFilter === sec.id
-                ? 'bg-[#122654] text-white shadow-xs'
-                : 'text-[#4A5878] hover:bg-[#F5F8FD] hover:text-[#122654]'
-            }`}
-          >
-            {sec.label}
-          </button>
-        ))}
       </div>
 
       {/* Filter and Search Bar */}
@@ -438,13 +424,28 @@ export default function WorkingPaperIndexPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E3E7EF] text-xs text-[#122654]">
-              {filteredApplicable.map((schedule) => {
+              {[...filteredApplicable]
+                .sort(
+                  (a, b) =>
+                    SECTIONS.findIndex((x) => x.id === a.section) - SECTIONS.findIndex((x) => x.id === b.section) ||
+                    a.ref.localeCompare(b.ref, undefined, { numeric: true })
+                )
+                .map((schedule, i, list) => {
                 const isSelected = selectedScheduleIds.has(schedule.id);
                 const hasDiff = schedule.differencePence !== 0n;
+                const startsSection = i === 0 || list[i - 1].section !== schedule.section;
 
                 return (
+                  <React.Fragment key={schedule.id}>
+                  {startsSection && (
+                    <tr className="bg-[#F5F8FD]">
+                      <th scope="colgroup" colSpan={11} className="py-2 px-4 text-left text-[11px] font-bold uppercase tracking-wider text-[#4A5878]">
+                        {SECTIONS.find((x) => x.id === schedule.section)?.label}
+                        <span className="ml-2 font-normal normal-case tracking-normal text-[#7E8DA6]">{list.filter((x) => x.section === schedule.section).length}</span>
+                      </th>
+                    </tr>
+                  )}
                   <tr
-                    key={schedule.id}
                     className={`hover:bg-[#F5F8FD]/80 transition-colors ${
                       isSelected ? 'bg-purple-50/40' : ''
                     }`}
@@ -594,15 +595,18 @@ export default function WorkingPaperIndexPage() {
                       </Link>
                     </td>
                   </tr>
+                  </React.Fragment>
                 );
               })}
             </tbody>
           </table>
         </div>
 
-        {notInFile.length > 0 && (
+        {(notInFile.length > 0 || hiddenCount > 0) && (
           <div className="border-t border-[#E3E7EF] px-5 py-3">
-            <h2 className="text-xs font-bold text-[#4A5878] pb-1.5">Not in this file ({notInFile.length})</h2>
+            <h2 className="text-xs font-bold text-[#4A5878] pb-1.5">
+              {showAllPapers ? 'Not in this file' : `Not in this file${clientType ? `, for a ${clientType}` : ''}`} ({notInFile.length})
+            </h2>
             <ul className="grid grid-cols-1 lg:grid-cols-2 gap-x-6">
               {notInFile.map((t) => (
                 <li key={t.ref} className="flex items-center gap-3 py-1.5 border-b border-[#E3E7EF] text-xs text-[#4A5878]">
@@ -616,6 +620,11 @@ export default function WorkingPaperIndexPage() {
                 </li>
               ))}
             </ul>
+            {hiddenCount > 0 && (
+              <button type="button" onClick={() => setShowAllPapers((v) => !v)} className="mt-2 text-xs font-semibold text-[#1D4E89] hover:underline cursor-pointer">
+                {showAllPapers ? 'Show only papers for this type of business' : `Show all standard papers (${hiddenCount} more)`}
+              </button>
+            )}
           </div>
         )}
 

@@ -32,6 +32,8 @@ import {
   DisclosureChecklistItem,
   StatutoryNoteItem,
   LedgerTransaction,
+  WorkflowTemplate,
+  EngagementWorkflow,
   Invite,
 } from '../types/models';
 import type { XeroConnection as XeroConnectionRecord } from './xero';
@@ -74,6 +76,8 @@ class Database {
   ai_review_findings: AiReviewFinding[] = [];
   schedule_versions: ScheduleVersion[] = [];
   checklist_items: DisclosureChecklistItem[] = [];
+  workflow_templates: WorkflowTemplate[] = [];
+  engagement_workflows: EngagementWorkflow[] = [];
   statutory_notes: StatutoryNoteItem[] = [];
   transactions: LedgerTransaction[] = [];
   invites: Invite[] = []; // Server-only, like credentials
@@ -98,7 +102,7 @@ class Database {
     'adjustments', 'templates', 'workpapers', 'procedures', 'comments', 'attachments',
     'attachment_links', 'signoffs', 'view_prefs', 'audit_logs', 'ai_lineage', 'credentials',
     'learned_rules', 'ai_action_logs', 'ai_review_findings', 'schedule_versions', 'checklist_items', 'statutory_notes',
-    'transactions', 'invites', 'uploads', 'xero_connections', 'qbo_connections',
+    'workflow_templates', 'engagement_workflows', 'transactions', 'invites', 'uploads', 'xero_connections', 'qbo_connections',
   ] as const;
 
   exportState(): Record<string, unknown[]> {
@@ -191,6 +195,8 @@ class Database {
     this.ai_review_findings = [];
     this.schedule_versions = [];
     this.checklist_items = [];
+    this.workflow_templates = [];
+    this.engagement_workflows = [];
     this.statutory_notes = [];
     this.transactions = [];
   }
@@ -270,6 +276,8 @@ class Database {
     this.ai_review_findings = [];
     this.schedule_versions = [];
     this.checklist_items = [];
+    this.workflow_templates = [];
+    this.engagement_workflows = [];
     this.statutory_notes = [];
     this.transactions = [];
     this.invites = [];

@@ -30,7 +30,7 @@ describe('papers follow the client profile', () => {
     const lean = packForClient({ company_type: 'Small company (FRS 102 1A)', vat_registered: false, payroll: false });
     expect(lean).not.toContain('T-20');
     expect(lean).not.toContain('P-20');
-    expect(packForClient({ company_type: 'Sole trader' })).toEqual(['A-10', 'B-10', 'C-10', 'K-10', 'I-10', 'P-10', 'Z-10']);
+    expect(packForClient({ company_type: 'Sole trader' })).toEqual(['A-10', 'B-10', 'C-10', 'K-10', 'I-10', 'P-10', 'Z-10', 'Z-30', 'Z-40']);
   });
 
   it('saving the profile updates open engagements: adds new papers, removes untouched ones', () => {
