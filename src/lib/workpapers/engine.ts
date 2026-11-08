@@ -1,6 +1,6 @@
 import { db } from '../server/db';
 import { asPence, formatPence } from '../money';
-import { TemplateDef, blankPaperData, templateFor } from './templates';
+import { TemplateDef, blankPaperData, templateFor, templateOf } from './templates';
 import { JOURNAL_IN_TB, type Workpaper } from '../types/models';
 
 /**
@@ -90,7 +90,7 @@ export function linkedFiles(workpaperId: string, rowId: string) {
 }
 
 export function evaluatePaper(wp: Workpaper): PaperResult | null {
-  const t = templateFor(wp.ref);
+  const t = templateOf(wp);
   if (!t) return null;
   const data = wp.data_json as Record<string, any>;
   const leads = leadFigures(wp.engagement_id, t);
@@ -558,7 +558,7 @@ export function toleranceFor(engagementId: string): bigint {
  */
 export function paperStatus(wp: Workpaper): Workpaper['status'] {
   if (!COMPUTED.includes(wp.status)) return wp.status;
-  const t = templateFor(wp.ref);
+  const t = templateOf(wp);
   if (!t) return wp.status;
   const started = JSON.stringify(wp.data_json) !== JSON.stringify(blankPaperData(t));
   if (!started) return 'not_started';

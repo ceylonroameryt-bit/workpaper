@@ -6,7 +6,7 @@ import { ArrowRight, Plus } from 'lucide-react';
 import { db } from '@/lib/server/db';
 import { getActor } from '@/lib/session';
 import { periodLabel } from '@/lib/periods';
-import { TEMPLATES, templateFor } from '@/lib/workpapers/templates';
+import { TEMPLATES, templateOf } from '@/lib/workpapers/templates';
 import { StatusBadge } from '@/components/ui/StatusPill';
 import { Engagement } from '@/lib/types/models';
 
@@ -59,7 +59,7 @@ export function ClientWorkpapers({ clientId }: { clientId: string }) {
                   <li key={w.id} className="border-b border-[#E3E7EF]">
                     <Link href={`/engagements/${eng.id}/workpapers/${w.id}`} className="flex items-center gap-3 py-2 hover:bg-[#F5F8FD] text-xs text-[#122654]">
                       <span className="font-mono font-bold text-[#1D4E89] w-10 shrink-0">{w.ref}</span>
-                      <span className="flex-1 min-w-0">{templateFor(w.ref)?.title ?? w.ref}</span>
+                      <span className="flex-1 min-w-0">{templateOf(w)?.title ?? w.ref}</span>
                       <StatusBadge status={w.status} size="sm" />
                     </Link>
                   </li>

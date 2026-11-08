@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Lock,
+  Plus,
   ChevronDown,
   ChevronRight,
   Search,
@@ -17,7 +18,8 @@ import {
 import { db } from '@/lib/server/db';
 import { useCompany } from '@/context/CompanyContext';
 import { formatPence } from '@/lib/money';
-import { templateFor } from '@/lib/workpapers/templates';
+import { TEMPLATES, templateOf } from '@/lib/workpapers/templates';
+import { CustomPaperDialog } from '@/components/workpaper/CustomPaperDialog';
 import { evaluatePaper, paperStatus } from '@/lib/workpapers/engine';
 import { getActor } from '@/lib/session';
 
@@ -46,6 +48,7 @@ interface ScheduleItem {
 
 const SECTION_OF = (ref: string): ScheduleItem['section'] =>
   ref === 'A-10' ? 'leads' : ref === 'Z-10' ? 'completion' : ref === 'Z-20' || ref.startsWith('R') ? 'disclosures' : ref.startsWith('T') ? 'tax' : ref.startsWith('I') || ref.startsWith('P') ? 'pnl' : 'balance_sheet';
+const customSection = (leads: { code: string }[]): ScheduleItem['section'] => (!leads.length ? 'completion' : Number(leads[0].code) < 600 ? 'pnl' : 'balance_sheet');
 const initials = (name: string) => name.split(' ').map((n) => n[0]).join('').slice(0, 3).toUpperCase();
 
 /** One index row per paper: TB balance, schedule, difference and status from the engine (WPS-02, WPS-04). */
@@ -53,7 +56,7 @@ function buildSchedules(engagementId: string): ScheduleItem[] {
   return db.workpapers
     .filter((w) => w.engagement_id === engagementId)
     .map((wp) => {
-      const t = templateFor(wp.ref);
+      const t = templateOf(wp);
       const r = evaluatePaper(wp);
       const sign = t?.creditArea ? -1n : 1n;
       const tb = sign * (r?.leads.reduce((a, l) => a + l.final, 0n) ?? 0n);
@@ -68,10 +71,10 @@ function buildSchedules(engagementId: string): ScheduleItem[] {
         code: t?.recRef ?? wp.ref,
         ref: wp.ref,
         title: t?.title ?? wp.ref,
-        section: SECTION_OF(wp.ref),
+        section: wp.custom_template ? customSection(wp.custom_template.leads) : SECTION_OF(wp.ref),
         templateName: wp.data_json.active_template_title || 'Default template',
         tbBalancePence: tb,
-        scheduleBalancePence: tb + sign * diff,
+        scheduleBalancePence: tb + diff,
         differencePence: diff,
         priorYearPence: prior,
         status: ['not_started', 'in_progress', 'unreconciled', 'reconciled', 'prepared', 'reviewed', 'approved'].includes(status) ? status : 'in_progress',
@@ -101,6 +104,7 @@ export default function WorkingPaperIndexPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedScheduleIds, setSelectedScheduleIds] = useState<Set<string>>(new Set());
   const [collapsedNa, setCollapsedNa] = useState<boolean>(true);
+  const [creatingPaper, setCreatingPaper] = useState(false);
 
   // Rows come from this engagement's papers (created from the client's standard and profile)
   const [rev, setRev] = useState(0);
@@ -189,6 +193,25 @@ export default function WorkingPaperIndexPage() {
       return true;
     });
   }, [applicableSchedules, searchQuery, sectionFilter, statusFilter, flagFilter]);
+
+  const engagement = db.engagements.find((e) => e.id === engagementId);
+  const isLocked = engagement?.status === 'locked';
+
+  // Every standard paper not in this file yet, narrowed by the same search and section
+  const notInFile = TEMPLATES.filter((t) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      !schedules.some((s) => s.ref === t.ref) &&
+      (sectionFilter === 'all' || SECTION_OF(t.ref) === sectionFilter) &&
+      (t.title.toLowerCase().includes(q) || t.ref.toLowerCase().includes(q))
+    );
+  });
+
+  const addPaper = (ref: string) => {
+    const wp = db.addWorkpaper(engagementId, ref);
+    if (engagement) db.logAudit(engagement.firm_id, getActor(), 'ADD_WORKPAPER', 'workpapers', wp?.id ?? ref, null, { ref });
+    setRev((r) => r + 1);
+  };
 
   // Statistics
   const totalApplicable = applicableSchedules.length;
@@ -348,6 +371,17 @@ export default function WorkingPaperIndexPage() {
             <option value="changed">Changed after review/reconcile</option>
           </select>
         </div>
+
+        {!isLocked && (
+          <button
+            type="button"
+            onClick={() => setCreatingPaper(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#D3DCEE] hover:border-[#A6B4D0] text-[#122654] text-xs font-bold rounded-lg cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Custom working paper</span>
+          </button>
+        )}
 
         {/* REV-01: bulk review, one server sign-off per schedule, each checked and logged */}
         {selectedScheduleIds.size > 0 && ['reviewer', 'manager', 'partner', 'admin'].includes(getActor().role) && (
@@ -566,6 +600,25 @@ export default function WorkingPaperIndexPage() {
           </table>
         </div>
 
+        {notInFile.length > 0 && (
+          <div className="border-t border-[#E3E7EF] px-5 py-3">
+            <h2 className="text-xs font-bold text-[#4A5878] pb-1.5">Not in this file ({notInFile.length})</h2>
+            <ul className="grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+              {notInFile.map((t) => (
+                <li key={t.ref} className="flex items-center gap-3 py-1.5 border-b border-[#E3E7EF] text-xs text-[#4A5878]">
+                  <span className="font-mono font-bold w-10 shrink-0">{t.ref}</span>
+                  <span className="flex-1 min-w-0">{t.title}</span>
+                  {!isLocked && (
+                    <button type="button" onClick={() => addPaper(t.ref)} aria-label={`Add ${t.ref} ${t.title}`} className="inline-flex items-center gap-1 font-bold text-[#1D4E89] hover:underline cursor-pointer">
+                      <Plus className="w-3 h-3" /> Add
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Collapsed Not Applicable Section (WPS-03) */}
         {naSchedules.length > 0 && (
           <div className="border-t border-[#E3E7EF] bg-[#F5F8FD]">
@@ -627,6 +680,19 @@ export default function WorkingPaperIndexPage() {
           </div>
         )}
       </div>
+
+      {creatingPaper && engagement && (
+        <CustomPaperDialog
+          engagementId={engagementId}
+          firmId={engagement.firm_id}
+          clientId={engagement.client_id}
+          onClose={() => setCreatingPaper(false)}
+          onCreated={() => {
+            setCreatingPaper(false);
+            setRev((r) => r + 1);
+          }}
+        />
+      )}
 
       {/* Untick Schedule Dialog with Manager Approval Notice (WPS-03) */}
       {pendingUntick && (

@@ -958,6 +958,43 @@ export function templateFor(ref: string): TemplateDef | undefined {
   return TEMPLATES.find((t) => t.ref === ref);
 }
 
+/** A paper's own definition when the practice made it, otherwise the standard template for its reference. */
+export function templateOf(wp: { ref: string; custom_template?: TemplateDef | null }): TemplateDef | undefined {
+  const c = wp.custom_template;
+  if (!c) return templateFor(wp.ref);
+  // It arrives with the browser's saved workspace, so a damaged one must not break every page that reads it
+  const usable = c.ref === wp.ref && typeof c.title === 'string' && (c.kind === 'lines' || c.kind === 'checklist') && Array.isArray(c.leads) && Array.isArray(c.procedures);
+  return usable ? c : undefined;
+}
+
+/** The first free X-nn reference in a file. */
+export function nextCustomRef(refsInFile: string[]): string {
+  for (let n = 1; ; n++) {
+    const ref = `X-${String(n).padStart(2, '0')}`;
+    if (!refsInFile.includes(ref)) return ref;
+  }
+}
+
+/** A working paper the practice defines for one engagement. */
+export function customTemplate(ref: string, d: { title: string; kind: 'lines' | 'checklist'; leads: LeadDef[]; creditArea: boolean; questions: string[] }): TemplateDef {
+  const title = d.title.trim().slice(0, 100);
+  return {
+    ref,
+    area: 'X',
+    areaName: 'Custom',
+    title,
+    version: 1,
+    summary: 'Custom working paper',
+    objective: `Support ${title}.`,
+    assertions: [],
+    leads: d.leads,
+    creditArea: d.creditArea,
+    kind: d.kind,
+    ...(d.kind === 'lines' ? { columns: [{ key: 'amount', label: 'Amount' }] } : { questions: d.questions }),
+    procedures: ['Agree this paper to supporting evidence and record the conclusion.'],
+  };
+}
+
 /** Blank data for a new paper of this template */
 export function blankPaperData(t: TemplateDef): Record<string, any> {
   const base = {

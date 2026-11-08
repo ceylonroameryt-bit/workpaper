@@ -3,6 +3,8 @@
  * Exactly matches the database schema & ground rules.
  */
 
+import type { TemplateDef } from '../workpapers/templates';
+
 export type UserRole = 'readonly' | 'preparer' | 'reviewer' | 'manager' | 'partner' | 'admin';
 
 export type StatusKey =
@@ -381,6 +383,7 @@ export interface Workpaper {
   data_json: Record<string, any>;
   status: StatusKey;
   rolled_from_workpaper_id: string | null;
+  custom_template?: TemplateDef | null; // set on a paper the practice defined for this engagement
   // WPS-03: unticked papers move to the N/A list with the reason; absent = applicable
   applicable?: boolean;
   na_reason?: string | null;

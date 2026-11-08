@@ -36,7 +36,7 @@ import {
 } from '../types/models';
 import type { XeroConnection as XeroConnectionRecord } from './xero';
 import type { QboConnection as QboConnectionRecord } from './quickbooks';
-import { packFor, packForClient, templateFor, blankPaperData } from '../workpapers/templates';
+import { packFor, packForClient, templateFor, blankPaperData, TemplateDef } from '../workpapers/templates';
 import { getStatutoryDetails } from '../mapping/auto-mapper';
 
 export interface ServerSession {
@@ -133,8 +133,8 @@ class Database {
     for (const ref of refs) this.addWorkpaper(engagementId, ref);
   }
 
-  addWorkpaper(engagementId: string, ref: string) {
-    const t = templateFor(ref);
+  addWorkpaper(engagementId: string, ref: string, custom?: TemplateDef) {
+    const t = custom ?? templateFor(ref);
     if (!t) return null;
     const wpId = `wp_${engagementId}_${ref.replace('-', '').toLowerCase()}`;
     const existing = this.workpapers.find((w) => w.id === wpId);
@@ -149,6 +149,7 @@ class Database {
       data_json: blankPaperData(t),
       status: 'not_started',
       rolled_from_workpaper_id: null,
+      ...(custom ? { custom_template: custom } : {}),
       created_at: now,
       updated_at: now,
     };

@@ -32,7 +32,7 @@ import { getActor } from '@/lib/session';
 import { StatusBadge } from '@/components/ui/StatusPill';
 import { evaluatePaper, levelsFor, linkedFiles, paperStatus } from '@/lib/workpapers/engine';
 import { diffData } from '@/lib/workpapers/diff';
-import { TEMPLATES, templateFor } from '@/lib/workpapers/templates';
+import { TEMPLATES, templateFor, templateOf } from '@/lib/workpapers/templates';
 import type { Attachment, AttachmentCategory } from '@/lib/types/models';
 import {
   Section,
@@ -933,7 +933,7 @@ export default function WorkpaperPage() {
           >
             {papers.map((p) => (
               <option key={p.id} value={p.id}>
-                {STATUS_SYMBOL[p.status] ?? '○'} {p.ref} {templateFor(p.ref)?.title}
+                {STATUS_SYMBOL[p.status] ?? '○'} {p.ref} {templateOf(p)?.title}
               </option>
             ))}
             {!isLocked && missingRefs.length > 0 && (
@@ -964,7 +964,7 @@ export default function WorkpaperPage() {
             {areas.map((a) => (
               <div key={a} className="mb-2">
                 <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#7E8DA6]">
-                  {a} {templateFor(papers.find((p) => p.ref.startsWith(a))!.ref)?.areaName}
+                  {a} {templateOf(papers.find((p) => p.ref.startsWith(a))!)?.areaName}
                 </div>
                 {papers
                   .filter((p) => p.ref.startsWith(a))
@@ -977,7 +977,7 @@ export default function WorkpaperPage() {
                       }`}
                     >
                       <span className="truncate">
-                        <span className="font-mono">{p.ref}</span> {templateFor(p.ref)?.title}
+                        <span className="font-mono">{p.ref}</span> {templateOf(p)?.title}
                       </span>
                       <span aria-hidden>{STATUS_SYMBOL[p.status] ?? '○'}</span>
                     </Link>
